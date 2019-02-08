@@ -1,4 +1,4 @@
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02" targetNamespace="http://json.webapp.siga.openeid.ee/" xmlns:tns="http://json.webapp.siga.openeid.ee/">
 	<grammars>
 		<include href="xsd0.xsd">
 		</include>
@@ -9,10 +9,10 @@
 				<method id="createContainer" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation  element="createContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation  element="tns:createContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="createContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -20,10 +20,10 @@
 				<method id="uploadContainer" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="uploadContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:uploadContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="uploadContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:uploadContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -31,10 +31,10 @@
 				<method id="validateContainer" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="validateContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:tns:validateContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="validateContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:validateContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -45,7 +45,7 @@
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 					</request>
 					<response>
-						<ns2:representation element="getContainerValidationResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getContainerValidationResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -54,10 +54,10 @@
 				<method id="prepareSignature" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="prepareSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:prepareSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="prepareSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:prepareSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -66,10 +66,10 @@
 				<method id="finalizeSignature" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="finalizeSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:finalizeSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="finalizeSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:finalizeSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -78,10 +78,10 @@
 				<method id="startMobileIdSigning" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="startMobileIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:startMobileIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
-						<ns2:representation element="startMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:startMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -92,7 +92,7 @@
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 					</request>
 					<response>
-						<ns2:representation element="getMobileSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getMobileSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -103,7 +103,7 @@
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 					</request>
 					<response>
-						<ns2:representation element="getSignatureListResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getSignatureListResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
@@ -114,7 +114,7 @@
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 					</request>
 					<response>
-						<ns2:representation element="closeSessionResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:closeSessionResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 				</method>
 			</resource>
