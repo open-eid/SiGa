@@ -31,7 +31,7 @@
 				<method id="validateContainer" name="POST">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-						<ns2:representation element="tns:tns:validateContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:validateContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response>
 						<ns2:representation element="tns:validateContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
