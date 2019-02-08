@@ -1,6 +1,6 @@
 <application xmlns="http://wadl.dev.java.net/2009/02" targetNamespace="http://json.webapp.siga.openeid.ee/" xmlns:tns="http://json.webapp.siga.openeid.ee/">
 	<grammars>
-		<include href="xsd0.xsd">
+		<include href="siga.xsd">
 		</include>
 	</grammars>
 	<resources base="http://localhost:8080/siga-webapp-1.0.0/">
