@@ -1,0 +1,123 @@
+<application xmlns="http://wadl.dev.java.net/2009/02">
+	<grammars>
+		<include href="xsd0.xsd">
+		</include>
+	</grammars>
+	<resources base="http://localhost:8080/siga-webapp-1.0.0/">
+		<resource path="">
+			<resource path="container/create">
+				<method id="createContainer" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation  element="createContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="createContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="container/upload">
+				<method id="uploadContainer" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation element="uploadContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="uploadContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="container/validate">
+				<method id="validateContainer" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation element="validateContainerRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="validateContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/validate">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getContainerValidation" name="GET">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+					</request>
+					<response>
+						<ns2:representation element="getContainerValidationResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/signature/prepare">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="prepareSignature" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation element="prepareSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="prepareSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/signature/finalize">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="finalizeSignature" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation element="finalizeSignatureRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="finalizeSignatureResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/signature/start/signing/mobileid">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="startMobileIdSigning" name="POST">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+						<ns2:representation element="startMobileIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response>
+						<ns2:representation element="startMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/signature/start/signing/mobileid/status">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getMobileSigningStatus" name="GET">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+					</request>
+					<response>
+						<ns2:representation element="getMobileSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/container/signature/list">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getSignatureList" name="GET">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+					</request>
+					<response>
+						<ns2:representation element="getSignatureListResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="session/{sessionId}/close">
+				<param name="sessionId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="closeSession" name="GET">
+					<request>
+						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+					</request>
+					<response>
+						<ns2:representation element="closeSessionResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+		</resource>
+	</resources>
+</application>

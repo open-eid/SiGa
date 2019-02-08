@@ -1,0 +1,639 @@
+<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+            xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
+
+    <xsd:annotation>
+        <xsd:appinfo>DigiDocService (DDS) ver-3.3</xsd:appinfo>
+    </xsd:annotation>
+
+    <!-- Mobile Get Certificate by ID code -->
+    <element name="GetMobileCertByIDCodeRequest">
+        <complexType>
+            <xsd:sequence>
+                <element maxOccurs="1" minOccurs="1" name="IDCode" type="tns:IdCodeType">
+                    <xsd:annotation>
+                        <xsd:documentation>Personal Identification Code of the user</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="Country"
+                         type="tns:CountryType">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s country code (e.g. LT).</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="ReturnCertData"
+                         type="tns:ReturnCertDataType">
+                    <xsd:annotation>
+                        <xsd:documentation>Return cert data type (eg. SIGN or AUTH or BOTH)</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+            </xsd:sequence>
+        </complexType>
+    </element>
+
+    <element name="GetMobileCertByIDCodeResponse">
+        <complexType>
+            <xsd:sequence>
+                <element maxOccurs="1" minOccurs="0" name="AuthCertStatus" type="tns:String2To7">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s auth certificate status (OK or REVOKED)</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="0" name="SignCertStatus" type="tns:String2To7">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s sign certificate status (OK or REVOKED)</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="0" name="AuthCertData"
+                         type="xsd:base64Binary">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s auth certificate in BASE64 coding</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="0" name="SignCertData"
+                         type="xsd:base64Binary">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s sign certificate in BASE64 coding</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+            </xsd:sequence>
+        </complexType>
+    </element>
+
+    <!-- Mobile Sign Hash by Id code identity -->
+    <element name="MobileSignHashByIDCodeRequest">
+        <complexType>
+            <xsd:sequence>
+                <element maxOccurs="1" minOccurs="1" name="Hash" type="tns:HexString128">
+                    <xsd:annotation>
+                        <xsd:documentation>Hash to sign in HEX form.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="HashType"
+                         type="tns:HashType">
+                    <xsd:annotation>
+                        <xsd:documentation>Hash algorithm</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="0" name="KeyID" type="tns:KeyID">
+                    <xsd:annotation>
+                        <xsd:documentation>Key algorithm to sign the hash</xsd:documentation>
+                    </xsd:annotation>
+                </element>
+
+                <element maxOccurs="1" minOccurs="1" name="IDCode" type="tns:IdCodeType">
+                    <xsd:annotation>
+                        <xsd:documentation>Personal Identification Code of the user
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="Country"
+                         type="tns:CountryType">
+                    <xsd:annotation>
+                        <xsd:documentation>Userâ€™s country code (e.g. LT).
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="Language"
+                         type="tns:LanguageType">
+                    <xsd:annotation>
+                        <xsd:documentation>Language for user dialog in mobile phone.
+                            3-letters capitalized acronyms are used. Possible values:
+                            EST,
+                            ENG, RUS.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="1" name="ServiceName" type="tns:String20">
+                    <xsd:annotation>
+                        <xsd:documentation>Name of the service â€“ previously agreed with
+                            Application Provider and DigiDocService operator. Maximum length
+                            â€“ 20 chars.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="1" minOccurs="0" name="MessageToDisplay" type="tns:String0To40">
+                    <xsd:annotation>
+                        <xsd:documentation>Text displayed before asking authentication or
+                            signing PIN. Maximum length â€“ 40 chars.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+            </xsd:sequence>
+        </complexType>
+    </element>
+
+    <!-- Mobile Sign Hash -->
+    <element name="MobileSignHashRequest">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractRequestType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="1" name="Hash" type="tns:HexString128">
+                            <xsd:annotation>
+                                <xsd:documentation>Hash to sign in HEX form.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="1" name="HashType"
+                                 type="tns:HashType">
+                            <xsd:annotation>
+                                <xsd:documentation>Hash algorithm</xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="KeyID" type="tns:KeyID">
+                            <xsd:annotation>
+                                <xsd:documentation>Key algorithm to sign the hash</xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <element name="MobileSignHashResponse">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractResponseType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="1" name="Status" type="tns:StatusType"/>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <!-- complex types -->
+    <element name="MobileAuthenticateRequest">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractRequestType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="0" name="SPChallenge"
+                                 type="tns:HexString20">
+                            <xsd:annotation>
+                                <xsd:documentation>10-byte random challenge generated by the
+                                    Application Provider witch would be part of the
+                                    message for
+                                    signing by user during authentication.
+                                    Must be in HEX form.
+                                    NB!
+                                    For security reasons itâ€™s recommended to
+                                    always fill this
+                                    parameter with different random
+                                    value every time.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <complexType abstract="true" name="AbstractRequestType">
+        <xsd:sequence>
+            <element maxOccurs="1" minOccurs="1" name="IDCode" type="tns:IdCodeType">
+                <xsd:annotation>
+                    <xsd:documentation>Personal Identification Code of the user
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="1" name="PhoneNo"
+                     type="tns:PhoneNumberType">
+                <xsd:annotation>
+                    <xsd:documentation>Userâ€™s phone number with country code in form
+                        +xxxxxxxxx (e.g. +3706234566).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="1" name="Language"
+                     type="tns:LanguageType">
+                <xsd:annotation>
+                    <xsd:documentation>Language for user dialog in mobile phone.
+                        3-letters capitalized acronyms are used. Possible values:
+                        EST,
+                        ENG, RUS.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="1" name="ServiceName" type="tns:String20">
+                <xsd:annotation>
+                    <xsd:documentation>Name of the service â€“ previously agreed with
+                        Application Provider and DigiDocService operator. Maximum length
+                        â€“ 20 chars.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="0" name="MessageToDisplay" type="tns:String0To40">
+                <xsd:annotation>
+                    <xsd:documentation>Text displayed before asking authentication or
+                        signing PIN. Maximum length â€“ 40 chars.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+        </xsd:sequence>
+    </complexType>
+
+    <element name="endpointError">
+        <complexType>
+            <xsd:sequence>
+                <element maxOccurs="1" minOccurs="1" name="message" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>Error message
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+                <element maxOccurs="unbounded" minOccurs="0" name="reason" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>Error reasons
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </element>
+            </xsd:sequence>
+        </complexType>
+    </element>
+
+    <element name="MobileAuthenticateResponse">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractResponseType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="0" name="Challenge"
+                                 type="xsd:string">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    The data to be signed by the user. Consists of mixture of
+                                    data sent by Application Provider in SPChallenge (10
+                                    bytes) field of the query and data added by DigiDocService (also 10
+                                    bytes).
+                                    Returned only if SPChallenge field in the query was set.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <complexType abstract="true" name="AbstractResponseType">
+        <xsd:complexContent>
+            <xsd:extension base="tns:SessionAwareType">
+                <xsd:sequence>
+                    <element maxOccurs="1" minOccurs="1" name="ChallengeID"
+                             type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                4-character control code calculated on basis of the
+                                Challenge value to be signed. This code is displayed on
+                                mobile phoneâ€™s screen and shall be also displayed by
+                                Application Provider in order to ensure the user on
+                                authencity of the query.
+                                NB! Application provider must ask user to verify that those codes
+                                are the same.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </complexType>
+
+    <!-- Get*Status complex types -->
+    <!-- Get Mobile Authenticate Status -->
+    <element name="GetMobileAuthenticateStatusRequest">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractGetStatusRequestType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="0" name="ReturnCertData"
+                                 type="xsd:boolean">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    If 'TRUE', certificate of the user is returned.
+                                    Certificate is useful if AP wants to save it and/or
+                                    independently verify correctness of the signature
+                                    and validation data.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="ReturnRevocationData"
+                                 type="xsd:boolean">
+                            <xsd:annotation>
+                                <xsd:documentation>If 'TRUE', OCSP response to the certificate
+                                    validity query is returned.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <element name="GetMobileSignHashStatusRequest">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractGetStatusRequestType">
+                    <xsd:sequence>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <complexType abstract="true" name="AbstractGetStatusRequestType">
+        <xsd:complexContent>
+            <xsd:extension base="tns:SessionAwareType">
+                <xsd:sequence>
+                    <element maxOccurs="1" minOccurs="0" name="WaitSignature"
+                             type="xsd:boolean">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                If â€žTRUEâ€œ then the Service will wait for response from MSSP
+                                before
+                                responding. â€žFALSEâ€œ will cause the Service to respond immediately.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </complexType>
+
+    <element name="GetMobileAuthenticateStatusResponse">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractGetStatusResponseType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="1" name="UserIDCode" type="tns:IdCodeType">
+                            <xsd:annotation>
+                                <xsd:documentation>Personal Identity Code of the user. The value is fetched
+                                    from â€œSerial Numberâ€ field of the certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="1" name="UserGivenname" type="xsd:string">
+                            <xsd:annotation>
+                                <xsd:documentation>First name of the user. The value is fetched from â€œGâ€
+                                    (given name) field of the certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="1" name="UserSurname" type="xsd:string">
+                            <xsd:annotation>
+                                <xsd:documentation>Last name of the user. The value is fetched from â€œSNâ€
+                                    (surname) field of the certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="1" name="UserCountry" type="xsd:string">
+                            <xsd:annotation>
+                                <xsd:documentation>Country of the origin in ISO 3166 2-character style. The
+                                    value is fetched from â€œCâ€ (country) field of the certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="1" name="UserCN" type="xsd:string">
+                            <xsd:annotation>
+                                <xsd:documentation>â€žCommon Nameâ€œ of the certificate holder. The value is
+                                    fetched from â€œCNâ€ (common name) field of the certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="CertificateData"
+                                 type="xsd:base64Binary">
+                            <xsd:annotation>
+                                <xsd:documentation>Userâ€™s certificate in BASE64 coding. Returned if
+                                    parameter ReturnCertData was set 'TRUE' in the query.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="RevocationData"
+                                 type="xsd:base64Binary">
+                            <xsd:annotation>
+                                <xsd:documentation>OCSP response in BASE64 coding. Returned if
+                                    parameter ReturnRevocationData was set 'TRUE' in the query
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <element name="GetMobileSignHashStatusResponse">
+        <complexType>
+            <xsd:complexContent>
+                <xsd:extension base="tns:AbstractGetStatusResponseType">
+                    <xsd:sequence>
+                        <element maxOccurs="1" minOccurs="1" name="Sesscode" type="tns:SessionIdType">
+                            <xsd:annotation>
+                                <xsd:documentation>Session id
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="CertificateData" type="xsd:base64Binary">
+                            <xsd:annotation>
+                                <xsd:documentation>Session certificate int PEM format
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                        <element maxOccurs="1" minOccurs="0" name="RevocationData" type="xsd:base64Binary">
+                            <xsd:annotation>
+                                <xsd:documentation>OCSP response for certificate
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </element>
+                    </xsd:sequence>
+                </xsd:extension>
+            </xsd:complexContent>
+        </complexType>
+    </element>
+
+    <complexType abstract="true" name="AbstractGetStatusResponseType">
+        <xsd:sequence>
+            <element maxOccurs="1" minOccurs="1" name="Status" type="tns:ProcessStatusType">
+                <xsd:annotation>
+                    <xsd:documentation>Process status
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="0" name="Signature"
+                     type="xsd:base64Binary">
+                <xsd:annotation>
+                    <xsd:documentation>Signature value in PKCS#1 container in BASE64
+                        encoding.
+                        NB! For security reasons itâ€™s recommended for
+                        application provider to verify the signature, by using a)
+                        value that was signed (Challenge parameter from
+                        MobileAuthenticate method response), b) public key
+                        from Mobile-ID userâ€™s certificate and c)
+                        signature (that is calculated by RSA algorithm).
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+        </xsd:sequence>
+    </complexType>
+
+    <complexType abstract="true" name="SessionAwareType">
+        <xsd:sequence>
+            <element maxOccurs="1" minOccurs="1" name="Sesscode" type="tns:SessionIdType">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Session identifier
+                    </xsd:documentation>
+                </xsd:annotation>
+            </element>
+        </xsd:sequence>
+    </complexType>
+
+    <simpleType name="HashType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SHA1" />
+            <xsd:enumeration value="SHA256" />
+            <xsd:enumeration value="SHA512" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="ReturnCertDataType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="AUTH" />
+            <xsd:enumeration value="SIGN" />
+            <xsd:enumeration value="BOTH" />
+            <xsd:enumeration value="AUTHRSA" />
+            <xsd:enumeration value="AUTHECC" />
+            <xsd:enumeration value="SIGNRSA" />
+            <xsd:enumeration value="SIGNECC" />
+            <xsd:enumeration value="BOTHRSA" />
+            <xsd:enumeration value="BOTHECC" />
+            <xsd:enumeration value="NONE" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="KeyID">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="RSA" />
+            <xsd:enumeration value="ECC" />
+            <xsd:enumeration value="SIGN_RSA" />
+            <xsd:enumeration value="SIGN_ECC" />
+            <xsd:enumeration value="AUTH_RSA" />
+            <xsd:enumeration value="AUTH_ECC" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="StatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="2" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="ProcessStatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="EXPIRED_TRANSACTION"/>
+            <xsd:enumeration value="USER_AUTHENTICATED"/>
+            <xsd:enumeration value="USER_CANCEL"/>
+            <xsd:enumeration value="SIGNATURE"/>
+            <xsd:enumeration value="OUTSTANDING_TRANSACTION"/>
+            <xsd:enumeration value="MID_NOT_READY"/>
+            <xsd:enumeration value="PHONE_ABSENT"/>
+            <xsd:enumeration value="SENDING_ERROR"/>
+            <xsd:enumeration value="SIM_ERROR"/>
+            <xsd:enumeration value="OCSP_UNAUTHORIZED"/>
+            <xsd:enumeration value="INTERNAL_ERROR"/>
+            <xsd:enumeration value="REVOKED_CERTIFICATE"/>
+            <xsd:enumeration value="NOT_VALID"/>
+            <xsd:enumeration value="PHONE_TIMEOUT"/>
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="CertStatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="GOOD"/>
+            <xsd:enumeration value="REVOKED"/>
+            <xsd:enumeration value="UNKNOWN"/>
+            <xsd:enumeration value="EXPIRED"/>
+            <xsd:enumeration value="SUSPENDED"/>
+            <xsd:enumeration value="OCSP_UNAUTHORIZED"/>
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="IdCodeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1" />
+            <xsd:maxLength value="20" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="String2To7">
+        <restriction base="xsd:string">
+            <xsd:minLength value="2" />
+            <xsd:maxLength value="7" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="PhoneNumberType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="5" />
+            <xsd:maxLength value="20" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="CountryType">
+        <xsd:restriction base="xsd:string">
+            <xsd:length value="2" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="LanguageType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="EST" />
+            <xsd:enumeration value="LIT" />
+            <xsd:enumeration value="RUS" />
+            <xsd:enumeration value="ENG" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="SessionIdType">
+        <xsd:restriction base="xsd:string">
+            <xsd:length value="31" />
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="String20">
+        <restriction base="xsd:string">
+            <minLength value="1" />
+            <maxLength value="20" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="String40">
+        <restriction base="xsd:string">
+            <minLength value="1" />
+            <maxLength value="40" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="String0To40">
+        <restriction base="xsd:string">
+            <maxLength value="40" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="HexString128">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9a-fA-F]{40,128}"/>
+        </xsd:restriction>
+    </simpleType>
+
+    <simpleType name="HexString20">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="(\s*)|([0-9a-fA-F]{20})"/>
+        </xsd:restriction>
+    </simpleType>
+
+</xsd:schema>
