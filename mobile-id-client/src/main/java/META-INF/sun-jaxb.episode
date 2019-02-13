@@ -14,145 +14,145 @@ Generated on: 2018.12.13 at 05:34:52 PM EET
             
         <schemaBindings map="false">
                   
-            <package name="com.nortal.sample.mobileid.model"/>
+            <package name="ee.openeid.siga.mobileid.model"/>
                 
         </schemaBindings>
             
         <bindings if-exists="true" scd="tns:GetMobileCertByIDCodeRequest">
                   
-            <class ref="GetMobileCertByIDCodeRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileCertByIDCodeRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileCertByIDCodeResponse">
                   
-            <class ref="GetMobileCertByIDCodeResponse"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileCertByIDCodeResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashByIDCodeRequest">
                   
-            <class ref="MobileSignHashByIDCodeRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.MobileSignHashByIDCodeRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashRequest">
                   
-            <class ref="MobileSignHashRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.MobileSignHashRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractRequestType">
                   
-            <class ref="AbstractRequestType"/>
+            <class ref="ee.openeid.siga.mobileid.model.AbstractRequestType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashResponse">
                   
-            <class ref="MobileSignHashResponse"/>
+            <class ref="ee.openeid.siga.mobileid.model.MobileSignHashResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractResponseType">
                   
-            <class ref="AbstractResponseType"/>
+            <class ref="ee.openeid.siga.mobileid.model.AbstractResponseType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:SessionAwareType">
                   
-            <class ref="SessionAwareType"/>
+            <class ref="ee.openeid.siga.mobileid.model.SessionAwareType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileAuthenticateRequest">
                   
-            <class ref="MobileAuthenticateRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.MobileAuthenticateRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:endpointError">
                   
-            <class ref="EndpointError"/>
+            <class ref="ee.openeid.siga.mobileid.model.EndpointError"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileAuthenticateResponse">
                   
-            <class ref="MobileAuthenticateResponse"/>
+            <class ref="ee.openeid.siga.mobileid.model.MobileAuthenticateResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileAuthenticateStatusRequest">
                   
-            <class ref="GetMobileAuthenticateStatusRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileAuthenticateStatusRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractGetStatusRequestType">
                   
-            <class ref="AbstractGetStatusRequestType"/>
+            <class ref="ee.openeid.siga.mobileid.model.AbstractGetStatusRequestType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileSignHashStatusRequest">
                   
-            <class ref="GetMobileSignHashStatusRequest"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileSignHashStatusRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileAuthenticateStatusResponse">
                   
-            <class ref="GetMobileAuthenticateStatusResponse"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileAuthenticateStatusResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractGetStatusResponseType">
                   
-            <class ref="AbstractGetStatusResponseType"/>
+            <class ref="ee.openeid.siga.mobileid.model.AbstractGetStatusResponseType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileSignHashStatusResponse">
                   
-            <class ref="GetMobileSignHashStatusResponse"/>
+            <class ref="ee.openeid.siga.mobileid.model.GetMobileSignHashStatusResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:ReturnCertDataType">
                   
-            <typesafeEnumClass ref="ReturnCertDataType"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.ReturnCertDataType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:HashType">
                   
-            <typesafeEnumClass ref="HashType"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.HashType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:KeyID">
                   
-            <typesafeEnumClass ref="KeyID"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.KeyID"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:LanguageType">
                   
-            <typesafeEnumClass ref="LanguageType"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.LanguageType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:ProcessStatusType">
                   
-            <typesafeEnumClass ref="ProcessStatusType"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.ProcessStatusType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:CertStatusType">
                   
-            <typesafeEnumClass ref="CertStatusType"/>
+            <typesafeEnumClass ref="ee.openeid.siga.mobileid.model.CertStatusType"/>
                 
         </bindings>
           
