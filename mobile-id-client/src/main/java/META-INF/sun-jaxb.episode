@@ -20,139 +20,139 @@ Generated on: 2018.12.13 at 05:34:52 PM EET
             
         <bindings if-exists="true" scd="tns:GetMobileCertByIDCodeRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileCertByIDCodeRequest"/>
+            <class ref="GetMobileCertByIDCodeRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileCertByIDCodeResponse">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileCertByIDCodeResponse"/>
+            <class ref="GetMobileCertByIDCodeResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashByIDCodeRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.MobileSignHashByIDCodeRequest"/>
+            <class ref="MobileSignHashByIDCodeRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.MobileSignHashRequest"/>
+            <class ref="MobileSignHashRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractRequestType">
                   
-            <class ref="com.nortal.sample.mobileid.model.AbstractRequestType"/>
+            <class ref="AbstractRequestType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileSignHashResponse">
                   
-            <class ref="com.nortal.sample.mobileid.model.MobileSignHashResponse"/>
+            <class ref="MobileSignHashResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractResponseType">
                   
-            <class ref="com.nortal.sample.mobileid.model.AbstractResponseType"/>
+            <class ref="AbstractResponseType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:SessionAwareType">
                   
-            <class ref="com.nortal.sample.mobileid.model.SessionAwareType"/>
+            <class ref="SessionAwareType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileAuthenticateRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.MobileAuthenticateRequest"/>
+            <class ref="MobileAuthenticateRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:endpointError">
                   
-            <class ref="com.nortal.sample.mobileid.model.EndpointError"/>
+            <class ref="EndpointError"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:MobileAuthenticateResponse">
                   
-            <class ref="com.nortal.sample.mobileid.model.MobileAuthenticateResponse"/>
+            <class ref="MobileAuthenticateResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileAuthenticateStatusRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileAuthenticateStatusRequest"/>
+            <class ref="GetMobileAuthenticateStatusRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractGetStatusRequestType">
                   
-            <class ref="com.nortal.sample.mobileid.model.AbstractGetStatusRequestType"/>
+            <class ref="AbstractGetStatusRequestType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileSignHashStatusRequest">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileSignHashStatusRequest"/>
+            <class ref="GetMobileSignHashStatusRequest"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileAuthenticateStatusResponse">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileAuthenticateStatusResponse"/>
+            <class ref="GetMobileAuthenticateStatusResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:AbstractGetStatusResponseType">
                   
-            <class ref="com.nortal.sample.mobileid.model.AbstractGetStatusResponseType"/>
+            <class ref="AbstractGetStatusResponseType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="tns:GetMobileSignHashStatusResponse">
                   
-            <class ref="com.nortal.sample.mobileid.model.GetMobileSignHashStatusResponse"/>
+            <class ref="GetMobileSignHashStatusResponse"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:ReturnCertDataType">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.ReturnCertDataType"/>
+            <typesafeEnumClass ref="ReturnCertDataType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:HashType">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.HashType"/>
+            <typesafeEnumClass ref="HashType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:KeyID">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.KeyID"/>
+            <typesafeEnumClass ref="KeyID"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:LanguageType">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.LanguageType"/>
+            <typesafeEnumClass ref="LanguageType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:ProcessStatusType">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.ProcessStatusType"/>
+            <typesafeEnumClass ref="ProcessStatusType"/>
                 
         </bindings>
             
         <bindings if-exists="true" scd="~tns:CertStatusType">
                   
-            <typesafeEnumClass ref="com.nortal.sample.mobileid.model.CertStatusType"/>
+            <typesafeEnumClass ref="CertStatusType"/>
                 
         </bindings>
           
