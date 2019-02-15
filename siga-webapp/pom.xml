@@ -20,7 +20,11 @@
             <artifactId>siga-auth</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>ee.openeid.siga</groupId>
+            <artifactId>siga-signature-service</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
         <!-- for >= Java 9 -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -97,7 +101,6 @@
                             <wadlOptions>
                                 <wadlOption>
                                     <wadl>${basedir}/src/main/resources/static/siga.wadl</wadl>
-                                    <packagename>ee.openeid.siga.webapp.json</packagename>
                                 </wadlOption>
                             </wadlOptions>
                         </configuration>
