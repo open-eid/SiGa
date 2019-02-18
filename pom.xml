@@ -15,9 +15,9 @@
     <packaging>pom</packaging>
     <name>Signature Gateway</name>
 
-
     <modules>
         <module>mobile-id-client</module>
+        <module>siga-common</module>
         <module>siga-webapp</module>
         <module>siga-auth</module>
         <module>siga-session-storage</module>
@@ -33,6 +33,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

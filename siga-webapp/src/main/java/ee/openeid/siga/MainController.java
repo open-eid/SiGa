@@ -1,28 +1,8 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.webapp.json.*;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import ee.openeid.siga.webapp.json.CloseSessionResponse;
-import ee.openeid.siga.webapp.json.CreateContainerRequest;
-import ee.openeid.siga.webapp.json.CreateContainerResponse;
-import ee.openeid.siga.webapp.json.FinalizeSignatureRequest;
-import ee.openeid.siga.webapp.json.FinalizeSignatureResponse;
-import ee.openeid.siga.webapp.json.GetContainerValidationResponse;
-import ee.openeid.siga.webapp.json.GetMobileSigningStatusResponse;
-import ee.openeid.siga.webapp.json.GetSignatureListResponse;
-import ee.openeid.siga.webapp.json.PrepareSignatureRequest;
-import ee.openeid.siga.webapp.json.PrepareSignatureResponse;
-import ee.openeid.siga.webapp.json.StartMobileIdSigningRequest;
-import ee.openeid.siga.webapp.json.StartMobileIdSigningResponse;
-import ee.openeid.siga.webapp.json.UploadContainerRequest;
-import ee.openeid.siga.webapp.json.UploadContainerResponse;
-import ee.openeid.siga.webapp.json.ValidateContainerRequest;
-import ee.openeid.siga.webapp.json.ValidateContainerResponse;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MainController {

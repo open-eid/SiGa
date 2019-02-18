@@ -26,8 +26,9 @@
     <xs:complexType name="dataFile">
         <xs:sequence>
             <xs:element name="fileName" type="xs:string"/>
-            <xs:element name="fileHash" type="xs:string" minOccurs="0"/>
-            <xs:element name="fileHashAlgorithm" type="xs:string" minOccurs="0"/>
+            <xs:element name="fileHashSha256" type="xs:string" minOccurs="0"/>
+            <xs:element name="fileHashSha512" type="xs:string" minOccurs="0"/>
+            <xs:element name="fileSize" type="xs:int" minOccurs="0"/>
             <xs:element name="fileContent" type="xs:string" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
