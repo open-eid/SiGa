@@ -1,5 +1,6 @@
 package ee.openeid.siga.session;
 
+import ee.openeid.siga.common.ContainerWrapper;
 import ee.openeid.siga.session.exception.ResourceNotFoundException;
 import org.apache.ignite.Ignite;
 import org.slf4j.Logger;
@@ -19,19 +20,19 @@ public class IgniteSessionService implements SessionService {
     private Ignite ignite;
 
     @Override
-    public String getContainer(String sessionId) {
-        String container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
+    public ContainerWrapper getContainer(String sessionId) {
+        ContainerWrapper container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
                 .orElseThrow(() -> new ResourceNotFoundException("Session [" + sessionId + "] not found"));
         LOGGER.info("Found container with session ID [{}]", sessionId);
         return container;
     }
 
     @Override
-    public void update(String sessionId, String container) {
+    public void update(String sessionId, ContainerWrapper container) {
         getContainerConfigCache().put(sessionId, container);
     }
 
-    public Cache<String, String> getContainerConfigCache() {
+    public Cache<String, ContainerWrapper> getContainerConfigCache() {
         return ignite.getOrCreateCache(CacheName.CONTAINER.name());
     }
 

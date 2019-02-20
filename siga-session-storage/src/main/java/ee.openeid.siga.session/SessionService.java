@@ -1,10 +1,11 @@
 package ee.openeid.siga.session;
 
+import ee.openeid.siga.common.ContainerWrapper;
+
 public interface SessionService {
 
-    String getContainer(String sessionId);
+    ContainerWrapper getContainer(String sessionId);
 
-    void update(String sessionId, String container);
-
+    void update(String sessionId, ContainerWrapper container);
 
 }

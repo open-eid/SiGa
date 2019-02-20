@@ -1,4 +1,4 @@
-package ee.openeid.siga.siga.service.signature.session;
+package ee.openeid.siga.service.signature.session;
 
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import org.junit.Assert;

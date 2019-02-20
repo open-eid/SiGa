@@ -216,7 +216,7 @@
     </xs:complexType>
     <xs:complexType name="validatedDocumentData">
         <xs:sequence>
-            <xs:element name="filename" type="xs:string"/>
+            <xs:element name="fileName" type="xs:string"/>
             <xs:element name="fileHash" minOccurs="0" type="xs:string"/>
             <xs:element name="hashAlgo" minOccurs="0" type="xs:string"/>
         </xs:sequence>
