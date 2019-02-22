@@ -3,6 +3,7 @@ package ee.openeid.siga.validation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
+import ee.openeid.siga.webapp.json.UploadContainerRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,11 @@ public class RequestValidator {
     public static void validateCreateContainerRequest(CreateContainerRequest request) {
         validateFileName(request.getContainerName(), "Container name is invalid");
         request.getDataFiles().forEach(dataFile -> validateDataFile(dataFile));
+    }
+
+    public static void validateUploadContainerRequest(UploadContainerRequest request) {
+        validateFileName(request.getContainerName(), "Container name is invalid");
+        validateFileContent(request.getContainer());
     }
 
     private static void validateFileName(String fileName, String errorMessage) {
@@ -31,7 +37,7 @@ public class RequestValidator {
     }
 
     private static void validateFileContent(String content) {
-        if (!isBase64StringEncoded(content)) {
+        if (StringUtils.isBlank(content) || !isBase64StringEncoded(content)) {
             throw new InvalidRequestException("File content is invalid");
         }
     }

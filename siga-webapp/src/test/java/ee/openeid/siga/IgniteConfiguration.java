@@ -17,7 +17,7 @@ public class IgniteConfiguration {
     public Ignite ignite() throws IgniteException {
         Ignite ignite = Ignition.start();
         CacheConfiguration sessionConfiguration = new CacheConfiguration();
-        sessionConfiguration.setName(CacheName.CONTAINER.name());
+        sessionConfiguration.setName(CacheName.HASHCODE_CONTAINER_SESSION.name());
         ignite.addCacheConfiguration(sessionConfiguration);
         return ignite;
     }

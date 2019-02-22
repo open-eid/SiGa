@@ -29,7 +29,7 @@ public class SessionConfiguration {
         Ignition.setClientMode(true);
         Ignite ignite = Ignition.start(sessionConfigurationProperties.getLocation());
         CacheConfiguration sessionConfiguration = new CacheConfiguration();
-        sessionConfiguration.setName(CacheName.CONTAINER.name());
+        sessionConfiguration.setName(CacheName.HASHCODE_CONTAINER_SESSION.name());
         Duration expiryDuration = new Duration(TimeUnit.SECONDS, sessionConfigurationProperties.getExpiryDuration());
         sessionConfiguration.setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(expiryDuration));
         ignite.addCacheConfiguration(sessionConfiguration);

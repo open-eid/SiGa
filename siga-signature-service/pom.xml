@@ -29,10 +29,5 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.digidoc4j</groupId>
-            <artifactId>digidoc4j</artifactId>
-            <version>3.0.0</version>
-        </dependency>
     </dependencies>
 </project>

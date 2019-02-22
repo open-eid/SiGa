@@ -2,5 +2,6 @@ package ee.openeid.siga.session;
 
 public enum CacheName {
 
-    CONTAINER
+    HASHCODE_CONTAINER_SESSION,
+    CONTAINER_SESSION
 }

@@ -1,10 +1,15 @@
 package ee.openeid.siga.service.signature.test;
 
-import ee.openeid.siga.service.signature.hashcode.AsicHashCode;
+import ee.openeid.siga.service.signature.hashcode.HashCodesDataFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -31,9 +36,9 @@ public class TestUtil {
                     hashCodeContainer.setMimeTypeContent(out.toString());
                 } else if ("META-INF/manifest.xml".equals(entryName)) {
                     hashCodeContainer.setManifestContent(out.toString());
-                } else if (AsicHashCode.HASHCODES_SHA256.equals(entryName)) {
+                } else if (HashCodesDataFile.HASHCODES_SHA256.equals(entryName)) {
                     hashCodeContainer.setHashCodesSha256Content(out.toString());
-                } else if (AsicHashCode.HASHCODES_SHA512.equals(entryName)) {
+                } else if (HashCodesDataFile.HASHCODES_SHA512.equals(entryName)) {
                     hashCodeContainer.setHashCodesSha512Content(out.toString());
                 }
             }
@@ -42,5 +47,11 @@ public class TestUtil {
         }
         zipStream.close();
         return hashCodeContainer;
+    }
+
+    public static InputStream getFileInputStream(String filePath) throws URISyntaxException, IOException {
+        Path documentPath = Paths.get(TestUtil.class.getClassLoader().getResource(filePath).toURI());
+        return new ByteArrayInputStream(Files.readAllBytes(documentPath));
+
     }
 }
