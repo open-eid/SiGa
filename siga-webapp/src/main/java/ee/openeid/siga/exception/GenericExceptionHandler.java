@@ -1,8 +1,8 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.common.exception.ErrorCode;
-import ee.openeid.siga.common.exception.ErrorResponse;
 import ee.openeid.siga.common.exception.InvalidRequestException;
+import ee.openeid.siga.webapp.json.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

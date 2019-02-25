@@ -1,12 +1,12 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.webapp.json.CreateContainerRequest;
-import ee.openeid.siga.webapp.json.CreateContainerResponse;
-import ee.openeid.siga.webapp.json.UploadContainerRequest;
-import ee.openeid.siga.webapp.json.UploadContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerResponse;
+import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.UploadHashCodeContainerResponse;
 
 public interface ContainerService {
 
-    CreateContainerResponse createContainer(CreateContainerRequest request);
-    UploadContainerResponse uploadContainer(UploadContainerRequest request);
+    CreateHashCodeContainerResponse createContainer(CreateHashCodeContainerRequest request);
+    UploadHashCodeContainerResponse uploadContainer(UploadHashCodeContainerRequest request);
 }

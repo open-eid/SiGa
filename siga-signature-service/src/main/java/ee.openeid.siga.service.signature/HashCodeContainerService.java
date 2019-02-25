@@ -5,10 +5,10 @@ import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.HashCodeSessionService;
-import ee.openeid.siga.webapp.json.CreateContainerRequest;
-import ee.openeid.siga.webapp.json.CreateContainerResponse;
-import ee.openeid.siga.webapp.json.UploadContainerRequest;
-import ee.openeid.siga.webapp.json.UploadContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerResponse;
+import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.UploadHashCodeContainerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class HashCodeContainerService implements ContainerService {
 
     private HashCodeSessionService sessionService;
 
-    public CreateContainerResponse createContainer(CreateContainerRequest request) {
+    public CreateHashCodeContainerResponse createContainer(CreateHashCodeContainerRequest request) {
 
         HashCodeContainer hashCodeContainer = new HashCodeContainer();
         request.getDataFiles().forEach(dataFile ->
@@ -33,21 +33,21 @@ public class HashCodeContainerService implements ContainerService {
 
         String sessionId = SessionIdGenerator.generateSessionId();
         sessionService.update(sessionId, transformContainerToSession(hashCodeContainer, request.getContainerName()));
-        CreateContainerResponse response = new CreateContainerResponse();
-        response.setSessionId(sessionId);
+        CreateHashCodeContainerResponse response = new CreateHashCodeContainerResponse();
+        response.setContainerId(sessionId);
         return response;
     }
 
     @Override
-    public UploadContainerResponse uploadContainer(UploadContainerRequest request) {
+    public UploadHashCodeContainerResponse uploadContainer(UploadHashCodeContainerRequest request) {
         String sessionId = SessionIdGenerator.generateSessionId();
         HashCodeContainer hashCodeContainer = new HashCodeContainer();
         InputStream inputStream = new ByteArrayInputStream(request.getContainer().getBytes());
         hashCodeContainer.open(inputStream);
         sessionService.update(sessionId, transformContainerToSession(hashCodeContainer, request.getContainerName()));
 
-        UploadContainerResponse response = new UploadContainerResponse();
-        response.setSessionId(sessionId);
+        UploadHashCodeContainerResponse response = new UploadHashCodeContainerResponse();
+        response.setContainerId(sessionId);
         return response;
     }
 

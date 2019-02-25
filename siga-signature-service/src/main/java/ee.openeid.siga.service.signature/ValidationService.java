@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.webapp.json.ValidateContainerRequest;
-import ee.openeid.siga.webapp.json.ValidateContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportResponse;
 
 public interface ValidationService {
-    ValidateContainerResponse validateContainer(ValidateContainerRequest request);
+    CreateHashCodeValidationReportResponse validateContainer(CreateHashCodeValidationReportRequest request);
 }

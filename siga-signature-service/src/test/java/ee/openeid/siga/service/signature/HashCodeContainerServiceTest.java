@@ -2,8 +2,8 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.HashCodeSessionService;
-import ee.openeid.siga.webapp.json.CreateContainerRequest;
-import ee.openeid.siga.webapp.json.CreateContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,13 +20,12 @@ public class HashCodeContainerServiceTest {
     @Mock
     private HashCodeSessionService sessionService;
 
-
     @Test
     public void successfulCreateContainer() {
-        CreateContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
+        CreateHashCodeContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
         containerService.setSessionService(sessionService);
-        CreateContainerResponse response = containerService.createContainer(request);
-        Assert.assertFalse(response.getSessionId().isBlank());
+        CreateHashCodeContainerResponse response = containerService.createContainer(request);
+        Assert.assertFalse(response.getContainerId().isBlank());
     }
 
 }

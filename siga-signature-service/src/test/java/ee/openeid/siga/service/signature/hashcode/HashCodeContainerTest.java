@@ -6,7 +6,7 @@ import ee.openeid.siga.service.signature.test.HashCodeContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
-import ee.openeid.siga.webapp.json.CreateContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import org.digidoc4j.Signature;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class HashCodeContainerTest {
 
     @Test
     public void validHashCodeContainerCreation() throws IOException {
-        CreateContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
+        CreateHashCodeContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
         HashCodeContainer hashCodeContainer = new HashCodeContainer();
         request.getDataFiles().forEach(dataFile -> hashCodeContainer.addDataFile(ContainerUtil.transformDataFileToHashCodeDataFile(dataFile)));
         try (OutputStream outputStream = new ByteArrayOutputStream()) {
