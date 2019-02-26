@@ -1,18 +1,20 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.SignatureHashCodeDataFile;
+import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.test.HashCodeContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import org.digidoc4j.Signature;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.List;
 
 public class HashCodeContainerTest {
 
@@ -40,6 +42,15 @@ public class HashCodeContainerTest {
         hashCodeContainer.open(inputStream);
         Assert.assertEquals(1, hashCodeContainer.getSignatures().size());
         Assert.assertEquals(2, hashCodeContainer.getDataFiles().size());
+
+        List<SignatureHashCodeDataFile> signatureDataFiles = hashCodeContainer.getSignatures().get(0).getDataFiles();
+        Assert.assertEquals(2, signatureDataFiles.size());
+        Assert.assertEquals("test.txt", signatureDataFiles.get(0).getFileName());
+        Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", signatureDataFiles.get(0).getHash());
+        Assert.assertEquals("SHA256", signatureDataFiles.get(0).getHashAlgo());
+        Assert.assertEquals("test1.txt", signatureDataFiles.get(1).getFileName());
+        Assert.assertEquals("MFRF3SBw+Ykk8BdGCEGzlMrxycC8qzbzvjQuST0yk8M=", signatureDataFiles.get(1).getHash());
+        Assert.assertEquals("SHA256", signatureDataFiles.get(1).getHashAlgo());
     }
 
 
@@ -59,7 +70,7 @@ public class HashCodeContainerTest {
         HashCodeContainer hashCodeContainer = new HashCodeContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashCodeContainer.open(inputStream);
-        Signature signature = hashCodeContainer.getSignatures().get(0);
+        SignatureWrapper signature = hashCodeContainer.getSignatures().get(0);
 
         hashCodeContainer.getSignatures().remove(0);
         HashCodeDataFile hashCodeDataFile = new HashCodeDataFile();
@@ -67,6 +78,7 @@ public class HashCodeContainerTest {
         hashCodeDataFile.setFileHashSha256("asdasd=");
         hashCodeDataFile.setFileSize(10);
         hashCodeContainer.addDataFile(hashCodeDataFile);
+
         hashCodeContainer.addSignature(signature);
         Assert.assertEquals(1, hashCodeContainer.getSignatures().size());
         Assert.assertEquals(3, hashCodeContainer.getDataFiles().size());

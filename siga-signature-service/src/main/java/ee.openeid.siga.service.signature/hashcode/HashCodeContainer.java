@@ -1,6 +1,8 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.SignatureHashCodeDataFile;
+import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.DSSDocument;
@@ -8,7 +10,6 @@ import eu.europa.esig.dss.DigestDocument;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
-import org.digidoc4j.Signature;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import static ee.openeid.siga.service.signature.hashcode.HashCodeContainerCreato
 public class HashCodeContainer {
 
     private List<HashCodeDataFile> dataFiles = new ArrayList<>();
-    private List<Signature> signatures = new ArrayList<>();
+    private List<SignatureWrapper> signatures = new ArrayList<>();
 
     public void save(OutputStream outputStream) {
         createHashCodeContainer(outputStream);
@@ -52,6 +53,7 @@ public class HashCodeContainer {
         hashCodeContainerCreator.writeManifest(convertDataFiles());
         hashCodeContainerCreator.writeHashCodeFiles(dataFiles);
         hashCodeContainerCreator.writeSignatures(signatures);
+
         hashCodeContainerCreator.finalizeZipFile();
     }
 
@@ -64,8 +66,7 @@ public class HashCodeContainer {
                 out.write(byteBuff, 0, bytesRead);
             }
             if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
-                DetachedXadesSignatureBuilder signatureBuilder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
-                signatures.add(signatureBuilder.openAdESSignature(out.toByteArray()));
+                signatures.add(createSignatureWrapper(out.toByteArray()));
             } else if (entryName.startsWith(HashCodesDataFile.HASHCODES_PREFIX)) {
                 HashCodesDataFileParser parser = new HashCodesDataFileParser(out.toByteArray());
                 addDataFileEntries(parser.getEntries(), entryName);
@@ -73,6 +74,28 @@ public class HashCodeContainer {
 
             zipStream.closeEntry();
         }
+    }
+
+    private SignatureWrapper createSignatureWrapper(byte[] signature) {
+        DetachedXadesSignatureBuilder signatureBuilder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
+
+        SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
+        Map<String, HashCodeDataFileEntry> dataFiles = parser.getEntries();
+
+        SignatureWrapper signatureWrapper = new SignatureWrapper();
+        signatureWrapper.setSignature(signatureBuilder.openAdESSignature(signature));
+        addSignatureDataFilesEntries(signatureWrapper, dataFiles);
+        return signatureWrapper;
+    }
+
+    private void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, HashCodeDataFileEntry> dataFiles) {
+        dataFiles.forEach((fileName, fileEntry) -> {
+            SignatureHashCodeDataFile hashCodeDataFile = new SignatureHashCodeDataFile();
+            hashCodeDataFile.setFileName(fileName);
+            hashCodeDataFile.setHash(fileEntry.getHash());
+            hashCodeDataFile.setHashAlgo(fileEntry.getHashAlgo());
+            wrapper.getDataFiles().add(hashCodeDataFile);
+        });
     }
 
     private void addDataFileEntries(Map<String, HashCodesEntry> entries, String entryName) {
@@ -110,7 +133,7 @@ public class HashCodeContainer {
         }).collect(Collectors.toList());
     }
 
-    public List<Signature> getSignatures() {
+    public List<SignatureWrapper> getSignatures() {
         return signatures;
     }
 
@@ -118,7 +141,7 @@ public class HashCodeContainer {
         return dataFiles;
     }
 
-    public void addSignature(Signature signature) {
+    public void addSignature(SignatureWrapper signature) {
         signatures.add(signature);
     }
 

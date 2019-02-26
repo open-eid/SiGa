@@ -2,6 +2,7 @@ package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
 import org.apache.commons.codec.binary.Base64;
@@ -15,6 +16,11 @@ public class RequestValidator {
     }
 
     public static void validateUploadContainerRequest(UploadHashCodeContainerRequest request) {
+        validateFileName(request.getContainerName(), "Container name is invalid");
+        validateFileContent(request.getContainer());
+    }
+
+    public static void validateValidationReportRequest(CreateHashCodeValidationReportRequest request) {
         validateFileName(request.getContainerName(), "Container name is invalid");
         validateFileContent(request.getContainer());
     }
@@ -53,4 +59,5 @@ public class RequestValidator {
             throw new InvalidRequestException("File size is invalid");
         }
     }
+
 }

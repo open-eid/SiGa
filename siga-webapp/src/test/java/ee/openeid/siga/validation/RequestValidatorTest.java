@@ -2,6 +2,7 @@ package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,11 @@ public class RequestValidatorTest {
     @Test
     public void successfulUploadContainerRequest() {
         RequestValidator.validateUploadContainerRequest(getUploadContainerRequest());
+    }
+
+    @Test
+    public void successfulValidationReportRequest() {
+        RequestValidator.validateValidationReportRequest(getValidationReportRequest());
     }
 
     @Test
@@ -120,6 +126,14 @@ public class RequestValidatorTest {
         request.setContainer("dGVzdCBmaWxlIGNvbnRlbnQ=");
         return request;
     }
+
+    public static CreateHashCodeValidationReportRequest getValidationReportRequest() {
+        CreateHashCodeValidationReportRequest request = new CreateHashCodeValidationReportRequest();
+        request.setContainerName("test.asice");
+        request.setContainer("dGVzdCBmaWxlIGNvbnRlbnQ=");
+        return request;
+    }
+
 
     public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {
         CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();

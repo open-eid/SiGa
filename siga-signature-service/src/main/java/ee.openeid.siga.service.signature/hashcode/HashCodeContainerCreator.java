@@ -2,10 +2,10 @@ package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashCodeDataFile;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.SignatureWrapper;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
-import org.digidoc4j.Signature;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;
 
 import java.io.IOException;
@@ -58,9 +58,9 @@ public class HashCodeContainerCreator {
         new BytesEntryCallback(getZipEntry(mimeType, ZIP_ENTRY_MIMETYPE), mimeType).write();
     }
 
-    public void writeSignatures(List<Signature> signatures) {
-        for (int i = 0; i < signatures.size(); i++) {
-            byte[] signatureData = signatures.get(0).getAdESSignature();
+    public void writeSignatures(List<SignatureWrapper> wrappers) {
+        for (int i = 0; i < wrappers.size(); i++) {
+            byte[] signatureData = wrappers.get(i).getSignature().getAdESSignature();
             String signatureName = SIGNATURE_FILE_PREFIX + i + SIGNATURE_FILE_EXTENSION;
             new BytesEntryCallback(getZipEntry(signatureData, signatureName), signatureData).write();
         }

@@ -12,16 +12,15 @@ import java.util.Map;
 public class HashCodesDataFileParser {
 
     private byte[] hashCodesDataFile;
-    private Map<String, HashCodesEntry> entries;
+    private Map<String, HashCodesEntry> entries = new HashMap<>();
 
 
     public HashCodesDataFileParser(byte[] hashCodesDataFile) {
         this.hashCodesDataFile = hashCodesDataFile;
+        loadHashCodesEntries();
     }
 
     public Map<String, HashCodesEntry> getEntries() {
-        entries = new HashMap<>();
-        loadHashCodesEntries();
         return entries;
     }
 

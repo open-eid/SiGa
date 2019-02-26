@@ -2,9 +2,9 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.session.DataFileSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class DataFileContainerService { //implements ContainerService { TODO: update wadl/implementation
 
     private DataFileSessionService sessionService;

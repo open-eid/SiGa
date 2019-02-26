@@ -10,14 +10,14 @@ import ee.openeid.siga.webapp.json.CreateHashCodeContainerResponse;
 import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.UploadHashCodeContainerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-@Component
+@Service
 public class HashCodeContainerService implements ContainerService {
 
     private HashCodeSessionService sessionService;

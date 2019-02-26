@@ -82,13 +82,7 @@
             <xs:element minOccurs="0" name="stateOrProvince" type="xs:string"/>
             <xs:element minOccurs="0" name="postalCode" type="xs:string"/>
             <xs:element minOccurs="0" name="country" type="xs:string"/>
-            <xs:element minOccurs="0" name="roles">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="role" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createHashCodeRemoteSigningResponse">
@@ -119,13 +113,7 @@
             <xs:element minOccurs="0" name="stateOrProvince" type="xs:string"/>
             <xs:element minOccurs="0" name="postalCode" type="xs:string"/>
             <xs:element minOccurs="0" name="country" type="xs:string"/>
-            <xs:element minOccurs="0" name="roles">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="role" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createHashCodeMobileIdSigningResponse">
@@ -140,13 +128,7 @@
     </xs:complexType>
     <xs:complexType name="getHashCodeSignaturesResponse">
         <xs:sequence>
-            <xs:element minOccurs="0" name="signatures">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="signature" type="tns:signature"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element minOccurs="0" name="signatures" maxOccurs="unbounded" type="tns:signature"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="getHashCodeContainerResponse">
@@ -167,31 +149,10 @@
             <xs:element name="validationTime" type="xs:string"/>
             <xs:element name="validatedDocument" type="tns:validatedDocumentData"/>
             <xs:element name="validationLevel" minOccurs="0" type="xs:string"/>
-            <xs:element name="validationWarnings" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="validationWarning"
-                                    type="tns:validationWarning"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element name="validationWarnings" maxOccurs="unbounded" minOccurs="0" type="tns:validationWarning"/>
             <xs:element name="signatureForm" minOccurs="0" type="xs:string"/>
-            <xs:element name="signatures" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="signature"
-                                    type="tns:signatureValidationData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="timeStampTokens" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" maxOccurs="unbounded" name="timeStampToken"
-                                    type="tns:timeStampTokenData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element name="signatures" minOccurs="0" maxOccurs="unbounded" type="tns:signatureValidationData"/>
+            <xs:element name="timeStampTokens" minOccurs="0" maxOccurs="unbounded" type="tns:timeStampTokenData"/>
             <xs:element name="validSignaturesCount" minOccurs="0" type="xs:int"/>
             <xs:element name="signaturesCount" minOccurs="0" type="xs:int"/>
         </xs:sequence>
@@ -212,25 +173,12 @@
     </xs:complexType>
     <xs:complexType name="timeStampTokenData">
         <xs:sequence>
-            <xs:element name="indication" type="tns:indication"/>
+            <xs:element name="indication" type="xs:string"/>
             <xs:element name="signedBy" type="xs:string"/>
             <xs:element name="signedTime" type="xs:string"/>
-            <xs:element name="errors" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="error" type="tns:error"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element name="errors" minOccurs="0" maxOccurs="unbounded" type="tns:error"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:simpleType name="indication">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="TOTAL-PASSED"/>
-            <xs:enumeration value="TOTAL-FAILED"/>
-            <xs:enumeration value="INDETERMINATE"/>
-        </xs:restriction>
-    </xs:simpleType>
     <xs:complexType name="error">
         <xs:sequence>
             <xs:element name="content" type="xs:string"/>
@@ -254,30 +202,12 @@
             <xs:element name="signatureFormat" type="xs:string"/>
             <xs:element name="signatureLevel" minOccurs="0" type="xs:string"/>
             <xs:element name="signedBy" type="xs:string"/>
-            <xs:element name="indication" type="tns:indication"/>
+            <xs:element name="indication" type="xs:string"/>
             <xs:element name="subIndication" minOccurs="0" type="xs:string"/>
-            <xs:element name="errors" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="error" type="tns:error"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="signatureScopes" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" name="signatureScope" type="tns:signatureScope"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element name="errors" minOccurs="0" maxOccurs="unbounded" type="tns:error"/>
+            <xs:element name="signatureScopes" minOccurs="0" maxOccurs="unbounded" type="tns:signatureScope"/>
             <xs:element name="claimedSigningTime" type="xs:string"/>
-            <xs:element name="warnings" minOccurs="0">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="warning" type="tns:warning"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
+            <xs:element name="warnings" maxOccurs="unbounded" minOccurs="0" type="tns:warning"/>
             <xs:element name="info" minOccurs="0" type="tns:info"/>
         </xs:sequence>
     </xs:complexType>

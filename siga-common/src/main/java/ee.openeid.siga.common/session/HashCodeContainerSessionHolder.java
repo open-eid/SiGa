@@ -1,9 +1,9 @@
 package ee.openeid.siga.common.session;
 
 import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.SignatureWrapper;
 import lombok.Builder;
 import lombok.Data;
-import org.digidoc4j.Signature;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ import java.util.List;
 public class HashCodeContainerSessionHolder implements Session {
     private String containerName;
     private List<HashCodeDataFile> dataFiles;
-    private List<Signature> signatures;
+    private List<SignatureWrapper> signatures;
 }
