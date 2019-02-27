@@ -64,6 +64,12 @@ public class MainController {
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetHashCodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
+        RequestValidator.validateContainerId(containerId);
+        return containerService.getContainer(containerId);
+    }
+
+    @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public DeleteHashCodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         return null;
     }

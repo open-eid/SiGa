@@ -176,7 +176,7 @@
 					</response>
 				</method>
 			</resource>
-			<resource path="hashcodecontainers/{containerId}	">
+			<resource path="hashcodecontainers/{containerId}">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 				<method id="getContainer" name="GET">
 					<response status="200">
