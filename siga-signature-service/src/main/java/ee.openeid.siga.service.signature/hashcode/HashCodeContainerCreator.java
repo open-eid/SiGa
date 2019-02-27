@@ -23,7 +23,6 @@ public class HashCodeContainerCreator {
     public static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
     private static final String SIGNATURE_FILE_EXTENSION = ".xml";
 
-
     public HashCodeContainerCreator(OutputStream outputStream) {
         this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
     }
@@ -60,7 +59,7 @@ public class HashCodeContainerCreator {
 
     public void writeSignatures(List<SignatureWrapper> wrappers) {
         for (int i = 0; i < wrappers.size(); i++) {
-            byte[] signatureData = wrappers.get(i).getSignature().getAdESSignature();
+            byte[] signatureData = wrappers.get(i).getSignature();
             String signatureName = SIGNATURE_FILE_PREFIX + i + SIGNATURE_FILE_EXTENSION;
             new BytesEntryCallback(getZipEntry(signatureData, signatureName), signatureData).write();
         }

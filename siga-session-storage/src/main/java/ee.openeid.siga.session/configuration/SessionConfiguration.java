@@ -37,7 +37,7 @@ public class SessionConfiguration {
     }
 
     @Autowired
-    public void setSessionConfigurationProperties(SessionConfigurationProperties sessionConfigurationProperties) {
+    protected void setSessionConfigurationProperties(SessionConfigurationProperties sessionConfigurationProperties) {
         this.sessionConfigurationProperties = sessionConfigurationProperties;
     }
 }

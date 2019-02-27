@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.service.signature.client.SivaClient;
+import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportResponse;
@@ -35,7 +36,8 @@ public class ValidationServiceImplTest {
 
     @Before
     public void setUp() {
-        Mockito.when(sivaClient.validateHashCodeContainer(any())).thenReturn(createValidationConclusion());
+        ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
+        Mockito.when(sivaClient.validateHashCodeContainer(any(), any())).thenReturn(validationConclusion);
     }
 
     @Test
@@ -53,10 +55,4 @@ public class ValidationServiceImplTest {
         return request;
     }
 
-    private ValidationConclusion createValidationConclusion() {
-        ValidationConclusion validationConclusion = new ValidationConclusion();
-        validationConclusion.setValidSignaturesCount(1);
-        validationConclusion.setSignaturesCount(1);
-        return validationConclusion;
-    }
 }

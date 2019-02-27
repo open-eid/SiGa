@@ -13,7 +13,7 @@ import java.util.Optional;
 public abstract class SessionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HashCodeSessionService.class);
 
-    @Autowired
+
     Ignite ignite;
 
     public Session getContainer(String sessionId) {
@@ -28,4 +28,9 @@ public abstract class SessionService {
     }
 
     public abstract Cache<String, Session> getContainerConfigCache();
+
+    @Autowired
+    protected void setIgnite(Ignite ignite) {
+        this.ignite = ignite;
+    }
 }

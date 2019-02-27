@@ -46,10 +46,8 @@ public class HashCodeContainerTest {
         List<SignatureHashCodeDataFile> signatureDataFiles = hashCodeContainer.getSignatures().get(0).getDataFiles();
         Assert.assertEquals(2, signatureDataFiles.size());
         Assert.assertEquals("test.txt", signatureDataFiles.get(0).getFileName());
-        Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", signatureDataFiles.get(0).getHash());
         Assert.assertEquals("SHA256", signatureDataFiles.get(0).getHashAlgo());
         Assert.assertEquals("test1.txt", signatureDataFiles.get(1).getFileName());
-        Assert.assertEquals("MFRF3SBw+Ykk8BdGCEGzlMrxycC8qzbzvjQuST0yk8M=", signatureDataFiles.get(1).getHash());
         Assert.assertEquals("SHA256", signatureDataFiles.get(1).getHashAlgo());
     }
 

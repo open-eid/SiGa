@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.exception.TechnicalException;
 import org.digidoc4j.DigestAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,8 @@ public class HashCodesDataFile {
             dataFiles.forEach(this::addFileEntry);
             dom.appendChild(rootElement);
 
-        } catch (
-                ParserConfigurationException e) {
-            throw new RuntimeException("Error creating hashCodes file", e);
+        } catch (ParserConfigurationException e) {
+            throw new TechnicalException("Error creating hashCodes file");
         }
     }
 

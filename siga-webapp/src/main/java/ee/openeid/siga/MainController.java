@@ -68,12 +68,12 @@ public class MainController {
     }
 
     @Autowired
-    public void setContainerService(HashCodeContainerService containerService) {
+    protected void setContainerService(HashCodeContainerService containerService) {
         this.containerService = containerService;
     }
 
     @Autowired
-    public void setValidationService(ValidationServiceImpl validationService) {
+    protected void setValidationService(ValidationServiceImpl validationService) {
         this.validationService = validationService;
     }
 }

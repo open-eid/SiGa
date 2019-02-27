@@ -32,7 +32,7 @@ public class ValidationServiceImpl implements ValidationService {
     private ValidationConclusion createValidationConclusion(HashCodeContainer hashCodeContainer) {
         List<ValidationConclusion> validationConclusions = new ArrayList<>();
         hashCodeContainer.getSignatures().forEach(signatureWrapper ->
-                validationConclusions.add(sivaClient.validateHashCodeContainer(signatureWrapper)));
+                validationConclusions.add(sivaClient.validateHashCodeContainer(signatureWrapper, hashCodeContainer.getDataFiles())));
         return mergeValidationConclusions(validationConclusions);
     }
 
@@ -61,7 +61,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Autowired
-    public void setSivaClient(SivaClient sivaClient) {
+    protected void setSivaClient(SivaClient sivaClient) {
         this.sivaClient = sivaClient;
     }
 }

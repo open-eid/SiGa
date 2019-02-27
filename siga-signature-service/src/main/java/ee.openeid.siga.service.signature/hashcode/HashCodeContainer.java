@@ -8,8 +8,6 @@ import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
 import eu.europa.esig.dss.MimeType;
-import org.digidoc4j.Configuration;
-import org.digidoc4j.DetachedXadesSignatureBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -71,29 +69,26 @@ public class HashCodeContainer {
                 HashCodesDataFileParser parser = new HashCodesDataFileParser(out.toByteArray());
                 addDataFileEntries(parser.getEntries(), entryName);
             }
-
             zipStream.closeEntry();
         }
     }
 
     private SignatureWrapper createSignatureWrapper(byte[] signature) {
-        DetachedXadesSignatureBuilder signatureBuilder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
 
         SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
-        Map<String, HashCodeDataFileEntry> dataFiles = parser.getEntries();
+        Map<String, String> dataFiles = parser.getEntries();
 
         SignatureWrapper signatureWrapper = new SignatureWrapper();
-        signatureWrapper.setSignature(signatureBuilder.openAdESSignature(signature));
+        signatureWrapper.setSignature(signature);
         addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;
     }
 
-    private void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, HashCodeDataFileEntry> dataFiles) {
-        dataFiles.forEach((fileName, fileEntry) -> {
+    private void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, String> dataFiles) {
+        dataFiles.forEach((fileName, fileHashAlgo) -> {
             SignatureHashCodeDataFile hashCodeDataFile = new SignatureHashCodeDataFile();
             hashCodeDataFile.setFileName(fileName);
-            hashCodeDataFile.setHash(fileEntry.getHash());
-            hashCodeDataFile.setHashAlgo(fileEntry.getHashAlgo());
+            hashCodeDataFile.setHashAlgo(fileHashAlgo);
             wrapper.getDataFiles().add(hashCodeDataFile);
         });
     }

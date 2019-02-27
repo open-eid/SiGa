@@ -1,13 +1,20 @@
 package ee.openeid.siga.service.signature.client;
 
+import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.SignatureHashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import org.digidoc4j.DigestAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -22,29 +29,58 @@ public class SivaClient {
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
 
+    public ValidationConclusion validateHashCodeContainer(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
+        SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
+        ResponseEntity<ValidationResponse> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(configurationProperties.getUrl() + VALIDATION_ENDPOINT,
+                    HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
+            if (responseEntity.getBody() == null) {
+                throw new ClientException("Unable to parse client empty response");
+            }
+        } catch (HttpServerErrorException | HttpClientErrorException e) {
+            throw new ClientException("Unable to get valid response from client");
+        }
 
-    public ValidationConclusion validateHashCodeContainer(SignatureWrapper signatureWrapper) {
-        SivaValidationRequest request = createRequest(signatureWrapper);
-        ResponseEntity<ValidationResponse> responseEntity = restTemplate.exchange(configurationProperties.getUrl() + VALIDATION_ENDPOINT,
-                HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 
-    private SivaValidationRequest createRequest(SignatureWrapper signatureWrapper) {
+    private SivaValidationRequest createRequest(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(SIGNATURE_FILE_NAME);
-        request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature().getAdESSignature())));
+        request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));
 
         List<SivaDataFile> sivaDataFiles = new ArrayList<>();
-        signatureWrapper.getDataFiles().forEach(dataFile -> {
+        dataFiles.forEach(dataFile -> {
+            String hash;
+            String hashAlgorithm = getDataFileHashAlgorithm(signatureWrapper.getDataFiles(), dataFile);
+            if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {
+                hash = dataFile.getFileHashSha256();
+            } else {
+                hash = dataFile.getFileHashSha512();
+            }
             SivaDataFile sivaDataFile = new SivaDataFile();
             sivaDataFile.setFilename(dataFile.getFileName());
-            sivaDataFile.setHash(dataFile.getHash());
-            sivaDataFile.setHashAlgo(dataFile.getHashAlgo());
+            sivaDataFile.setHash(hash);
+            sivaDataFile.setHashAlgo(hashAlgorithm);
             sivaDataFiles.add(sivaDataFile);
         });
         request.setDatafiles(sivaDataFiles);
         return request;
+    }
+
+    private String getDataFileHashAlgorithm(List<SignatureHashCodeDataFile> signatureDataFiles, HashCodeDataFile dataFile) {
+        for (SignatureHashCodeDataFile signatureDataFile : signatureDataFiles) {
+            if (signatureDataFile.getFileName().equals(dataFile.getFileName())) {
+                String hashAlgorithm = signatureDataFile.getHashAlgo();
+                if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {
+                    return hashAlgorithm;
+                } else if (DigestAlgorithm.SHA512.name().equals(hashAlgorithm)) {
+                    return hashAlgorithm;
+                }
+            }
+        }
+        throw new InvalidHashAlgorithmException("Container contains invalid hash algorithms");
     }
 
     private HttpEntity<?> formHttpEntity(Object object) {
@@ -52,12 +88,12 @@ public class SivaClient {
     }
 
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
+    protected void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Autowired
-    public void setConfigurationProperties(SivaConfigurationProperties configurationProperties) {
+    protected void setConfigurationProperties(SivaConfigurationProperties configurationProperties) {
         this.configurationProperties = configurationProperties;
     }
 }

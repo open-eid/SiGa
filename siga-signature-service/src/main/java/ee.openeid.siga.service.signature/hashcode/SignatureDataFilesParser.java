@@ -15,7 +15,7 @@ import java.util.Map;
 public class SignatureDataFilesParser {
 
     private byte[] signature;
-    private LinkedMap<String, HashCodeDataFileEntry> entries = new LinkedMap<>();
+    private LinkedMap<String, String> entries = new LinkedMap<>();
 
 
     public SignatureDataFilesParser(byte[] signature) {
@@ -23,7 +23,7 @@ public class SignatureDataFilesParser {
         loadDataFileEntries();
     }
 
-    public Map<String, HashCodeDataFileEntry> getEntries() {
+    public Map<String, String> getEntries() {
         return entries;
     }
 
@@ -48,22 +48,18 @@ public class SignatureDataFilesParser {
 
     private void addFileEntry(Node child) {
         NamedNodeMap attributes = child.getAttributes();
-        HashCodeDataFileEntry entry = new HashCodeDataFileEntry();
         String fileName = URLDecoder.decode(attributes.getNamedItem("URI").getTextContent(), StandardCharsets.UTF_8);
         validateNotDuplicateFile(fileName);
         child = child.getFirstChild();
-
+        String digestAlgorithm = "";
         while (child != null) {
             String nodeName = child.getLocalName();
             if ("DigestMethod".equals(nodeName)) {
-                entry.setHashAlgo(getDigestAlgorithm(child));
-            } else if ("DigestValue".equals(nodeName)) {
-                String digest = child.getFirstChild().getNodeValue();
-                entry.setHash(digest);
+                digestAlgorithm = getDigestAlgorithm(child);
             }
             child = child.getNextSibling();
         }
-        entries.put(fileName, entry);
+        entries.put(fileName, digestAlgorithm);
     }
 
     private String getDigestAlgorithm(Node child) {

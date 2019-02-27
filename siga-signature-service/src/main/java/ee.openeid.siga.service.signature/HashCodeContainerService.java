@@ -60,7 +60,7 @@ public class HashCodeContainerService implements ContainerService {
     }
 
     @Autowired
-    public void setSessionService(HashCodeSessionService sessionService) {
+    protected void setSessionService(HashCodeSessionService sessionService) {
         this.sessionService = sessionService;
     }
 }

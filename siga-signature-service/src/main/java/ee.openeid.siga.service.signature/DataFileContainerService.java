@@ -35,7 +35,7 @@ public class DataFileContainerService { //implements ContainerService { TODO: up
 //    }
 
     @Autowired
-    public void setSessionService(DataFileSessionService sessionService) {
+    protected void setSessionService(DataFileSessionService sessionService) {
         this.sessionService = sessionService;
     }
 }
