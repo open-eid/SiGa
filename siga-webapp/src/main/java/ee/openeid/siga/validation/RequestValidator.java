@@ -20,6 +20,10 @@ public class RequestValidator {
         validateFileContent(request.getContainer());
     }
 
+    public static void validateContainerId(String containerId) {
+        validateFileName(containerId, "Container name is invalid");
+    }
+
     public static void validateValidationReportRequest(CreateHashCodeValidationReportRequest request) {
         validateFileName(request.getContainerName(), "Container name is invalid");
         validateFileContent(request.getContainer());

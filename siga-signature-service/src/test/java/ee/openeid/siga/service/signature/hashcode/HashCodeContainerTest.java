@@ -16,9 +16,9 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.List;
 
-public class HashCodeContainerTest {
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 
-    private static final String SIGNED_HASHCODE = "hashcode.asice";
+public class HashCodeContainerTest {
 
     @Test
     public void validHashCodeContainerCreation() throws IOException {

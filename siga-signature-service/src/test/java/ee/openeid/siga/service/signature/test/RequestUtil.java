@@ -18,7 +18,7 @@ import java.util.List;
 
 public class RequestUtil {
 
-    private static final String SIGNED_HASHCODE = "hashcode.asice";
+    public static final String SIGNED_HASHCODE = "hashcode.asice";
 
     public static List<ee.openeid.siga.common.HashCodeDataFile> createHashCodeDataFiles() {
         List<ee.openeid.siga.common.HashCodeDataFile> hashCodeDataFiles = new ArrayList<>();

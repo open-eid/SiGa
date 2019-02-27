@@ -11,20 +11,19 @@ import javax.cache.Cache;
 import java.util.Optional;
 
 public abstract class SessionService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HashCodeSessionService.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
     Ignite ignite;
 
-    public Session getContainer(String sessionId) {
-        Session container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
-                .orElseThrow(() -> new ResourceNotFoundException("Session [" + sessionId + "] not found"));
-        LOGGER.info("Found container with session ID [{}]", sessionId);
+    public Session getContainer(String containerId) {
+        Session container = Optional.ofNullable(getContainerConfigCache().get(containerId))
+                .orElseThrow(() -> new ResourceNotFoundException("Session [" + containerId + "] not found"));
+        LOGGER.info("Found container with container ID [{}]", containerId);
         return container;
     }
 
-    public void update(String sessionId, Session session) {
-        getContainerConfigCache().put(sessionId, session);
+    public void update(String containerId, Session session) {
+        getContainerConfigCache().put(containerId, session);
     }
 
     public abstract Cache<String, Session> getContainerConfigCache();

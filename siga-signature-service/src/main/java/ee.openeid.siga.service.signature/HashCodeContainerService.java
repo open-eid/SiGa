@@ -16,9 +16,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Base64;
 
 @Service
-public class HashCodeContainerService implements ContainerService {
+public class HashCodeContainerService {
 
     private HashCodeSessionService sessionService;
 
@@ -38,11 +39,10 @@ public class HashCodeContainerService implements ContainerService {
         return response;
     }
 
-    @Override
     public UploadHashCodeContainerResponse uploadContainer(UploadHashCodeContainerRequest request) {
         String sessionId = SessionIdGenerator.generateSessionId();
         HashCodeContainer hashCodeContainer = new HashCodeContainer();
-        InputStream inputStream = new ByteArrayInputStream(request.getContainer().getBytes());
+        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(request.getContainer().getBytes()));
         hashCodeContainer.open(inputStream);
         sessionService.update(sessionId, transformContainerToSession(hashCodeContainer, request.getContainerName()));
 
