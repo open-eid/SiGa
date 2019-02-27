@@ -1,14 +1,13 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
+import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.HashCodeSessionService;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerResponse;
-import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.UploadHashCodeContainerResponse;
+import ee.openeid.siga.webapp.json.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +50,28 @@ public class HashCodeContainerService {
         return response;
     }
 
+    public GetHashCodeContainerResponse getContainer(String containerId) {
+        Session session = sessionService.getContainer(containerId);
+        if (session instanceof HashCodeContainerSessionHolder) {
+            HashCodeContainerSessionHolder sessionHolder = (HashCodeContainerSessionHolder) session;
+
+            HashCodeContainer hashCodeContainer = new HashCodeContainer();
+            sessionHolder.getSignatures().forEach(signatureWrapper -> hashCodeContainer.getSignatures().add(signatureWrapper));
+            sessionHolder.getDataFiles().forEach(dataFile -> hashCodeContainer.getDataFiles().add(dataFile));
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            hashCodeContainer.save(outputStream);
+            byte[] container = outputStream.toByteArray();
+
+            GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
+            response.setContainer(new String(Base64.getEncoder().encode(container)));
+            response.setContainerName(sessionHolder.getContainerName());
+            return response;
+        }
+        throw new TechnicalException("Unable to parse session");
+    }
+
+
     private HashCodeContainerSessionHolder transformContainerToSession(HashCodeContainer container, String containerName) {
         return HashCodeContainerSessionHolder.builder()
                 .containerName(containerName)
@@ -63,4 +84,6 @@ public class HashCodeContainerService {
     protected void setSessionService(HashCodeSessionService sessionService) {
         this.sessionService = sessionService;
     }
+
+
 }

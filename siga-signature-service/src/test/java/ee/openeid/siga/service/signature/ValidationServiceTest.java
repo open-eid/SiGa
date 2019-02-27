@@ -1,6 +1,5 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
@@ -23,8 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Base64;
-import java.util.Collections;
 
+import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -44,7 +43,7 @@ public class ValidationServiceTest {
     public void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
         Mockito.when(sivaClient.validateHashCodeContainer(any(), any())).thenReturn(validationConclusion);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(createSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
     }
 
     @Test
@@ -66,15 +65,8 @@ public class ValidationServiceTest {
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         CreateHashCodeValidationReportRequest request = new CreateHashCodeValidationReportRequest();
         request.setContainer(new String(Base64.getEncoder().encode(IOUtils.toByteArray(inputStream))));
-        request.setContainerName("asice.asice");
+        request.setContainerName(CONTAINER_NAME);
         return request;
-    }
-
-    private HashCodeContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
-        return HashCodeContainerSessionHolder.builder()
-                .containerName("asice.asice")
-                .signatures(Collections.singletonList(RequestUtil.createSignatureWrapper()))
-                .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
     }
 
 }

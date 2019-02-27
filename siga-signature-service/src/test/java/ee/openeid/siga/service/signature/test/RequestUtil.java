@@ -2,29 +2,30 @@ package ee.openeid.siga.service.signature.test;
 
 import ee.openeid.siga.common.SignatureHashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 public class RequestUtil {
 
     public static final String SIGNED_HASHCODE = "hashcode.asice";
+    public static final String CONTAINER_NAME = "asice.asice";
 
     public static List<ee.openeid.siga.common.HashCodeDataFile> createHashCodeDataFiles() {
         List<ee.openeid.siga.common.HashCodeDataFile> hashCodeDataFiles = new ArrayList<>();
         ee.openeid.siga.common.HashCodeDataFile dataFile = new ee.openeid.siga.common.HashCodeDataFile();
         dataFile.setFileName("test.txt");
         dataFile.setFileHashSha256("asdjaosdjasp=");
+        dataFile.setFileSize(10);
         dataFile.setFileHashSha512("asdjaosdasdasdasdasdsdadjasp=");
         hashCodeDataFiles.add(dataFile);
         return hashCodeDataFiles;
@@ -32,8 +33,7 @@ public class RequestUtil {
 
     public static SignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
         SignatureWrapper signatureWrapper = new SignatureWrapper();
-        InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
-        signatureWrapper.setSignature(Base64.getEncoder().encode(IOUtils.toByteArray(inputStream)));
+        signatureWrapper.setSignature("asdasdsas=".getBytes());
         List<SignatureHashCodeDataFile> signatureDataFiles = new ArrayList<>();
         SignatureHashCodeDataFile dataFile = new SignatureHashCodeDataFile();
         dataFile.setFileName("test.txt");
@@ -57,7 +57,7 @@ public class RequestUtil {
 
     public static CreateHashCodeContainerRequest getHashCodeCreateContainerRequest() {
         CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
-        request.setContainerName("test.asice");
+        request.setContainerName(CONTAINER_NAME);
         HashCodeDataFile dataFile1 = new HashCodeDataFile();
         dataFile1.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile1.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
@@ -73,5 +73,11 @@ public class RequestUtil {
         return request;
     }
 
+    public static HashCodeContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
+        return HashCodeContainerSessionHolder.builder()
+                .containerName(CONTAINER_NAME)
+                .signatures(Collections.singletonList(RequestUtil.createSignatureWrapper()))
+                .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
+    }
 
 }
