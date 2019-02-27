@@ -1,10 +1,10 @@
 package ee.openeid.siga.service.signature.test;
 
-import ee.openeid.siga.common.SignatureHashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
+import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -32,16 +32,10 @@ public class RequestUtil {
     }
 
     public static SignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
-        SignatureWrapper signatureWrapper = new SignatureWrapper();
-        signatureWrapper.setSignature("asdasdsas=".getBytes());
-        List<SignatureHashCodeDataFile> signatureDataFiles = new ArrayList<>();
-        SignatureHashCodeDataFile dataFile = new SignatureHashCodeDataFile();
-        dataFile.setFileName("test.txt");
-        dataFile.setHashAlgo("SHA256");
-        signatureDataFiles.add(dataFile);
 
-        signatureWrapper.setDataFiles(signatureDataFiles);
-        return signatureWrapper;
+        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        hashCodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
+        return hashCodeContainer.getSignatures().get(0);
     }
 
     public static ValidationResponse createValidationResponse() {

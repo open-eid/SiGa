@@ -28,10 +28,10 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ValidationServiceTest {
+public class ContainerValidationServiceTest {
 
     @InjectMocks
-    private ValidationService validationService;
+    private ContainerValidationService validationService;
 
     @Mock
     private SivaClient sivaClient;

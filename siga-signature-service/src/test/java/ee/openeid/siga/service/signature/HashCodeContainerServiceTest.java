@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 @RunWith(MockitoJUnitRunner.class)
 public class HashCodeContainerServiceTest {
 
+    public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
+
     @InjectMocks
     HashCodeContainerService containerService;
 
@@ -50,9 +52,18 @@ public class HashCodeContainerServiceTest {
     @Test
     public void successfulGetContainer() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
-        GetHashCodeContainerResponse container = containerService.getContainer("23423423-234234234-324234-4234");
+        GetHashCodeContainerResponse container = containerService.getContainer(CONTAINER_ID);
         Assert.assertFalse(container.getContainer().isBlank());
         Assert.assertEquals(CONTAINER_NAME, container.getContainerName());
+    }
+
+    @Test
+    public void successfulGetSignatures() throws IOException, URISyntaxException {
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
+        GetHashCodeSignaturesResponse response = containerService.getSignatures(CONTAINER_ID);
+        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", response.getSignatures().get(0).getId());
+        Assert.assertEquals("LT", response.getSignatures().get(0).getSignatureProfile());
+        Assert.assertEquals("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE", response.getSignatures().get(0).getSignerInfo());
     }
 
 }

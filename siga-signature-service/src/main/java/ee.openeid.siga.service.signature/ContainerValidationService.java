@@ -3,12 +3,11 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.HashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
-import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
 import ee.openeid.siga.session.HashCodeSessionService;
+import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportResponse;
 import ee.openeid.siga.webapp.json.GetHashCodeValidationReportResponse;
@@ -22,7 +21,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
-public class ValidationService {
+public class ContainerValidationService extends ContainerService {
 
     private SivaClient sivaClient;
     private HashCodeSessionService sessionService;
@@ -37,15 +36,11 @@ public class ValidationService {
     }
 
     public GetHashCodeValidationReportResponse validateExistingContainer(String containerId) {
-        Session session = sessionService.getContainer(containerId);
-        if (session instanceof HashCodeContainerSessionHolder) {
-            HashCodeContainerSessionHolder sessionHolder = (HashCodeContainerSessionHolder) session;
-            ValidationConclusion validationConclusion = createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
-            GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
-            response.setValidationConclusion(validationConclusion);
-            return response;
-        }
-        throw new TechnicalException("Unable to parse session");
+        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
+        ValidationConclusion validationConclusion = createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
+        GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
+        response.setValidationConclusion(validationConclusion);
+        return response;
     }
 
     private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashCodeDataFile> dataFiles) {
@@ -87,5 +82,10 @@ public class ValidationService {
     @Autowired
     protected void setSessionService(HashCodeSessionService sessionService) {
         this.sessionService = sessionService;
+    }
+
+    @Override
+    SessionService getSessionService() {
+        return sessionService;
     }
 }

@@ -1,7 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.service.signature.HashCodeContainerService;
-import ee.openeid.siga.service.signature.ValidationService;
+import ee.openeid.siga.service.signature.ContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class MainController {
 
     private HashCodeContainerService containerService;
-    private ValidationService validationService;
+    private ContainerValidationService validationService;
 
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeContainerResponse createContainer(@RequestBody CreateHashCodeContainerRequest createContainerRequest) {
@@ -60,7 +60,8 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
-        return null;
+        RequestValidator.validateContainerId(containerId);
+        return containerService.getSignatures(containerId);
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
@@ -80,7 +81,7 @@ public class MainController {
     }
 
     @Autowired
-    protected void setValidationService(ValidationService validationService) {
+    protected void setValidationService(ContainerValidationService validationService) {
         this.validationService = validationService;
     }
 }

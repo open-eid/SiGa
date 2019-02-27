@@ -1,11 +1,12 @@
 package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.session.DataFileSessionService;
+import ee.openeid.siga.session.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataFileContainerService { //implements ContainerService { TODO: update wadl/implementation
+public class DataFileContainerService extends ContainerService{ //implements ContainerService { TODO: update wadl/implementation
 
     private DataFileSessionService sessionService;
 //
@@ -37,5 +38,10 @@ public class DataFileContainerService { //implements ContainerService { TODO: up
     @Autowired
     protected void setSessionService(DataFileSessionService sessionService) {
         this.sessionService = sessionService;
+    }
+
+    @Override
+    SessionService getSessionService() {
+        return sessionService;
     }
 }

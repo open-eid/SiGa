@@ -1,13 +1,15 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
-import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.HashCodeSessionService;
+import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +17,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Service
-public class HashCodeContainerService {
+public class HashCodeContainerService extends ContainerService {
 
     private HashCodeSessionService sessionService;
 
@@ -51,26 +55,43 @@ public class HashCodeContainerService {
     }
 
     public GetHashCodeContainerResponse getContainer(String containerId) {
-        Session session = sessionService.getContainer(containerId);
-        if (session instanceof HashCodeContainerSessionHolder) {
-            HashCodeContainerSessionHolder sessionHolder = (HashCodeContainerSessionHolder) session;
+        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
 
-            HashCodeContainer hashCodeContainer = new HashCodeContainer();
-            sessionHolder.getSignatures().forEach(signatureWrapper -> hashCodeContainer.getSignatures().add(signatureWrapper));
-            sessionHolder.getDataFiles().forEach(dataFile -> hashCodeContainer.getDataFiles().add(dataFile));
+        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        sessionHolder.getSignatures().forEach(signatureWrapper -> hashCodeContainer.getSignatures().add(signatureWrapper));
+        sessionHolder.getDataFiles().forEach(dataFile -> hashCodeContainer.getDataFiles().add(dataFile));
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            hashCodeContainer.save(outputStream);
-            byte[] container = outputStream.toByteArray();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        hashCodeContainer.save(outputStream);
+        byte[] container = outputStream.toByteArray();
 
-            GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
-            response.setContainer(new String(Base64.getEncoder().encode(container)));
-            response.setContainerName(sessionHolder.getContainerName());
-            return response;
-        }
-        throw new TechnicalException("Unable to parse session");
+        GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
+        response.setContainer(new String(Base64.getEncoder().encode(container)));
+        response.setContainerName(sessionHolder.getContainerName());
+        return response;
     }
 
+    public GetHashCodeSignaturesResponse getSignatures(String containerId) {
+        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
+        List<Signature> signatures = new ArrayList<>();
+        sessionHolder.getSignatures().forEach(signatureWrapper -> {
+            signatures.add(transformSignature(signatureWrapper));
+        });
+        GetHashCodeSignaturesResponse response = new GetHashCodeSignaturesResponse();
+        response.getSignatures().addAll(signatures);
+        return response;
+
+    }
+
+    private Signature transformSignature(SignatureWrapper signatureWrapper) {
+        Signature signature = new Signature();
+        DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
+        org.digidoc4j.Signature dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
+        signature.setId(dd4jSignature.getId());
+        signature.setSignatureProfile(dd4jSignature.getProfile().name());
+        signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
+        return signature;
+    }
 
     private HashCodeContainerSessionHolder transformContainerToSession(HashCodeContainer container, String containerName) {
         return HashCodeContainerSessionHolder.builder()
@@ -86,4 +107,8 @@ public class HashCodeContainerService {
     }
 
 
+    @Override
+    SessionService getSessionService() {
+        return sessionService;
+    }
 }
