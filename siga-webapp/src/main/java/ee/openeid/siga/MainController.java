@@ -21,8 +21,8 @@ public class MainController {
         List<HashCodeDataFile> dataFiles = createContainerRequest.getDataFiles();
         RequestValidator.validateHashCodeDataFiles(dataFiles);
 
-        CreateHashCodeContainerResponse response = new CreateHashCodeContainerResponse();
         String sessionId = containerService.createContainer(dataFiles);
+        CreateHashCodeContainerResponse response = new CreateHashCodeContainerResponse();
         response.setContainerId(sessionId);
         return response;
     }
@@ -32,8 +32,8 @@ public class MainController {
         String container = uploadContainerRequest.getContainer();
         RequestValidator.validateFileContent(container);
 
-        UploadHashCodeContainerResponse response = new UploadHashCodeContainerResponse();
         String sessionId = containerService.uploadContainer(container);
+        UploadHashCodeContainerResponse response = new UploadHashCodeContainerResponse();
         response.setContainerId(sessionId);
         return response;
     }
@@ -43,8 +43,8 @@ public class MainController {
         String container = validationReportRequest.getContainer();
         RequestValidator.validateFileContent(container);
 
-        CreateHashCodeValidationReportResponse response = new CreateHashCodeValidationReportResponse();
         ValidationConclusion validationConclusion = validationService.validateContainer(container);
+        CreateHashCodeValidationReportResponse response = new CreateHashCodeValidationReportResponse();
         response.setValidationConclusion(validationConclusion);
         return response;
     }
@@ -53,8 +53,8 @@ public class MainController {
     public GetHashCodeValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
         ValidationConclusion validationConclusion = validationService.validateExistingContainer(containerId);
+        GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
         response.setValidationConclusion(validationConclusion);
         return response;
     }
@@ -82,8 +82,9 @@ public class MainController {
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        GetHashCodeSignaturesResponse response = new GetHashCodeSignaturesResponse();
+
         List<Signature> signatures = containerService.getSignatures(containerId);
+        GetHashCodeSignaturesResponse response = new GetHashCodeSignaturesResponse();
         response.getSignatures().addAll(signatures);
         return response;
     }
@@ -91,15 +92,20 @@ public class MainController {
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
+
         String container = containerService.getContainer(containerId);
+        GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
         response.setContainer(container);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public DeleteHashCodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
-        return null;
+        RequestValidator.validateContainerId(containerId);
+        String result = containerService.closeSession(containerId);
+        DeleteHashCodeContainerResponse response = new DeleteHashCodeContainerResponse();
+        response.setResult(result);
+        return response;
     }
 
     @Autowired

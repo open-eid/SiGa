@@ -5,6 +5,7 @@ import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
+import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
@@ -63,6 +64,12 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return new String(Base64.getEncoder().encode(container));
     }
 
+
+    public String closeSession(String containerId) {
+        sessionService.remove(containerId);
+        return SessionResult.OK.name();
+    }
+
     public List<Signature> getSignatures(String containerId) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         List<Signature> signatures = new ArrayList<>();
@@ -98,4 +105,5 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     public SessionService getSessionService() {
         return sessionService;
     }
+
 }

@@ -28,6 +28,10 @@ public class SessionService {
         getContainerConfigCache().put(containerId, session);
     }
 
+    public void remove(String containerId) {
+        getContainerConfigCache().remove(containerId);
+    }
+
     public Cache<String, Session> getContainerConfigCache() {
         return ignite.getOrCreateCache(CacheName.CONTAINER.name());
     }

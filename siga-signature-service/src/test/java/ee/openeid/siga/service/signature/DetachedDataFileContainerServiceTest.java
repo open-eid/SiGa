@@ -2,6 +2,7 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
+import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.Signature;
@@ -61,6 +62,12 @@ public class DetachedDataFileContainerServiceTest {
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatures.get(0).getId());
         Assert.assertEquals("LT", signatures.get(0).getSignatureProfile());
         Assert.assertEquals("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE", signatures.get(0).getSignerInfo());
+    }
+
+    @Test
+    public void successfulCloseSession() {
+        String result = containerService.closeSession(CONTAINER_ID);
+        Assert.assertEquals(SessionResult.OK.name(), result);
     }
 
 }
