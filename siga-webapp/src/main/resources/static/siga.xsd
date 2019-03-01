@@ -29,7 +29,6 @@
 
     <xs:complexType name="createHashCodeContainerRequest">
         <xs:sequence>
-            <xs:element name="containerName" type="xs:string"/>
             <xs:element name="dataFiles" type="tns:hashCodeDataFile" nillable="true" maxOccurs="unbounded"
                         minOccurs="0"/>
         </xs:sequence>
@@ -37,9 +36,9 @@
     <xs:complexType name="hashCodeDataFile">
         <xs:sequence>
             <xs:element name="fileName" type="xs:string"/>
-            <xs:element name="fileHashSha256" type="xs:string" minOccurs="0"/>
-            <xs:element name="fileHashSha512" type="xs:string" minOccurs="0"/>
-            <xs:element name="fileSize" type="xs:int" minOccurs="0"/>
+            <xs:element name="fileHashSha256" type="xs:string"/>
+            <xs:element name="fileHashSha512" type="xs:string"/>
+            <xs:element name="fileSize" type="xs:int"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createHashCodeContainerResponse">
@@ -50,7 +49,6 @@
     <xs:complexType name="uploadHashCodeContainerRequest">
         <xs:sequence>
             <xs:element name="container" type="xs:string"/>
-            <xs:element name="containerName" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="uploadHashCodeContainerResponse">
@@ -60,7 +58,6 @@
     </xs:complexType>
     <xs:complexType name="createHashCodeValidationReportRequest">
         <xs:sequence>
-            <xs:element name="containerName" type="xs:string"/>
             <xs:element name="container" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
@@ -133,7 +130,6 @@
     </xs:complexType>
     <xs:complexType name="getHashCodeContainerResponse">
         <xs:sequence>
-            <xs:element name="containerName" type="xs:string"/>
             <xs:element name="container" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>

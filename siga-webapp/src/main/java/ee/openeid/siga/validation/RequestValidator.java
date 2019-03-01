@@ -1,32 +1,28 @@
 package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.exception.InvalidRequestException;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
-import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 public class RequestValidator {
 
-    public static void validateCreateContainerRequest(CreateHashCodeContainerRequest request) {
-        validateFileName(request.getContainerName(), "Container name is invalid");
-        request.getDataFiles().forEach(dataFile -> validateHashCodeDataFile(dataFile));
-    }
-
-    public static void validateUploadContainerRequest(UploadHashCodeContainerRequest request) {
-        validateFileName(request.getContainerName(), "Container name is invalid");
-        validateFileContent(request.getContainer());
+    public static void validateHashCodeDataFiles(List<HashCodeDataFile> dataFiles) {
+        dataFiles.forEach(RequestValidator::validateHashCodeDataFile);
     }
 
     public static void validateContainerId(String containerId) {
-        validateFileName(containerId, "Container name is invalid");
+        if (StringUtils.isBlank(containerId) || containerId.length() > 36) {
+            throw new InvalidRequestException("Container Id is invalid");
+        }
     }
 
-    public static void validateValidationReportRequest(CreateHashCodeValidationReportRequest request) {
-        validateFileName(request.getContainerName(), "Container name is invalid");
-        validateFileContent(request.getContainer());
+    public static void validateFileContent(String content) {
+        if (StringUtils.isBlank(content) || !isBase64StringEncoded(content)) {
+            throw new InvalidRequestException("File content is invalid");
+        }
     }
 
     private static void validateFileName(String fileName, String errorMessage) {
@@ -40,12 +36,6 @@ public class RequestValidator {
         validateFileSize(dataFile.getFileSize());
         validateHash(dataFile.getFileHashSha256());
         validateHash(dataFile.getFileHashSha512());
-    }
-
-    private static void validateFileContent(String content) {
-        if (StringUtils.isBlank(content) || !isBase64StringEncoded(content)) {
-            throw new InvalidRequestException("File content is invalid");
-        }
     }
 
     private static void validateHash(String hash) {

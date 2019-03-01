@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static ee.openeid.siga.service.signature.hashcode.HashCodeContainerCreator.SIGNATURE_FILE_PREFIX;
+import static ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainerCreator.SIGNATURE_FILE_PREFIX;
 
-public class HashCodeContainer {
+public class DetachedDataFileContainer {
 
     private List<HashCodeDataFile> dataFiles = new ArrayList<>();
     private List<SignatureWrapper> signatures = new ArrayList<>();
@@ -46,7 +46,7 @@ public class HashCodeContainer {
     }
 
     private void createHashCodeContainer(OutputStream outputStream) {
-        HashCodeContainerCreator hashCodeContainerCreator = new HashCodeContainerCreator(outputStream);
+        DetachedDataFileContainerCreator hashCodeContainerCreator = new DetachedDataFileContainerCreator(outputStream);
         hashCodeContainerCreator.writeMimeType();
         hashCodeContainerCreator.writeManifest(convertDataFiles());
         hashCodeContainerCreator.writeHashCodeFiles(dataFiles);

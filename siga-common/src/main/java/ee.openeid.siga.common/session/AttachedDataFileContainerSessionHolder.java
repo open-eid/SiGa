@@ -7,7 +7,7 @@ import org.digidoc4j.Container;
 
 @Data
 @AllArgsConstructor
-public class DataFileContainerSessionHolder implements Session {
+public class AttachedDataFileContainerSessionHolder implements Session {
     private String containerName;
     private Container container;
 }

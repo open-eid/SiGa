@@ -1,13 +1,13 @@
 package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
-import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
+import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
-import ee.openeid.siga.session.HashCodeSessionService;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.HashCodeDataFile;
+import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,42 +22,37 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
-public class HashCodeContainerService extends ContainerService {
+public class DetachedDataFileContainerService implements DetachedDataFileSessionHolder {
 
-    private HashCodeSessionService sessionService;
+    private SessionService sessionService;
 
-    public CreateHashCodeContainerResponse createContainer(CreateHashCodeContainerRequest request) {
+    public String createContainer(List<HashCodeDataFile> dataFiles) {
 
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
-        request.getDataFiles().forEach(dataFile ->
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
+        dataFiles.forEach(dataFile ->
                 hashCodeContainer.addDataFile(ContainerUtil.transformDataFileToHashCodeDataFile(dataFile))
         );
         OutputStream outputStream = new ByteArrayOutputStream();
         hashCodeContainer.save(outputStream);
 
         String sessionId = SessionIdGenerator.generateSessionId();
-        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer, request.getContainerName()));
-        CreateHashCodeContainerResponse response = new CreateHashCodeContainerResponse();
-        response.setContainerId(sessionId);
-        return response;
+        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer));
+        return sessionId;
     }
 
-    public UploadHashCodeContainerResponse uploadContainer(UploadHashCodeContainerRequest request) {
+    public String uploadContainer(String container) {
         String sessionId = SessionIdGenerator.generateSessionId();
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
-        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(request.getContainer().getBytes()));
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
+        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
         hashCodeContainer.open(inputStream);
-        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer, request.getContainerName()));
-
-        UploadHashCodeContainerResponse response = new UploadHashCodeContainerResponse();
-        response.setContainerId(sessionId);
-        return response;
+        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer));
+        return sessionId;
     }
 
-    public GetHashCodeContainerResponse getContainer(String containerId) {
-        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
+    public String getContainer(String containerId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
 
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         sessionHolder.getSignatures().forEach(signatureWrapper -> hashCodeContainer.getSignatures().add(signatureWrapper));
         sessionHolder.getDataFiles().forEach(dataFile -> hashCodeContainer.getDataFiles().add(dataFile));
 
@@ -65,22 +60,16 @@ public class HashCodeContainerService extends ContainerService {
         hashCodeContainer.save(outputStream);
         byte[] container = outputStream.toByteArray();
 
-        GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
-        response.setContainer(new String(Base64.getEncoder().encode(container)));
-        response.setContainerName(sessionHolder.getContainerName());
-        return response;
+        return new String(Base64.getEncoder().encode(container));
     }
 
-    public GetHashCodeSignaturesResponse getSignatures(String containerId) {
-        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
+    public List<Signature> getSignatures(String containerId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         List<Signature> signatures = new ArrayList<>();
         sessionHolder.getSignatures().forEach(signatureWrapper -> {
             signatures.add(transformSignature(signatureWrapper));
         });
-        GetHashCodeSignaturesResponse response = new GetHashCodeSignaturesResponse();
-        response.getSignatures().addAll(signatures);
-        return response;
-
+        return signatures;
     }
 
     private Signature transformSignature(SignatureWrapper signatureWrapper) {
@@ -93,22 +82,20 @@ public class HashCodeContainerService extends ContainerService {
         return signature;
     }
 
-    private HashCodeContainerSessionHolder transformContainerToSession(HashCodeContainer container, String containerName) {
-        return HashCodeContainerSessionHolder.builder()
-                .containerName(containerName)
+    private DetachedDataFileContainerSessionHolder transformContainerToSession(DetachedDataFileContainer container) {
+        return DetachedDataFileContainerSessionHolder.builder()
                 .dataFiles(container.getDataFiles())
                 .signatures(container.getSignatures())
                 .build();
     }
 
     @Autowired
-    protected void setSessionService(HashCodeSessionService sessionService) {
+    protected void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
 
-
     @Override
-    SessionService getSessionService() {
+    public SessionService getSessionService() {
         return sessionService;
     }
 }

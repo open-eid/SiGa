@@ -1,10 +1,10 @@
 package ee.openeid.siga.service.signature.test;
 
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
+import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
-import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
+import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -33,7 +33,7 @@ public class RequestUtil {
 
     public static SignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
 
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         hashCodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
         return hashCodeContainer.getSignatures().get(0);
     }
@@ -51,7 +51,6 @@ public class RequestUtil {
 
     public static CreateHashCodeContainerRequest getHashCodeCreateContainerRequest() {
         CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
-        request.setContainerName(CONTAINER_NAME);
         HashCodeDataFile dataFile1 = new HashCodeDataFile();
         dataFile1.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile1.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
@@ -67,9 +66,8 @@ public class RequestUtil {
         return request;
     }
 
-    public static HashCodeContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
-        return HashCodeContainerSessionHolder.builder()
-                .containerName(CONTAINER_NAME)
+    public static DetachedDataFileContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
+        return DetachedDataFileContainerSessionHolder.builder()
                 .signatures(Collections.singletonList(RequestUtil.createSignatureWrapper()))
                 .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
     }

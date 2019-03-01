@@ -1,14 +1,13 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.session.DataFileSessionService;
 import ee.openeid.siga.session.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataFileContainerService extends ContainerService{ //implements ContainerService { TODO: update wadl/implementation
+public class AttachedDataFileContainerService { //implements ContainerService { TODO: update wadl/implementation
 
-    private DataFileSessionService sessionService;
+    private SessionService sessionService;
 //
 //    @Override
 //    public CreateDataFileContainerResponse createContainer(CreateHashCodeContainerRequest request) {
@@ -36,12 +35,8 @@ public class DataFileContainerService extends ContainerService{ //implements Con
 //    }
 
     @Autowired
-    protected void setSessionService(DataFileSessionService sessionService) {
+    protected void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
 
-    @Override
-    SessionService getSessionService() {
-        return sessionService;
-    }
 }

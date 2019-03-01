@@ -2,9 +2,7 @@ package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
-import ee.openeid.siga.webapp.json.UploadHashCodeContainerRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,84 +10,40 @@ import org.junit.rules.ExpectedException;
 
 public class RequestValidatorTest {
 
+    public static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
+
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
     public void successfulCreateContainerHashCodeRequest() {
-        RequestValidator.validateCreateContainerRequest(getCreateHashCodeContainerRequest());
+        RequestValidator.validateHashCodeDataFiles(getCreateHashCodeContainerRequest().getDataFiles());
     }
 
     @Test
-    public void successfulUploadContainerRequest() {
-        RequestValidator.validateUploadContainerRequest(getUploadContainerRequest());
+    public void successfulFileContent() {
+        RequestValidator.validateFileContent(CONTENT);
     }
 
     @Test
-    public void successfulValidationReportRequest() {
-        RequestValidator.validateValidationReportRequest(getValidationReportRequest());
-    }
-
-    @Test
-    public void uploadContainer_ContainerNameEmpty() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Container name is invalid");
-        UploadHashCodeContainerRequest request = getUploadContainerRequest();
-        request.setContainerName("");
-        RequestValidator.validateUploadContainerRequest(request);
-    }
-
-    @Test
-    public void uploadContainer_ContainerNameTooLong() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Container name is invalid");
-        UploadHashCodeContainerRequest request = getUploadContainerRequest();
-        request.setContainerName(StringUtils.repeat("a", 270));
-        RequestValidator.validateUploadContainerRequest(request);
-    }
-
-    @Test
-    public void uploadContainer_ContainerContentEmpty() {
+    public void containerContentEmpty() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("File content is invalid");
-        UploadHashCodeContainerRequest request = getUploadContainerRequest();
-        request.setContainer("");
-        RequestValidator.validateUploadContainerRequest(request);
+        RequestValidator.validateFileContent("");
     }
 
     @Test
-    public void uploadContainer_ContainerContentNotBase64() {
+    public void containerContentNotBase64() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("File content is invalid");
-        UploadHashCodeContainerRequest request = getUploadContainerRequest();
-        request.setContainer("?&%");
-        RequestValidator.validateUploadContainerRequest(request);
-    }
-
-
-    @Test
-    public void createContainer_ContainerNameEmpty() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Container name is invalid");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
-        request.setContainerName("");
-        RequestValidator.validateCreateContainerRequest(request);
-    }
-
-    @Test
-    public void createContainer_ContainerNameTooLong() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Container name is invalid");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
-        request.setContainerName(StringUtils.repeat("a", 270));
-        RequestValidator.validateCreateContainerRequest(request);
+        RequestValidator.validateFileContent("?&%");
     }
 
     @Test
     public void createContainer_NoDataFiles() {
         CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
         request.getDataFiles().clear();
-        RequestValidator.validateCreateContainerRequest(request);
+        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
     }
 
     @Test
@@ -99,7 +53,7 @@ public class RequestValidatorTest {
         CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new HashCodeDataFile());
-        RequestValidator.validateCreateContainerRequest(request);
+        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
     }
 
     @Test
@@ -108,7 +62,7 @@ public class RequestValidatorTest {
         exceptionRule.expectMessage("File hash is invalid");
         CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
-        RequestValidator.validateCreateContainerRequest(request);
+        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
     }
 
     @Test
@@ -117,27 +71,32 @@ public class RequestValidatorTest {
         exceptionRule.expectMessage("File hash is invalid");
         CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
-        RequestValidator.validateCreateContainerRequest(request);
+        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
     }
 
-    public static UploadHashCodeContainerRequest getUploadContainerRequest() {
-        UploadHashCodeContainerRequest request = new UploadHashCodeContainerRequest();
-        request.setContainerName("test.asice");
-        request.setContainer("dGVzdCBmaWxlIGNvbnRlbnQ=");
-        return request;
+    @Test
+    public void containerIdIsNull() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Container Id is invalid");
+        RequestValidator.validateContainerId(null);
     }
 
-    public static CreateHashCodeValidationReportRequest getValidationReportRequest() {
-        CreateHashCodeValidationReportRequest request = new CreateHashCodeValidationReportRequest();
-        request.setContainerName("test.asice");
-        request.setContainer("dGVzdCBmaWxlIGNvbnRlbnQ=");
-        return request;
+    @Test
+    public void containerIdIsEmpty() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Container Id is invalid");
+        RequestValidator.validateContainerId("");
     }
 
+    @Test
+    public void containerIdIsTooLong() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Container Id is invalid");
+        RequestValidator.validateContainerId(StringUtils.repeat("a", 37));
+    }
 
     public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {
         CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
-        request.setContainerName("test.asice");
         HashCodeDataFile dataFile = new HashCodeDataFile();
         dataFile.setFileName("first datafile.txt");
         dataFile.setFileSize(6);

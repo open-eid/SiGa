@@ -16,14 +16,14 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class HashCodeContainerCreator {
+public class DetachedDataFileContainerCreator {
 
     private final ZipOutputStream zipOutputStream;
     private static final String ZIP_ENTRY_MIMETYPE = "mimetype";
     public static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
     private static final String SIGNATURE_FILE_EXTENSION = ".xml";
 
-    public HashCodeContainerCreator(OutputStream outputStream) {
+    public DetachedDataFileContainerCreator(OutputStream outputStream) {
         this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
     }
 

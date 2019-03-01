@@ -1,41 +1,62 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.service.signature.HashCodeContainerService;
-import ee.openeid.siga.service.signature.ContainerValidationService;
+import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
+import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class MainController {
 
-    private HashCodeContainerService containerService;
-    private ContainerValidationService validationService;
+    private DetachedDataFileContainerService containerService;
+    private DetachedDataFileContainerValidationService validationService;
 
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeContainerResponse createContainer(@RequestBody CreateHashCodeContainerRequest createContainerRequest) {
-        RequestValidator.validateCreateContainerRequest(createContainerRequest);
-        return containerService.createContainer(createContainerRequest);
+        List<HashCodeDataFile> dataFiles = createContainerRequest.getDataFiles();
+        RequestValidator.validateHashCodeDataFiles(dataFiles);
+
+        CreateHashCodeContainerResponse response = new CreateHashCodeContainerResponse();
+        String sessionId = containerService.createContainer(dataFiles);
+        response.setContainerId(sessionId);
+        return response;
     }
 
     @RequestMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public UploadHashCodeContainerResponse uploadContainer(@RequestBody UploadHashCodeContainerRequest uploadContainerRequest) {
-        RequestValidator.validateUploadContainerRequest(uploadContainerRequest);
-        return containerService.uploadContainer(uploadContainerRequest);
+        String container = uploadContainerRequest.getContainer();
+        RequestValidator.validateFileContent(container);
+
+        UploadHashCodeContainerResponse response = new UploadHashCodeContainerResponse();
+        String sessionId = containerService.uploadContainer(container);
+        response.setContainerId(sessionId);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeValidationReportResponse validateContainer(@RequestBody CreateHashCodeValidationReportRequest validationReportRequest) {
-        RequestValidator.validateValidationReportRequest(validationReportRequest);
-        return validationService.validateContainer(validationReportRequest);
+        String container = validationReportRequest.getContainer();
+        RequestValidator.validateFileContent(container);
+
+        CreateHashCodeValidationReportResponse response = new CreateHashCodeValidationReportResponse();
+        ValidationConclusion validationConclusion = validationService.validateContainer(container);
+        response.setValidationConclusion(validationConclusion);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        return validationService.validateExistingContainer(containerId);
+
+        GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
+        ValidationConclusion validationConclusion = validationService.validateExistingContainer(containerId);
+        response.setValidationConclusion(validationConclusion);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
@@ -61,13 +82,19 @@ public class MainController {
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        return containerService.getSignatures(containerId);
+        GetHashCodeSignaturesResponse response = new GetHashCodeSignaturesResponse();
+        List<Signature> signatures = containerService.getSignatures(containerId);
+        response.getSignatures().addAll(signatures);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        return containerService.getContainer(containerId);
+        GetHashCodeContainerResponse response = new GetHashCodeContainerResponse();
+        String container = containerService.getContainer(containerId);
+        response.setContainer(container);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
@@ -76,12 +103,12 @@ public class MainController {
     }
 
     @Autowired
-    protected void setContainerService(HashCodeContainerService containerService) {
+    protected void setContainerService(DetachedDataFileContainerService containerService) {
         this.containerService = containerService;
     }
 
     @Autowired
-    protected void setValidationService(ContainerValidationService validationService) {
+    protected void setValidationService(DetachedDataFileContainerValidationService validationService) {
         this.validationService = validationService;
     }
 }

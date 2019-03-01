@@ -19,8 +19,8 @@ public class TestUtil {
     public static final String HASHCODES_SHA512_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hashcodes><file-entry full-path=\"first datafile.txt\" hash=\"SHA512\" size=\"10\"/><file-entry full-path=\"second datafile.txt\" hash=\"SHA512\" size=\"10\"/></hashcodes>";
     public static final String MIMETYPE = "application/vnd.etsi.asic-e+zip";
 
-    public static HashCodeContainerFilesHolder getContainerFiles(byte[] container) throws IOException {
-        HashCodeContainerFilesHolder hashCodeContainer = new HashCodeContainerFilesHolder();
+    public static DetachedDataFileContainerFilesHolder getContainerFiles(byte[] container) throws IOException {
+        DetachedDataFileContainerFilesHolder hashCodeContainer = new DetachedDataFileContainerFilesHolder();
         ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(container));
         ZipEntry entry;
         while ((entry = zipStream.getNextEntry()) != null) {

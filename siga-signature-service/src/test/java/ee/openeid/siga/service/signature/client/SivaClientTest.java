@@ -60,7 +60,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(body))
         );
-        ValidationConclusion response = sivaClient.validateHashCodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
+        ValidationConclusion response = sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
         Assert.assertEquals(Integer.valueOf(1), response.getSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
     }
@@ -74,7 +74,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(404))
         );
-        sivaClient.validateHashCodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
+        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(500))
         );
-        sivaClient.validateHashCodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
+        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashCodeDataFiles());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class SivaClientTest {
 
         SignatureWrapper signatureWrapper = RequestUtil.createSignatureWrapper();
         signatureWrapper.getDataFiles().get(0).setHashAlgo("SHA386");
-        sivaClient.validateHashCodeContainer(signatureWrapper, RequestUtil.createHashCodeDataFiles());
+        sivaClient.validateDetachedDataFileContainer(signatureWrapper, RequestUtil.createHashCodeDataFiles());
     }
 
     protected String toJson(Object request) {

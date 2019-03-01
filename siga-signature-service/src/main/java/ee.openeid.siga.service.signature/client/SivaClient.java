@@ -29,7 +29,7 @@ public class SivaClient {
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
 
-    public ValidationConclusion validateHashCodeContainer(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
+    public ValidationConclusion validateDetachedDataFileContainer(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
         SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
         ResponseEntity<ValidationResponse> responseEntity;
         try {

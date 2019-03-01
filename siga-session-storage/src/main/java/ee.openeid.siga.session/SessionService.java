@@ -6,11 +6,13 @@ import org.apache.ignite.Ignite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.cache.Cache;
 import java.util.Optional;
 
-public abstract class SessionService {
+@Component
+public class SessionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
     Ignite ignite;
@@ -26,7 +28,9 @@ public abstract class SessionService {
         getContainerConfigCache().put(containerId, session);
     }
 
-    public abstract Cache<String, Session> getContainerConfigCache();
+    public Cache<String, Session> getContainerConfigCache() {
+        return ignite.getOrCreateCache(CacheName.CONTAINER.name());
+    }
 
     @Autowired
     protected void setIgnite(Ignite ignite) {

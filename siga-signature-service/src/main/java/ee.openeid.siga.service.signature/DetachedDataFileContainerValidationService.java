@@ -3,14 +3,10 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.HashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.session.HashCodeContainerSessionHolder;
+import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
-import ee.openeid.siga.service.signature.hashcode.HashCodeContainer;
-import ee.openeid.siga.session.HashCodeSessionService;
+import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportRequest;
-import ee.openeid.siga.webapp.json.CreateHashCodeValidationReportResponse;
-import ee.openeid.siga.webapp.json.GetHashCodeValidationReportResponse;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,32 +17,26 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
-public class ContainerValidationService extends ContainerService {
+public class DetachedDataFileContainerValidationService implements DetachedDataFileSessionHolder {
 
     private SivaClient sivaClient;
-    private HashCodeSessionService sessionService;
+    private SessionService sessionService;
 
-    public CreateHashCodeValidationReportResponse validateContainer(CreateHashCodeValidationReportRequest request) {
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
-        hashCodeContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(request.getContainer().getBytes())));
-        ValidationConclusion validationConclusion = createValidationConclusion(hashCodeContainer.getSignatures(), hashCodeContainer.getDataFiles());
-        CreateHashCodeValidationReportResponse response = new CreateHashCodeValidationReportResponse();
-        response.setValidationConclusion(validationConclusion);
-        return response;
+    public ValidationConclusion validateContainer(String container) {
+        DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
+        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes())));
+        return createValidationConclusion(detachedDataFileContainer.getSignatures(), detachedDataFileContainer.getDataFiles());
     }
 
-    public GetHashCodeValidationReportResponse validateExistingContainer(String containerId) {
-        HashCodeContainerSessionHolder sessionHolder = getSession(containerId);
-        ValidationConclusion validationConclusion = createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
-        GetHashCodeValidationReportResponse response = new GetHashCodeValidationReportResponse();
-        response.setValidationConclusion(validationConclusion);
-        return response;
+    public ValidationConclusion validateExistingContainer(String containerId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        return createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
     }
 
     private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashCodeDataFile> dataFiles) {
         List<ValidationConclusion> validationConclusions = new ArrayList<>();
         signatureWrappers.forEach(signatureWrapper ->
-                validationConclusions.add(sivaClient.validateHashCodeContainer(signatureWrapper, dataFiles)));
+                validationConclusions.add(sivaClient.validateDetachedDataFileContainer(signatureWrapper, dataFiles)));
         return mergeValidationConclusions(validationConclusions);
     }
 
@@ -80,12 +70,12 @@ public class ContainerValidationService extends ContainerService {
     }
 
     @Autowired
-    protected void setSessionService(HashCodeSessionService sessionService) {
+    protected void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
 
     @Override
-    SessionService getSessionService() {
+    public SessionService getSessionService() {
         return sessionService;
     }
 }

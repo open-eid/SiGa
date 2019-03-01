@@ -9,8 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class HashCodeContainerSessionHolder implements Session {
-    private String containerName;
+public class DetachedDataFileContainerSessionHolder implements Session {
     private List<HashCodeDataFile> dataFiles;
     private List<SignatureWrapper> signatures;
 }

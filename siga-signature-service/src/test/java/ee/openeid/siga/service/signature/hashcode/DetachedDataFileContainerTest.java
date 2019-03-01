@@ -4,7 +4,7 @@ import ee.openeid.siga.common.HashCodeDataFile;
 import ee.openeid.siga.common.SignatureHashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.SignatureExistsException;
-import ee.openeid.siga.service.signature.test.HashCodeContainerFilesHolder;
+import ee.openeid.siga.service.signature.test.DetachedDataFileContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
@@ -18,16 +18,16 @@ import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 
-public class HashCodeContainerTest {
+public class DetachedDataFileContainerTest {
 
     @Test
     public void validHashCodeContainerCreation() throws IOException {
         CreateHashCodeContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         request.getDataFiles().forEach(dataFile -> hashCodeContainer.addDataFile(ContainerUtil.transformDataFileToHashCodeDataFile(dataFile)));
         try (OutputStream outputStream = new ByteArrayOutputStream()) {
             hashCodeContainer.save(outputStream);
-            HashCodeContainerFilesHolder hashCodeContainerFilesHolder = TestUtil.getContainerFiles(((ByteArrayOutputStream) outputStream).toByteArray());
+            DetachedDataFileContainerFilesHolder hashCodeContainerFilesHolder = TestUtil.getContainerFiles(((ByteArrayOutputStream) outputStream).toByteArray());
             Assert.assertEquals(TestUtil.MIMETYPE, hashCodeContainerFilesHolder.getMimeTypeContent());
             Assert.assertEquals(TestUtil.MANIFEST_CONTENT, hashCodeContainerFilesHolder.getManifestContent());
             Assert.assertEquals(TestUtil.HASHCODES_SHA256_CONTENT, hashCodeContainerFilesHolder.getHashCodesSha256Content());
@@ -37,7 +37,7 @@ public class HashCodeContainerTest {
 
     @Test
     public void validHashCodeContainerOpening() throws IOException, URISyntaxException {
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashCodeContainer.open(inputStream);
         Assert.assertEquals(1, hashCodeContainer.getSignatures().size());
@@ -54,7 +54,7 @@ public class HashCodeContainerTest {
 
     @Test(expected = SignatureExistsException.class)
     public void couldNotAddDataFileWhenSignatureExists() throws IOException, URISyntaxException {
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashCodeContainer.open(inputStream);
         HashCodeDataFile hashCodeDataFile = new HashCodeDataFile();
@@ -65,7 +65,7 @@ public class HashCodeContainerTest {
 
     @Test
     public void validHashCodeContainerAddedNewData() throws IOException, URISyntaxException {
-        HashCodeContainer hashCodeContainer = new HashCodeContainer();
+        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashCodeContainer.open(inputStream);
         SignatureWrapper signature = hashCodeContainer.getSignatures().get(0);
@@ -82,7 +82,7 @@ public class HashCodeContainerTest {
         Assert.assertEquals(3, hashCodeContainer.getDataFiles().size());
         try (OutputStream outputStream = new ByteArrayOutputStream()) {
             hashCodeContainer.save(outputStream);
-            HashCodeContainer newContainer = new HashCodeContainer();
+            DetachedDataFileContainer newContainer = new DetachedDataFileContainer();
             newContainer.open(new ByteArrayInputStream(((ByteArrayOutputStream) outputStream).toByteArray()));
             Assert.assertEquals(1, newContainer.getSignatures().size());
             Assert.assertEquals(3, newContainer.getDataFiles().size());
