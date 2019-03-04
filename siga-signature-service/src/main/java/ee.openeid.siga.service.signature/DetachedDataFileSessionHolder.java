@@ -12,7 +12,7 @@ public interface DetachedDataFileSessionHolder {
         if (session instanceof DetachedDataFileContainerSessionHolder) {
             return (DetachedDataFileContainerSessionHolder) session;
         }
-        throw new TechnicalException("Unable to parse session");
+        throw new TechnicalException("Unable to parse session response");
     }
 
     SessionService getSessionService();

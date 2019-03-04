@@ -19,13 +19,17 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     public DataToSign createDataToSign(String containerId, SignatureParameters signatureParameters) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         validateContainer(sessionHolder);
-        return buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
+        DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
+        sessionHolder.setDataToSign(dataToSign);
+        sessionService.update(containerId, sessionHolder);
+        return dataToSign;
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration)
                 .withSigningCertificate(signatureParameters.getSigningCertificate())
                 .withSignatureProfile(signatureParameters.getSignatureProfile())
+                .withSignatureDigestAlgorithm(DigestAlgorithm.SHA512)
                 .withCountry(signatureParameters.getCountry())
                 .withStateOrProvince(signatureParameters.getStateOrProvince())
                 .withCity(signatureParameters.getCity())
@@ -57,6 +61,10 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     @Override
     public SessionService getSessionService() {
         return sessionService;
+    }
+
+    protected void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     @Autowired

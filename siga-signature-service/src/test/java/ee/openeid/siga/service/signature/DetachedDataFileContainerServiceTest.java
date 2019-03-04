@@ -19,13 +19,12 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
 
+import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DetachedDataFileContainerServiceTest {
-
-    public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
     @InjectMocks
     DetachedDataFileContainerService containerService;

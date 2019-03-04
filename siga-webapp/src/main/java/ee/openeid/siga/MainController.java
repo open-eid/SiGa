@@ -128,4 +128,9 @@ public class MainController {
     protected void setValidationService(DetachedDataFileContainerValidationService validationService) {
         this.validationService = validationService;
     }
+
+    @Autowired
+    public void setSigningService(DetachedDataFileContainerSigningService signingService) {
+        this.signingService = signingService;
+    }
 }

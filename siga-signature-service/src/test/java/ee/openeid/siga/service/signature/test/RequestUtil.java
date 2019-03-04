@@ -8,9 +8,12 @@ import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.SignatureProfile;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +21,7 @@ import java.util.List;
 public class RequestUtil {
 
     public static final String SIGNED_HASHCODE = "hashcode.asice";
-    public static final String CONTAINER_NAME = "asice.asice";
+    public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
     public static List<ee.openeid.siga.common.HashCodeDataFile> createHashCodeDataFiles() {
         List<ee.openeid.siga.common.HashCodeDataFile> hashCodeDataFiles = new ArrayList<>();
@@ -72,4 +75,15 @@ public class RequestUtil {
                 .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
     }
 
+    public static SignatureParameters createSignatureParameters(X509Certificate certificate) {
+        SignatureParameters signatureParameters = new SignatureParameters();
+        signatureParameters.setSigningCertificate(certificate);
+        signatureParameters.setSignatureProfile(SignatureProfile.LT);
+        signatureParameters.setCountry("Estonia");
+        signatureParameters.setStateOrProvince("Harjumaa");
+        signatureParameters.setCity("Tallinn");
+        signatureParameters.setPostalCode("34234");
+        signatureParameters.setRoles(Collections.singletonList("Engineer"));
+        return signatureParameters;
+    }
 }
