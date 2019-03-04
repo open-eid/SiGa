@@ -25,6 +25,7 @@ public class RequestValidatorTest {
         RequestValidator.validateFileContent(CONTENT);
     }
 
+
     @Test
     public void containerContentEmpty() {
         exceptionRule.expect(InvalidRequestException.class);
@@ -41,6 +42,8 @@ public class RequestValidatorTest {
 
     @Test
     public void createContainer_NoDataFiles() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Data files are needed");
         CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
         request.getDataFiles().clear();
         RequestValidator.validateHashCodeDataFiles(request.getDataFiles());

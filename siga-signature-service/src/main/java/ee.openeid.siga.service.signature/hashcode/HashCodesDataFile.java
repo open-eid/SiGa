@@ -50,7 +50,11 @@ public class HashCodesDataFile {
     private void addFileEntry(HashCodeDataFile dataFile) {
         Element child = dom.createElement("file-entry");
         child.setAttribute("full-path", dataFile.getFileName());
-        child.setAttribute("hash", digestAlgorithm.name());
+        if (DigestAlgorithm.SHA256 == digestAlgorithm) {
+            child.setAttribute("hash", dataFile.getFileHashSha256());
+        } else if (DigestAlgorithm.SHA512 == digestAlgorithm) {
+            child.setAttribute("hash", dataFile.getFileHashSha512());
+        }
         child.setAttribute("size", dataFile.getFileSize().toString());
         rootElement.appendChild(child);
     }

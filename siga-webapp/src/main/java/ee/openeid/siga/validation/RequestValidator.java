@@ -12,9 +12,8 @@ import java.util.List;
 public class RequestValidator {
 
     public static void validateHashCodeDataFiles(List<HashCodeDataFile> dataFiles) {
-
         if (CollectionUtils.isEmpty(dataFiles)) {
-            throw new InvalidRequestException("Data files can not be null ");
+            throw new InvalidRequestException("Data files are needed");
         }
         dataFiles.forEach(RequestValidator::validateHashCodeDataFile);
     }
