@@ -66,8 +66,12 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashCodeRemoteSigningRequest createRemoteSigningRequest) {
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
+
         SignatureParameters signatureParameters = RequestTransformer.tranformRemoteRequest(createRemoteSigningRequest);
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
+
         CreateHashCodeRemoteSigningResponse response = new CreateHashCodeRemoteSigningResponse();
         String dataToSignBase64 = new String(Base64.getEncoder().encode(dataToSign.getDataToSign()));
         response.setDataToSign(dataToSignBase64);
@@ -77,6 +81,7 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public UpdateHashCodeRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashCodeRemoteSigningRequest updateRemoteSigningRequest) {
+
         return null;
     }
 

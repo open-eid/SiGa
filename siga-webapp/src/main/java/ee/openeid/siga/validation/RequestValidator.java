@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.digidoc4j.SignatureProfile;
 
 import java.util.List;
 
@@ -54,4 +55,12 @@ public class RequestValidator {
         }
     }
 
+    public static void validateRemoteSigning(String signingCertificate, String signatureProfile) {
+        if (StringUtils.isBlank(signingCertificate) || !isBase64StringEncoded(signingCertificate)) {
+            throw new InvalidRequestException("Invalid signing certificate");
+        }
+        if (SignatureProfile.findByProfile(signatureProfile) == null) {
+            throw new InvalidRequestException("Invalid signature profile");
+        }
+    }
 }

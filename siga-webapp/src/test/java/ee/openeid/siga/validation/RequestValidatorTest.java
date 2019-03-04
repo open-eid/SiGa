@@ -95,6 +95,25 @@ public class RequestValidatorTest {
         RequestValidator.validateContainerId(StringUtils.repeat("a", 37));
     }
 
+    @Test
+    public void successfulRemoteSigning() {
+        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "LT");
+    }
+
+    @Test
+    public void invalidSigningCertificate() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signing certificate");
+        RequestValidator.validateRemoteSigning("+=?!%", "LT");
+    }
+
+    @Test
+    public void invalidSignatureProfile() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signature profile");
+        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "TL");
+    }
+
     public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {
         CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
         HashCodeDataFile dataFile = new HashCodeDataFile();
