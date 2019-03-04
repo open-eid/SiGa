@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.common.exception.NoDataFileException;
+import ee.openeid.siga.common.exception.DataFileNotFoundException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -60,7 +60,7 @@ public class DetachedDataFileContainerSigningServiceTest {
 
     @Test
     public void noDataFilesInSession() throws IOException, URISyntaxException {
-        exceptionRule.expect(NoDataFileException.class);
+        exceptionRule.expect(DataFileNotFoundException.class);
         exceptionRule.expectMessage("Unable to create signature. Data files must be added to container");
         DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();
         sessionHolder.getDataFiles().clear();

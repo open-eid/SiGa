@@ -9,7 +9,7 @@ import java.security.cert.X509Certificate;
 
 public class RequestTransformer {
 
-    public static SignatureParameters tranformRemoteRequest(CreateHashCodeRemoteSigningRequest remoteSigningRequest) {
+    public static SignatureParameters transformRemoteRequest(CreateHashCodeRemoteSigningRequest remoteSigningRequest) {
         SignatureParameters signatureParameters = new SignatureParameters();
         X509Certificate x509Certificate = CertificateUtil.createX509Certificate(remoteSigningRequest.getSigningCertificate().getBytes());
 

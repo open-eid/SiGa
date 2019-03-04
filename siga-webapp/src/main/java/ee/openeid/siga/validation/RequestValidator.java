@@ -3,6 +3,7 @@ package ee.openeid.siga.validation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
 
@@ -11,6 +12,10 @@ import java.util.List;
 public class RequestValidator {
 
     public static void validateHashCodeDataFiles(List<HashCodeDataFile> dataFiles) {
+
+        if (CollectionUtils.isEmpty(dataFiles)) {
+            throw new InvalidRequestException("Data files can not be null ");
+        }
         dataFiles.forEach(RequestValidator::validateHashCodeDataFile);
     }
 
@@ -61,6 +66,12 @@ public class RequestValidator {
         }
         if (SignatureProfile.findByProfile(signatureProfile) == null) {
             throw new InvalidRequestException("Invalid signature profile");
+        }
+    }
+
+    public static void validateSignatureValue(String signatureValue) {
+        if (StringUtils.isBlank(signatureValue) || !isBase64StringEncoded(signatureValue)) {
+            throw new InvalidRequestException("Invalid signature value");
         }
     }
 }

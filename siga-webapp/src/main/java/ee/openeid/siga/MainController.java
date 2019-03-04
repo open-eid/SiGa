@@ -69,7 +69,7 @@ public class MainController {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
-        SignatureParameters signatureParameters = RequestTransformer.tranformRemoteRequest(createRemoteSigningRequest);
+        SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(createRemoteSigningRequest);
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
 
         CreateHashCodeRemoteSigningResponse response = new CreateHashCodeRemoteSigningResponse();
@@ -81,8 +81,12 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public UpdateHashCodeRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashCodeRemoteSigningRequest updateRemoteSigningRequest) {
-
-        return null;
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
+        String result = signingService.finalizeSigning(containerId, updateRemoteSigningRequest.getSignatureValue());
+        UpdateHashCodeRemoteSigningResponse response = new UpdateHashCodeRemoteSigningResponse();
+        response.setResult(result);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)

@@ -108,10 +108,43 @@ public class RequestValidatorTest {
     }
 
     @Test
+    public void emptySigningCertificate() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signing certificate");
+        RequestValidator.validateRemoteSigning("", "LT");
+    }
+
+    @Test
     public void invalidSignatureProfile() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Invalid signature profile");
         RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "TL");
+    }
+
+    @Test
+    public void emptySignatureProfile() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signature profile");
+        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "");
+    }
+
+    @Test
+    public void successfulSignatureValue() {
+        RequestValidator.validateSignatureValue("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");
+    }
+
+    @Test
+    public void emptySignatureValue() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signature value");
+        RequestValidator.validateSignatureValue("");
+    }
+
+    @Test
+    public void invalidSignatureValue() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signature value");
+        RequestValidator.validateSignatureValue("+=?!%");
     }
 
     public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {

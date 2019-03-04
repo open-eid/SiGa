@@ -2,14 +2,20 @@ package ee.openeid.siga.service.signature;
 
 
 import ee.openeid.siga.common.HashCodeDataFile;
-import ee.openeid.siga.common.exception.NoDataFileException;
+import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.DataFileNotFoundException;
+import ee.openeid.siga.common.exception.DataToSignNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
+import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DetachedDataFileContainerSigningService implements DetachedDataFileSessionHolder {
@@ -18,11 +24,28 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
 
     public DataToSign createDataToSign(String containerId, SignatureParameters signatureParameters) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
-        validateContainer(sessionHolder);
+        verifyDataFileExistence(sessionHolder);
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         sessionHolder.setDataToSign(dataToSign);
         sessionService.update(containerId, sessionHolder);
         return dataToSign;
+    }
+
+    public String finalizeSigning(String containerId, String signatureValue) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        verifyDataToSignExistence(sessionHolder);
+        DataToSign dataToSign = sessionHolder.getDataToSign();
+        byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
+        SignatureDataFilesParser parser = new SignatureDataFilesParser(base64Decoded);
+        Map<String, String> dataFiles = parser.getEntries();
+        Signature signature = dataToSign.finalize(base64Decoded);
+        SignatureWrapper signatureWrapper = new SignatureWrapper();
+        signatureWrapper.setSignature(signature.getAdESSignature());
+
+//        signatureWrapper.setDataFiles(); //TODO:
+        sessionHolder.getSignatures().add(signatureWrapper);
+        sessionService.update(containerId, sessionHolder);
+        return SessionResult.OK.name();
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
@@ -52,9 +75,15 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         return new DigestDataFile(fileName, digestAlgorithm, digest);
     }
 
-    private void validateContainer(DetachedDataFileContainerSessionHolder sessionHolder) {
+    private void verifyDataFileExistence(DetachedDataFileContainerSessionHolder sessionHolder) {
         if (sessionHolder.getDataFiles().size() < 1) {
-            throw new NoDataFileException("Unable to create signature. Data files must be added to container");
+            throw new DataFileNotFoundException("Unable to create signature. Data files must be added to container");
+        }
+    }
+
+    private void verifyDataToSignExistence(DetachedDataFileContainerSessionHolder sessionHolder) {
+        if (sessionHolder.getDataToSign() == null) {
+            throw new DataToSignNotFoundException("Unable to finalize signature. Invalid session found");
         }
     }
 
@@ -71,4 +100,6 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     protected void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
+
+
 }
