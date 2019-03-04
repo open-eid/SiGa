@@ -3,6 +3,7 @@ package ee.openeid.siga.exception;
 import ee.openeid.siga.common.exception.ErrorCode;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GenericExceptionHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

@@ -32,7 +32,7 @@ public class SessionService {
         getContainerConfigCache().remove(containerId);
     }
 
-    public Cache<String, Session> getContainerConfigCache() {
+    private Cache<String, Session> getContainerConfigCache() {
         return ignite.getOrCreateCache(CacheName.CONTAINER.name());
     }
 

@@ -1,13 +1,17 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
+import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -15,6 +19,7 @@ public class MainController {
 
     private DetachedDataFileContainerService containerService;
     private DetachedDataFileContainerValidationService validationService;
+    private DetachedDataFileContainerSigningService signingService;
 
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeContainerResponse createContainer(@RequestBody CreateHashCodeContainerRequest createContainerRequest) {
@@ -61,7 +66,13 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashCodeRemoteSigningRequest createRemoteSigningRequest) {
-        return null;
+        SignatureParameters signatureParameters = RequestTransformer.tranformRemoteRequest(createRemoteSigningRequest);
+        DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
+        CreateHashCodeRemoteSigningResponse response = new CreateHashCodeRemoteSigningResponse();
+        String dataToSignBase64 = new String(Base64.getEncoder().encode(dataToSign.getDataToSign()));
+        response.setDataToSign(dataToSignBase64);
+        response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
