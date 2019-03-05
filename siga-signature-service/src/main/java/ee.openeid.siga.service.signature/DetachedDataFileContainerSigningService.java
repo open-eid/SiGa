@@ -7,6 +7,7 @@ import ee.openeid.siga.common.exception.DataFileNotFoundException;
 import ee.openeid.siga.common.exception.DataToSignNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
+import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.*;
@@ -35,15 +36,17 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         verifyDataToSignExistence(sessionHolder);
         DataToSign dataToSign = sessionHolder.getDataToSign();
+
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
-        SignatureDataFilesParser parser = new SignatureDataFilesParser(base64Decoded);
-        Map<String, String> dataFiles = parser.getEntries();
         Signature signature = dataToSign.finalize(base64Decoded);
+
+        SignatureDataFilesParser parser = new SignatureDataFilesParser(signature.getAdESSignature());
+        Map<String, String> dataFiles = parser.getEntries();
         SignatureWrapper signatureWrapper = new SignatureWrapper();
         signatureWrapper.setSignature(signature.getAdESSignature());
-
-//        signatureWrapper.setDataFiles(); //TODO:
+        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         sessionHolder.getSignatures().add(signatureWrapper);
+
         sessionService.update(containerId, sessionHolder);
         return SessionResult.OK.name();
     }

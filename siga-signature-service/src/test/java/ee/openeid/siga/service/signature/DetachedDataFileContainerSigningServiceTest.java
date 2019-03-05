@@ -20,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Base64;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
@@ -28,7 +29,7 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.createSignature
 public class DetachedDataFileContainerSigningServiceTest {
     private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
-    private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference Id=\"r-id-1\" Type=\"\" URI=\"test.txt\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"></ds:DigestMethod><ds:DigestValue>YXNkamFvc2Rhc2Rhc2Rhc2Rhc2RzZGFkamFzcD0=</ds:DigestValue></ds:Reference><ds:Reference Type=\"http://uri.etsi.org/01903#SignedProperties\"";
+    private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference Id=\"r-id-1\" Type=\"\" URI=\"test.txt\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"></ds:DigestMethod><ds:DigestValue>Z1JLQXJTNmpCc1BMRjFWUDdhUThWWjdCQTVRQTY2aGovbnRtTmN4T05aRzU4OTl3MlZGSGc5cHN5RUg0U2NnN3JQU0pRRVlmNjVCR0FzY016dFNYc0E=</ds:DigestValue></ds:Reference><ds:Reference Type=\"http://uri.etsi.org/01903#SignedProperties\"";
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -86,6 +87,7 @@ public class DetachedDataFileContainerSigningServiceTest {
     public void signAndValidateSignature() {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        signatureParameters.setDigestAlgorithm(DigestAlgorithm.SHA512);
         DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         Signature signature = dataToSign.finalize(signatureRaw);
@@ -95,6 +97,17 @@ public class DetachedDataFileContainerSigningServiceTest {
         Assert.assertEquals("Estonia", signature.getCountryName());
         Assert.assertEquals("Engineer", signature.getSignerRoles().get(0));
         Assert.assertTrue(signature.validateSignature().isValid());
+    }
+
+    @Test
+    public void finalizeAndValidateSignature() {
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
+        String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
+        String result = signingService.finalizeSigning(CONTAINER_ID, base64EncodedSignature);
+        Assert.assertEquals("OK", result);
     }
 
 }

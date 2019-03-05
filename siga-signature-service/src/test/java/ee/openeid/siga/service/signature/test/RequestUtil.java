@@ -27,9 +27,9 @@ public class RequestUtil {
         List<ee.openeid.siga.common.HashCodeDataFile> hashCodeDataFiles = new ArrayList<>();
         ee.openeid.siga.common.HashCodeDataFile dataFile = new ee.openeid.siga.common.HashCodeDataFile();
         dataFile.setFileName("test.txt");
-        dataFile.setFileHashSha256("asdjaosdjasp=");
+        dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
-        dataFile.setFileHashSha512("asdjaosdasdasdasdasdsdadjasp=");
+        dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");
         hashCodeDataFiles.add(dataFile);
         return hashCodeDataFiles;
     }
@@ -70,8 +70,10 @@ public class RequestUtil {
     }
 
     public static DetachedDataFileContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
+        List<SignatureWrapper> signatureWrappers = new ArrayList<>();
+        signatureWrappers.add(RequestUtil.createSignatureWrapper());
         return DetachedDataFileContainerSessionHolder.builder()
-                .signatures(Collections.singletonList(RequestUtil.createSignatureWrapper()))
+                .signatures(signatureWrappers)
                 .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
     }
 

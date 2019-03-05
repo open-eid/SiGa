@@ -2,6 +2,7 @@ package ee.openeid.siga.exception;
 
 import ee.openeid.siga.common.exception.ErrorCode;
 import ee.openeid.siga.common.exception.InvalidRequestException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponse resourceNotFoundException(ResourceNotFoundException exception) {
+        LOGGER.debug("Session not found - {}",  exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorCode(ErrorCode.SESSION_NOT_FOUND.name());
+        return errorResponse;
+    }
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
