@@ -1,10 +1,10 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashCodeDataFile;
-import ee.openeid.siga.common.SignatureHashCodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
-import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
 import eu.europa.esig.dss.MimeType;
@@ -36,12 +36,17 @@ public class DetachedDataFileContainer {
         try {
             ZipInputStream zipStream = new ZipInputStream(inputStream);
             ZipEntry entry;
+            boolean isValidZip = false;
             while ((entry = zipStream.getNextEntry()) != null) {
                 operateWithEntry(entry, zipStream);
+                isValidZip = true;
             }
             zipStream.close();
+            if (!isValidZip) {
+                throw new InvalidRequestException("Invalid container");
+            }
         } catch (IOException e) {
-            throw new TechnicalException("Unable to open hashcode container");
+            throw new InvalidRequestException("Unable to open hashcode container");
         }
     }
 
@@ -80,17 +85,8 @@ public class DetachedDataFileContainer {
 
         SignatureWrapper signatureWrapper = new SignatureWrapper();
         signatureWrapper.setSignature(signature);
-        addSignatureDataFilesEntries(signatureWrapper, dataFiles);
+        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;
-    }
-
-    private void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, String> dataFiles) {
-        dataFiles.forEach((fileName, fileHashAlgo) -> {
-            SignatureHashCodeDataFile hashCodeDataFile = new SignatureHashCodeDataFile();
-            hashCodeDataFile.setFileName(fileName);
-            hashCodeDataFile.setHashAlgo(fileHashAlgo);
-            wrapper.getDataFiles().add(hashCodeDataFile);
-        });
     }
 
     private void addDataFileEntries(Map<String, HashCodesEntry> entries, String entryName) {

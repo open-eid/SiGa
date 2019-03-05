@@ -1,4 +1,4 @@
-package ee.openeid.siga.session.exception;
+package ee.openeid.siga.common.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

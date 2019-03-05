@@ -1,7 +1,7 @@
 package ee.openeid.siga.session;
 
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.session.exception.ResourceNotFoundException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import org.apache.ignite.Ignite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
