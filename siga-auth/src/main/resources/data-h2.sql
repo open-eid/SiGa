@@ -1,0 +1,8 @@
+INSERT INTO siga_client (id, name, contact_name, contact_email, contact_phone) VALUES (1, 'client1', 'Client1 Contact Person', 'support@client1.ee', '+37200000001');
+INSERT INTO siga_client (id, name, contact_name, contact_email, contact_phone) VALUES (2, 'client2', 'SigaClient 2 Contact Person', 'support@client2.ee', '+37200000002');
+-- Signing secret 746573745365637265744b6579303031 (testSecretKey001)
+INSERT INTO siga_service (id, name, uuid, client_id, signing_secret, sk_relying_party_name, sk_relying_party_uuid) VALUES (1, 'test1.service.ee', 'a7fd7728-a3ea-4975-bfab-f240a67e894f', 1, '5yZ44So1/+PFhM8ePmSBjeBeg8c59l2mSU75AOz6IOzTmZ7EsfvdLKKoF575cA/hY80nh47QmhdtPshbKc9vsQ==', 'relying_party_name', '439ffac4-39b1-11e9-b210-d663bd873d93');
+-- Signing secret 746573745365637265744b6579303032 (testSecretKey002)
+INSERT INTO siga_service (id, name, uuid, client_id, signing_secret, sk_relying_party_name, sk_relying_party_uuid) VALUES (2, 'test2.service.ee', '824dcfe9-5c26-4d76-829a-e6630f434746', 1, 'DNitLNTg3/jsD1odBXrt9ez+N8Nh3kHOWPB/1zmb4pfMszg1luOsHuk5zaCNs4R3/6LwbzVbnw/8epy7Wx5pYQ==', 'relying_party_name', '439ffd6c-39b1-11e9-b210-d663bd873d93');
+-- Signing secret 746573745365637265744b6579303033 (testSecretKey003)
+INSERT INTO siga_service (id, name, uuid, client_id, signing_secret, sk_relying_party_name, sk_relying_party_uuid) VALUES (3, 'test3.service.ee', '400ff9a2-b5fb-4fde-b764-9b519963f82e', 2, '3UQ0E3DKP+FZtfELlOj6u4g/QNAtrfQw6aobQVXex+tzV55uwndCgMSsuBWD5WNFGB18v+9td2cgpHrsJerpTQ==', 'relying_party_name', '439fff10-39b1-11e9-b210-d663bd873d93');
