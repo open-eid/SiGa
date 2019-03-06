@@ -23,4 +23,13 @@ public class TestData {
     public static final String DEFAULT_FILENAME = "test.txt";
     public static final String DEFAULT_FILESIZE = "745";
 
+    // Response strings
+    public static final String CONTAINER_ID = "containerId";
+
+    // Error response strings
+    public static final String ERROR_CODE = "errorCode";
+
+    // Error codes
+    public static final String SESSION_NOT_FOUND = "SESSION_NOT_FOUND";
+
 }

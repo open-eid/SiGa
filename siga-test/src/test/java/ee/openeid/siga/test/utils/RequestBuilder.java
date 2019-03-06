@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.utils;
 
+import ee.openeid.siga.test.model.SigaApiFlow;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,8 +46,14 @@ public class RequestBuilder {
     }
 
 
-    public static String signRequest(String serviceSecret, String serviceUuid, Long timestamp, String request, String  hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
-        String signableString = serviceUuid + ":" + timestamp + ":" + request;
-        return generateHmacSignature(serviceSecret, signableString, hmacAlgo);
+    public static String signRequest(SigaApiFlow flow, String request, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
+        flow.setSigningTime(getSigningTimeInSeconds().toString());
+        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + request;
+        return generateHmacSignature(flow.getServiceSecret(), signableString, hmacAlgo);
     }
+
+    private static Long getSigningTimeInSeconds (){
+        return  System.currentTimeMillis()/1000;
+    }
+
 }

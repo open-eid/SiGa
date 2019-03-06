@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -14,12 +15,11 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 
 public class TestBase {
 
-    protected Response postCreateHashcodeContainer(String request) throws InvalidKeyException, NoSuchAlgorithmException {
-        Long timestamp =  System.currentTimeMillis()/1000;
-        return given()
-                .header(X_AUTHORIZATION_TIMESTAMP, timestamp)
-                .header(X_AUTHORIZATION_SERVICE_UUID, SERVICE_UUID)
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(SERVICE_SECRET, SERVICE_UUID, timestamp, request, null))
+    protected Response postCreateHashcodeContainer(SigaApiFlow flow, String request) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, null))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request).log().all()
                 .contentType(ContentType.JSON)
@@ -29,14 +29,15 @@ public class TestBase {
                 .log().all()
                 .extract()
                 .response();
+        flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
+        return response;
     }
 
-     protected Response postUploadHashcodeContainer(String request) throws InvalidKeyException, NoSuchAlgorithmException {
-        Long timestamp =  System.currentTimeMillis()/1000;
-        return given()
-                .header(X_AUTHORIZATION_TIMESTAMP, timestamp)
-                .header(X_AUTHORIZATION_SERVICE_UUID, SERVICE_UUID)
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(SERVICE_SECRET, SERVICE_UUID, timestamp, request, null))
+     protected Response postUploadHashcodeContainer(SigaApiFlow flow, String request) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, null))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request).log().all()
                 .contentType(ContentType.JSON)
@@ -46,19 +47,20 @@ public class TestBase {
                 .log().all()
                 .extract()
                 .response();
+        flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
+        return response;
     }
 
-    protected Response getValidationReportForContainerInSession(String containerId) throws InvalidKeyException, NoSuchAlgorithmException {
-        Long timestamp =  System.currentTimeMillis()/1000;
+    protected Response getValidationReportForContainerInSession(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
-                .header(X_AUTHORIZATION_TIMESTAMP, timestamp)
-                .header(X_AUTHORIZATION_SERVICE_UUID, SERVICE_UUID)
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(SERVICE_SECRET, SERVICE_UUID, timestamp, "", null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", null))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .get(HASHCODE_CONTAINERS + "/" + containerId + VALIDATIONREPORT)
+                .get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + VALIDATIONREPORT)
                 .then()
                 .log().all()
                 .extract()
