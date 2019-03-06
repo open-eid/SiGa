@@ -1,5 +1,6 @@
 package ee.openeid.siga.validation;
 
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
 import org.apache.commons.codec.binary.Base64;
@@ -63,6 +64,10 @@ public class RequestValidator {
         if (StringUtils.isBlank(signingCertificate) || !isBase64StringEncoded(signingCertificate)) {
             throw new InvalidRequestException("Invalid signing certificate");
         }
+        validateSignatureProfile(signatureProfile);
+    }
+
+    public static void validateSignatureProfile(String signatureProfile) {
         if (SignatureProfile.findByProfile(signatureProfile) == null) {
             throw new InvalidRequestException("Invalid signature profile");
         }
@@ -73,4 +78,51 @@ public class RequestValidator {
             throw new InvalidRequestException("Invalid signature value");
         }
     }
+
+    public static void validateMobileIdInformation(MobileIdInformation mobileIdInformation) {
+        validateLanguage(mobileIdInformation.getLanguage());
+        validateMessageToDisplay(mobileIdInformation.getMessageToDisplay());
+        validatePhoneNo(mobileIdInformation.getPhoneNo());
+        validatePersonIdentifier(mobileIdInformation.getPersonIdentifier());
+        validateServiceName(mobileIdInformation.getServiceName());
+        validateOriginCounty(mobileIdInformation.getCountry());
+
+    }
+
+    private static void validateOriginCounty(String country) {
+        if (StringUtils.isBlank(country) || country.length() != 2) {
+            throw new InvalidRequestException("Invalid country of origin");
+        }
+    }
+
+    private static void validateServiceName(String serviceName) {
+        if (StringUtils.isBlank(serviceName) || serviceName.length() > 20) {
+            throw new InvalidRequestException("Invalid Mobile-Id service name");
+        }
+    }
+
+    private static void validatePersonIdentifier(String personIdentifier) {
+        if (StringUtils.isBlank(personIdentifier) || personIdentifier.length() > 30) {
+            throw new InvalidRequestException("Invalid person identifier");
+        }
+    }
+
+    private static void validatePhoneNo(String phoneNo) {
+        if (StringUtils.isBlank(phoneNo) || phoneNo.length() > 20)
+            throw new InvalidRequestException("Invalid phone No.");
+    }
+
+    private static void validateLanguage(String language) {
+        if (StringUtils.isBlank(language) || language.length() != 3) {
+            throw new InvalidRequestException("Invalid Mobile-Id language");
+        }
+    }
+
+    private static void validateMessageToDisplay(String messageToDisplay) {
+        if (messageToDisplay != null && messageToDisplay.length() > 40) {
+            throw new InvalidRequestException("Invalid Mobile-Id message to display");
+        }
+    }
+
+
 }

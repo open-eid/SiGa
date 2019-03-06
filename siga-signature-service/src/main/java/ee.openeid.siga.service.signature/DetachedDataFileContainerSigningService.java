@@ -2,24 +2,30 @@ package ee.openeid.siga.service.signature;
 
 
 import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.DataFileNotFoundException;
 import ee.openeid.siga.common.exception.DataToSignNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.mobileid.client.MobileService;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.DSSUtils;
 import org.digidoc4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class DetachedDataFileContainerSigningService implements DetachedDataFileSessionHolder {
+
+    private MobileService mobileService;
     private SessionService sessionService;
     private Configuration configuration = new Configuration();
 
@@ -49,6 +55,16 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
 
         sessionService.update(containerId, sessionHolder);
         return SessionResult.OK.name();
+    }
+
+    public String startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        verifyDataFileExistence(sessionHolder);
+        X509Certificate signingCertificate = mobileService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getCountry());
+        signatureParameters.setSigningCertificate(signingCertificate);
+        DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
+        byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
+        return null;
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
@@ -104,5 +120,8 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         this.sessionService = sessionService;
     }
 
-
+    @Autowired
+    public void setMobileService(MobileService mobileService) {
+        this.mobileService = mobileService;
+    }
 }
