@@ -14,4 +14,5 @@ public class DetachedDataFileContainerSessionHolder implements Session {
     private List<HashCodeDataFile> dataFiles;
     private List<SignatureWrapper> signatures;
     private DataToSign dataToSign;
+    private String sessionCode;
 }

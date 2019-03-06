@@ -1,8 +1,12 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.DataFileNotFoundException;
+import ee.openeid.siga.common.exception.DataToSignNotFoundException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.mobileid.client.MobileService;
+import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.*;
@@ -24,6 +28,7 @@ import java.util.Base64;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DetachedDataFileContainerSigningServiceTest {
@@ -36,6 +41,9 @@ public class DetachedDataFileContainerSigningServiceTest {
 
     @InjectMocks
     private DetachedDataFileContainerSigningService signingService;
+
+    @Mock
+    private MobileService mobileService;
 
     @Mock
     private SessionService sessionService;
@@ -110,4 +118,42 @@ public class DetachedDataFileContainerSigningServiceTest {
         Assert.assertEquals("OK", result);
     }
 
+    @Test
+    public void noDataToSignInSession() {
+        exceptionRule.expect(DataToSignNotFoundException.class);
+        exceptionRule.expectMessage("Unable to finalize signature. Invalid session found");
+        byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, Base64.getDecoder().decode("kZLQdTYDtWjSbmFlM3RO+vAfygvKDKfQHQkYrDflIDj98r28vlSTMkewVDzlsuzeIY6G+Skr1jmpQmuDr7usJQ=="));
+        String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
+        signingService.finalizeSigning(CONTAINER_ID, base64EncodedSignature);
+    }
+
+    @Test
+    public void successfulMobileIdSigning() {
+        Mockito.when(mobileService.getMobileCertificate(any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
+        signingService.startMobileIdSigning(CONTAINER_ID, mobileIdInformation, signatureParameters);
+    }
+
+    @Test
+    public void invalidMobileSignHashStatus() {
+        exceptionRule.expect(IllegalStateException.class);
+        exceptionRule.expectMessage("Invalid DigiDocService response");
+        MobileSignHashResponse mobileSignHashResponse = createMobileSignHashResponse();
+        mobileSignHashResponse.setStatus("Random");
+        Mockito.when(mobileService.getMobileCertificate(any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileService.initMobileSignHash(any(), any(), any())).thenReturn(mobileSignHashResponse);
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
+        signingService.startMobileIdSigning(CONTAINER_ID, mobileIdInformation, signatureParameters);
+    }
+
+    private MobileSignHashResponse createMobileSignHashResponse() {
+        MobileSignHashResponse mobileSignHashResponse = new MobileSignHashResponse();
+        mobileSignHashResponse.setStatus("OK");
+        mobileSignHashResponse.setChallengeID("2331");
+        mobileSignHashResponse.setSesscode("3223423423424");
+        return mobileSignHashResponse;
+    }
 }

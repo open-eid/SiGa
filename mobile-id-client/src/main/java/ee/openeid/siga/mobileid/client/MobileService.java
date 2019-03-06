@@ -11,12 +11,13 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 public class MobileService extends WebServiceGatewaySupport {
+    private static final String CONTEXT_PATH = "ee.openeid.siga.mobileid.model";
 
     private final String serviceUrl;
 
     public MobileService(String serviceUrl) {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("com.nortal.sample.mobileid.model");
+        marshaller.setContextPath(CONTEXT_PATH);
         setMarshaller(marshaller);
         setUnmarshaller(marshaller);
         this.serviceUrl = serviceUrl;
@@ -27,7 +28,6 @@ public class MobileService extends WebServiceGatewaySupport {
         request.setIDCode(idCode);
         request.setCountry(country);
         request.setReturnCertData(ReturnCertDataType.SIGN);
-
         GetMobileCertByIDCodeResponse response = (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
@@ -46,7 +46,7 @@ public class MobileService extends WebServiceGatewaySupport {
         request.setHash(hash);
         request.setHashType(HashType.fromValue(hashType));
 
-        return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        return  (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
     }
 
     public GetMobileSignHashStatusResponse getMobileSignHashStatus(String sessCode) {

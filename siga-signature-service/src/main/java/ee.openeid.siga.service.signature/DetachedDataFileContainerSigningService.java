@@ -8,11 +8,13 @@ import ee.openeid.siga.common.exception.DataFileNotFoundException;
 import ee.openeid.siga.common.exception.DataToSignNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.MobileService;
+import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.Map;
 @Service
 public class DetachedDataFileContainerSigningService implements DetachedDataFileSessionHolder {
 
+    private static final String OK_RESPONSE = "OK";
     private MobileService mobileService;
     private SessionService sessionService;
     private Configuration configuration = new Configuration();
@@ -45,14 +48,10 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
 
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
         Signature signature = dataToSign.finalize(base64Decoded);
+        SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
 
-        SignatureDataFilesParser parser = new SignatureDataFilesParser(signature.getAdESSignature());
-        Map<String, String> dataFiles = parser.getEntries();
-        SignatureWrapper signatureWrapper = new SignatureWrapper();
-        signatureWrapper.setSignature(signature.getAdESSignature());
-        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         sessionHolder.getSignatures().add(signatureWrapper);
-
+        sessionHolder.setDataToSign(null);
         sessionService.update(containerId, sessionHolder);
         return SessionResult.OK.name();
     }
@@ -64,7 +63,13 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         signatureParameters.setSigningCertificate(signingCertificate);
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
-        return null;
+        MobileSignHashResponse response = mobileService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
+        if (!OK_RESPONSE.equals(response.getStatus())) {
+            throw new IllegalStateException("Invalid DigiDocService response");
+        }
+        sessionHolder.setSessionCode(response.getSesscode());
+        sessionService.update(containerId, sessionHolder);
+        return response.getChallengeID();
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
@@ -85,6 +90,15 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
             builder = builder.withRoles(signatureParameters.getRoles().toArray(roles));
         }
         return builder;
+    }
+
+    private SignatureWrapper createSignatureWrapper(byte[] signature) {
+        SignatureWrapper signatureWrapper = new SignatureWrapper();
+        SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
+        Map<String, String> dataFiles = parser.getEntries();
+        signatureWrapper.setSignature(signature);
+        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
+        return signatureWrapper;
     }
 
     private DigestDataFile convertDataFile(HashCodeDataFile hashCodeDataFile) {
