@@ -1,41 +1,33 @@
 package ee.openeid.siga.mobileid.client;
 
+import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.mobileid.model.*;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
+
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
-
-import ee.openeid.siga.mobileid.model.GetMobileCertByIDCodeRequest;
-import ee.openeid.siga.mobileid.model.GetMobileCertByIDCodeResponse;
-import ee.openeid.siga.mobileid.model.GetMobileSignHashStatusRequest;
-import ee.openeid.siga.mobileid.model.GetMobileSignHashStatusResponse;
-import ee.openeid.siga.mobileid.model.HashType;
-import ee.openeid.siga.mobileid.model.LanguageType;
-import ee.openeid.siga.mobileid.model.MobileSignHashRequest;
-import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
-import ee.openeid.siga.mobileid.model.ReturnCertDataType;
-
 public class MobileService extends WebServiceGatewaySupport {
+    private static final String CONTEXT_PATH = "ee.openeid.siga.mobileid.model";
 
     private final String serviceUrl;
 
     public MobileService(String serviceUrl) {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("com.nortal.sample.mobileid.model");
+        marshaller.setContextPath(CONTEXT_PATH);
         setMarshaller(marshaller);
         setUnmarshaller(marshaller);
         this.serviceUrl = serviceUrl;
     }
 
-    public X509Certificate getMobileCertificate(String idCode) {
+    public X509Certificate getMobileCertificate(String idCode, String country) {
         GetMobileCertByIDCodeRequest request = new GetMobileCertByIDCodeRequest();
         request.setIDCode(idCode);
-        request.setCountry("EE");
+        request.setCountry(country);
         request.setReturnCertData(ReturnCertDataType.SIGN);
-
         GetMobileCertByIDCodeResponse response = (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
@@ -45,16 +37,16 @@ public class MobileService extends WebServiceGatewaySupport {
         }
     }
 
-    public MobileSignHashResponse initMobileSignHash(String idCode, String phoneNo, String hashType, String hash) {
+    public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();
-        request.setServiceName("Testimine");
-        request.setLanguage(LanguageType.EST);
-        request.setIDCode(idCode);
-        request.setPhoneNo(phoneNo);
+        request.setServiceName(mobileIdInformation.getServiceName());
+        request.setLanguage(LanguageType.fromValue(mobileIdInformation.getLanguage()));
+        request.setIDCode(mobileIdInformation.getPersonIdentifier());
+        request.setPhoneNo(mobileIdInformation.getPhoneNo());
         request.setHash(hash);
         request.setHashType(HashType.fromValue(hashType));
 
-        return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        return  (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
     }
 
     public GetMobileSignHashStatusResponse getMobileSignHashStatus(String sessCode) {

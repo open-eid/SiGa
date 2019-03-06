@@ -1,5 +1,6 @@
 package ee.openeid.siga.validation;
 
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashCodeDataFile;
@@ -148,6 +149,173 @@ public class RequestValidatorTest {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Invalid signature value");
         RequestValidator.validateSignatureValue("+=?!%");
+    }
+
+    @Test
+    public void successfulMobileInformation() {
+        RequestValidator.validateMobileIdInformation(getMobileInformationRequest());
+    }
+
+    @Test
+    public void nullLanguage() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id language");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setLanguage(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void emptyLanguage() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id language");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setLanguage("");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidLanguage() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id language");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setLanguage("ESTO");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidMessageToDisplay() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id message to display");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 41));
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void nullMessageToDisplay() {
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setMessageToDisplay(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void nullPhoneNo() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid phone No.");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPhoneNo(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void emptyPhoneNo() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid phone No.");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPhoneNo("");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidPhoneNo() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid phone No.");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPhoneNo(StringUtils.repeat("a", 21));
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void nullPersonIdentifier() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPersonIdentifier(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void emptyPersonIdentifier() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPersonIdentifier("");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidPersonIdentifier() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void nullServiceName() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id service name");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setServiceName(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void emptyServiceName() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id service name");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setServiceName("");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidServiceName() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id service name");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setServiceName(StringUtils.repeat("a", 21));
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void nullCountry() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid country of origin");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setCountry(null);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void emptyCountry() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid country of origin");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setCountry("");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidCountry() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid country of origin");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setCountry("EST");
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    public static MobileIdInformation getMobileInformationRequest() {
+        MobileIdInformation mobileIdInformation = new MobileIdInformation();
+        mobileIdInformation.setServiceName("Service name");
+        mobileIdInformation.setPhoneNo("+37253410832");
+        mobileIdInformation.setPersonIdentifier("3489348234");
+        mobileIdInformation.setCountry("EE");
+        mobileIdInformation.setLanguage("EST");
+        mobileIdInformation.setMessageToDisplay("Random display");
+        return mobileIdInformation;
     }
 
     public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {

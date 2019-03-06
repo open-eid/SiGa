@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.test;
 
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
@@ -87,5 +88,16 @@ public class RequestUtil {
         signatureParameters.setPostalCode("34234");
         signatureParameters.setRoles(Collections.singletonList("Engineer"));
         return signatureParameters;
+    }
+
+    public static MobileIdInformation createMobileInformation() {
+        MobileIdInformation mobileIdInformation = new MobileIdInformation();
+        mobileIdInformation.setServiceName("Service name");
+        mobileIdInformation.setPhoneNo("+37253410832");
+        mobileIdInformation.setPersonIdentifier("3489348234");
+        mobileIdInformation.setCountry("EE");
+        mobileIdInformation.setLanguage("EST");
+        mobileIdInformation.setMessageToDisplay("Random display");
+        return mobileIdInformation;
     }
 }

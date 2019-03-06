@@ -16,8 +16,6 @@ public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-
-
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse resourceNotFoundException(ResourceNotFoundException exception) {

@@ -1,10 +1,12 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
+import eu.europa.esig.dss.DSSUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +75,8 @@ public class MainController {
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
 
         CreateHashCodeRemoteSigningResponse response = new CreateHashCodeRemoteSigningResponse();
-        String dataToSignBase64 = new String(Base64.getEncoder().encode(dataToSign.getDataToSign()));
-        response.setDataToSign(dataToSignBase64);
+        byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
+        response.setDataToSign(new String(Base64.getEncoder().encode(digest)));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;
     }
@@ -91,7 +93,17 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashCodeMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashCodeMobileIdSigningRequest createMobileIdSigningRequest) {
-        return null;
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
+        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation(createMobileIdSigningRequest);
+        SignatureParameters signatureParameters = RequestTransformer.transformMobileIdSignatureParameters(createMobileIdSigningRequest);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+
+        String challengeId = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+
+        CreateHashCodeMobileIdSigningResponse response = new CreateHashCodeMobileIdSigningResponse();
+        response.setChallengeId(challengeId);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
