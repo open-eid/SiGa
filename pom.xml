@@ -22,6 +22,7 @@
         <module>siga-auth</module>
         <module>siga-session-storage</module>
         <module>siga-signature-service</module>
+        <module>siga-test</module>
     </modules>
 
     <properties>
