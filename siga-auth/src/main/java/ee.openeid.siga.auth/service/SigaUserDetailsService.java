@@ -22,7 +22,6 @@ public class SigaUserDetailsService implements UserDetailsService {
     public SigaUserDetails loadUserByUsername(String serviceUuid) throws UsernameNotFoundException {
         SigaService service = serviceRepository.findByUuid(serviceUuid)
                 .orElseThrow(() -> new UsernameNotFoundException("SigaService UUID not found"));
-
         return SigaUserDetails.builder()
                 .clientName(service.getClient().getName())
                 .serviceName(service.getName())

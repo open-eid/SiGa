@@ -1,6 +1,6 @@
 package ee.openeid.siga.auth;
 
-import ee.openeid.siga.auth.filter.event.EventsLoggingFilter;
+import ee.openeid.siga.auth.filter.event.SigaEventsLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
@@ -46,7 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     HmacAuthenticationProvider hmacAuthenticationProvider;
 
     @Autowired
-    EventsLoggingFilter eventsLoggingFilter;
+    SigaEventsLoggingFilter eventsLoggingFilter;
 
     @Override
     public void configure(final WebSecurity web) {

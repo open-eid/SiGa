@@ -46,14 +46,12 @@ public class SigaAuthTests {
     private final static String REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
     private final static int TOKEN_EXPIRATION_IN_SECONDS = 120;
     private final static int TOKEN_CLOCK_SKEW = 2;
-    private String xAuthorizationTimestamp;
-    private String xAuthorizationSignature;
-
     @Autowired
     MockMvc mockMvc;
-
     @Autowired
     VaultTemplate vaultTemplate;
+    private String xAuthorizationTimestamp;
+    private String xAuthorizationSignature;
 
     @Before
     public void setup() throws InvalidKeyException, NoSuchAlgorithmException {
