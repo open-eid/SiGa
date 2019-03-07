@@ -2,22 +2,18 @@ package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
-import io.restassured.response.ValidatableResponse;
 import org.json.JSONException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-
-import ee.openeid.siga.test.utils.RequestBuilder;
 
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainer;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -32,30 +28,45 @@ public class HashcodeST extends TestBase{
 
     @Test
     public void createHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        Response status = postCreateHashcodeContainer(flow, hashcodeContainersDataDefault());
-        assertThat(status.statusCode(), equalTo(200));
-        assertThat(status.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
 
     @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response status = postUploadHashcodeContainer(flow, hashcodeContainer("hashcode.asice"));
-        assertThat(status.statusCode(), equalTo(200));
-        assertThat(status.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
 
     @Test
     public void getHashcodeContainerShouldReturnContainerId() throws NoSuchAlgorithmException, InvalidKeyException {
-        Response status = getValidationReportForContainerInSession(flow);
-        assertThat(status.statusCode(), equalTo(400));
-        assertThat(status.getBody().path(ERROR_CODE), equalTo(SESSION_NOT_FOUND));
+        Response response = getValidationReportForContainerInSession(flow);
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(SESSION_NOT_FOUND));
     }
 
     @Test
-    public void validateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
-        postUploadHashcodeContainer(flow, hashcodeContainer("hashcode.asice"));
+    public void validateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
         Response response = getValidationReportForContainerInSession(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+    }
+
+    @Test
+    public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest("hashcode.asice"));
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+    }
+
+    @Ignore //TODO: Signer cert should be in what form? What are the signatureProfile values?
+    @Test
+    public void startRemoteSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        assertThat(response.statusCode(), equalTo(200));
     }
 }

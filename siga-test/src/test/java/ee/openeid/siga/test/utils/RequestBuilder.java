@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -19,11 +18,11 @@ import static ee.openeid.siga.test.utils.HmacSigner.generateHmacSignature;
 
 public class RequestBuilder {
 
-    public static String hashcodeContainersDataDefault() throws JSONException {
-        return hashcodeContainersData(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
+    public static String hashcodeContainersDataRequestWithDefault() throws JSONException {
+        return hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
     }
 
-    public static String hashcodeContainersData(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
+    public static String hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -36,12 +35,38 @@ public class RequestBuilder {
         return request.toString();
     }
 
-    public static String hashcodeContainer(String containerName) throws JSONException, IOException {
+    public static String hashcodeContainerRequest(String containerName) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
         String path = classLoader.getResource(containerName).getPath().substring(1);
         String file = Base64.encodeBase64String(Files.readAllBytes(FileSystems.getDefault().getPath(path)));
         request.put("container", file);
+        return request.toString();
+    }
+
+    public static String hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
+        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
+    }
+
+    public static String hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+        JSONObject request = new JSONObject();
+        request.put("signingCertificate", signingCertificate);
+        request.put("signatureProfile", signatureProfile);
+        if (city != null){
+            request.put("city", city);
+        }
+        if (stateOrProvince != null){
+            request.put("stateOrProvince", stateOrProvince);
+        }
+        if (postalCode != null){
+            request.put("postalCode", postalCode);
+        }
+        if (country != null){
+            request.put("country", country);
+        }
+        if (roles != null){
+            request.put("roles", roles);
+        }
         return request.toString();
     }
 
