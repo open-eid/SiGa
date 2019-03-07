@@ -108,7 +108,13 @@ public class MainController {
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashCodeMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId) {
-        return null;
+        RequestValidator.validateContainerId(containerId);
+
+        String status = signingService.processMobileStatus(containerId);
+
+        GetHashCodeMobileIdSigningStatusResponse response = new GetHashCodeMobileIdSigningStatusResponse();
+        response.setMidStatus(status);
+        return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)

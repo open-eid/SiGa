@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 public class CertificateUtilTest {
     private static final String CERTIFICATE = "MIIEEzCCAvugAwIBAgIQc/jtqiMEFERMtVvsSsH7sjANBgkqhkiG9w0BAQUFADB9" +
@@ -33,14 +34,14 @@ public class CertificateUtilTest {
 
     @Test
     public void createValidCertificate() {
-        X509Certificate certificate = CertificateUtil.createX509Certificate(CERTIFICATE.getBytes());
+        X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(CERTIFICATE.getBytes()));
         Assert.assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 
     @Test(expected = TechnicalException.class)
     public void createInvalidCertificate() {
         String invalidCertificate = CERTIFICATE.replace("a", "b");
-        X509Certificate certificate = CertificateUtil.createX509Certificate(invalidCertificate.getBytes());
+        X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(invalidCertificate.getBytes()));
         Assert.assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 

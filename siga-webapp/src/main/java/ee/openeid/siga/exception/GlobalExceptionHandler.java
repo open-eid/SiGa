@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.ws.soap.client.SoapFaultClientException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,6 +34,16 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorCode.INVALID_REQUEST.name());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(SoapFaultClientException.class)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse soapFaultClientException(Exception exception) {
+        LOGGER.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage("Unable to connect to client");
+        errorResponse.setErrorCode(ErrorCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
 

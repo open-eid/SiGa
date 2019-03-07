@@ -1,13 +1,12 @@
 package ee.openeid.siga.mobileid.client;
 
+import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.mobileid.model.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 public class MobileService extends WebServiceGatewaySupport {
@@ -28,12 +27,11 @@ public class MobileService extends WebServiceGatewaySupport {
         request.setIDCode(idCode);
         request.setCountry(country);
         request.setReturnCertData(ReturnCertDataType.SIGN);
-        GetMobileCertByIDCodeResponse response = (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         try {
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(response.getSignCertData()));
-        } catch (CertificateException e) {
-            throw new RuntimeException("Error constructing certificate object from bytes");
+            GetMobileCertByIDCodeResponse response = (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+            return CertificateUtil.createX509Certificate(response.getSignCertData());
+        } catch (Exception e) {
+            throw new ClientException("Unable to receive valid response from DigiDocService");
         }
     }
 
@@ -45,16 +43,22 @@ public class MobileService extends WebServiceGatewaySupport {
         request.setPhoneNo(mobileIdInformation.getPhoneNo());
         request.setHash(hash);
         request.setHashType(HashType.fromValue(hashType));
-
-        return  (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        try {
+            return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        } catch (Exception e) {
+            throw new ClientException("Unable to receive valid response from DigiDocService");
+        }
     }
 
     public GetMobileSignHashStatusResponse getMobileSignHashStatus(String sessCode) {
         GetMobileSignHashStatusRequest request = new GetMobileSignHashStatusRequest();
         request.setSesscode(sessCode);
         request.setWaitSignature(false);
-
-        return (GetMobileSignHashStatusResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        try {
+            return (GetMobileSignHashStatusResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
+        } catch (Exception e) {
+            throw new ClientException("Unable to receive valid response from DigiDocService");
+        }
     }
 
 }

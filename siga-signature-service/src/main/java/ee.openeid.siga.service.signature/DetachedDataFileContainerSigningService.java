@@ -4,17 +4,20 @@ package ee.openeid.siga.service.signature;
 import ee.openeid.siga.common.HashCodeDataFile;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.exception.DataFileNotFoundException;
-import ee.openeid.siga.common.exception.DataToSignNotFoundException;
+import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.MobileService;
+import ee.openeid.siga.mobileid.model.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
+import ee.openeid.siga.mobileid.model.ProcessStatusType;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSUtils;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,13 +40,14 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         verifyDataFileExistence(sessionHolder);
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         sessionHolder.setDataToSign(dataToSign);
+        sessionHolder.setSigningType(SigningType.REMOTE);
         sessionService.update(containerId, sessionHolder);
         return dataToSign;
     }
 
     public String finalizeSigning(String containerId, String signatureValue) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
-        verifyDataToSignExistence(sessionHolder);
+        validateRemoteSession(sessionHolder);
         DataToSign dataToSign = sessionHolder.getDataToSign();
 
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
@@ -51,7 +55,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
 
         sessionHolder.getSignatures().add(signatureWrapper);
-        sessionHolder.setDataToSign(null);
+        sessionHolder.clearSigning();
         sessionService.update(containerId, sessionHolder);
         return SessionResult.OK.name();
     }
@@ -67,9 +71,27 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         if (!OK_RESPONSE.equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
+        sessionHolder.setDataToSign(dataToSign);
+        sessionHolder.setSigningType(SigningType.MOBILE_ID);
         sessionHolder.setSessionCode(response.getSesscode());
         sessionService.update(containerId, sessionHolder);
         return response.getChallengeID();
+    }
+
+    public String processMobileStatus(String containerId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        validateMobileIdSession(sessionHolder);
+        GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileService.getMobileSignHashStatus(sessionHolder.getSessionCode());
+        ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
+        if (ProcessStatusType.SIGNATURE == status) {
+            DataToSign dataToSign = sessionHolder.getDataToSign();
+            Signature signature = dataToSign.finalize(getMobileSignHashStatusResponse.getSignature());
+            SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
+            sessionHolder.getSignatures().add(signatureWrapper);
+            sessionHolder.clearSigning();
+            sessionService.update(containerId, sessionHolder);
+        }
+        return status.name();
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
@@ -104,19 +126,34 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     private DigestDataFile convertDataFile(HashCodeDataFile hashCodeDataFile) {
         String fileName = hashCodeDataFile.getFileName();
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.SHA512;
-        byte[] digest = hashCodeDataFile.getFileHashSha512().getBytes();
+        byte[] digest = Base64.getDecoder().decode(hashCodeDataFile.getFileHashSha512().getBytes());
         return new DigestDataFile(fileName, digestAlgorithm, digest);
     }
 
     private void verifyDataFileExistence(DetachedDataFileContainerSessionHolder sessionHolder) {
         if (sessionHolder.getDataFiles().size() < 1) {
-            throw new DataFileNotFoundException("Unable to create signature. Data files must be added to container");
+            throw new InvalidSessionDataException("Unable to create signature. Data files must be added to container");
         }
     }
 
-    private void verifyDataToSignExistence(DetachedDataFileContainerSessionHolder sessionHolder) {
+    private void validateRemoteSession(DetachedDataFileContainerSessionHolder sessionHolder) {
         if (sessionHolder.getDataToSign() == null) {
-            throw new DataToSignNotFoundException("Unable to finalize signature. Invalid session found");
+            throw new InvalidSessionDataException("Unable to finalize signature. Invalid session found");
+        }
+        if (SigningType.REMOTE != sessionHolder.getSigningType()) {
+            throw new InvalidSessionDataException("Unable to finalize signature");
+        }
+    }
+
+    private void validateMobileIdSession(DetachedDataFileContainerSessionHolder sessionHolder) {
+        if (sessionHolder.getDataToSign() == null) {
+            throw new InvalidSessionDataException("Unable to finalize signature. Invalid session found");
+        }
+        if (StringUtils.isBlank(sessionHolder.getSessionCode())) {
+            throw new InvalidSessionDataException("Unable to finalize signature. Session code not found");
+        }
+        if (SigningType.MOBILE_ID != sessionHolder.getSigningType()) {
+            throw new InvalidSessionDataException("Unable to finalize signature");
         }
     }
 
@@ -138,4 +175,5 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     public void setMobileService(MobileService mobileService) {
         this.mobileService = mobileService;
     }
+
 }

@@ -8,12 +8,14 @@ import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
 
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 public class RequestTransformer {
 
     public static SignatureParameters transformRemoteRequest(CreateHashCodeRemoteSigningRequest remoteSigningRequest) {
         SignatureParameters signatureParameters = new SignatureParameters();
-        X509Certificate x509Certificate = CertificateUtil.createX509Certificate(remoteSigningRequest.getSigningCertificate().getBytes());
+        byte[] base64DecodedCertificate = Base64.getDecoder().decode(remoteSigningRequest.getSigningCertificate().getBytes());
+        X509Certificate x509Certificate = CertificateUtil.createX509Certificate(base64DecodedCertificate);
 
         signatureParameters.setSigningCertificate(x509Certificate);
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(remoteSigningRequest.getSignatureProfile());
