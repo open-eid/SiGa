@@ -75,7 +75,7 @@ public class SigaEventLoggingAspect {
                         sigaEvent.addStartParameter(name, args[parameterIndex.get()].toString());
                     });
         }
-        if (sigaEventLog.logRequestBodyXPath().length > 0) {
+        if (sigaEventLog.logRequestBody().length > 0) {
             AtomicInteger parameterIndex = new AtomicInteger(-1);
             stream(parameterAnnotations).flatMap(Arrays::stream)
                     .filter(a -> {
@@ -85,7 +85,7 @@ public class SigaEventLoggingAspect {
                     .map(a -> (RequestBody) a)
                     .findFirst().ifPresent(requestBody -> {
                 final Object requestBodyObject = args[parameterIndex.get()];
-                stream(sigaEventLog.logRequestBodyXPath()).forEach(parameterNameXPath -> {
+                stream(sigaEventLog.logRequestBody()).forEach(parameterNameXPath -> {
                     Object value = JXPathContext.newContext(requestBodyObject).getValue(parameterNameXPath.xpath());
                     sigaEvent.addStartParameter(parameterNameXPath.parameterName(), value.toString());
                 });
