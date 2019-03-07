@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1551794617390-1
+      author: (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: client_pk
+                  name: id
+                  type: SERIAL
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+              - column:
+                  name: contact_name
+                  type: VARCHAR(100)
+              - column:
+                  name: contact_email
+                  type: VARCHAR(256)
+              - column:
+                  name: contact_phone
+                  type: VARCHAR(30)
+            tableName: siga_client
+  - changeSet:
+      id: 1551794617390-2
+      author: (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: service_pk
+                  name: id
+                  type: SERIAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: uuid
+                  type: VARCHAR(36)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: signing_secret
+                  type: VARCHAR(128)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: client_id
+                  type: INTEGER
+              - column:
+                  name: name
+                  type: VARCHAR(20)
+              - column:
+                  name: sk_relying_party_name
+                  type: VARCHAR(20)
+              - column:
+                  name: sk_relying_party_uuid
+                  type: VARCHAR(100)
+            tableName: siga_service
+  - changeSet:
+      id: 1551794617390-3
+      author: (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: name
+            indexName: contact_name
+            tableName: siga_client
+            unique: true
+  - changeSet:
+      id: 1551794617390-4
+      author: (generated)
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: uuid
+            indexName: service_name_uindex
+            tableName: siga_service
+            unique: true
+  - changeSet:
+      id: 1551794617390-5
+      author: (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: client_id
+            baseTableName: siga_service
+            constraintName: service_client_id_fk
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: siga_client
+            validate: true
