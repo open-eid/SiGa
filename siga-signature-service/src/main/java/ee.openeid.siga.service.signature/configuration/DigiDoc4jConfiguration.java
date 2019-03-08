@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Profile;
 
 
 @SpringBootConfiguration
-@Profile("!test")
-public class SigaConfiguration {
+@Profile("!digidoc4jTest")
+public class DigiDoc4jConfiguration {
     @Bean
     public Configuration configuration() {
         return new Configuration();
