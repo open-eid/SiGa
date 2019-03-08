@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.digestSigner.signDigest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -72,8 +73,8 @@ public class HashcodeST extends TestBase{
     @Test
     public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
-        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("signatureValue"));
+        Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"))));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
     }
