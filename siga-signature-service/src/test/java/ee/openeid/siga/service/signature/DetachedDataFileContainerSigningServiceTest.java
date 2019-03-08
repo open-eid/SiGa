@@ -50,8 +50,13 @@ public class DetachedDataFileContainerSigningServiceTest {
     @Mock
     private SessionService sessionService;
 
+    @Mock
+    private Configuration configuration;
+
     @Before
     public void setUp() throws IOException, URISyntaxException {
+        configuration = new Configuration(Configuration.Mode.TEST);
+        signingService.setConfiguration(configuration);
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createSessionHolder());
     }
 

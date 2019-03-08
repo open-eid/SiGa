@@ -28,7 +28,7 @@
     <logger name="eu.europa.esig.dss.client.http.commons" level="INFO"/>
     <logger name="ee.sk" level="INFO"/>
 
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </root>
