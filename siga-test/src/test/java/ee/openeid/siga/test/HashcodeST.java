@@ -62,11 +62,20 @@ public class HashcodeST extends TestBase{
         assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
     }
 
-    @Ignore //TODO: Signer cert should be in what form? What are the signatureProfile values?
     @Test
     public void startRemoteSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Ignore
+    @Test
+    public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response response = putRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("signatureValue"));
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
     }
 }

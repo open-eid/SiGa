@@ -11,6 +11,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.TestData.DEFAULT_FILESIZE;
@@ -18,11 +19,11 @@ import static ee.openeid.siga.test.utils.HmacSigner.generateHmacSignature;
 
 public class RequestBuilder {
 
-    public static String hashcodeContainersDataRequestWithDefault() throws JSONException {
+    public static JSONObject hashcodeContainersDataRequestWithDefault() throws JSONException {
         return hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
     }
 
-    public static String hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
+    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -32,23 +33,23 @@ public class RequestBuilder {
         dataFileObject.put("fileSize", fileSize);
         datafiles.put(dataFileObject);
         request.put("dataFiles", datafiles);
-        return request.toString();
+        return request;
     }
 
-    public static String hashcodeContainerRequest(String containerName) throws JSONException, IOException {
+    public static JSONObject hashcodeContainerRequest(String containerName) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
         String path = classLoader.getResource(containerName).getPath().substring(1);
         String file = Base64.encodeBase64String(Files.readAllBytes(FileSystems.getDefault().getPath(path)));
         request.put("container", file);
-        return request.toString();
+        return request;
     }
 
-    public static String hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
+    public static JSONObject hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
         return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
     }
 
-    public static String hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
@@ -67,9 +68,14 @@ public class RequestBuilder {
         if (roles != null){
             request.put("roles", roles);
         }
-        return request.toString();
+        return request;
     }
 
+    public static JSONObject hashcodeRemoteSigningSignatureValueRequest(String signatureValue) throws JSONException, IOException {
+        JSONObject request = new JSONObject();
+        request.put("signatureValue", signatureValue);
+        return request;
+    }
 
     public static String signRequest(SigaApiFlow flow, String request, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
         flow.setSigningTime(getSigningTimeInSeconds().toString());
@@ -78,7 +84,7 @@ public class RequestBuilder {
     }
 
     private static Long getSigningTimeInSeconds (){
-        return  System.currentTimeMillis()/1000;
+        return  Instant.now().getEpochSecond();
     }
 
 }
