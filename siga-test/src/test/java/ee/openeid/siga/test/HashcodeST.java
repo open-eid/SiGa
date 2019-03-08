@@ -65,17 +65,25 @@ public class HashcodeST extends TestBase{
     @Test
     public void startRemoteSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         assertThat(response.statusCode(), equalTo(200));
     }
 
-    @Ignore
     @Test
     public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
-        postRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        Response response = putRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("signatureValue"));
+        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("signatureValue"));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+    }
+
+   // @Ignore //TODO: Not getting proper response from DigiDocService
+    @Test
+    public void signWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        Response response = getHashcodeMidSigningInSession(flow);
+        assertThat(response.statusCode(), equalTo(200));
     }
 }

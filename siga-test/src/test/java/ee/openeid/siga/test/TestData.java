@@ -6,7 +6,9 @@ public class TestData {
     public static final String HASHCODE_CONTAINERS = "/hashcodecontainers";
     public static final String VALIDATIONREPORT = "/validationreport";
     public static final String UPLOAD = "/upload";
-    public static final String REMOTESIGNING = "/remotesigning";
+    public static final String REMOTE_SIGNING = "/remotesigning";
+    public static final String MID_SIGNING = "/mobileidsigning";
+    public static final String STATUS = "/status";
 
 
     // Headers for HMAC authentication

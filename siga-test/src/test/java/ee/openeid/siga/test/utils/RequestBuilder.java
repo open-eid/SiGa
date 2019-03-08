@@ -5,6 +5,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -74,6 +75,40 @@ public class RequestBuilder {
     public static JSONObject hashcodeRemoteSigningSignatureValueRequest(String signatureValue) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
+        return request;
+    }
+
+    public static JSONObject hashcodeMidSigningRequestWithDefault (String personIdentifier, String phoneNo) throws JSONException {
+        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", "test1.service.ee", "LT", "something", null, null, null, null, null);
+    }
+
+    public static JSONObject hashcodeMidSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String serviceName, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+        JSONObject request = new JSONObject();
+        request.put("personIdentifier", personIdentifier);
+        request.put("phoneNo", phoneNo);
+        request.put("originCountry", originCountry);
+        request.put("language", language);
+        request.put("serviceName", serviceName);
+        request.put("signatureProfile", signatureProfile);
+
+        if (messageToDisplay != null){
+            request.put("messageToDisplay", messageToDisplay);
+        }
+        if (city != null){
+            request.put("city", city);
+        }
+        if (stateOrProvince != null){
+            request.put("stateOrProvince", stateOrProvince);
+        }
+        if (postalCode != null){
+            request.put("postalCode", postalCode);
+        }
+        if (country != null){
+            request.put("country", country);
+        }
+        if (roles != null){
+            request.put("roles", roles);
+        }
         return request;
     }
 
