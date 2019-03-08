@@ -33,7 +33,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     private static final String OK_RESPONSE = "OK";
     private MobileService mobileService;
     private SessionService sessionService;
-    private Configuration configuration = new Configuration();
+    private Configuration configuration;
 
     public DataToSign createDataToSign(String containerId, SignatureParameters signatureParameters) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
@@ -162,7 +162,8 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         return sessionService;
     }
 
-    protected void setConfiguration(Configuration configuration) {
+    @Autowired
+    public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 
