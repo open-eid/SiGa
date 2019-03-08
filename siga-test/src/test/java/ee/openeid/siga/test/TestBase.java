@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
@@ -47,6 +48,19 @@ public class TestBase {
     protected Response getHashcodeMidSigningInSession(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + STATUS, flow);
     }
+
+    protected Response pollForMidSigning (SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
+        Long endTime = Instant.now().getEpochSecond()  + 15;
+        while (Instant.now().getEpochSecond() < endTime) {
+            Thread.sleep(3500);
+            Response response = getHashcodeMidSigningInSession(flow);
+            if ("SIGNATURE".equals(response.getBody().path("midStatus"))) {
+                return response;
+            }
+        }
+        throw new RuntimeException("No MID response in: 15 seconds");
+    }
+
 
     private Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
@@ -105,4 +119,6 @@ public class TestBase {
                 .extract()
                 .response();
     }
+
+
 }

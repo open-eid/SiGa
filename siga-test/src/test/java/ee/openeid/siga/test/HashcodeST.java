@@ -79,12 +79,11 @@ public class HashcodeST extends TestBase{
         assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
     }
 
-   // @Ignore //TODO: Not getting proper response from DigiDocService
     @Test
-    public void signWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void signWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
-        Response response = getHashcodeMidSigningInSession(flow);
+        Response response = pollForMidSigning(flow);
         assertThat(response.statusCode(), equalTo(200));
     }
 }
