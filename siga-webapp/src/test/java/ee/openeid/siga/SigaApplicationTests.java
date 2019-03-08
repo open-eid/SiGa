@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.SecurityConfiguration;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.auth.properties.SigaVaultProperties;
-import ee.openeid.siga.webapp.json.GetHashCodeMobileIdSigningStatusResponse;
-import ee.openeid.siga.webapp.json.UploadHashCodeContainerResponse;
+import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -30,7 +30,6 @@ import org.springframework.vault.support.VaultResponseSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +45,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "digidoc4jTest"})
 @SpringBootTest(classes = {SigaApplication.class, SigaApplicationTests.TestConfiguration.class}, webEnvironment = RANDOM_PORT,
         properties = {"spring.main.allow-bean-definition-overriding=true",
                 "siga.security.hmac.expiration=120",
@@ -75,22 +74,49 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void mobileIdSigning() throws Exception {
+    public void mobileIdSigningFlow() throws Exception {
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String containerId = uploadContainer();
+        DetachedDataFileContainer originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
         startMobileSigning(containerId);
         String response = getMobileIdStatus(containerId);
         Assert.assertEquals("SIGNATURE", response);
-
+        DetachedDataFileContainer container = getContainer(containerId);
+        Assert.assertEquals(2, container.getSignatures().size());
+        Assert.assertEquals(2, container.getDataFiles().size());
+        ValidationConclusion validationConclusion = getValidationConclusion(containerId);
+        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
+        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
-    private void getContainer() {
+    private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
 
+        JSONObject request = new JSONObject();
+        String signature = getSignature(request.toString());
+        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/validationreport");
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+                .andExpect(status().is2xxSuccessful());
+
+        GetHashCodeValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeValidationReportResponse.class);
+        return reportResponse.getValidationConclusion();
+    }
+
+    private DetachedDataFileContainer getContainer(String containerId) throws Exception {
+        JSONObject request = new JSONObject();
+        String signature = getSignature(request.toString());
+        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+                .andExpect(status().is2xxSuccessful());
+        GetHashCodeContainerResponse getHashCodeContainerResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeContainerResponse.class);
+        DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
+        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(getHashCodeContainerResponse.getContainer())));
+        return detachedDataFileContainer;
     }
 
     private String getMobileIdStatus(String containerId) throws Exception {
         JSONObject request = new JSONObject();
-
         String signature = getSignature(request.toString());
         Thread.sleep(7000);
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
@@ -117,7 +143,7 @@ public class SigaApplicationTests {
 
     private String uploadContainer() throws Exception {
         JSONObject request = new JSONObject();
-        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
+        String container = IOUtils.toString(getFileInputStream(), Charset.defaultCharset());
         request.put("container", container);
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = post("/upload/hashcodecontainers");
@@ -145,7 +171,7 @@ public class SigaApplicationTests {
                 .build().getSignature(HMAC_SHARED_SECRET);
     }
 
-    private InputStream getFileInputStream(String filePath) throws URISyntaxException, IOException {
+    private InputStream getFileInputStream() throws IOException {
         Path documentPath = Paths.get(new ClassPathResource("hashcode.asice").getURI());
         return new ByteArrayInputStream(Base64.getEncoder().encode(Files.readAllBytes(documentPath)));
     }
