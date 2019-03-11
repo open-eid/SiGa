@@ -50,8 +50,8 @@ public class DetachedDataFileContainerServiceTest {
     @Test
     public void successfulGetContainer() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
-        String containerId = containerService.getContainer(CONTAINER_ID);
-        Assert.assertFalse(containerId.isBlank());
+        String container = containerService.getContainer(CONTAINER_ID);
+        Assert.assertFalse(container.isBlank());
     }
 
     @Test
