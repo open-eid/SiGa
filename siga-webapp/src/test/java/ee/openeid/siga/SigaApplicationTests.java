@@ -7,6 +7,8 @@ import ee.openeid.siga.auth.properties.SigaVaultProperties;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,8 +42,7 @@ import static ee.openeid.siga.auth.filter.hmac.HmacHeaders.*;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -58,6 +59,7 @@ public class SigaApplicationTests {
     private final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
     private final static String REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
     private String xAuthorizationTimestamp;
+    private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/sign_ESTEID2018.p12", "1234".toCharArray());
 
     @Autowired
     MockMvc mockMvc;
@@ -81,8 +83,30 @@ public class SigaApplicationTests {
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
         startMobileSigning(containerId);
-        String response = getMobileIdStatus(containerId);
-        Assert.assertEquals("SIGNATURE", response);
+        String mobileFirstStatus = getMobileIdStatus(containerId);
+        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        Thread.sleep(8000);
+        String mobileStatus = getMobileIdStatus(containerId);
+        Assert.assertEquals("SIGNATURE", mobileStatus);
+        assertSignedContainer(containerId);
+    }
+
+    @Test
+    public void remoteSigningFlow() throws Exception {
+        xAuthorizationTimestamp = valueOf(now().getEpochSecond());
+        String containerId = uploadContainer();
+        DetachedDataFileContainer originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        CreateHashCodeRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
+        byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
+        byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
+        String signatureValue = new String(Base64.getEncoder().encode(signedData));
+        finalizeRemoteSigning(containerId, signatureValue);
+        assertSignedContainer(containerId);
+    }
+
+    private void assertSignedContainer(String containerId) throws Exception {
         DetachedDataFileContainer container = getContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
@@ -118,11 +142,33 @@ public class SigaApplicationTests {
     private String getMobileIdStatus(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         String signature = getSignature(request.toString());
-        Thread.sleep(7000);
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
                 .andExpect(status().is2xxSuccessful());
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeMobileIdSigningStatusResponse.class).getMidStatus();
+    }
+
+    private CreateHashCodeRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("signatureProfile", "LT");
+        request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
+        String signature = getSignature(request.toString());
+        MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/remotesigning");
+
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+                .andExpect(status().is2xxSuccessful());
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashCodeRemoteSigningResponse.class);
+    }
+
+    private void finalizeRemoteSigning(String containerId, String signatureValue) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("signatureValue", signatureValue);
+
+        String signature = getSignature(request.toString());
+        MockHttpServletRequestBuilder builder = put("/hashcodecontainers/" + containerId + "/remotesigning");
+
+        mockMvc.perform(buildRequest(builder, signature, request))
+                .andExpect(status().is2xxSuccessful());
 
     }
 

@@ -6,7 +6,6 @@ import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService
 import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
-import eu.europa.esig.dss.DSSUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +74,7 @@ public class MainController {
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
 
         CreateHashCodeRemoteSigningResponse response = new CreateHashCodeRemoteSigningResponse();
-        byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
-        response.setDataToSign(new String(Base64.getEncoder().encode(digest)));
+        response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;
     }
