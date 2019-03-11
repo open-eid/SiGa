@@ -2,6 +2,7 @@ package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.auth.properties.SigaVaultProperties;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +13,12 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponseSupport;
 
 import static java.util.Objects.requireNonNull;
+import static lombok.AccessLevel.PRIVATE;
 
 @Configuration
 @PropertySource(value = {"vault-config.properties"})
 @Import(value = EnvironmentVaultConfiguration.class)
+@FieldDefaults(level = PRIVATE)
 public class VaultConfiguration {
 
     @Autowired

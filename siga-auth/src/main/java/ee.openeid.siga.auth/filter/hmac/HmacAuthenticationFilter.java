@@ -1,7 +1,10 @@
 package ee.openeid.siga.auth.filter.hmac;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.openeid.siga.auth.filter.event.SigaEventLogger;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
+import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventType;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.apachecommons.CommonsLog;
@@ -38,20 +41,23 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     int TOKEN_EXPIRATION_IN_SECONDS;
     int TOKEN_CLOCK_SKEW;
     String MAC_ALGORITHM;
+    SigaEventLogger sigaEventLogger;
 
-    public HmacAuthenticationFilter(RequestMatcher requestMatcher,
+    public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher,
                                     SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
         requireNonNull(securityConfigurationProperties.getHmac(), "siga.security.hmac properties not set!");
         TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration();
         TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew();
         MAC_ALGORITHM = securityConfigurationProperties.getHmac().getMacAlgorithm();
+        this.sigaEventLogger = sigaEventLogger;
         setAuthenticationSuccessHandler(noRedirectAuthenticationSuccessHandler());
     }
 
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
+        sigaEventLogger.logStartEvent(SigaEventType.AUTHENTICATION);
         final String timestamp = ofNullable(request.getHeader(X_AUTHORIZATION_TIMESTAMP.getValue()))
                 .orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Timestamp header"));
         checkIfTokenIsExpired(timestamp);
@@ -91,12 +97,14 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
                                             final FilterChain chain,
                                             final Authentication authResult) throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
+        sigaEventLogger.logEndEvent(SigaEventType.AUTHENTICATION);
         chain.doFilter(request, response);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException {
+        SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventType.AUTHENTICATION);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
@@ -104,9 +112,11 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setErrorCode("AUTHORIZATION_ERROR");
             if (failed instanceof InternalAuthenticationServiceException) {
-                errorResponse.setErrorMessage("Internal service error.");
+                errorResponse.setErrorMessage("Internal service error");
+                exceptionEvent.setErrorMessage("Internal service error");
             } else {
                 errorResponse.setErrorMessage(failed.getMessage());
+                exceptionEvent.setErrorMessage(failed.getMessage());
             }
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(out, errorResponse);

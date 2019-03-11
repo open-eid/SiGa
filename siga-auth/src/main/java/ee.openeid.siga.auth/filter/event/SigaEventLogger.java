@@ -34,11 +34,20 @@ public class SigaEventLogger {
         return event;
     }
 
-    public SigaEvent logExceptionEvent(SigaEventType eventType, long executionTimeInMilli) {
+    public SigaEvent logExceptionEvent(SigaEventType eventType) {
+        return logExceptionEvent(eventType, null);
+    }
+
+    public SigaEvent logExceptionEvent(SigaEventType eventType, Long executionTimeInMilli) {
+        return logExceptionEvent(eventType, null, executionTimeInMilli);
+    }
+
+    public SigaEvent logExceptionEvent(SigaEventType eventType, String errorMessage, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
                 .eventType(eventType)
                 .executionTime(now().toEpochMilli())
                 .executionDuration(executionTimeInMilli)
+                .errorMessage(errorMessage)
                 .resultType(SigaEvent.EventResultType.EXCEPTION)
                 .build();
         events.add(event);
@@ -74,7 +83,11 @@ public class SigaEventLogger {
                 return e;
             }).forEach(log::info);
         } else {
-            events.forEach(log::info);
+            final String serviceUuid = getEvents().get(0).getServiceUuid();
+            events.forEach(e -> {
+                e.setServiceUuid(serviceUuid);
+                log.info(e);
+            });
         }
     }
 
