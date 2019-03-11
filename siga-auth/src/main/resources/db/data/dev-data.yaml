@@ -43,6 +43,7 @@ databaseChangeLog:
       id: 1551795684113-2
       author: (generated)
       changes:
+        # Signing secret 746573745365637265744b6579303031 (testSecretKey001)
         - insert:
             columns:
               - column:
@@ -67,6 +68,7 @@ databaseChangeLog:
                   name: sk_relying_party_uuid
                   value: 439ffac4-39b1-11e9-b210-d663bd873d93
             tableName: siga_service
+        # Signing secret 746573745365637265744b6579303032 (testSecretKey002)
         - insert:
             columns:
               - column:
@@ -91,6 +93,7 @@ databaseChangeLog:
                   name: sk_relying_party_uuid
                   value: 439ffd6c-39b1-11e9-b210-d663bd873d93
             tableName: siga_service
+        # Signing secret 746573745365637265744b6579303033 (testSecretKey003)
         - insert:
             columns:
               - column:

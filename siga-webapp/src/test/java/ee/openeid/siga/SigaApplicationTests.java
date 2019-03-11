@@ -76,8 +76,30 @@ public class SigaApplicationTests {
     }
 
     @Test
+    public void getAnotherUserContainer() throws Exception {
+
+        String containerId = uploadContainer();
+        DetachedDataFileContainer originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        String uuid = "824dcfe9-5c26-4d76-829a-e6630f434746";
+        String sharedSecret = "746573745365637265744b6579303032";
+        JSONObject request = new JSONObject();
+        String signature = HmacSignature.builder()
+                .macAlgorithm(DEFAULT_HMAC_ALGO)
+                .serviceUuid(uuid)
+                .timestamp(xAuthorizationTimestamp)
+                .payload(request.toString().getBytes())
+                .build().getSignature(sharedSecret);
+
+        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
+        mockMvc.perform(buildRequest(builder, signature, request, uuid))
+                .andExpect(status().is(400));
+    }
+
+    @Test
     public void mobileIdSigningFlow() throws Exception {
-        xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String containerId = uploadContainer();
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -93,7 +115,6 @@ public class SigaApplicationTests {
 
     @Test
     public void remoteSigningFlow() throws Exception {
-        xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String containerId = uploadContainer();
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -120,7 +141,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/validationreport");
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
 
         GetHashCodeValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeValidationReportResponse.class);
@@ -131,7 +152,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
         GetHashCodeContainerResponse getHashCodeContainerResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeContainerResponse.class);
         DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
@@ -143,7 +164,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeMobileIdSigningStatusResponse.class).getMidStatus();
     }
@@ -155,7 +176,7 @@ public class SigaApplicationTests {
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/remotesigning");
 
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashCodeRemoteSigningResponse.class);
     }
@@ -167,7 +188,7 @@ public class SigaApplicationTests {
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = put("/hashcodecontainers/" + containerId + "/remotesigning");
 
-        mockMvc.perform(buildRequest(builder, signature, request))
+        mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
 
     }
@@ -183,7 +204,7 @@ public class SigaApplicationTests {
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/mobileidsigning");
 
-        mockMvc.perform(buildRequest(builder, signature, request))
+        mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
     }
 
@@ -194,15 +215,15 @@ public class SigaApplicationTests {
         String signature = getSignature(request.toString());
         MockHttpServletRequestBuilder builder = post("/upload/hashcodecontainers");
 
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request))
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), UploadHashCodeContainerResponse.class).getContainerId();
     }
 
-    private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String signature, JSONObject request) throws Exception {
+    private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String signature, JSONObject request, String serviceUUID) {
         return builder.accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), REQUESTING_SERVICE_UUID)
+                .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), serviceUUID)
                 .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
                 .header(X_AUTHORIZATION_SIGNATURE.getValue(), signature)
                 .content(request.toString().getBytes());
