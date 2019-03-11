@@ -74,9 +74,9 @@ public class HashcodeST extends TestBase{
     public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
         Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"))));
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+        assertThat(response.getBody().path("result"), equalTo("OK"));
     }
 
     @Test
