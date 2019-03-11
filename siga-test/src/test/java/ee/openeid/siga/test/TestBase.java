@@ -49,6 +49,10 @@ public class TestBase {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + STATUS, flow);
     }
 
+    protected Response getHashcodeSignatureList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES, flow);
+    }
+
     protected Response pollForMidSigning (SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
         Long endTime = Instant.now().getEpochSecond()  + 15;
         while (Instant.now().getEpochSecond() < endTime) {

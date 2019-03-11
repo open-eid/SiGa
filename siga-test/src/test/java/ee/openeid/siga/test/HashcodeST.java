@@ -86,4 +86,12 @@ public class HashcodeST extends TestBase{
         Response response = pollForMidSigning(flow);
         assertThat(response.statusCode(), equalTo(200));
     }
+
+    @Test
+    public void getSignaturesShouldReturnListOfSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        Response response = getHashcodeSignatureList(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path("signatures[0].id"), equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"));
+    }
 }
