@@ -26,7 +26,7 @@
         Alter configuration below as needed.
     -->
     <bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
-
+        <property name="igniteInstanceName" value="siga-ignite"/>
         <property name="cacheConfiguration">
             <list>
                 <bean class="org.apache.ignite.configuration.CacheConfiguration">
@@ -40,6 +40,14 @@
                                 </bean>
                             </constructor-arg>
                         </bean>
+                    </property>
+                </bean>
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="name" value="SIGA-AUTH-SERVICES"/>
+                    <property name="cacheMode" value="REPLICATED"/>
+                    <property name="atomicityMode" value="ATOMIC"/>
+                    <property name="nearConfiguration">
+                        <bean class="org.apache.ignite.configuration.NearCacheConfiguration"/>
                     </property>
                 </bean>
             </list>

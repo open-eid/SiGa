@@ -9,20 +9,12 @@ import static lombok.AccessLevel.PRIVATE;
 
 @Getter
 @Setter
+@FieldDefaults(level = PRIVATE)
 @ConfigurationProperties(prefix = "siga.security")
 public class SecurityConfigurationProperties {
 
-    private HmacConf hmac;
-    private VaultConf vault;
-    private EhCacheConf ehcache;
-
-    @Getter
-    @Setter
-    @FieldDefaults(level = PRIVATE)
-    public static class EhCacheConf {
-        int timeToLive;
-        int timeToIdle;
-    }
+    HmacConf hmac;
+    VaultConf vault;
 
     @Getter
     @Setter
