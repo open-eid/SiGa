@@ -15,7 +15,8 @@ public @interface SigaEventLog {
 
     boolean logPathVariables() default false;
 
-    ParameterNameXPath[] logRequestBody() default {};
+    JXPath[] logRequestBody() default {};
 
-    ParameterNameXPath[] logReturnObject() default {};
+    JXPath[] logReturnObject() default {};
+
 }

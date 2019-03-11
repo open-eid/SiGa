@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static java.time.Instant.now;
-import static java.util.Arrays.stream;
 
 @Aspect
 @Component
@@ -35,62 +33,69 @@ public class SigaEventLoggingAspect {
     public void callAt(SigaEventLog sigaEventLog) {
     }
 
-    @Around("callAt(sigaEventLog)")
-    public Object logMethodExecution(ProceedingJoinPoint joinPoint, SigaEventLog sigaEventLog) throws Throwable {
+    @Around("callAt(eventLog)")
+    public Object logMethodExecution(ProceedingJoinPoint joinPoint, SigaEventLog eventLog) throws Throwable {
 
         Instant start = now();
         try {
-            SigaEvent startEvent = sigaEventLogger.logStartEvent(sigaEventLog.eventType());
-            logMethodParameters(sigaEventLog, startEvent, joinPoint);
+            SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventType());
+            if (eventLog.logPathVariables() || eventLog.logRequestBody().length != 0) {
+                logMethodParameters(eventLog, startEvent, joinPoint);
+            }
 
             start = now();
             Object proceed = joinPoint.proceed();
             Instant finish = now();
 
             long executionTimeInMilli = Duration.between(start, finish).toMillis();
-            sigaEventLogger.logEndEvent(sigaEventLog.eventType(), executionTimeInMilli);
+            SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventType(), executionTimeInMilli);
+            if (eventLog.logReturnObject().length != 0) {
+                logObject(endEvent, eventLog.logReturnObject(), proceed);
+            }
             return proceed;
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
-            sigaEventLogger.logExceptionEvent(sigaEventLog.eventType(), executionTimeInMilli);
+            sigaEventLogger.logExceptionEvent(eventLog.eventType(), executionTimeInMilli);
             throw e;
         }
     }
 
-    private void logMethodParameters(SigaEventLog sigaEventLog, SigaEvent sigaEvent, ProceedingJoinPoint joinPoint) {
+    private void logMethodParameters(SigaEventLog eventLog, SigaEvent event, ProceedingJoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         Object[] args = joinPoint.getArgs();
 
-        if (sigaEventLog.logPathVariables()) {
-            AtomicInteger parameterIndex = new AtomicInteger(-1);
-            stream(parameterAnnotations).flatMap(Arrays::stream)
-                    .filter(a -> {
-                        parameterIndex.incrementAndGet();
-                        return a.annotationType().isAssignableFrom(PathVariable.class);
-                    })
-                    .map(a -> (PathVariable) a)
-                    .forEach(a -> {
-                        String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, a.value());
-                        sigaEvent.addStartParameter(name, args[parameterIndex.get()].toString());
-                    });
-        }
-        if (sigaEventLog.logRequestBody().length > 0) {
-            AtomicInteger parameterIndex = new AtomicInteger(-1);
-            stream(parameterAnnotations).flatMap(Arrays::stream)
-                    .filter(a -> {
-                        parameterIndex.incrementAndGet();
-                        return a.annotationType().isAssignableFrom(RequestBody.class);
-                    })
-                    .map(a -> (RequestBody) a)
-                    .findFirst().ifPresent(requestBody -> {
-                final Object requestBodyObject = args[parameterIndex.get()];
-                stream(sigaEventLog.logRequestBody()).forEach(parameterNameXPath -> {
-                    Object value = JXPathContext.newContext(requestBodyObject).getValue(parameterNameXPath.xpath());
-                    sigaEvent.addStartParameter(parameterNameXPath.parameterName(), value.toString());
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            if (eventLog.logPathVariables()) {
+                containsAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
+                    String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, ((PathVariable) annotation).value());
+                    event.addEventParameter(name, arg.toString());
                 });
-            });
+            }
+            if (eventLog.logRequestBody().length != 0) {
+                containsAnnotation(parameterAnnotations[i], RequestBody.class).ifPresent(annotation -> {
+                    logObject(event, eventLog.logRequestBody(), arg);
+                });
+            }
         }
+    }
+
+    private void logObject(SigaEvent event, JXPath[] jxPaths, Object returnObject) {
+        JXPathContext xc = JXPathContext.newContext(returnObject);
+        for (JXPath p : jxPaths) {
+            Object value = xc.getValue(p.xpath());
+            event.addEventParameter(p.logName(), value.toString());
+        }
+    }
+
+    private Optional<Annotation> containsAnnotation(Annotation[] annotations, Class annotationClass) {
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType().isAssignableFrom(annotationClass)) {
+                return Optional.of(annotation);
+            }
+        }
+        return Optional.empty();
     }
 }
 

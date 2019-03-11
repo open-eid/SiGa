@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @CommonsLog
 @Component
-public class SigaEventsLoggingFilter extends AbstractRequestLoggingFilter {
+public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
 
     @Autowired
     SigaEventLogger sigaEventLogger;

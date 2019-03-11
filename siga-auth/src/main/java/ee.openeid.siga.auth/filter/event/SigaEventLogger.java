@@ -3,6 +3,7 @@ package ee.openeid.siga.auth.filter.event;
 import ee.openeid.siga.auth.model.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventType;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import static lombok.AccessLevel.PRIVATE;
 @CommonsLog
 @FieldDefaults(level = PRIVATE)
 public class SigaEventLogger {
+    @Getter
     final List<SigaEvent> events = new ArrayList<>();
 
     public SigaEvent logStartEvent(SigaEventType eventType) {

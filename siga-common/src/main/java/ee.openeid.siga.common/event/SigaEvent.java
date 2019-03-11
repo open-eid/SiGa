@@ -25,41 +25,31 @@ public class SigaEvent {
     Long executionDuration;
     EventResultType resultType;
     @Builder.Default
-    Map<String, String> startParameters = new HashMap<>();
-    @Builder.Default
-    Map<String, String> returnParameters = new HashMap<>();
+    Map<String, String> eventParameters = new HashMap<>();
 
-    public void addStartParameter(String parameterName, String parameterValue) {
-        startParameters.put(parameterName, parameterValue);
-    }
-
-    public void addReturnParameter(String parameterName, String parameterValue) {
-        returnParameters.put(parameterName, parameterValue);
+    public void addEventParameter(String parameterName, String parameterValue) {
+        eventParameters.put(parameterName, parameterValue);
     }
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder("[");
-        sb.append("event_type=").append(eventType.name()).append(", ");
-        sb.append("client_name=").append(clientName).append(", ");
-        sb.append("service_name=").append(serviceName).append(", ");
-        sb.append("service_uuid=").append(serviceUuid).append(", ");
-
-        getParameters(startParameters).ifPresent(s -> sb.append("start_parameters=").append(s));
-        getParameters(returnParameters).ifPresent(s -> sb.append("return_parameters=").append(s));
+        StringJoiner sj = new StringJoiner(", ", "[", "]");
+        sj.add("event_type=" + eventType.name());
+        sj.add("client_name=" + clientName);
+        sj.add("service_name=" + serviceName);
+        sj.add("service_uuid=" + serviceUuid);
+        getParameters(eventParameters).ifPresent(s -> sj.add("event_parameters=" + s));
 
         if (errorCode != null) {
-            sb.append("error_code=").append(errorCode).append(", ");
+            sj.add("error_code=" + errorCode);
         }
         if (executionDuration != null) {
-            sb.append("duration=").append(executionDuration).append("ms");
+            sj.add("duration=" + executionDuration + "ms");
         }
         if (resultType != null) {
-            sb.append(", result=").append(resultType.name());
+            sj.add("result=" + resultType.name());
         }
-        sb.append("]");
-        return sb.toString();
+        return sj.toString();
     }
 
     private Optional<String> getParameters(Map<String, String> parameters) {

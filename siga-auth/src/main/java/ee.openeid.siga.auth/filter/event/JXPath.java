@@ -6,8 +6,8 @@ import java.lang.annotation.Target;
 
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ParameterNameXPath {
-    String parameterName();
+public @interface JXPath {
+    String logName();
 
     String xpath();
 }
