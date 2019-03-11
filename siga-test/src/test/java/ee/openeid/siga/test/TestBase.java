@@ -53,6 +53,14 @@ public class TestBase {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES, flow);
     }
 
+    protected Response getHashcodeContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+    }
+
+    protected Response deleteHashcodeContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return delete(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+    }
+
     protected Response pollForMidSigning (SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
         Long endTime = Instant.now().getEpochSecond()  + 15;
         while (Instant.now().getEpochSecond() < endTime) {
@@ -118,6 +126,22 @@ public class TestBase {
                 .contentType(ContentType.JSON)
                 .when()
                 .get(endpoint)
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
+
+    private Response delete(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", null))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .delete(endpoint)
                 .then()
                 .log().all()
                 .extract()

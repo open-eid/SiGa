@@ -16,6 +16,7 @@ import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.digestSigner.signDigest;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class HashcodeST extends TestBase{
@@ -93,5 +94,25 @@ public class HashcodeST extends TestBase{
         Response response = getHashcodeSignatureList(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("signatures[0].id"), equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"));
+    }
+
+    @Test
+    public void getSignedContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
+        Response response = getHashcodeContainer(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path("container").toString().length(), notNullValue());
+    }
+
+    @Test
+    public void deleteContainerShouldRemoveContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        deleteHashcodeContainer(flow);
+        Response response = getHashcodeSignatureList(flow);
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path("errorCode"), equalTo("SESSION_NOT_FOUND"));
+        assertThat(response.getBody().path("errorMessage"), equalTo("Session [" + flow.getContainerId() + "] not found"));
     }
 }
