@@ -1,5 +1,6 @@
 package ee.openeid.siga.auth;
 
+import ee.openeid.siga.auth.filter.event.SigaEventLogger;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
@@ -48,6 +49,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     SigaEventLoggingFilter eventsLoggingFilter;
 
+    @Autowired
+    SigaEventLogger sigaEventLogger;
+
     @Override
     public void configure(final WebSecurity web) {
         web.ignoring().requestMatchers(PUBLIC_URLS);
@@ -84,7 +88,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     HmacAuthenticationFilter authenticationFilter() throws Exception {
-        final HmacAuthenticationFilter filter = new HmacAuthenticationFilter(PROTECTED_URLS,
+        final HmacAuthenticationFilter filter = new HmacAuthenticationFilter(sigaEventLogger, PROTECTED_URLS,
                 configurationProperties);
         filter.setAuthenticationManager(authenticationManager());
         return filter;

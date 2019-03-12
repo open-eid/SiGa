@@ -2,6 +2,9 @@ package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.auth.properties.SigaVaultProperties;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteException;
+import org.apache.ignite.Ignition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -193,7 +196,6 @@ public class SigaAuthTests {
     @Configuration
     @Import(SecurityConfiguration.class)
     static class TestConfiguration {
-
         @Primary
         @Bean
         public VaultTemplate vaultTemplate() {
@@ -206,6 +208,11 @@ public class SigaAuthTests {
             vrs.setData(svp);
             Mockito.when(vaultTemplate.read("dev/siga", SigaVaultProperties.class)).thenReturn(vrs);
             return vaultTemplate;
+        }
+
+        @Bean(destroyMethod = "close")
+        public Ignite ignite() throws IgniteException {
+            return Ignition.start();
         }
     }
 

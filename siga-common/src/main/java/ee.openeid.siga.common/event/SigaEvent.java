@@ -1,9 +1,10 @@
 package ee.openeid.siga.common.event;
 
+import com.google.common.base.MoreObjects;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class SigaEvent {
     String serviceName;
     String serviceUuid;
     String errorCode;
+    String errorMessage;
     Long executionTime;
     Long executionDuration;
     EventResultType resultType;
@@ -33,23 +35,17 @@ public class SigaEvent {
 
     @Override
     public String toString() {
-        StringJoiner sj = new StringJoiner(", ", "[", "]");
-        sj.add("event_type=" + eventType.name());
-        sj.add("client_name=" + clientName);
-        sj.add("service_name=" + serviceName);
-        sj.add("service_uuid=" + serviceUuid);
-        getParameters(eventParameters).ifPresent(s -> sj.add("event_parameters=" + s));
-
-        if (errorCode != null) {
-            sj.add("error_code=" + errorCode);
-        }
-        if (executionDuration != null) {
-            sj.add("duration=" + executionDuration + "ms");
-        }
-        if (resultType != null) {
-            sj.add("result=" + resultType.name());
-        }
-        return sj.toString();
+        MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this)
+                .add("event_type", eventType)
+                .add("client_name", clientName)
+                .add("service_name", serviceName)
+                .add("service_uuid", serviceUuid);
+        getParameters(eventParameters).ifPresent(s -> toStringHelper.add("event_parameters", s));
+        toStringHelper.add("error_code", errorCode);
+        toStringHelper.add("error_message", errorMessage != null ? StringUtils.wrap(errorMessage, "\"") : null);
+        toStringHelper.add("duration", executionDuration != null ? executionDuration + "ms" : null);
+        toStringHelper.add("result", resultType);
+        return toStringHelper.omitNullValues().toString();
     }
 
     private Optional<String> getParameters(Map<String, String> parameters) {
@@ -57,7 +53,7 @@ public class SigaEvent {
             StringJoiner sj = new StringJoiner(", ", "[", "]");
             parameters.forEach((parameterName, parameterValue) -> {
                 if (parameterValue.contains(" ")) {
-                    parameterValue = StringUtils.quote(parameterValue);
+                    parameterValue = StringUtils.wrap(parameterValue, "\"");
                 }
                 sj.add(parameterName + "=" + parameterValue);
             });
