@@ -15,8 +15,7 @@ public class HmacAuthenticationProvider extends DaoAuthenticationProvider {
     }
 
     @Override
-    protected void additionalAuthenticationChecks(final UserDetails userDetails,
-                                                  final UsernamePasswordAuthenticationToken authentication) {
+    protected void additionalAuthenticationChecks(final UserDetails userDetails, final UsernamePasswordAuthenticationToken authentication) {
         final HmacSignature token = (HmacSignature) authentication.getCredentials();
         final byte[] signingSecret = userDetails.getPassword().getBytes();
         try {

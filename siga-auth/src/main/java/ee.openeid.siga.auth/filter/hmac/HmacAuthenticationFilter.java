@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
 
-import static ee.openeid.siga.auth.filter.hmac.HmacHeaders.*;
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static java.lang.Long.parseLong;
 import static java.time.Instant.now;
 import static java.time.Instant.ofEpochSecond;
@@ -38,45 +38,54 @@ import static org.apache.commons.io.IOUtils.toByteArray;
 @CommonsLog
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    int TOKEN_EXPIRATION_IN_SECONDS;
-    int TOKEN_CLOCK_SKEW;
-    String MAC_ALGORITHM;
+    long TOKEN_EXPIRATION_IN_SECONDS;
+    long TOKEN_CLOCK_SKEW;
     SigaEventLogger sigaEventLogger;
 
-    public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher,
-                                    SecurityConfigurationProperties securityConfigurationProperties) {
+    public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
         requireNonNull(securityConfigurationProperties.getHmac(), "siga.security.hmac properties not set!");
         TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration();
         TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew();
-        MAC_ALGORITHM = securityConfigurationProperties.getHmac().getMacAlgorithm();
         this.sigaEventLogger = sigaEventLogger;
         setAuthenticationSuccessHandler(noRedirectAuthenticationSuccessHandler());
     }
 
     @Override
-    public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
+    public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         sigaEventLogger.logStartEvent(SigaEventType.AUTHENTICATION);
-        final String timestamp = ofNullable(request.getHeader(X_AUTHORIZATION_TIMESTAMP.getValue()))
-                .orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Timestamp header"));
+        final String timestamp = ofNullable(request.getHeader(X_AUTHORIZATION_TIMESTAMP.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Timestamp header"));
+        final String serviceUuid = ofNullable(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-ServiceUuid header"));
+        final String signature = ofNullable(request.getHeader(X_AUTHORIZATION_SIGNATURE.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Signature header"));
         checkIfTokenIsExpired(timestamp);
-        final String serviceUuid = ofNullable(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue()))
-                .orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-ServiceUuid header"));
-        final String signature = ofNullable(request.getHeader(X_AUTHORIZATION_SIGNATURE.getValue()))
-                .orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Signature header"));
+
+        String uri = request.getRequestURI();
+        if (request.getQueryString() != null) {
+            uri += "?" + request.getQueryString();
+        }
+
+        String hmacAlgo = request.getHeader(X_AUTHORIZATION_HMAC_ALGORITHM.getValue());
+        if (hmacAlgo == null) {
+            hmacAlgo = HmacAlgorithm.HMAC_SHA_256.getValue();
+        } else {
+            if (HmacAlgorithm.fromString(hmacAlgo) == null) {
+                throw new HmacAuthenticationException("Invalid HMAC algorithm");
+            }
+        }
+
         byte[] payload = toByteArray(request.getInputStream());
 
         HmacSignature token = HmacSignature.builder()
-                .macAlgorithm(MAC_ALGORITHM)
+                .macAlgorithm(hmacAlgo)
                 .serviceUuid(serviceUuid)
                 .timestamp(timestamp)
+                .requestMethod(request.getMethod())
+                .uri(uri)
                 .payload(payload)
                 .signature(signature)
                 .build();
 
-        return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(serviceUuid, token,
-                emptyList()));
+        return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(serviceUuid, token, emptyList()));
     }
 
     private void checkIfTokenIsExpired(String timestamp) {
@@ -84,8 +93,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
             if (timestamp.isBlank()) {
                 throw new HmacAuthenticationException("Invalid X-Authorization-Timestamp");
             }
-            Instant validUntil =
-                    ofEpochSecond(parseLong(timestamp)).plusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW);
+            Instant validUntil = ofEpochSecond(parseLong(timestamp)).plusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW);
             if (now().isAfter(validUntil)) {
                 throw new HmacAuthenticationException("HMAC token is expired");
             }
@@ -93,17 +101,14 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     @Override
-    protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,
-                                            final FilterChain chain,
-                                            final Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
         sigaEventLogger.logEndEvent(SigaEventType.AUTHENTICATION);
         chain.doFilter(request, response);
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                              AuthenticationException failed) throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventType.AUTHENTICATION);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -43,7 +43,7 @@ public class SigaEventLoggingAspect {
         try {
             SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventType());
             if (eventLog.logPathVariables() || eventLog.logRequestBody().length != 0) {
-                logMethodParameters(eventLog, startEvent, joinPoint);
+                logMethodParameters(joinPoint, eventLog, startEvent);
             }
 
             start = now();
@@ -67,7 +67,7 @@ public class SigaEventLoggingAspect {
         }
     }
 
-    private void logMethodParameters(SigaEventLog eventLog, SigaEvent event, ProceedingJoinPoint joinPoint) {
+    private void logMethodParameters(ProceedingJoinPoint joinPoint, SigaEventLog eventLog, SigaEvent event) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         Object[] args = joinPoint.getArgs();

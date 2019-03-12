@@ -3,7 +3,7 @@ package ee.openeid.siga;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.SecurityConfiguration;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.auth.properties.SigaVaultProperties;
+import ee.openeid.siga.auth.properties.VaultProperties;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
@@ -38,7 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-import static ee.openeid.siga.auth.filter.hmac.HmacHeaders.*;
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -90,6 +90,8 @@ public class SigaApplicationTests {
                 .macAlgorithm(DEFAULT_HMAC_ALGO)
                 .serviceUuid(uuid)
                 .timestamp(xAuthorizationTimestamp)
+                .requestMethod("GET")
+                .uri("/hashcodecontainers/" + containerId)
                 .payload(request.toString().getBytes())
                 .build().getSignature(sharedSecret);
 
@@ -139,7 +141,7 @@ public class SigaApplicationTests {
     private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
 
         JSONObject request = new JSONObject();
-        String signature = getSignature(request.toString());
+        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/validationreport", request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/validationreport");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
@@ -150,7 +152,7 @@ public class SigaApplicationTests {
 
     private DetachedDataFileContainer getContainer(String containerId) throws Exception {
         JSONObject request = new JSONObject();
-        String signature = getSignature(request.toString());
+        String signature = getSignature("GET", "/hashcodecontainers/" + containerId, request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
@@ -162,7 +164,7 @@ public class SigaApplicationTests {
 
     private String getMobileIdStatus(String containerId) throws Exception {
         JSONObject request = new JSONObject();
-        String signature = getSignature(request.toString());
+        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/mobileidsigning/status", request.toString());
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
@@ -173,7 +175,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
-        String signature = getSignature(request.toString());
+        String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/remotesigning", request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/remotesigning");
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
@@ -185,7 +187,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
 
-        String signature = getSignature(request.toString());
+        String signature = getSignature("PUT", "/hashcodecontainers/" + containerId + "/remotesigning", request.toString());
         MockHttpServletRequestBuilder builder = put("/hashcodecontainers/" + containerId + "/remotesigning");
 
         mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
@@ -201,7 +203,7 @@ public class SigaApplicationTests {
         request.put("language", "EST");
         request.put("serviceName", "Testimine");
         request.put("signatureProfile", "LT");
-        String signature = getSignature(request.toString());
+        String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/mobileidsigning", request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/mobileidsigning");
 
         mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
@@ -212,7 +214,7 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         String container = IOUtils.toString(getFileInputStream(), Charset.defaultCharset());
         request.put("container", container);
-        String signature = getSignature(request.toString());
+        String signature = getSignature("POST", "/upload/hashcodecontainers", request.toString());
         MockHttpServletRequestBuilder builder = post("/upload/hashcodecontainers");
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
@@ -229,11 +231,13 @@ public class SigaApplicationTests {
                 .content(request.toString().getBytes());
     }
 
-    private String getSignature(String payload) throws Exception {
+    private String getSignature(String requestMethod, String uri, String payload) throws Exception {
         return HmacSignature.builder()
                 .macAlgorithm(DEFAULT_HMAC_ALGO)
                 .serviceUuid(REQUESTING_SERVICE_UUID)
                 .timestamp(xAuthorizationTimestamp)
+                .requestMethod(requestMethod)
+                .uri(uri)
                 .payload(payload.getBytes())
                 .build().getSignature(HMAC_SHARED_SECRET);
     }
@@ -253,13 +257,13 @@ public class SigaApplicationTests {
         @Bean
         public VaultTemplate vaultTemplate() {
             VaultTemplate vaultTemplate = Mockito.mock(VaultTemplate.class);
-            SigaVaultProperties svp = new SigaVaultProperties();
-            svp.setJasyptEncryptionConf(new SigaVaultProperties.JasyptEncryptionConf());
+            VaultProperties svp = new VaultProperties();
+            svp.setJasyptEncryptionConf(new VaultProperties.JasyptEncryptionConf());
             svp.getJasyptEncryptionConf().setAlgorithm("PBEWithMD5AndDES");
             svp.getJasyptEncryptionConf().setKey("encryptorKey");
-            VaultResponseSupport<SigaVaultProperties> vrs = new VaultResponseSupport<>();
+            VaultResponseSupport<VaultProperties> vrs = new VaultResponseSupport<>();
             vrs.setData(svp);
-            Mockito.when(vaultTemplate.read("dev/siga", SigaVaultProperties.class)).thenReturn(vrs);
+            Mockito.when(vaultTemplate.read("dev/siga", VaultProperties.class)).thenReturn(vrs);
             return vaultTemplate;
         }
     }

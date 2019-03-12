@@ -2,6 +2,7 @@ package ee.openeid.siga.auth.filter.hmac;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -21,14 +22,20 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class HmacSignature {
     static byte DELIMITER = ':';
+    @NonNull
     String macAlgorithm;
     String signature;
+    @NonNull
     String serviceUuid;
+    @NonNull
+    String requestMethod;
+    @NonNull
+    String uri;
+    @NonNull
     String timestamp;
     byte[] payload;
 
-    public boolean isValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException,
-            InvalidKeyException {
+    public boolean isValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException, InvalidKeyException {
         requireNonNull(signingSecret, "signingSecret");
         final byte[] calculatedSignature = getSignature(signingSecret);
         return MessageDigest.isEqual(calculatedSignature, Hex.decodeHex(signature));
@@ -45,6 +52,10 @@ public class HmacSignature {
         hmac.update(serviceUuid.getBytes(StandardCharsets.UTF_8));
         hmac.update(DELIMITER);
         hmac.update(timestamp.getBytes(StandardCharsets.UTF_8));
+        hmac.update(DELIMITER);
+        hmac.update(requestMethod.getBytes(StandardCharsets.UTF_8));
+        hmac.update(DELIMITER);
+        hmac.update(uri.getBytes(StandardCharsets.UTF_8));
         hmac.update(DELIMITER);
         hmac.update(payload);
         final byte[] signatureBytes = hmac.doFinal();

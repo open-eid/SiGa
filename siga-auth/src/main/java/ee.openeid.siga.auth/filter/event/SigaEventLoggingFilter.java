@@ -1,6 +1,6 @@
 package ee.openeid.siga.auth.filter.event;
 
-import ee.openeid.siga.auth.filter.hmac.HmacHeaders;
+import ee.openeid.siga.auth.filter.hmac.HmacHeader;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventType;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +24,7 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
     @Override
     protected void beforeRequest(HttpServletRequest request, String message) {
         SigaEvent event = sigaEventLogger.logStartEvent(SigaEventType.REQUEST);
-        String xAuthorizationServiceUuid = request.getHeader(HmacHeaders.X_AUTHORIZATION_SERVICE_UUID.getValue());
+        String xAuthorizationServiceUuid = request.getHeader(HmacHeader.X_AUTHORIZATION_SERVICE_UUID.getValue());
         event.setServiceUuid(xAuthorizationServiceUuid);
     }
 

@@ -1,7 +1,7 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
-import ee.openeid.siga.auth.properties.SigaVaultProperties;
+import ee.openeid.siga.auth.properties.VaultProperties;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +28,9 @@ public class VaultConfiguration {
     SecurityConfigurationProperties securityConfigurationProperties;
 
     @Bean
-    public SigaVaultProperties sigaVaultProperties() {
+    public VaultProperties sigaVaultProperties() {
         requireNonNull(securityConfigurationProperties.getVault(), "siga.security.vault properties not set!");
-        VaultResponseSupport<SigaVaultProperties> response = vaultTemplate
-                .read(securityConfigurationProperties.getVault().getPath(), SigaVaultProperties.class);
+        VaultResponseSupport<VaultProperties> response = vaultTemplate.read(securityConfigurationProperties.getVault().getPath(), VaultProperties.class);
         return response.getData();
     }
 }

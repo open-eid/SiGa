@@ -11,7 +11,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class SigaVaultProperties {
+public class VaultProperties {
 
     JasyptEncryptionConf jasyptEncryptionConf;
 

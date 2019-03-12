@@ -71,8 +71,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(authenticationFilter(), AnonymousAuthenticationFilter.class)
                 .addFilterBefore((servletRequest, servletResponse, filterChain) -> {
-                    ContentCachingRequestWrapper cachingRequestWrapper =
-                            new ContentCachingRequestWrapper(servletRequest);
+                    ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
@@ -88,8 +87,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     HmacAuthenticationFilter authenticationFilter() throws Exception {
-        final HmacAuthenticationFilter filter = new HmacAuthenticationFilter(sigaEventLogger, PROTECTED_URLS,
-                configurationProperties);
+        final HmacAuthenticationFilter filter = new HmacAuthenticationFilter(sigaEventLogger, PROTECTED_URLS, configurationProperties);
         filter.setAuthenticationManager(authenticationManager());
         return filter;
     }

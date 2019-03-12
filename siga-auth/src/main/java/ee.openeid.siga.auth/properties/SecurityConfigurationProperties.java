@@ -20,9 +20,8 @@ public class SecurityConfigurationProperties {
     @Setter
     @FieldDefaults(level = PRIVATE)
     public static class HmacConf {
-        int expiration;
-        int clockSkew;
-        String macAlgorithm;
+        long expiration;
+        long clockSkew;
     }
 
     @Getter
