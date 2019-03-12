@@ -5,11 +5,13 @@ import ee.openeid.siga.auth.properties.SigaVaultProperties;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -196,6 +198,7 @@ public class SigaAuthTests {
     @Configuration
     @Import(SecurityConfiguration.class)
     static class TestConfiguration {
+
         @Primary
         @Bean
         public VaultTemplate vaultTemplate() {
@@ -212,7 +215,7 @@ public class SigaAuthTests {
 
         @Bean(destroyMethod = "close")
         public Ignite ignite() throws IgniteException {
-            return Ignition.start();
+            return Ignition.start("ignite-test-configuration.xml");
         }
     }
 

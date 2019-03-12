@@ -13,6 +13,6 @@ public class IgniteConfiguration {
 
     @Bean(destroyMethod = "close")
     public Ignite ignite() throws IgniteException {
-        return Ignition.start();
+        return Ignition.start("ignite-test-configuration.xml");
     }
 }
