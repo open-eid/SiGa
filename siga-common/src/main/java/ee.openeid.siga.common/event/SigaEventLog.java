@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SigaEventLog {
 
-    SigaEventName eventType() default SigaEventName.REQUEST;
+    SigaEventName eventName() default SigaEventName.REQUEST;
 
     Param[] logParameters() default {};
 

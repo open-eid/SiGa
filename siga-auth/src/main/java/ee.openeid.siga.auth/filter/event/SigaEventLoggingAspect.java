@@ -43,7 +43,7 @@ public class SigaEventLoggingAspect {
 
         Instant start = now();
         try {
-            SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventType());
+            SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
             if (eventLog.logParameters().length != 0) {
                 logMethodParameters(joinPoint, eventLog, startEvent);
             }
@@ -53,7 +53,7 @@ public class SigaEventLoggingAspect {
             Instant finish = now();
 
             long executionTimeInMilli = Duration.between(start, finish).toMillis();
-            SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventType(), executionTimeInMilli);
+            SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventName(), executionTimeInMilli);
             if (eventLog.logReturnObject().length != 0) {
                 logObject(endEvent, eventLog.logReturnObject(), proceed);
             }
@@ -61,9 +61,9 @@ public class SigaEventLoggingAspect {
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
             if (e instanceof LoggableException) {
-                sigaEventLogger.logExceptionEvent(eventLog.eventType(), e.getMessage(), executionTimeInMilli);
+                sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getMessage(), executionTimeInMilli);
             } else {
-                sigaEventLogger.logExceptionEvent(eventLog.eventType(), "Internal server error", executionTimeInMilli);
+                sigaEventLogger.logExceptionEvent(eventLog.eventName(), "Internal server error", executionTimeInMilli);
             }
             throw e;
         }
