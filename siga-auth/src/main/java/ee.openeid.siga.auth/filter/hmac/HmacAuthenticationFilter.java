@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.event.SigaEventLogger;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEventType;
+import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.apachecommons.CommonsLog;
@@ -53,7 +53,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        sigaEventLogger.logStartEvent(SigaEventType.AUTHENTICATION);
+        sigaEventLogger.logStartEvent(SigaEventName.AUTHENTICATION);
         final String timestamp = ofNullable(request.getHeader(X_AUTHORIZATION_TIMESTAMP.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Timestamp header"));
         final String serviceUuid = ofNullable(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-ServiceUuid header"));
         final String signature = ofNullable(request.getHeader(X_AUTHORIZATION_SIGNATURE.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Signature header"));
@@ -103,13 +103,13 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
-        sigaEventLogger.logEndEvent(SigaEventType.AUTHENTICATION);
+        sigaEventLogger.logEndEvent(SigaEventName.AUTHENTICATION);
         chain.doFilter(request, response);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
-        SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventType.AUTHENTICATION);
+        SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventName.AUTHENTICATION);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 

@@ -17,7 +17,8 @@ import static lombok.AccessLevel.PRIVATE;
 @Builder
 @FieldDefaults(level = PRIVATE)
 public class SigaEvent {
-    SigaEventType eventType;
+    EventType eventType;
+    SigaEventName eventName;
     String clientName;
     String serviceName;
     String serviceUuid;
@@ -37,6 +38,7 @@ public class SigaEvent {
     public String toString() {
         MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this)
                 .add("event_type", eventType)
+                .add("event_name", eventName)
                 .add("client_name", clientName)
                 .add("service_name", serviceName)
                 .add("service_uuid", serviceUuid);
@@ -45,7 +47,7 @@ public class SigaEvent {
         toStringHelper.add("error_message", errorMessage != null ? StringUtils.wrap(errorMessage, "\"") : null);
         toStringHelper.add("duration", executionDuration != null ? executionDuration + "ms" : null);
         toStringHelper.add("result", resultType);
-        return toStringHelper.omitNullValues().toString();
+        return toStringHelper.omitNullValues().toString().replace("SigaEvent{", "[").replace("}", "]");
     }
 
     private Optional<String> getParameters(Map<String, String> parameters) {
@@ -60,6 +62,10 @@ public class SigaEvent {
             return Optional.of(sj.toString());
         }
         return Optional.empty();
+    }
+
+    public enum EventType {
+        START, FINISH
     }
 
     public enum EventResultType {

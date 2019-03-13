@@ -1,6 +1,9 @@
 package ee.openeid.siga.auth.filter.event;
 
+import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLog;
+import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.LoggableException;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.jxpath.JXPathContext;
@@ -12,7 +15,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
@@ -42,7 +44,7 @@ public class SigaEventLoggingAspect {
         Instant start = now();
         try {
             SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventType());
-            if (eventLog.logPathVariables() || eventLog.logRequestBody().length != 0) {
+            if (eventLog.logParameters().length != 0) {
                 logMethodParameters(joinPoint, eventLog, startEvent);
             }
 
@@ -61,7 +63,7 @@ public class SigaEventLoggingAspect {
             if (e instanceof LoggableException) {
                 sigaEventLogger.logExceptionEvent(eventLog.eventType(), e.getMessage(), executionTimeInMilli);
             } else {
-                sigaEventLogger.logExceptionEvent(eventLog.eventType(), executionTimeInMilli);
+                sigaEventLogger.logExceptionEvent(eventLog.eventType(), "Internal server error", executionTimeInMilli);
             }
             throw e;
         }
@@ -71,27 +73,29 @@ public class SigaEventLoggingAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         Object[] args = joinPoint.getArgs();
-
+        Param[] logParameters = eventLog.logParameters();
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (eventLog.logPathVariables()) {
-                containsAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
-                    String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, ((PathVariable) annotation).value());
-                    event.addEventParameter(name, arg.toString());
-                });
-            }
-            if (eventLog.logRequestBody().length != 0) {
-                containsAnnotation(parameterAnnotations[i], RequestBody.class).ifPresent(annotation -> logObject(event,
-                        eventLog.logRequestBody(), arg));
+            containsAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
+                String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, ((PathVariable) annotation).value());
+                event.addEventParameter(name, arg.toString());
+            });
+
+            if (eventLog.logParameters().length != 0) {
+                for (Param p : logParameters) {
+                    if (p.index() == i) {
+                        logObject(event, p.fields(), arg);
+                    }
+                }
             }
         }
     }
 
-    private void logObject(SigaEvent event, JXPath[] jxPaths, Object returnObject) {
+    private void logObject(SigaEvent event, XPath[] xPaths, Object returnObject) {
         JXPathContext xc = JXPathContext.newContext(returnObject);
-        for (JXPath p : jxPaths) {
+        for (XPath p : xPaths) {
             Object value = xc.getValue(p.xpath());
-            event.addEventParameter(p.logName(), value.toString());
+            event.addEventParameter(p.name(), value != null ? value.toString() : "null");
         }
     }
 

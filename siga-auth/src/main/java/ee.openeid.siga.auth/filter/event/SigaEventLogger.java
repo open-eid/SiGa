@@ -2,7 +2,7 @@ package ee.openeid.siga.auth.filter.event;
 
 import ee.openeid.siga.auth.model.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEventType;
+import ee.openeid.siga.common.event.SigaEventName;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.apachecommons.CommonsLog;
@@ -25,26 +25,28 @@ public class SigaEventLogger {
     @Getter
     final List<SigaEvent> events = new ArrayList<>();
 
-    public SigaEvent logStartEvent(SigaEventType eventType) {
+    public SigaEvent logStartEvent(SigaEventName eventType) {
         SigaEvent event = SigaEvent.builder()
-                .eventType(eventType)
+                .eventType(SigaEvent.EventType.START)
+                .eventName(eventType)
                 .executionTime(now().toEpochMilli())
                 .build();
         events.add(event);
         return event;
     }
 
-    public SigaEvent logExceptionEvent(SigaEventType eventType) {
+    public SigaEvent logExceptionEvent(SigaEventName eventType) {
         return logExceptionEvent(eventType, null);
     }
 
-    public SigaEvent logExceptionEvent(SigaEventType eventType, Long executionTimeInMilli) {
+    public SigaEvent logExceptionEvent(SigaEventName eventType, Long executionTimeInMilli) {
         return logExceptionEvent(eventType, null, executionTimeInMilli);
     }
 
-    public SigaEvent logExceptionEvent(SigaEventType eventType, String errorMessage, Long executionTimeInMilli) {
+    public SigaEvent logExceptionEvent(SigaEventName eventType, String errorMessage, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
-                .eventType(eventType)
+                .eventType(SigaEvent.EventType.FINISH)
+                .eventName(eventType)
                 .executionTime(now().toEpochMilli())
                 .executionDuration(executionTimeInMilli)
                 .errorMessage(errorMessage)
@@ -54,13 +56,14 @@ public class SigaEventLogger {
         return event;
     }
 
-    public SigaEvent logEndEvent(SigaEventType eventType) {
+    public SigaEvent logEndEvent(SigaEventName eventType) {
         return logEndEvent(eventType, null);
     }
 
-    public SigaEvent logEndEvent(SigaEventType eventType, Long executionTimeInMilli) {
+    public SigaEvent logEndEvent(SigaEventName eventType, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
-                .eventType(eventType)
+                .eventType(SigaEvent.EventType.FINISH)
+                .eventName(eventType)
                 .executionTime(now().toEpochMilli())
                 .executionDuration(executionTimeInMilli)
                 .resultType(SigaEvent.EventResultType.SUCCESS)

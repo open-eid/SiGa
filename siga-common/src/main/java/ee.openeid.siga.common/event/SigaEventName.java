@@ -1,6 +1,6 @@
 package ee.openeid.siga.common.event;
 
-public enum SigaEventType {
+public enum SigaEventName {
     REQUEST,
     AUTHENTICATION,
     HC_UPLOAD_CONTAINER,
