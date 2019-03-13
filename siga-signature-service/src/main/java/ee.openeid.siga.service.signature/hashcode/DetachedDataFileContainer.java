@@ -4,6 +4,7 @@ import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
+import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
@@ -84,6 +85,7 @@ public class DetachedDataFileContainer {
         Map<String, String> dataFiles = parser.getEntries();
 
         SignatureWrapper signatureWrapper = new SignatureWrapper();
+        signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;

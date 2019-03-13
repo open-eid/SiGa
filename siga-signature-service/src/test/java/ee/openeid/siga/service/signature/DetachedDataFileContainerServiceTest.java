@@ -6,6 +6,7 @@ import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.Signature;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +61,7 @@ public class DetachedDataFileContainerServiceTest {
         List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatures.get(0).getId());
         Assert.assertEquals("LT", signatures.get(0).getSignatureProfile());
+        Assert.assertFalse(StringUtils.isBlank(signatures.get(0).getGeneratedSignatureId()));
         Assert.assertEquals("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE", signatures.get(0).getSignerInfo());
     }
 

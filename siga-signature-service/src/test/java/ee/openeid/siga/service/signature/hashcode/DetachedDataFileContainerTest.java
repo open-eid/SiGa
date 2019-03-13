@@ -9,6 +9,7 @@ import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,6 +42,7 @@ public class DetachedDataFileContainerTest {
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashcodeContainer.open(inputStream);
         Assert.assertEquals(1, hashcodeContainer.getSignatures().size());
+        Assert.assertFalse(StringUtils.isBlank(hashcodeContainer.getSignatures().get(0).getGeneratedSignatureId()));
         Assert.assertEquals(2, hashcodeContainer.getDataFiles().size());
 
         List<SignatureHashcodeDataFile> signatureDataFiles = hashcodeContainer.getSignatures().get(0).getDataFiles();

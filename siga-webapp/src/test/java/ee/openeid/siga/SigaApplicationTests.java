@@ -37,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.List;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static java.lang.String.valueOf;
@@ -103,6 +104,7 @@ public class SigaApplicationTests {
     @Test
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
+        List<Signature> signatures = getSignatureList(containerId);
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
@@ -118,6 +120,7 @@ public class SigaApplicationTests {
     @Test
     public void remoteSigningFlow() throws Exception {
         String containerId = uploadContainer();
+        List<Signature> signatures = getSignatureList(containerId);
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
@@ -133,9 +136,21 @@ public class SigaApplicationTests {
         DetachedDataFileContainer container = getContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
+        List<Signature> signatures = getSignatureList(containerId);
+        Assert.assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getValidationConclusion(containerId);
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
+    }
+
+    private List<Signature> getSignatureList(String containerId) throws Exception {
+        JSONObject request = new JSONObject();
+        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/signatures", request.toString());
+        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/signatures");
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
+        GetHashcodeSignaturesResponse signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeSignaturesResponse.class);
+        return signatureListResponse.getSignatures();
     }
 
     private ValidationConclusion getValidationConclusion(String containerId) throws Exception {

@@ -84,6 +84,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
         org.digidoc4j.Signature dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
         signature.setId(dd4jSignature.getId());
+        signature.setGeneratedSignatureId(signatureWrapper.getGeneratedSignatureId());
         signature.setSignatureProfile(dd4jSignature.getProfile().name());
         signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
         return signature;

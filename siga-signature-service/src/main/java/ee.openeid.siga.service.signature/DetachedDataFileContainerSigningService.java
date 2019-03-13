@@ -12,6 +12,7 @@ import ee.openeid.siga.mobileid.model.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.ProcessStatusType;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
+import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
@@ -118,6 +119,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         SignatureWrapper signatureWrapper = new SignatureWrapper();
         SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
         Map<String, String> dataFiles = parser.getEntries();
+        signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;
