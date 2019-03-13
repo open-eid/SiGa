@@ -75,7 +75,7 @@ public class TestBase {
     }
 
 
-    private Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
+    protected Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint, null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
@@ -96,7 +96,7 @@ public class TestBase {
         return response;
     }
 
-    private Response put(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
+    protected Response put(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "PUT", endpoint, null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
@@ -117,7 +117,7 @@ public class TestBase {
         return response;
     }
 
-    private Response get(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+    protected Response get(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "GET", endpoint, null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
@@ -133,7 +133,7 @@ public class TestBase {
                 .response();
     }
 
-    private Response delete(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+    protected Response delete(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "DELETE", endpoint, null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())

@@ -39,5 +39,6 @@ public class TestData {
 
     // Error codes
     public static final String SESSION_NOT_FOUND = "SESSION_NOT_FOUND";
+    public static final String INVALID_REQUEST = "INVALID_REQUEST";
 
 }
