@@ -7,7 +7,7 @@ import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.HashCodeDataFile;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
@@ -27,38 +27,38 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
 
     private SessionService sessionService;
 
-    public String createContainer(List<HashCodeDataFile> dataFiles) {
+    public String createContainer(List<HashcodeDataFile> dataFiles) {
 
-        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         dataFiles.forEach(dataFile ->
-                hashCodeContainer.addDataFile(ContainerUtil.transformDataFileToHashCodeDataFile(dataFile))
+                hashcodeContainer.addDataFile(ContainerUtil.transformDataFileToHashcodeDataFile(dataFile))
         );
         OutputStream outputStream = new ByteArrayOutputStream();
-        hashCodeContainer.save(outputStream);
+        hashcodeContainer.save(outputStream);
 
         String sessionId = SessionIdGenerator.generateSessionId();
-        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer));
+        sessionService.update(sessionId, transformContainerToSession(hashcodeContainer));
         return sessionId;
     }
 
     public String uploadContainer(String container) {
         String sessionId = SessionIdGenerator.generateSessionId();
-        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
-        hashCodeContainer.open(inputStream);
-        sessionService.update(sessionId, transformContainerToSession(hashCodeContainer));
+        hashcodeContainer.open(inputStream);
+        sessionService.update(sessionId, transformContainerToSession(hashcodeContainer));
         return sessionId;
     }
 
     public String getContainer(String containerId) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
 
-        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
-        sessionHolder.getSignatures().forEach(signatureWrapper -> hashCodeContainer.getSignatures().add(signatureWrapper));
-        sessionHolder.getDataFiles().forEach(dataFile -> hashCodeContainer.getDataFiles().add(dataFile));
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        sessionHolder.getSignatures().forEach(signatureWrapper -> hashcodeContainer.getSignatures().add(signatureWrapper));
+        sessionHolder.getDataFiles().forEach(dataFile -> hashcodeContainer.getDataFiles().add(dataFile));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        hashCodeContainer.save(outputStream);
+        hashcodeContainer.save(outputStream);
         byte[] container = outputStream.toByteArray();
 
         return new String(Base64.getEncoder().encode(container));

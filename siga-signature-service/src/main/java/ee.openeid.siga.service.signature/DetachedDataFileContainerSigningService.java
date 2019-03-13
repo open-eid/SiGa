@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature;
 
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.SigningType;
@@ -94,7 +94,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         return status.name();
     }
 
-    private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashCodeDataFile> dataFiles, SignatureParameters signatureParameters) {
+    private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashcodeDataFile> dataFiles, SignatureParameters signatureParameters) {
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration)
                 .withSigningCertificate(signatureParameters.getSigningCertificate())
                 .withSignatureProfile(signatureParameters.getSignatureProfile())
@@ -104,8 +104,8 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
                 .withCity(signatureParameters.getCity())
                 .withPostalCode(signatureParameters.getPostalCode());
 
-        for (HashCodeDataFile hashCodeDataFile : dataFiles) {
-            builder = builder.withDataFile(convertDataFile(hashCodeDataFile));
+        for (HashcodeDataFile hashcodeDataFile : dataFiles) {
+            builder = builder.withDataFile(convertDataFile(hashcodeDataFile));
         }
         if (signatureParameters.getRoles() != null && !signatureParameters.getRoles().isEmpty()) {
             String[] roles = new String[signatureParameters.getRoles().size()];
@@ -123,10 +123,10 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         return signatureWrapper;
     }
 
-    private DigestDataFile convertDataFile(HashCodeDataFile hashCodeDataFile) {
-        String fileName = hashCodeDataFile.getFileName();
+    private DigestDataFile convertDataFile(HashcodeDataFile hashcodeDataFile) {
+        String fileName = hashcodeDataFile.getFileName();
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.SHA512;
-        byte[] digest = Base64.getDecoder().decode(hashCodeDataFile.getFileHashSha512().getBytes());
+        byte[] digest = Base64.getDecoder().decode(hashcodeDataFile.getFileHashSha512().getBytes());
         return new DigestDataFile(fileName, digestAlgorithm, digest);
     }
 

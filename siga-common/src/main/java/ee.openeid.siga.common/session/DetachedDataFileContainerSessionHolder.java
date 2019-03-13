@@ -1,6 +1,6 @@
 package ee.openeid.siga.common.session;
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.SigningType;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Builder
 public class DetachedDataFileContainerSessionHolder implements Session {
-    private List<HashCodeDataFile> dataFiles;
+    private List<HashcodeDataFile> dataFiles;
     private List<SignatureWrapper> signatures;
     private DataToSign dataToSign;
     private String sessionCode;

@@ -2,7 +2,7 @@ package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
-import ee.openeid.siga.webapp.json.HashCodeDataFile;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,11 +12,11 @@ import java.util.List;
 
 public class RequestValidator {
 
-    public static void validateHashCodeDataFiles(List<HashCodeDataFile> dataFiles) {
+    public static void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
         if (CollectionUtils.isEmpty(dataFiles)) {
             throw new InvalidRequestException("Data files are needed");
         }
-        dataFiles.forEach(RequestValidator::validateHashCodeDataFile);
+        dataFiles.forEach(RequestValidator::validateHashcodeDataFile);
     }
 
     public static void validateContainerId(String containerId) {
@@ -37,7 +37,7 @@ public class RequestValidator {
         }
     }
 
-    private static void validateHashCodeDataFile(HashCodeDataFile dataFile) {
+    private static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
         validateFileName(dataFile.getFileName(), "Data file name is invalid");
         validateFileSize(dataFile.getFileSize());
         validateHash(dataFile.getFileHashSha256());

@@ -121,7 +121,7 @@ public class SigaApplicationTests {
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-        CreateHashCodeRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
+        CreateHashcodeRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
@@ -146,7 +146,7 @@ public class SigaApplicationTests {
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
 
-        GetHashCodeValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeValidationReportResponse.class);
+        GetHashcodeValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeValidationReportResponse.class);
         return reportResponse.getValidationConclusion();
     }
 
@@ -156,9 +156,9 @@ public class SigaApplicationTests {
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        GetHashCodeContainerResponse getHashCodeContainerResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeContainerResponse.class);
+        GetHashcodeContainerResponse getHashcodeContainerResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerResponse.class);
         DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
-        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(getHashCodeContainerResponse.getContainer())));
+        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(getHashcodeContainerResponse.getContainer())));
         return detachedDataFileContainer;
     }
 
@@ -168,10 +168,10 @@ public class SigaApplicationTests {
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashCodeMobileIdSigningStatusResponse.class).getMidStatus();
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeMobileIdSigningStatusResponse.class).getMidStatus();
     }
 
-    private CreateHashCodeRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
+    private CreateHashcodeRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
@@ -180,7 +180,7 @@ public class SigaApplicationTests {
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashCodeRemoteSigningResponse.class);
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeRemoteSigningResponse.class);
     }
 
     private void finalizeRemoteSigning(String containerId, String signatureValue) throws Exception {
@@ -219,7 +219,7 @@ public class SigaApplicationTests {
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), UploadHashCodeContainerResponse.class).getContainerId();
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), UploadHashcodeContainerResponse.class).getContainerId();
     }
 
     private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String signature, JSONObject request, String serviceUUID) {

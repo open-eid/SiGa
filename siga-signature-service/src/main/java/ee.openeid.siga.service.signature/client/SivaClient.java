@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.client;
 
-import ee.openeid.siga.common.HashCodeDataFile;
-import ee.openeid.siga.common.SignatureHashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
+import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
@@ -33,7 +33,7 @@ public class SivaClient {
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
 
-    public ValidationConclusion validateDetachedDataFileContainer(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
+    public ValidationConclusion validateDetachedDataFileContainer(SignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
         ResponseEntity<ValidationResponse> responseEntity;
         try {
@@ -50,7 +50,7 @@ public class SivaClient {
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 
-    private SivaValidationRequest createRequest(SignatureWrapper signatureWrapper, List<HashCodeDataFile> dataFiles) {
+    private SivaValidationRequest createRequest(SignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(SIGNATURE_FILE_NAME);
         request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));
@@ -74,8 +74,8 @@ public class SivaClient {
         return request;
     }
 
-    private String getDataFileHashAlgorithm(List<SignatureHashCodeDataFile> signatureDataFiles, HashCodeDataFile dataFile) {
-        for (SignatureHashCodeDataFile signatureDataFile : signatureDataFiles) {
+    private String getDataFileHashAlgorithm(List<SignatureHashcodeDataFile> signatureDataFiles, HashcodeDataFile dataFile) {
+        for (SignatureHashcodeDataFile signatureDataFile : signatureDataFiles) {
             if (signatureDataFile.getFileName().equals(dataFile.getFileName())) {
                 String hashAlgorithm = signatureDataFile.getHashAlgo();
                 if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {

@@ -10,7 +10,7 @@ public class AttachedDataFileContainerService { //implements ContainerService { 
     private SessionService sessionService;
 //
 //    @Override
-//    public CreateDataFileContainerResponse createContainer(CreateHashCodeContainerRequest request) {
+//    public CreateDataFileContainerResponse createContainer(CreateHashcodeContainerRequest request) {
 //        ContainerBuilder containerBuilder = ContainerBuilder.
 //                aContainer(ASICE);
 //        request.getDataFiles().forEach(dataFile -> containerBuilder.withDataFile(

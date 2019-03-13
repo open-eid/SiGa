@@ -6,6 +6,6 @@ import lombok.Data;
 public class DetachedDataFileContainerFilesHolder {
     private String mimeTypeContent;
     private String manifestContent;
-    private String hashCodesSha256Content;
-    private String hashCodesSha512Content;
+    private String hashcodesSha256Content;
+    private String hashcodesSha512Content;
 }

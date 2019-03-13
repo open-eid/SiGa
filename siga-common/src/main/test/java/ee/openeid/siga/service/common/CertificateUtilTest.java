@@ -41,8 +41,7 @@ public class CertificateUtilTest {
     @Test(expected = TechnicalException.class)
     public void createInvalidCertificate() {
         String invalidCertificate = CERTIFICATE.replace("a", "b");
-        X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(invalidCertificate.getBytes()));
-        Assert.assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
+        CertificateUtil.createX509Certificate(Base64.getDecoder().decode(invalidCertificate.getBytes()));
     }
 
 }

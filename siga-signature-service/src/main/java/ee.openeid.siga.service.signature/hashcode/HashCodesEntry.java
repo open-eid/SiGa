@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class HashCodesEntry {
+public class HashcodesEntry {
     private String hash;
     private Integer size;
 }

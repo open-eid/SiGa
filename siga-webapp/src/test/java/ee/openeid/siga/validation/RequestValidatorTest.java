@@ -2,8 +2,8 @@ package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.InvalidRequestException;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.HashCodeDataFile;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,8 +17,8 @@ public class RequestValidatorTest {
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
-    public void successfulCreateContainerHashCodeRequest() {
-        RequestValidator.validateHashCodeDataFiles(getCreateHashCodeContainerRequest().getDataFiles());
+    public void successfulCreateContainerHashcodeRequest() {
+        RequestValidator.validateHashcodeDataFiles(getCreateHashcodeContainerRequest().getDataFiles());
     }
 
     @Test
@@ -45,37 +45,37 @@ public class RequestValidatorTest {
     public void createContainer_NoDataFiles() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Data files are needed");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
+        CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
-        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
+        RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
     }
 
     @Test
     public void createContainer_DataFileContentIsEmpty() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Data file name is invalid");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
+        CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
-        request.getDataFiles().add(new HashCodeDataFile());
-        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
+        request.getDataFiles().add(new HashcodeDataFile());
+        RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
     }
 
     @Test
     public void createContainer_DataFileHashIsNotBase64() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("File hash is invalid");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
+        CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
-        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
+        RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
     }
 
     @Test
     public void createContainer_DataFileHashTooLong() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("File hash is invalid");
-        CreateHashCodeContainerRequest request = getCreateHashCodeContainerRequest();
+        CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
-        RequestValidator.validateHashCodeDataFiles(request.getDataFiles());
+        RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
     }
 
     @Test
@@ -318,9 +318,9 @@ public class RequestValidatorTest {
         return mobileIdInformation;
     }
 
-    public static CreateHashCodeContainerRequest getCreateHashCodeContainerRequest() {
-        CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
-        HashCodeDataFile dataFile = new HashCodeDataFile();
+    public static CreateHashcodeContainerRequest getCreateHashcodeContainerRequest() {
+        CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
+        HashcodeDataFile dataFile = new HashcodeDataFile();
         dataFile.setFileName("first datafile.txt");
         dataFile.setFileSize(6);
         dataFile.setFileHashSha256("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");

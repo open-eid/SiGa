@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature;
 
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
@@ -33,7 +33,7 @@ public class DetachedDataFileContainerValidationService implements DetachedDataF
         return createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
     }
 
-    private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashCodeDataFile> dataFiles) {
+    private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         List<ValidationConclusion> validationConclusions = new ArrayList<>();
         signatureWrappers.forEach(signatureWrapper ->
                 validationConclusions.add(sivaClient.validateDetachedDataFileContainer(signatureWrapper, dataFiles)));

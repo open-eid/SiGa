@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.exception.TechnicalException;
 import org.digidoc4j.DigestAlgorithm;
 import org.slf4j.Logger;
@@ -17,9 +17,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.OutputStream;
 import java.util.List;
 
-public class HashCodesDataFile {
+public class HashcodesDataFile {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HashCodesDataFile.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HashcodesDataFile.class);
     public static final String HASHCODES_SHA256 = "META-INF/hashcodes-sha256.xml";
     public static final String HASHCODES_SHA512 = "META-INF/hashcodes-sha512.xml";
     public static final String HASHCODES_PREFIX = "META-INF/hashcodes-";
@@ -27,12 +27,12 @@ public class HashCodesDataFile {
     private Element rootElement;
     private DigestAlgorithm digestAlgorithm;
 
-    public HashCodesDataFile(DigestAlgorithm digestAlgorithm) {
+    public HashcodesDataFile(DigestAlgorithm digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
     }
 
-    public void generateHashCodeFile(List<HashCodeDataFile> dataFiles) {
-        LOGGER.debug("Writing hashCode files");
+    public void generateHashcodeFile(List<HashcodeDataFile> dataFiles) {
+        LOGGER.debug("Writing hashcode files");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -43,11 +43,11 @@ public class HashCodesDataFile {
             dom.appendChild(rootElement);
 
         } catch (ParserConfigurationException e) {
-            throw new TechnicalException("Error creating hashCodes file");
+            throw new TechnicalException("Error creating hashcodes file");
         }
     }
 
-    private void addFileEntry(HashCodeDataFile dataFile) {
+    private void addFileEntry(HashcodeDataFile dataFile) {
         Element child = dom.createElement("file-entry");
         child.setAttribute("full-path", dataFile.getFileName());
         if (DigestAlgorithm.SHA256 == digestAlgorithm) {

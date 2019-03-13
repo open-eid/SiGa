@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.SignatureWrapper;
 import eu.europa.esig.dss.MimeType;
@@ -27,18 +27,18 @@ public class DetachedDataFileContainerCreator {
         this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
     }
 
-    public void writeHashCodeFiles(List<HashCodeDataFile> dataFiles) {
-        writeHashCodeFile(dataFiles, DigestAlgorithm.SHA256, HashCodesDataFile.HASHCODES_SHA256);
-        writeHashCodeFile(dataFiles, DigestAlgorithm.SHA512, HashCodesDataFile.HASHCODES_SHA512);
+    public void writeHashcodeFiles(List<HashcodeDataFile> dataFiles) {
+        writeHashcodeFile(dataFiles, DigestAlgorithm.SHA256, HashcodesDataFile.HASHCODES_SHA256);
+        writeHashcodeFile(dataFiles, DigestAlgorithm.SHA512, HashcodesDataFile.HASHCODES_SHA512);
     }
 
-    private void writeHashCodeFile(List<HashCodeDataFile> dataFiles, DigestAlgorithm digestAlgorithm, String entryName) {
-        HashCodesDataFile hashCodesDataFile = new HashCodesDataFile(digestAlgorithm);
-        hashCodesDataFile.generateHashCodeFile(dataFiles);
+    private void writeHashcodeFile(List<HashcodeDataFile> dataFiles, DigestAlgorithm digestAlgorithm, String entryName) {
+        HashcodesDataFile hashcodesDataFile = new HashcodesDataFile(digestAlgorithm);
+        hashcodesDataFile.generateHashcodeFile(dataFiles);
         new EntryCallback(new ZipEntry(entryName)) {
             @Override
             void doWithEntryStream(OutputStream stream) {
-                hashCodesDataFile.writeTo(stream);
+                hashcodesDataFile.writeTo(stream);
             }
         }.write();
     }

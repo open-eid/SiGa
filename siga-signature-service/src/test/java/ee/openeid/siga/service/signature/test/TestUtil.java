@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.test;
 
-import ee.openeid.siga.service.signature.hashcode.HashCodesDataFile;
+import ee.openeid.siga.service.signature.hashcode.HashcodesDataFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,7 +20,7 @@ public class TestUtil {
     public static final String MIMETYPE = "application/vnd.etsi.asic-e+zip";
 
     public static DetachedDataFileContainerFilesHolder getContainerFiles(byte[] container) throws IOException {
-        DetachedDataFileContainerFilesHolder hashCodeContainer = new DetachedDataFileContainerFilesHolder();
+        DetachedDataFileContainerFilesHolder hashcodeContainer = new DetachedDataFileContainerFilesHolder();
         ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(container));
         ZipEntry entry;
         while ((entry = zipStream.getNextEntry()) != null) {
@@ -33,20 +33,20 @@ public class TestUtil {
                     out.write(byteBuff, 0, bytesRead);
                 }
                 if ("mimetype".equals(entryName)) {
-                    hashCodeContainer.setMimeTypeContent(out.toString());
+                    hashcodeContainer.setMimeTypeContent(out.toString());
                 } else if ("META-INF/manifest.xml".equals(entryName)) {
-                    hashCodeContainer.setManifestContent(out.toString());
-                } else if (HashCodesDataFile.HASHCODES_SHA256.equals(entryName)) {
-                    hashCodeContainer.setHashCodesSha256Content(out.toString());
-                } else if (HashCodesDataFile.HASHCODES_SHA512.equals(entryName)) {
-                    hashCodeContainer.setHashCodesSha512Content(out.toString());
+                    hashcodeContainer.setManifestContent(out.toString());
+                } else if (HashcodesDataFile.HASHCODES_SHA256.equals(entryName)) {
+                    hashcodeContainer.setHashcodesSha256Content(out.toString());
+                } else if (HashcodesDataFile.HASHCODES_SHA512.equals(entryName)) {
+                    hashcodeContainer.setHashcodesSha512Content(out.toString());
                 }
             }
 
             zipStream.closeEntry();
         }
         zipStream.close();
-        return hashCodeContainer;
+        return hashcodeContainer;
     }
 
     public static InputStream getFileInputStream(String filePath) throws URISyntaxException, IOException {

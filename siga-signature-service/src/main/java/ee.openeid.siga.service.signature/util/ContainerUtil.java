@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.util;
 
-import ee.openeid.siga.common.HashCodeDataFile;
-import ee.openeid.siga.common.SignatureHashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
+import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 
 import java.util.Map;
@@ -9,21 +9,21 @@ import java.util.Map;
 
 public class ContainerUtil {
 
-    public static HashCodeDataFile transformDataFileToHashCodeDataFile(ee.openeid.siga.webapp.json.HashCodeDataFile dataFile) {
-        HashCodeDataFile hashCodeDataFile = new HashCodeDataFile();
-        hashCodeDataFile.setFileName(dataFile.getFileName());
-        hashCodeDataFile.setFileSize(dataFile.getFileSize());
-        hashCodeDataFile.setFileHashSha256(dataFile.getFileHashSha256());
-        hashCodeDataFile.setFileHashSha512(dataFile.getFileHashSha512());
-        return hashCodeDataFile;
+    public static HashcodeDataFile transformDataFileToHashcodeDataFile(ee.openeid.siga.webapp.json.HashcodeDataFile dataFile) {
+        HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
+        hashcodeDataFile.setFileName(dataFile.getFileName());
+        hashcodeDataFile.setFileSize(dataFile.getFileSize());
+        hashcodeDataFile.setFileHashSha256(dataFile.getFileHashSha256());
+        hashcodeDataFile.setFileHashSha512(dataFile.getFileHashSha512());
+        return hashcodeDataFile;
     }
 
     public static void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, String> dataFiles) {
         dataFiles.forEach((fileName, fileHashAlgo) -> {
-            SignatureHashCodeDataFile hashCodeDataFile = new SignatureHashCodeDataFile();
-            hashCodeDataFile.setFileName(fileName);
-            hashCodeDataFile.setHashAlgo(fileHashAlgo);
-            wrapper.getDataFiles().add(hashCodeDataFile);
+            SignatureHashcodeDataFile hashcodeDataFile = new SignatureHashcodeDataFile();
+            hashcodeDataFile.setFileName(fileName);
+            hashcodeDataFile.setHashAlgo(fileHashAlgo);
+            wrapper.getDataFiles().add(hashcodeDataFile);
         });
     }
 }

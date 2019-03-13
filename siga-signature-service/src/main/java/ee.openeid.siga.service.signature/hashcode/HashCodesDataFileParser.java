@@ -9,23 +9,23 @@ import org.w3c.dom.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HashCodesDataFileParser {
+public class HashcodesDataFileParser {
 
-    private byte[] hashCodesDataFile;
-    private Map<String, HashCodesEntry> entries = new HashMap<>();
+    private byte[] hashcodesDataFile;
+    private Map<String, HashcodesEntry> entries = new HashMap<>();
 
 
-    public HashCodesDataFileParser(byte[] hashCodesDataFile) {
-        this.hashCodesDataFile = hashCodesDataFile;
-        loadHashCodesEntries();
+    public HashcodesDataFileParser(byte[] hashcodesDataFile) {
+        this.hashcodesDataFile = hashcodesDataFile;
+        loadHashcodesEntries();
     }
 
-    public Map<String, HashCodesEntry> getEntries() {
+    public Map<String, HashcodesEntry> getEntries() {
         return entries;
     }
 
-    private void loadHashCodesEntries() {
-        Element root = DomUtils.buildDOM(hashCodesDataFile).getDocumentElement();
+    private void loadHashcodesEntries() {
+        Element root = DomUtils.buildDOM(hashcodesDataFile).getDocumentElement();
         Node child = root.getFirstChild();
         while (child != null) {
             String nodeName = child.getLocalName();
@@ -42,8 +42,8 @@ public class HashCodesDataFileParser {
         String hash = attributes.getNamedItem("hash").getTextContent();
         String size = attributes.getNamedItem("size").getTextContent();
         validateNotDuplicateFile(filePath);
-        HashCodesEntry hashCodesEntry = new HashCodesEntry(hash, Integer.parseInt(size));
-        entries.put(filePath, hashCodesEntry);
+        HashcodesEntry hashcodesEntry = new HashcodesEntry(hash, Integer.parseInt(size));
+        entries.put(filePath, hashcodesEntry);
     }
 
     private void validateNotDuplicateFile(String filePath) {

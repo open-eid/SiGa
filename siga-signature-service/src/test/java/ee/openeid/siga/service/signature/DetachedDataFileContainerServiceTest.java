@@ -4,7 +4,7 @@ import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.Signature;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulCreateContainer() {
-        CreateHashCodeContainerRequest request = RequestUtil.getHashCodeCreateContainerRequest();
+        CreateHashcodeContainerRequest request = RequestUtil.getHashcodeCreateContainerRequest();
         containerService.setSessionService(sessionService);
         String containerId = containerService.createContainer(request.getDataFiles());
         Assert.assertFalse(containerId.isBlank());

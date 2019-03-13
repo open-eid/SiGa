@@ -1,13 +1,14 @@
 package ee.openeid.siga.service.signature.test;
 
+
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.webapp.json.CreateHashCodeContainerRequest;
-import ee.openeid.siga.webapp.json.HashCodeDataFile;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
@@ -24,22 +25,22 @@ public class RequestUtil {
     public static final String SIGNED_HASHCODE = "hashcode.asice";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
-    public static List<ee.openeid.siga.common.HashCodeDataFile> createHashCodeDataFiles() {
-        List<ee.openeid.siga.common.HashCodeDataFile> hashCodeDataFiles = new ArrayList<>();
-        ee.openeid.siga.common.HashCodeDataFile dataFile = new ee.openeid.siga.common.HashCodeDataFile();
+    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFiles() {
+        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+        ee.openeid.siga.common.HashcodeDataFile dataFile = new ee.openeid.siga.common.HashcodeDataFile();
         dataFile.setFileName("test.txt");
         dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
         dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");
-        hashCodeDataFiles.add(dataFile);
-        return hashCodeDataFiles;
+        hashcodeDataFiles.add(dataFile);
+        return hashcodeDataFiles;
     }
 
     public static SignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
 
-        DetachedDataFileContainer hashCodeContainer = new DetachedDataFileContainer();
-        hashCodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
-        return hashCodeContainer.getSignatures().get(0);
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        hashcodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
+        return hashcodeContainer.getSignatures().get(0);
     }
 
     public static ValidationResponse createValidationResponse() {
@@ -53,15 +54,15 @@ public class RequestUtil {
         return response;
     }
 
-    public static CreateHashCodeContainerRequest getHashCodeCreateContainerRequest() {
-        CreateHashCodeContainerRequest request = new CreateHashCodeContainerRequest();
-        HashCodeDataFile dataFile1 = new HashCodeDataFile();
+    public static CreateHashcodeContainerRequest getHashcodeCreateContainerRequest() {
+        CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
+        HashcodeDataFile dataFile1 = new HashcodeDataFile();
         dataFile1.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile1.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile1.setFileSize(10);
         dataFile1.setFileName("first datafile.txt");
         request.getDataFiles().add(dataFile1);
-        HashCodeDataFile dataFile2 = new HashCodeDataFile();
+        HashcodeDataFile dataFile2 = new HashcodeDataFile();
         dataFile2.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile2.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile2.setFileSize(10);
@@ -75,7 +76,7 @@ public class RequestUtil {
         signatureWrappers.add(RequestUtil.createSignatureWrapper());
         return DetachedDataFileContainerSessionHolder.builder()
                 .signatures(signatureWrappers)
-                .dataFiles(RequestUtil.createHashCodeDataFiles()).build();
+                .dataFiles(RequestUtil.createHashcodeDataFiles()).build();
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {

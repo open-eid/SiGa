@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashCodeDataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidRequestException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
@@ -25,11 +25,11 @@ import static ee.openeid.siga.service.signature.hashcode.DetachedDataFileContain
 
 public class DetachedDataFileContainer {
 
-    private List<HashCodeDataFile> dataFiles = new ArrayList<>();
+    private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<SignatureWrapper> signatures = new ArrayList<>();
 
     public void save(OutputStream outputStream) {
-        createHashCodeContainer(outputStream);
+        createHashcodeContainer(outputStream);
     }
 
     public void open(InputStream inputStream) {
@@ -50,14 +50,14 @@ public class DetachedDataFileContainer {
         }
     }
 
-    private void createHashCodeContainer(OutputStream outputStream) {
-        DetachedDataFileContainerCreator hashCodeContainerCreator = new DetachedDataFileContainerCreator(outputStream);
-        hashCodeContainerCreator.writeMimeType();
-        hashCodeContainerCreator.writeManifest(convertDataFiles());
-        hashCodeContainerCreator.writeHashCodeFiles(dataFiles);
-        hashCodeContainerCreator.writeSignatures(signatures);
+    private void createHashcodeContainer(OutputStream outputStream) {
+        DetachedDataFileContainerCreator hashcodeContainerCreator = new DetachedDataFileContainerCreator(outputStream);
+        hashcodeContainerCreator.writeMimeType();
+        hashcodeContainerCreator.writeManifest(convertDataFiles());
+        hashcodeContainerCreator.writeHashcodeFiles(dataFiles);
+        hashcodeContainerCreator.writeSignatures(signatures);
 
-        hashCodeContainerCreator.finalizeZipFile();
+        hashcodeContainerCreator.finalizeZipFile();
     }
 
     private void operateWithEntry(ZipEntry entry, ZipInputStream zipStream) throws IOException {
@@ -70,8 +70,8 @@ public class DetachedDataFileContainer {
             }
             if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
                 signatures.add(createSignatureWrapper(out.toByteArray()));
-            } else if (entryName.startsWith(HashCodesDataFile.HASHCODES_PREFIX)) {
-                HashCodesDataFileParser parser = new HashCodesDataFileParser(out.toByteArray());
+            } else if (entryName.startsWith(HashcodesDataFile.HASHCODES_PREFIX)) {
+                HashcodesDataFileParser parser = new HashcodesDataFileParser(out.toByteArray());
                 addDataFileEntries(parser.getEntries(), entryName);
             }
             zipStream.closeEntry();
@@ -89,25 +89,25 @@ public class DetachedDataFileContainer {
         return signatureWrapper;
     }
 
-    private void addDataFileEntries(Map<String, HashCodesEntry> entries, String entryName) {
-        entries.forEach((file, hashCodesEntry) -> {
-            Optional<HashCodeDataFile> existingDataFile = dataFiles.stream().filter(dataFile -> dataFile.getFileName().equals(file)).findAny();
+    private void addDataFileEntries(Map<String, HashcodesEntry> entries, String entryName) {
+        entries.forEach((file, hashcodesEntry) -> {
+            Optional<HashcodeDataFile> existingDataFile = dataFiles.stream().filter(dataFile -> dataFile.getFileName().equals(file)).findAny();
             if (existingDataFile.isPresent()) {
-                if (HashCodesDataFile.HASHCODES_SHA256.equals(entryName)) {
-                    existingDataFile.get().setFileHashSha256(hashCodesEntry.getHash());
-                } else if (HashCodesDataFile.HASHCODES_SHA512.equals(entryName)) {
-                    existingDataFile.get().setFileHashSha512(hashCodesEntry.getHash());
+                if (HashcodesDataFile.HASHCODES_SHA256.equals(entryName)) {
+                    existingDataFile.get().setFileHashSha256(hashcodesEntry.getHash());
+                } else if (HashcodesDataFile.HASHCODES_SHA512.equals(entryName)) {
+                    existingDataFile.get().setFileHashSha512(hashcodesEntry.getHash());
                 }
             } else {
-                HashCodeDataFile hashCodeDataFile = new HashCodeDataFile();
-                hashCodeDataFile.setFileName(file);
-                hashCodeDataFile.setFileSize(hashCodesEntry.getSize());
-                if (HashCodesDataFile.HASHCODES_SHA256.equals(entryName)) {
-                    hashCodeDataFile.setFileHashSha256(hashCodesEntry.getHash());
-                } else if (HashCodesDataFile.HASHCODES_SHA512.equals(entryName)) {
-                    hashCodeDataFile.setFileHashSha512(hashCodesEntry.getHash());
+                HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
+                hashcodeDataFile.setFileName(file);
+                hashcodeDataFile.setFileSize(hashcodesEntry.getSize());
+                if (HashcodesDataFile.HASHCODES_SHA256.equals(entryName)) {
+                    hashcodeDataFile.setFileHashSha256(hashcodesEntry.getHash());
+                } else if (HashcodesDataFile.HASHCODES_SHA512.equals(entryName)) {
+                    hashcodeDataFile.setFileHashSha512(hashcodesEntry.getHash());
                 }
-                dataFiles.add(hashCodeDataFile);
+                dataFiles.add(hashcodeDataFile);
             }
         });
     }
@@ -128,7 +128,7 @@ public class DetachedDataFileContainer {
         return signatures;
     }
 
-    public List<HashCodeDataFile> getDataFiles() {
+    public List<HashcodeDataFile> getDataFiles() {
         return dataFiles;
     }
 
@@ -136,7 +136,7 @@ public class DetachedDataFileContainer {
         signatures.add(signature);
     }
 
-    public void addDataFile(HashCodeDataFile dataFile) {
+    public void addDataFile(HashcodeDataFile dataFile) {
         if (signatures.size() > 0)
             throw new SignatureExistsException("Unable to add data file when signature exists");
         dataFiles.add(dataFile);

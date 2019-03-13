@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class SignatureWrapper {
     private byte[] signature;
-    private List<SignatureHashCodeDataFile> dataFiles = new ArrayList<>();
+    private List<SignatureHashcodeDataFile> dataFiles = new ArrayList<>();
 }
