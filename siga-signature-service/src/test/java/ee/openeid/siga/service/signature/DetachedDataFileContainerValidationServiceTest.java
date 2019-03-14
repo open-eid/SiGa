@@ -4,7 +4,6 @@ import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.CreateHashcodeValidationReportRequest;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -45,7 +44,7 @@ public class DetachedDataFileContainerValidationServiceTest {
 
     @Test
     public void successfulContainerValidation() throws IOException, URISyntaxException {
-        ValidationConclusion validationConclusion = validationService.validateContainer(createRequest().getContainer());
+        ValidationConclusion validationConclusion = validationService.validateContainer(createContainer());
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
     }
@@ -58,11 +57,9 @@ public class DetachedDataFileContainerValidationServiceTest {
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
     }
 
-    private CreateHashcodeValidationReportRequest createRequest() throws IOException, URISyntaxException {
+    private String createContainer() throws IOException, URISyntaxException {
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
-        CreateHashcodeValidationReportRequest request = new CreateHashcodeValidationReportRequest();
-        request.setContainer(new String(Base64.getEncoder().encode(IOUtils.toByteArray(inputStream))));
-        return request;
+        return new String(Base64.getEncoder().encode(IOUtils.toByteArray(inputStream)));
     }
 
 }

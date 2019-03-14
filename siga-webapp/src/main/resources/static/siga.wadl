@@ -44,12 +44,12 @@
 				</method>
 			</resource>
 			<resource path="hashcodecontainers/validationreport">
-				<method id="createValidationReport" name="POST">
+				<method id="createHashcodeContainerValidationReport" name="POST">
 					<request>
-						<ns2:representation element="tns:createHashcodeValidationReportRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerValidationReportRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response status="200">
-						<ns2:representation element="tns:createHashcodeValidationReportResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerValidationReportResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -64,12 +64,12 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/validationreport">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="getValidationReport" name="GET">
+				<method id="getHashcodeContainerValidationReport" name="GET">
 					<request>
 						<param name="Authorization" style="header" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
 					</request>
 					<response status="200">
-						<ns2:representation element="tns:getHashcodeValidationReportResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getHashcodeContainerValidationReportResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -84,12 +84,12 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/remotesigning">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="createRemoteSigning" name="POST">
+				<method id="createHashcodeContainerRemoteSigning" name="POST">
 					<request>
-						<ns2:representation element="tns:createHashcodeRemoteSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerRemoteSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response status="200">
-						<ns2:representation element="tns:createHashcodeRemoteSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerRemoteSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -104,12 +104,29 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/remotesigning">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="updateRemoteSigning" name="PUT">
+				<method id="updateHashcodeContainerRemoteSigning" name="PUT">
 					<request>
-						<ns2:representation element="tns:updateHashcodeRemoteSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:updateHashcodeContainerRemoteSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response status="200">
-						<ns2:representation element="tns:updateHashcodeRemoteSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:updateHashcodeContainerRemoteSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+            <resource path="hashcodecontainers/{containerId}/remotesigning">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="deleteHashcodeContainerRemoteSigning" name="DELETE">
+					<response status="200">
+						<ns2:representation element="tns:deleteHashcodeContainerRemoteSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -124,12 +141,12 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/mobileidsigning">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="createMobileIdSigning" name="POST">
+				<method id="createHashcodeContainerMobileIdSigning" name="POST">
 					<request>
-						<ns2:representation element="tns:createHashcodeMobileIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerMobileIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</request>
 					<response status="200">
-						<ns2:representation element="tns:createHashcodeMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:createHashcodeContainerMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -144,9 +161,80 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/mobileidsigning/status">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="getMobileIdSigningStatus" name="GET">
+				<method id="getHashcodeContainerMobileIdSigningStatus" name="GET">
 					<response status="200">
-						<ns2:representation element="tns:getHashcodeMobileIdSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getHashcodeContainerMobileIdSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/mobileidsigning">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="deleteHashcodeContainerMobileIdSigning" name="DELETE">
+					<response status="200">
+						<ns2:representation element="tns:deleteHashcodeContainerMobileIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="createHashcodeContainerSmartIdSigning" name="POST">
+					<request>
+						<ns2:representation element="tns:createHashcodeContainerSmartIdSigningRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response status="200">
+						<ns2:representation element="tns:createHashcodeContainerSmartIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/smartidsigning/status">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getHashcodeContainerSmartIdSigningStatus" name="GET">
+					<response status="200">
+						<ns2:representation element="tns:getHashcodeContainerSmartIdSigningStatusResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/smartidsigning">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="deleteHashcodeContainerSmartIdSigning" name="DELETE">
+					<response status="200">
+						<ns2:representation element="tns:deleteHashcodeContainerSmartIdSigningResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -161,9 +249,82 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}/signatures">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="getSignatures" name="GET">
+				<method id="getHashcodeContainerSignatures" name="GET">
 					<response status="200">
-						<ns2:representation element="tns:getHashcodeSignaturesResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+						<ns2:representation element="tns:getHashcodeContainerSignaturesResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/signatures/{sigantureId}">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<param name="signatureId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getHashcodeContainerSignatureDetails" name="GET">
+					<response status="200">
+						<ns2:representation element="tns:getHashcodeContainerSignatureDetailsResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+            <resource path="hashcodecontainers/{containerId}/datafiles">
+            	<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="createHashcodeContainerDataFile" name="POST">
+					<request>
+						<ns2:representation  element="tns:createHashcodeContainerDataFileRequest" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</request>
+					<response status="200">
+						<ns2:representation element="tns:createHashcodeContainerDataFileResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/datafiles">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="getHashcodeContainerDataFiles" name="GET">
+					<response status="200">
+						<ns2:representation element="tns:getHashcodeContainerDataFilesResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="400">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="401">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+					<response status="500">
+						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
+					</response>
+				</method>
+			</resource>
+			<resource path="hashcodecontainers/{containerId}/datafiles/{datafileName}">
+				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<param name="datafileName" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
+				<method id="deleteHashcodeContainerDataFile" name="DELETE">
+					<response status="200">
+						<ns2:representation element="tns:deleteHashcodeContainerDataFileResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>
 					<response status="400">
 						<ns2:representation element="tns:errorResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
@@ -178,7 +339,7 @@
 			</resource>
 			<resource path="hashcodecontainers/{containerId}">
 				<param name="containerId" style="template" type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema"/>
-				<method id="getContainer" name="GET">
+				<method id="getHashcodeContainer" name="GET">
 					<response status="200">
 						<ns2:representation element="tns:getHashcodeContainerResponse" mediaType="application/json" xmlns="" xmlns:ns2="http://wadl.dev.java.net/2009/02"/>
 					</response>

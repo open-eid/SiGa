@@ -45,52 +45,52 @@ public class MainController {
     }
 
     @RequestMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
-    public CreateHashcodeValidationReportResponse validateContainer(@RequestBody CreateHashcodeValidationReportRequest validationReportRequest) {
+    public CreateHashcodeContainerValidationReportResponse validateContainer(@RequestBody CreateHashcodeContainerValidationReportRequest validationReportRequest) {
         String container = validationReportRequest.getContainer();
         RequestValidator.validateFileContent(container);
 
         ValidationConclusion validationConclusion = validationService.validateContainer(container);
-        CreateHashcodeValidationReportResponse response = new CreateHashcodeValidationReportResponse();
+        CreateHashcodeContainerValidationReportResponse response = new CreateHashcodeContainerValidationReportResponse();
         response.setValidationConclusion(validationConclusion);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public GetHashcodeValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
+    public GetHashcodeContainerValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
         ValidationConclusion validationConclusion = validationService.validateExistingContainer(containerId);
-        GetHashcodeValidationReportResponse response = new GetHashcodeValidationReportResponse();
+        GetHashcodeContainerValidationReportResponse response = new GetHashcodeContainerValidationReportResponse();
         response.setValidationConclusion(validationConclusion);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
-    public CreateHashcodeRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeRemoteSigningRequest createRemoteSigningRequest) {
+    public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
         SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(createRemoteSigningRequest);
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
 
-        CreateHashcodeRemoteSigningResponse response = new CreateHashcodeRemoteSigningResponse();
+        CreateHashcodeContainerRemoteSigningResponse response = new CreateHashcodeContainerRemoteSigningResponse();
         response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-    public UpdateHashcodeRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashcodeRemoteSigningRequest updateRemoteSigningRequest) {
+    public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
         String result = signingService.finalizeSigning(containerId, updateRemoteSigningRequest.getSignatureValue());
-        UpdateHashcodeRemoteSigningResponse response = new UpdateHashcodeRemoteSigningResponse();
+        UpdateHashcodeContainerRemoteSigningResponse response = new UpdateHashcodeContainerRemoteSigningResponse();
         response.setResult(result);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
-    public CreateHashcodeMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeMobileIdSigningRequest createMobileIdSigningRequest) {
+    public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
         MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation(createMobileIdSigningRequest);
@@ -99,28 +99,28 @@ public class MainController {
 
         String challengeId = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 
-        CreateHashcodeMobileIdSigningResponse response = new CreateHashcodeMobileIdSigningResponse();
+        CreateHashcodeContainerMobileIdSigningResponse response = new CreateHashcodeContainerMobileIdSigningResponse();
         response.setChallengeId(challengeId);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public GetHashcodeMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId) {
+    public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
         String status = signingService.processMobileStatus(containerId);
 
-        GetHashcodeMobileIdSigningStatusResponse response = new GetHashcodeMobileIdSigningStatusResponse();
+        GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);
         return response;
     }
 
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public GetHashcodeSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
+    public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
         List<Signature> signatures = containerService.getSignatures(containerId);
-        GetHashcodeSignaturesResponse response = new GetHashcodeSignaturesResponse();
+        GetHashcodeContainerSignaturesResponse response = new GetHashcodeContainerSignaturesResponse();
         response.getSignatures().addAll(signatures);
         return response;
     }

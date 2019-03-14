@@ -124,7 +124,7 @@ public class SigaApplicationTests {
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-        CreateHashcodeRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
+        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
@@ -149,7 +149,7 @@ public class SigaApplicationTests {
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/signatures");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        GetHashcodeSignaturesResponse signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeSignaturesResponse.class);
+        GetHashcodeContainerSignaturesResponse signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerSignaturesResponse.class);
         return signatureListResponse.getSignatures();
     }
 
@@ -161,7 +161,7 @@ public class SigaApplicationTests {
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
 
-        GetHashcodeValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeValidationReportResponse.class);
+        GetHashcodeContainerValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerValidationReportResponse.class);
         return reportResponse.getValidationConclusion();
     }
 
@@ -183,10 +183,10 @@ public class SigaApplicationTests {
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/status");
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeMobileIdSigningStatusResponse.class).getMidStatus();
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus();
     }
 
-    private CreateHashcodeRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
+    private CreateHashcodeContainerRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
@@ -195,7 +195,7 @@ public class SigaApplicationTests {
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeRemoteSigningResponse.class);
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeContainerRemoteSigningResponse.class);
     }
 
     private void finalizeRemoteSigning(String containerId, String signatureValue) throws Exception {

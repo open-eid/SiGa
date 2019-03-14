@@ -4,17 +4,17 @@
     <xs:element name="createHashcodeContainerResponse" type="tns:createHashcodeContainerResponse"/>
     <xs:element name="uploadHashcodeContainerRequest" type="tns:uploadHashcodeContainerRequest"/>
     <xs:element name="uploadHashcodeContainerResponse" type="tns:uploadHashcodeContainerResponse"/>
-    <xs:element name="createHashcodeValidationReportRequest" type="tns:createHashcodeValidationReportRequest"/>
-    <xs:element name="createHashcodeValidationReportResponse" type="tns:createHashcodeValidationReportResponse"/>
-    <xs:element name="getHashcodeValidationReportResponse" type="tns:getHashcodeValidationReportResponse"/>
-    <xs:element name="createHashcodeRemoteSigningRequest" type="tns:createHashcodeRemoteSigningRequest"/>
-    <xs:element name="createHashcodeRemoteSigningResponse" type="tns:createHashcodeRemoteSigningResponse"/>
-    <xs:element name="updateHashcodeRemoteSigningRequest" type="tns:updateHashcodeRemoteSigningRequest"/>
-    <xs:element name="updateHashcodeRemoteSigningResponse" type="tns:updateHashcodeRemoteSigningResponse"/>
-    <xs:element name="createHashcodeMobileIdSigningRequest" type="tns:createHashcodeMobileIdSigningRequest"/>
-    <xs:element name="createHashcodeMobileIdSigningResponse" type="tns:createHashcodeMobileIdSigningResponse"/>
-    <xs:element name="getHashcodeMobileIdSigningStatusResponse" type="tns:getHashcodeMobileIdSigningStatusResponse"/>
-    <xs:element name="getHashcodeSignaturesResponse" type="tns:getHashcodeSignaturesResponse"/>
+    <xs:element name="createHashcodeContainerValidationReportRequest" type="tns:createHashcodeContainerValidationReportRequest"/>
+    <xs:element name="createHashcodeContainerValidationReportResponse" type="tns:createHashcodeContainerValidationReportResponse"/>
+    <xs:element name="getHashcodeContainerValidationReportResponse" type="tns:getHashcodeContainerValidationReportResponse"/>
+    <xs:element name="createHashcodeContainerRemoteSigningRequest" type="tns:createHashcodeContainerRemoteSigningRequest"/>
+    <xs:element name="createHashcodeContainerRemoteSigningResponse" type="tns:createHashcodeContainerRemoteSigningResponse"/>
+    <xs:element name="updateHashcodeContainerRemoteSigningRequest" type="tns:updateHashcodeContainerRemoteSigningRequest"/>
+    <xs:element name="updateHashcodeContainerRemoteSigningResponse" type="tns:updateHashcodeContainerRemoteSigningResponse"/>
+    <xs:element name="createHashcodeContainerMobileIdSigningRequest" type="tns:createHashcodeContainerMobileIdSigningRequest"/>
+    <xs:element name="createHashcodeContainerMobileIdSigningResponse" type="tns:createHashcodeContainerMobileIdSigningResponse"/>
+    <xs:element name="getHashcodeContainerMobileIdSigningStatusResponse" type="tns:getHashcodeContainerMobileIdSigningStatusResponse"/>
+    <xs:element name="getHashcodeContainerSignaturesResponse" type="tns:getHashcodeContainerSignaturesResponse"/>
     <xs:element name="getHashcodeContainerResponse" type="tns:getHashcodeContainerResponse"/>
     <xs:element name="deleteHashcodeContainerResponse" type="tns:deleteHashcodeContainerResponse"/>
     <xs:element name="errorResponse" type="tns:errorResponse"/>
@@ -56,22 +56,22 @@
             <xs:element name="containerId" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeValidationReportRequest">
+    <xs:complexType name="createHashcodeContainerValidationReportRequest">
         <xs:sequence>
             <xs:element name="container" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeValidationReportResponse">
+    <xs:complexType name="createHashcodeContainerValidationReportResponse">
         <xs:sequence>
             <xs:element name="validationConclusion" type="tns:validationConclusion"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="getHashcodeValidationReportResponse">
+    <xs:complexType name="getHashcodeContainerValidationReportResponse">
         <xs:sequence>
             <xs:element name="validationConclusion" type="tns:validationConclusion"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeRemoteSigningRequest">
+    <xs:complexType name="createHashcodeContainerRemoteSigningRequest">
         <xs:sequence>
             <xs:element name="signingCertificate" type="xs:string"/>
             <xs:element name="signatureProfile" type="xs:string"/>
@@ -82,23 +82,23 @@
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeRemoteSigningResponse">
+    <xs:complexType name="createHashcodeContainerRemoteSigningResponse">
         <xs:sequence>
             <xs:element name="dataToSign" type="xs:string"/>
             <xs:element name="digestAlgorithm" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="updateHashcodeRemoteSigningRequest">
+    <xs:complexType name="updateHashcodeContainerRemoteSigningRequest">
         <xs:sequence>
             <xs:element name="signatureValue" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="updateHashcodeRemoteSigningResponse">
+    <xs:complexType name="updateHashcodeContainerRemoteSigningResponse">
         <xs:sequence>
             <xs:element name="result" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeMobileIdSigningRequest">
+    <xs:complexType name="createHashcodeContainerMobileIdSigningRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
             <xs:element name="phoneNo" type="xs:string"/>
@@ -114,17 +114,17 @@
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeMobileIdSigningResponse">
+    <xs:complexType name="createHashcodeContainerMobileIdSigningResponse">
         <xs:sequence>
             <xs:element name="challengeId" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="getHashcodeMobileIdSigningStatusResponse">
+    <xs:complexType name="getHashcodeContainerMobileIdSigningStatusResponse">
         <xs:sequence>
             <xs:element name="midStatus" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="getHashcodeSignaturesResponse">
+    <xs:complexType name="getHashcodeContainerSignaturesResponse">
         <xs:sequence>
             <xs:element minOccurs="0" name="signatures" maxOccurs="unbounded" type="tns:signature"/>
         </xs:sequence>
