@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SigaEventLogAnnotatedComponentStub {
 
-    @SigaEventLog(eventType = SigaEventName.REQUEST, logParameters = {@Param(index = 0, fields = {@XPath(name = "parameter_1", xpath = "value")}),
+    @SigaEventLog(eventName = SigaEventName.REQUEST, logParameters = {@Param(index = 0, fields = {@XPath(name = "parameter_1", xpath = "value")}),
             @Param(index = 1, fields = {@XPath(name = "parameter_2", xpath = "value")})}, logReturnObject = {@XPath(name = "return_value_1", xpath = "returnValue1"),
             @XPath(name = "return_value_2", xpath = "returnValue2")})
     public ReturnObject annotatedMethod(Parameter parameter1, Parameter parameter2) {
@@ -22,12 +22,12 @@ public class SigaEventLogAnnotatedComponentStub {
                 .build();
     }
 
-    @SigaEventLog(eventType = SigaEventName.REQUEST)
+    @SigaEventLog(eventName = SigaEventName.REQUEST)
     public void annotatedMethodThrowsLoggableException() {
         throw new ExceptionToLog("Loggable exception message");
     }
 
-    @SigaEventLog(eventType = SigaEventName.REQUEST)
+    @SigaEventLog(eventName = SigaEventName.REQUEST)
     public void annotatedMethodThrowsException() {
         throw new NullPointerException("NPE Exception");
     }

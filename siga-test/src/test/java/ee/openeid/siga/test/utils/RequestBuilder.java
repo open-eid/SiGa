@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.utils;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import io.restassured.internal.http.URIBuilder;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,6 +9,8 @@ import org.json.JSONObject;
 import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
@@ -112,9 +115,9 @@ public class RequestBuilder {
         return request;
     }
 
-    public static String signRequest(SigaApiFlow flow, String request, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
+    public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
         flow.setSigningTime(getSigningTimeInSeconds().toString());
-        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + request;
+        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url + ":" + request;
         return generateHmacSignature(flow.getServiceSecret(), signableString, hmacAlgo);
     }
 

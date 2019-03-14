@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -19,7 +20,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class HashcodeST extends TestBase{
+public class HashcodeContainerSystemT extends TestBase{
 
     private SigaApiFlow flow;
 
@@ -29,21 +30,7 @@ public class HashcodeST extends TestBase{
     }
 
     @Test
-    public void createHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
-    }
-
-    @Test
-    public void uploadHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
-    }
-
-    @Test
-    public void getHashcodeContainerShouldReturnContainerId() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = getValidationReportForContainerInSession(flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(SESSION_NOT_FOUND));
