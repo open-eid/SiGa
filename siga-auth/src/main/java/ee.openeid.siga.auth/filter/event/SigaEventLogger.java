@@ -3,7 +3,6 @@ package ee.openeid.siga.auth.filter.event;
 import ee.openeid.siga.auth.model.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.security.core.Authentication;
@@ -22,31 +21,34 @@ import static lombok.AccessLevel.PRIVATE;
 @CommonsLog
 @FieldDefaults(level = PRIVATE)
 public class SigaEventLogger {
-    @Getter
     final List<SigaEvent> events = new ArrayList<>();
 
-    public SigaEvent logStartEvent(SigaEventName eventType) {
+    public SigaEvent getEvent(int index) {
+        return events.get(index);
+    }
+
+    public SigaEvent logStartEvent(SigaEventName eventName) {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.START)
-                .eventName(eventType)
+                .eventName(eventName)
                 .executionTime(now().toEpochMilli())
                 .build();
         events.add(event);
         return event;
     }
 
-    public SigaEvent logExceptionEvent(SigaEventName eventType) {
-        return logExceptionEvent(eventType, null);
+    public SigaEvent logExceptionEvent(SigaEventName eventName) {
+        return logExceptionEvent(eventName, null);
     }
 
-    public SigaEvent logExceptionEvent(SigaEventName eventType, Long executionTimeInMilli) {
-        return logExceptionEvent(eventType, null, executionTimeInMilli);
+    public SigaEvent logExceptionEvent(SigaEventName eventName, Long executionTimeInMilli) {
+        return logExceptionEvent(eventName, null, executionTimeInMilli);
     }
 
-    public SigaEvent logExceptionEvent(SigaEventName eventType, String errorMessage, Long executionTimeInMilli) {
+    public SigaEvent logExceptionEvent(SigaEventName eventName, String errorMessage, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.FINISH)
-                .eventName(eventType)
+                .eventName(eventName)
                 .executionTime(now().toEpochMilli())
                 .executionDuration(executionTimeInMilli)
                 .errorMessage(errorMessage)
@@ -56,14 +58,14 @@ public class SigaEventLogger {
         return event;
     }
 
-    public SigaEvent logEndEvent(SigaEventName eventType) {
-        return logEndEvent(eventType, null);
+    public SigaEvent logEndEvent(SigaEventName eventName) {
+        return logEndEvent(eventName, null);
     }
 
-    public SigaEvent logEndEvent(SigaEventName eventType, Long executionTimeInMilli) {
+    public SigaEvent logEndEvent(SigaEventName eventName, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.FINISH)
-                .eventName(eventType)
+                .eventName(eventName)
                 .executionTime(now().toEpochMilli())
                 .executionDuration(executionTimeInMilli)
                 .resultType(SigaEvent.EventResultType.SUCCESS)
@@ -79,18 +81,19 @@ public class SigaEventLogger {
             final String clientName = sud.getClientName();
             final String serviceName = sud.getServiceName();
             final String serviceUuid = sud.getServiceUuid();
-            events.stream().map(e -> {
+            events.stream().peek(e -> {
                 e.setClientName(clientName);
                 e.setServiceName(serviceName);
                 e.setServiceUuid(serviceUuid);
-                return e;
             }).forEach(log::info);
         } else {
-            final String serviceUuid = getEvents().get(0).getServiceUuid();
-            events.forEach(e -> {
-                e.setServiceUuid(serviceUuid);
-                log.info(e);
-            });
+            if (!events.isEmpty()) {
+                final String serviceUuid = events.get(0).getServiceUuid();
+                events.forEach(e -> {
+                    e.setServiceUuid(serviceUuid);
+                    log.info(e);
+                });
+            }
         }
     }
 

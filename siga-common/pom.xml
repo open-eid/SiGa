@@ -31,6 +31,11 @@
             <artifactId>digidoc4j</artifactId>
             <version>3.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.6</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

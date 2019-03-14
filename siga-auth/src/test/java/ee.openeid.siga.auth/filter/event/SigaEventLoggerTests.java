@@ -40,8 +40,8 @@ public class SigaEventLoggerTests {
         SigaEventLogAnnotatedComponentStub.Parameter parameter1 = SigaEventLogAnnotatedComponentStub.Parameter.builder().value("value1").build();
         SigaEventLogAnnotatedComponentStub.Parameter parameter2 = SigaEventLogAnnotatedComponentStub.Parameter.builder().value("value2").build();
         sigaEventLogAnnotatedComponentStub.annotatedMethod(parameter1, parameter2);
-        SigaEvent startEvent = sigaEventLogger.getEvents().get(0);
-        SigaEvent endEvent = sigaEventLogger.getEvents().get(1);
+        SigaEvent startEvent = sigaEventLogger.getEvent(0);
+        SigaEvent endEvent = sigaEventLogger.getEvent(1);
         assertNotNull(startEvent);
         assertNotNull(endEvent);
         assertEquals("REQUEST", startEvent.getEventName().name());
@@ -62,8 +62,8 @@ public class SigaEventLoggerTests {
         } catch (SigaEventLogAnnotatedComponentStub.ExceptionToLog ex) {
             assertNotNull(ex);
         }
-        SigaEvent startEvent = sigaEventLogger.getEvents().get(0);
-        SigaEvent endEvent = sigaEventLogger.getEvents().get(1);
+        SigaEvent startEvent = sigaEventLogger.getEvent(0);
+        SigaEvent endEvent = sigaEventLogger.getEvent(1);
         assertNotNull(startEvent);
         assertNotNull(endEvent);
         assertEquals("REQUEST", startEvent.getEventName().name());
@@ -79,8 +79,8 @@ public class SigaEventLoggerTests {
         } catch (NullPointerException ex) {
             assertNotNull(ex);
         }
-        SigaEvent startEvent = sigaEventLogger.getEvents().get(0);
-        SigaEvent endEvent = sigaEventLogger.getEvents().get(1);
+        SigaEvent startEvent = sigaEventLogger.getEvent(0);
+        SigaEvent endEvent = sigaEventLogger.getEvent(1);
         assertNotNull(startEvent);
         assertNotNull(endEvent);
         assertEquals("REQUEST", startEvent.getEventName().name());
