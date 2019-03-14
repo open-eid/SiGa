@@ -24,7 +24,7 @@ public class SigaEventLogAnnotatedComponentStub {
 
     @SigaEventLog(eventName = SigaEventName.REQUEST)
     public void annotatedMethodThrowsLoggableException() {
-        throw new ExceptionToLog("Loggable exception message");
+        throw new ExceptionToLog("Loggable \"exception\" message with characters that should be escaped");
     }
 
     @SigaEventLog(eventName = SigaEventName.REQUEST)

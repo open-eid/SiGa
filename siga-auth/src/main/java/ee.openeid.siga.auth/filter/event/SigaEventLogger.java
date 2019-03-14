@@ -4,7 +4,7 @@ import ee.openeid.siga.auth.model.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.apachecommons.CommonsLog;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @Component
 @RequestScope
-@CommonsLog
+@Slf4j
 @FieldDefaults(level = PRIVATE)
 public class SigaEventLogger {
     final List<SigaEvent> events = new ArrayList<>();
@@ -85,13 +85,13 @@ public class SigaEventLogger {
                 e.setClientName(clientName);
                 e.setServiceName(serviceName);
                 e.setServiceUuid(serviceUuid);
-            }).forEach(log::info);
+            }).forEach(e -> log.info(e.toString()));
         } else {
             if (!events.isEmpty()) {
                 final String serviceUuid = events.get(0).getServiceUuid();
                 events.forEach(e -> {
                     e.setServiceUuid(serviceUuid);
-                    log.info(e);
+                    log.info(e.toString());
                 });
             }
         }
