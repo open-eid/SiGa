@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Profile;
 public class DigiDoc4jTestConfiguration {
     @Bean
     public Configuration configuration() {
-        return new Configuration(Configuration.Mode.TEST);
+        Configuration configuration = new Configuration(Configuration.Mode.TEST);
+//        configuration.setPreferAiaOcsp(true);
+        //TODO: digidoc4j 3.1.0 needed
+        return configuration;
     }
 }

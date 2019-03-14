@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Profile;
 public class DigiDoc4jConfiguration {
     @Bean
     public Configuration configuration() {
-        return new Configuration();
+        Configuration configuration = new Configuration();
+//        configuration.setPreferAiaOcsp(true);
+        //TODO: digidoc4j 3.1.0 needed
+        return configuration;
     }
 }

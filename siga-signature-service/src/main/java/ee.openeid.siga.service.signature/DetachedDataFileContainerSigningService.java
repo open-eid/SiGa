@@ -20,6 +20,7 @@ import eu.europa.esig.dss.DSSUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.*;
+import org.digidoc4j.exceptions.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         DataToSign dataToSign = sessionHolder.getDataToSign();
 
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
-        Signature signature = dataToSign.finalize(base64Decoded);
+        Signature signature = finalizeSignature(dataToSign, base64Decoded);
         SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
 
         sessionHolder.getSignatures().add(signatureWrapper);
@@ -86,7 +87,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
         if (ProcessStatusType.SIGNATURE == status) {
             DataToSign dataToSign = sessionHolder.getDataToSign();
-            Signature signature = dataToSign.finalize(getMobileSignHashStatusResponse.getSignature());
+            Signature signature = finalizeSignature(dataToSign, getMobileSignHashStatusResponse.getSignature());
             SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
             sessionHolder.getSignatures().add(signatureWrapper);
             sessionHolder.clearSigning();
@@ -123,6 +124,32 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;
+    }
+
+    private Signature finalizeSignature(DataToSign dataToSign, byte[] base64Decoded) {
+//        CommonOCSPSource commonOCSPSource = new CommonOCSPSource(configuration);
+//        String ocspUrl = commonOCSPSource.getAccessLocation(dataToSign.getSignatureParameters().getSigningCertificate());
+        //TODO: digidoc4j 3.1.0 needed
+        try {
+
+            Signature signature = dataToSign.finalize(base64Decoded);
+//                    TSP status: success {url:configuration.getTspSource()}
+//                    OCSP status: success {url:ocspUrl}
+            if (signature.getOCSPCertificate() == null) {
+//                    TSP status: success
+//                    OCSP status: failure
+            }
+            return signature;
+        } catch (TechnicalException e) {
+            if (e.getCause() != null && StringUtils.isNotBlank(e.getCause().getMessage())) {
+                String errorUrl = StringUtils.substringBetween(e.getCause().getMessage(), "'", "'");
+                if (configuration.getTspSource().equals(errorUrl)) {
+//                    TSP status: failure
+                }
+                //TODO: digidoc4j 3.1.0 needed
+            }
+            throw new ee.openeid.siga.common.exception.TechnicalException("Unable to finalize signature");
+        }
     }
 
     private DigestDataFile convertDataFile(HashcodeDataFile hashcodeDataFile) {
