@@ -1,6 +1,8 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.event.SigaEventLog;
+import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
@@ -22,6 +24,7 @@ public class MainController {
     private DetachedDataFileContainerValidationService validationService;
     private DetachedDataFileContainerSigningService signingService;
 
+    @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerResponse createContainer(@RequestBody CreateHashcodeContainerRequest createContainerRequest) {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
@@ -33,6 +36,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_UPLOAD_CONTAINER)
     @RequestMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public UploadHashcodeContainerResponse uploadContainer(@RequestBody UploadHashcodeContainerRequest uploadContainerRequest) {
         String container = uploadContainerRequest.getContainer();
@@ -44,6 +48,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_VALIDATE_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerValidationReportResponse validateContainer(@RequestBody CreateHashcodeContainerValidationReportRequest validationReportRequest) {
         String container = validationReportRequest.getContainer();
@@ -55,6 +60,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_VALIDATE_CONTAINER_BY_ID)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
@@ -65,6 +71,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_INIT)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
@@ -79,6 +86,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_FINISH)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
@@ -89,6 +97,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_INIT)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
@@ -104,6 +113,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_STATUS)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
@@ -115,6 +125,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURES_LIST)
     @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
@@ -125,6 +136,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
@@ -135,6 +147,7 @@ public class MainController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_DELETE_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
