@@ -105,6 +105,7 @@ public class SigaApplicationTests {
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatureList(containerId);
+        Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
@@ -121,6 +122,7 @@ public class SigaApplicationTests {
     public void remoteSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatureList(containerId);
+        Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
@@ -214,9 +216,8 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", "60001019906");
         request.put("phoneNo", "+37200000766");
-        request.put("originCountry", "EE");
+        request.put("country", "EE");
         request.put("language", "EST");
-        request.put("serviceName", "Testimine");
         request.put("signatureProfile", "LT");
         String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/mobileidsigning", request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/mobileidsigning");

@@ -1,7 +1,7 @@
 package ee.openeid.siga.auth.service;
 
 import ee.openeid.siga.auth.model.SigaService;
-import ee.openeid.siga.auth.model.SigaUserDetails;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;

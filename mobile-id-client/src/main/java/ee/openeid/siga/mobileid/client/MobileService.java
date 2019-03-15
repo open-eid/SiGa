@@ -2,11 +2,14 @@ package ee.openeid.siga.mobileid.client;
 
 import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import java.security.cert.X509Certificate;
@@ -43,7 +46,12 @@ public class MobileService extends WebServiceGatewaySupport {
 
     public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();
-        request.setServiceName(mobileIdInformation.getServiceName());
+        if (!(SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof SigaUserDetails)) {
+            throw new TechnicalException("Invalid authentication principal object");
+        }
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        request.setServiceName(sigaUserDetails.getServiceName());
         request.setLanguage(LanguageType.fromValue(mobileIdInformation.getLanguage()));
         request.setIDCode(mobileIdInformation.getPersonIdentifier());
         request.setPhoneNo(mobileIdInformation.getPhoneNo());

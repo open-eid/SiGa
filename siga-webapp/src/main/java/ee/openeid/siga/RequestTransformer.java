@@ -4,6 +4,7 @@ import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningRequest;
+import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
 
@@ -20,10 +21,13 @@ public class RequestTransformer {
         signatureParameters.setSigningCertificate(x509Certificate);
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(remoteSigningRequest.getSignatureProfile());
         signatureParameters.setSignatureProfile(signatureProfile);
-        signatureParameters.setCountry(remoteSigningRequest.getCountry());
-        signatureParameters.setStateOrProvince(remoteSigningRequest.getStateOrProvince());
-        signatureParameters.setCity(remoteSigningRequest.getCity());
-        signatureParameters.setPostalCode(remoteSigningRequest.getPostalCode());
+        SignatureProductionPlace signatureProductionPlace = remoteSigningRequest.getSignatureProductionPlace();
+        if (signatureProductionPlace != null) {
+            signatureParameters.setCountry(signatureProductionPlace.getCountry());
+            signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
+            signatureParameters.setCity(signatureProductionPlace.getCity());
+            signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
+        }
         signatureParameters.setRoles(remoteSigningRequest.getRoles());
         return signatureParameters;
     }
@@ -32,10 +36,13 @@ public class RequestTransformer {
         SignatureParameters signatureParameters = new SignatureParameters();
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(request.getSignatureProfile());
         signatureParameters.setSignatureProfile(signatureProfile);
-        signatureParameters.setCountry(request.getCountry());
-        signatureParameters.setStateOrProvince(request.getStateOrProvince());
-        signatureParameters.setCity(request.getCity());
-        signatureParameters.setPostalCode(request.getPostalCode());
+        SignatureProductionPlace signatureProductionPlace = request.getSignatureProductionPlace();
+        if (signatureProductionPlace != null) {
+            signatureParameters.setCountry(signatureProductionPlace.getCountry());
+            signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
+            signatureParameters.setCity(signatureProductionPlace.getCity());
+            signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
+        }
         signatureParameters.setRoles(request.getRoles());
         return signatureParameters;
 
@@ -46,9 +53,8 @@ public class RequestTransformer {
         mobileIdInformation.setLanguage(request.getLanguage());
         mobileIdInformation.setMessageToDisplay(request.getMessageToDisplay());
         mobileIdInformation.setPersonIdentifier(request.getPersonIdentifier());
-        mobileIdInformation.setCountry(request.getOriginCountry());
+        mobileIdInformation.setCountry(request.getCountry());
         mobileIdInformation.setPhoneNo(request.getPhoneNo());
-        mobileIdInformation.setServiceName(request.getServiceName());
         return mobileIdInformation;
     }
 

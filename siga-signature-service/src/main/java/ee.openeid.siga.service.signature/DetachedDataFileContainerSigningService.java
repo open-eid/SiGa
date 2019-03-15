@@ -155,6 +155,9 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     private DigestDataFile convertDataFile(HashcodeDataFile hashcodeDataFile) {
         String fileName = hashcodeDataFile.getFileName();
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.SHA512;
+        if (StringUtils.isBlank(hashcodeDataFile.getFileHashSha512())) {
+            throw new TechnicalException("Unable to create signature. Unable to read file hash");
+        }
         byte[] digest = Base64.getDecoder().decode(hashcodeDataFile.getFileHashSha512().getBytes());
         return new DigestDataFile(fileName, digestAlgorithm, digest);
     }

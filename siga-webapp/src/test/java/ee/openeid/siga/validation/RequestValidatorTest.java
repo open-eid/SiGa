@@ -119,6 +119,13 @@ public class RequestValidatorTest {
     }
 
     @Test
+    public void oldSignatureProfile() {
+        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expectMessage("Invalid signature profile");
+        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "B_BES");
+    }
+
+    @Test
     public void invalidSignatureProfile() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Invalid signature profile");
@@ -254,33 +261,6 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void nullServiceName() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id service name");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setServiceName(null);
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
-    public void emptyServiceName() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id service name");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setServiceName("");
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
-    public void invalidServiceName() {
-        exceptionRule.expect(InvalidRequestException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id service name");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setServiceName(StringUtils.repeat("a", 21));
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
     public void nullCountry() {
         exceptionRule.expect(InvalidRequestException.class);
         exceptionRule.expectMessage("Invalid country of origin");
@@ -309,7 +289,6 @@ public class RequestValidatorTest {
 
     public static MobileIdInformation getMobileInformationRequest() {
         MobileIdInformation mobileIdInformation = new MobileIdInformation();
-        mobileIdInformation.setServiceName("Service name");
         mobileIdInformation.setPhoneNo("+37253410832");
         mobileIdInformation.setPersonIdentifier("3489348234");
         mobileIdInformation.setCountry("EE");

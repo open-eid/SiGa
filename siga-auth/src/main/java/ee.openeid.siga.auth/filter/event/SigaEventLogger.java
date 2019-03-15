@@ -1,6 +1,6 @@
 package ee.openeid.siga.auth.filter.event;
 
-import ee.openeid.siga.auth.model.SigaUserDetails;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
 import lombok.experimental.FieldDefaults;

@@ -1,4 +1,4 @@
-package ee.openeid.siga.auth.model;
+package ee.openeid.siga.common.auth;
 
 import lombok.Builder;
 import lombok.Data;

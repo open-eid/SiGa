@@ -68,7 +68,8 @@ public class RequestValidator {
     }
 
     public static void validateSignatureProfile(String signatureProfile) {
-        if (SignatureProfile.findByProfile(signatureProfile) == null) {
+        SignatureProfile generatedSignatureProfile = SignatureProfile.findByProfile(signatureProfile);
+        if (!(SignatureProfile.LT == generatedSignatureProfile || SignatureProfile.LT_TM == generatedSignatureProfile || SignatureProfile.LTA == generatedSignatureProfile)) {
             throw new InvalidRequestException("Invalid signature profile");
         }
     }
@@ -84,7 +85,6 @@ public class RequestValidator {
         validateMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         validatePhoneNo(mobileIdInformation.getPhoneNo());
         validatePersonIdentifier(mobileIdInformation.getPersonIdentifier());
-        validateServiceName(mobileIdInformation.getServiceName());
         validateOriginCounty(mobileIdInformation.getCountry());
 
     }
@@ -92,12 +92,6 @@ public class RequestValidator {
     private static void validateOriginCounty(String country) {
         if (StringUtils.isBlank(country) || country.length() != 2) {
             throw new InvalidRequestException("Invalid country of origin");
-        }
-    }
-
-    private static void validateServiceName(String serviceName) {
-        if (StringUtils.isBlank(serviceName) || serviceName.length() > 20) {
-            throw new InvalidRequestException("Invalid Mobile-Id service name");
         }
     }
 

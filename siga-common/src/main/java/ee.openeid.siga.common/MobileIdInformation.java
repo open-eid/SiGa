@@ -9,6 +9,5 @@ public class MobileIdInformation {
     private String phoneNo;
     private String language;
     private String country;
-    private String serviceName;
     private String messageToDisplay;
 }

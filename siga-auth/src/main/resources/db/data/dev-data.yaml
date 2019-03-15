@@ -60,7 +60,7 @@ databaseChangeLog:
                   valueNumeric: 1
               - column:
                   name: name
-                  value: test1.service.ee
+                  value: Testimine
               - column:
                   name: sk_relying_party_name
                   value: relying_party_name
