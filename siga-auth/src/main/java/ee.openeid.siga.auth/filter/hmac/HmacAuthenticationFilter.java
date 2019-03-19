@@ -1,7 +1,7 @@
 package ee.openeid.siga.auth.filter.hmac;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.auth.filter.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;

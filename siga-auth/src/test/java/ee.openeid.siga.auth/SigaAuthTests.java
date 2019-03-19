@@ -214,6 +214,7 @@ public class SigaAuthTests {
     @Profile("test")
     @Configuration
     @Import(SecurityConfiguration.class)
+    @ComponentScan(basePackages = {"ee.openeid.siga.auth", "ee.openeid.siga.common"})
     static class TestConfiguration {
         @Primary
         @Bean

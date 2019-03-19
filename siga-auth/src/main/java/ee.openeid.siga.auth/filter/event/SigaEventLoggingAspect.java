@@ -1,9 +1,6 @@
 package ee.openeid.siga.auth.filter.event;
 
-import ee.openeid.siga.common.event.Param;
-import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEventLog;
-import ee.openeid.siga.common.event.XPath;
+import ee.openeid.siga.common.event.*;
 import ee.openeid.siga.common.exception.LoggableException;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.jxpath.JXPathContext;

@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import lombok.experimental.FieldDefaults;
 import org.junit.After;
 import org.junit.Before;
@@ -85,8 +86,8 @@ public class SigaEventLoggerTests {
         assertEquals(startEvent.toString(), startLoggingEvent.getMessage());
         assertEquals(endEvent.toString(), endLoggingEvent.getMessage());
 
-        assertThat(startLoggingEvent.getMessage(), containsString("event_parameters=[parameter_1=\"value1 with \\\"characters\\\" that should be escaped\", parameter_2=value2]"));
-        assertThat(endLoggingEvent.getMessage(), containsString("event_parameters=[return_value_2=value2, return_value_1=\"value1 with \\\"characters\\\" that should be escaped\"]"));
+        assertThat(startLoggingEvent.getMessage(), containsString("parameter_1=\"value1 with \\\"characters\\\" that should be escaped\", parameter_2=value2"));
+        assertThat(endLoggingEvent.getMessage(), containsString("return_value_2=value2, return_value_1=\"value1 with \\\"characters\\\" that should be escaped\""));
     }
 
     @Test

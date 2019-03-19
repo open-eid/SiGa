@@ -75,6 +75,10 @@ public class RequestUtil {
         List<SignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper());
         return DetachedDataFileContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName("client1")
+                .serviceName("Testimine")
+                .serviceUuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
                 .signatures(signatureWrappers)
                 .dataFiles(RequestUtil.createHashcodeDataFiles()).build();
     }

@@ -1,8 +1,6 @@
-package ee.openeid.siga.auth.filter.event;
+package ee.openeid.siga.common.event;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEventName;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -31,7 +29,7 @@ public class SigaEventLogger {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.START)
                 .eventName(eventName)
-                .executionTime(now().toEpochMilli())
+                .timestamp(now().toEpochMilli())
                 .build();
         events.add(event);
         return event;
@@ -49,8 +47,8 @@ public class SigaEventLogger {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.FINISH)
                 .eventName(eventName)
-                .executionTime(now().toEpochMilli())
-                .executionDuration(executionTimeInMilli)
+                .timestamp(now().toEpochMilli())
+                .duration(executionTimeInMilli)
                 .errorMessage(errorMessage)
                 .resultType(SigaEvent.EventResultType.EXCEPTION)
                 .build();
@@ -66,8 +64,8 @@ public class SigaEventLogger {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.FINISH)
                 .eventName(eventName)
-                .executionTime(now().toEpochMilli())
-                .executionDuration(executionTimeInMilli)
+                .timestamp(now().toEpochMilli())
+                .duration(executionTimeInMilli)
                 .resultType(SigaEvent.EventResultType.SUCCESS)
                 .build();
         events.add(event);

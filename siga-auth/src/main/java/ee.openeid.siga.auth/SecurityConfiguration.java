@@ -1,6 +1,6 @@
 package ee.openeid.siga.auth;
 
-import ee.openeid.siga.auth.filter.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;

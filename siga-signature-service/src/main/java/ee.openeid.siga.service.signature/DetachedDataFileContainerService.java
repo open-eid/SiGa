@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
@@ -12,6 +13,8 @@ import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +40,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         hashcodeContainer.save(outputStream);
 
         String sessionId = SessionIdGenerator.generateSessionId();
-        sessionService.update(sessionId, transformContainerToSession(hashcodeContainer));
+        sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
         return sessionId;
     }
 
@@ -46,7 +49,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
         hashcodeContainer.open(inputStream);
-        sessionService.update(sessionId, transformContainerToSession(hashcodeContainer));
+        sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
         return sessionId;
     }
 
@@ -90,8 +93,14 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return signature;
     }
 
-    private DetachedDataFileContainerSessionHolder transformContainerToSession(DetachedDataFileContainer container) {
+    private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
+        SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         return DetachedDataFileContainerSessionHolder.builder()
+                .sessionId(sessionId)
+                .clientName(authenticatedUser.getClientName())
+                .serviceName(authenticatedUser.getServiceName())
+                .serviceUuid(authenticatedUser.getServiceUuid())
                 .dataFiles(container.getDataFiles())
                 .signatures(container.getSignatures())
                 .build();

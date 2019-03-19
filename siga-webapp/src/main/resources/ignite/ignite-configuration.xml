@@ -19,9 +19,12 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd">
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd">
     <!--
         Alter configuration below as needed.
     -->
@@ -50,6 +53,11 @@
                         <bean class="org.apache.ignite.configuration.NearCacheConfiguration"/>
                     </property>
                 </bean>
+            </list>
+        </property>
+        <property name="includeEventTypes">
+            <list>
+                <util:constant static-field="org.apache.ignite.events.EventType.EVT_CACHE_OBJECT_EXPIRED"/>
             </list>
         </property>
         <property name="sslContextFactory">

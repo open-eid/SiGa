@@ -25,8 +25,8 @@ public class SigaEvent {
     String serviceUuid;
     String errorCode;
     String errorMessage;
-    Long executionTime;
-    Long executionDuration;
+    Long timestamp;
+    Long duration;
     EventResultType resultType;
     @Builder.Default
     Map<String, String> eventParameters = new HashMap<>();
@@ -38,32 +38,28 @@ public class SigaEvent {
     @Override
     public String toString() {
         MoreObjects.ToStringHelper ts = MoreObjects.toStringHelper(this)
+                .add("timestamp", timestamp)
                 .add("event_type", eventType)
                 .add("event_name", eventName)
                 .add("client_name", escapeJava(clientName))
                 .add("service_name", escapeJava(serviceName))
                 .add("service_uuid", serviceUuid);
-        getParameters(eventParameters).ifPresent(s -> ts.add("event_parameters", s));
-        ts.add("error_code", escapeJava(errorCode));
-        ts.add("error_message", errorMessage != null ? wrap(escapeJava(errorMessage), "\"") : null);
-        ts.add("duration", executionDuration != null ? executionDuration + "ms" : null);
-        ts.add("result", resultType);
-        return ts.omitNullValues().toString().replace("SigaEvent{", "[").replace("}", "]");
-    }
 
-    private Optional<String> getParameters(Map<String, String> parameters) {
-        if (!parameters.isEmpty()) {
-            StringJoiner sj = new StringJoiner(", ", "[", "]");
-            parameters.forEach((name, value) -> {
+        if (!eventParameters.isEmpty()) {
+            eventParameters.forEach((name, value) -> {
                 if (value.contains(" ")) {
-                    sj.add(escapeJava(name) + "=" + wrap(escapeJava(value), "\""));
+                    ts.add(escapeJava(name), wrap(escapeJava(value), "\""));
                 } else {
-                    sj.add(escapeJava(name) + "=" + escapeJava(value));
+                    ts.add(escapeJava(name), escapeJava(value));
                 }
             });
-            return Optional.of(sj.toString());
         }
-        return Optional.empty();
+
+        ts.add("error_code", escapeJava(errorCode));
+        ts.add("error_message", errorMessage != null ? wrap(escapeJava(errorMessage), "\"") : null);
+        ts.add("duration", duration != null ? duration + "ms" : null);
+        ts.add("result", resultType);
+        return ts.omitNullValues().toString().replace("SigaEvent{", "[").replace("}", "]");
     }
 
     public enum EventType {
