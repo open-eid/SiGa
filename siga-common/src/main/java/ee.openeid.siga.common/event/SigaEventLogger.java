@@ -13,6 +13,7 @@ import java.util.List;
 
 import static java.time.Instant.now;
 import static lombok.AccessLevel.PRIVATE;
+import static org.slf4j.MarkerFactory.getMarker;
 
 @Component
 @RequestScope
@@ -44,11 +45,16 @@ public class SigaEventLogger {
     }
 
     public SigaEvent logExceptionEvent(SigaEventName eventName, String errorMessage, Long executionTimeInMilli) {
+        return logExceptionEvent(eventName, null, errorMessage, executionTimeInMilli);
+    }
+
+    public SigaEvent logExceptionEvent(SigaEventName eventName, String errorCode, String errorMessage, Long executionTimeInMilli) {
         SigaEvent event = SigaEvent.builder()
                 .eventType(SigaEvent.EventType.FINISH)
                 .eventName(eventName)
                 .timestamp(now().toEpochMilli())
                 .duration(executionTimeInMilli)
+                .errorCode(errorCode)
                 .errorMessage(errorMessage)
                 .resultType(SigaEvent.EventResultType.EXCEPTION)
                 .build();
@@ -83,13 +89,13 @@ public class SigaEventLogger {
                 e.setClientName(clientName);
                 e.setServiceName(serviceName);
                 e.setServiceUuid(serviceUuid);
-            }).forEach(e -> log.info(e.toString()));
+            }).forEach(e -> log.info(getMarker("SIGA_EVENT"), e.toString()));
         } else {
             if (!events.isEmpty()) {
                 final String serviceUuid = events.get(0).getServiceUuid();
                 events.forEach(e -> {
                     e.setServiceUuid(serviceUuid);
-                    log.info(e.toString());
+                    log.info(getMarker("SIGA_EVENT"), e.toString());
                 });
             }
         }

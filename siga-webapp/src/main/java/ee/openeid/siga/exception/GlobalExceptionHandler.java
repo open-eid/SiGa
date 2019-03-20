@@ -1,8 +1,7 @@
 package ee.openeid.siga.exception;
 
-import ee.openeid.siga.common.exception.ErrorCode;
-import ee.openeid.siga.common.exception.InvalidRequestException;
-import ee.openeid.siga.common.exception.ResourceNotFoundException;
+import ee.openeid.siga.common.exception.ErrorResponseCode;
+import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,23 +16,13 @@ public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler(SigaApiException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse resourceNotFoundException(ResourceNotFoundException exception) {
-        LOGGER.debug("Session not found - {}",  exception);
+    public ErrorResponse genericSigaApiException(SigaApiException exception) {
+        LOGGER.error("Siga API exception - {}", exception);
         ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorCode(exception.getErrorCode());
         errorResponse.setErrorMessage(exception.getMessage());
-        errorResponse.setErrorCode(ErrorCode.SESSION_NOT_FOUND.name());
-        return errorResponse;
-    }
-
-    @ExceptionHandler(InvalidRequestException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse invalidRequestException(InvalidRequestException exception) {
-        LOGGER.error("Invalid request - {}",  exception);
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setErrorMessage(exception.getMessage());
-        errorResponse.setErrorCode(ErrorCode.INVALID_REQUEST.name());
         return errorResponse;
     }
 
@@ -43,7 +32,7 @@ public class GlobalExceptionHandler {
         LOGGER.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage("Unable to connect to client");
-        errorResponse.setErrorCode(ErrorCode.INTERNAL_SERVER_ERROR.name());
+        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
 
@@ -53,7 +42,7 @@ public class GlobalExceptionHandler {
         LOGGER.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
-        errorResponse.setErrorCode(ErrorCode.INTERNAL_SERVER_ERROR.name());
+        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
 

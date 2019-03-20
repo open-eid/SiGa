@@ -3,6 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService;
 import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
@@ -24,7 +25,7 @@ public class MainController {
     private DetachedDataFileContainerValidationService validationService;
     private DetachedDataFileContainerSigningService signingService;
 
-    @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER)
+    @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerResponse createContainer(@RequestBody CreateHashcodeContainerRequest createContainerRequest) {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();

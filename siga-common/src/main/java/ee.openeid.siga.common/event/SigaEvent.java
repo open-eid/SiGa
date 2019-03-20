@@ -7,8 +7,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.wrap;
@@ -57,7 +55,7 @@ public class SigaEvent {
 
         ts.add("error_code", escapeJava(errorCode));
         ts.add("error_message", errorMessage != null ? wrap(escapeJava(errorMessage), "\"") : null);
-        ts.add("duration", duration != null ? duration + "ms" : null);
+        ts.add("duration_ms", duration);
         ts.add("result", resultType);
         return ts.omitNullValues().toString().replace("SigaEvent{", "[").replace("}", "]");
     }

@@ -1,7 +1,7 @@
 package ee.openeid.siga.auth.filter.event;
 
 import ee.openeid.siga.common.event.*;
-import ee.openeid.siga.common.exception.LoggableException;
+import ee.openeid.siga.common.exception.SigaApiException;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.jxpath.JXPathContext;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -55,13 +55,13 @@ public class SigaEventLoggingAspect {
                 logObject(endEvent, eventLog.logReturnObject(), proceed);
             }
             return proceed;
+        } catch (SigaApiException e) {
+            long executionTimeInMilli = Duration.between(start, now()).toMillis();
+            sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getErrorCode(), e.getMessage(), executionTimeInMilli);
+            throw e;
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
-            if (e instanceof LoggableException) {
-                sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getMessage(), executionTimeInMilli);
-            } else {
-                sigaEventLogger.logExceptionEvent(eventLog.eventName(), "Internal server error", executionTimeInMilli);
-            }
+            sigaEventLogger.logExceptionEvent(eventLog.eventName(), "INTERNAL_SERVER_ERROR", "Internal server error", executionTimeInMilli);
             throw e;
         }
     }

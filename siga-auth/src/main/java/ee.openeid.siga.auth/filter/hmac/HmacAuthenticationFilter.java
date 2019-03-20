@@ -1,10 +1,11 @@
 package ee.openeid.siga.auth.filter.hmac;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.MediaType;
@@ -113,7 +114,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
         try (OutputStream out = response.getOutputStream()) {
             ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setErrorCode("AUTHORIZATION_ERROR");
+            errorResponse.setErrorCode(ErrorResponseCode.AUTHORIZATION_ERROR.name());
             if (failed instanceof InternalAuthenticationServiceException) {
                 errorResponse.setErrorMessage("Internal service error");
                 exceptionEvent.setErrorMessage("Internal service error");

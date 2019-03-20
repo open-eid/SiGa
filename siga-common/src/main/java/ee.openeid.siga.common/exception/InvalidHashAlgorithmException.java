@@ -1,9 +1,9 @@
 package ee.openeid.siga.common.exception;
 
-public class InvalidHashAlgorithmException extends RuntimeException implements LoggableException {
+public class InvalidHashAlgorithmException extends SigaApiException {
 
     public InvalidHashAlgorithmException(String message) {
-        super(message);
+        super("INVALID_HASH_ALGORITHM_EXCEPTION", message);
     }
 }
 

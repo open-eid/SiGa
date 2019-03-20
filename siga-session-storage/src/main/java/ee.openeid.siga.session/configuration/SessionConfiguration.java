@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static java.time.Instant.now;
 import static lombok.AccessLevel.PRIVATE;
+import static org.slf4j.MarkerFactory.getMarker;
 
 @SpringBootConfiguration
 @EnableConfigurationProperties({
@@ -56,7 +57,7 @@ public class SessionConfiguration {
                     .resultType(SigaEvent.EventResultType.SUCCESS)
                     .build();
             sigaEvent.addEventParameter("container_id", bob.getField("sessionId"));
-            log.info(sigaEvent.toString());
+            log.info(getMarker("SIGA_EVENT"), sigaEvent.toString());
             return true;
         }, null, EventType.EVT_CACHE_OBJECT_EXPIRED);
 

@@ -1,10 +1,10 @@
 package ee.openeid.siga.auth;
 
-import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

@@ -1,8 +1,8 @@
 package ee.openeid.siga.common.exception;
 
-public class ClientException extends RuntimeException implements LoggableException {
+public class ClientException extends SigaApiException {
 
     public ClientException(String message) {
-        super(message);
+        super("CLIENT_EXCEPTION", message);
     }
 }

@@ -4,7 +4,7 @@ import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
-import ee.openeid.siga.common.exception.LoggableException;
+import ee.openeid.siga.common.exception.SigaApiException;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.stereotype.Component;
@@ -32,9 +32,9 @@ public class SigaEventLogAnnotatedComponentStub {
         throw new NullPointerException("NPE Exception");
     }
 
-    public static class ExceptionToLog extends RuntimeException implements LoggableException {
+    public static class ExceptionToLog extends SigaApiException {
         public ExceptionToLog(String message) {
-            super(message);
+            super("EXCEPTION_TO_LOG", message);
         }
     }
 
