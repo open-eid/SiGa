@@ -21,7 +21,7 @@ public class SessionService {
     public Session getContainer(String containerId) {
         String sessionId = getSessionId(containerId);
         Session container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
-                .orElseThrow(() -> new ResourceNotFoundException("Session [" + containerId + "] not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         LOGGER.info("Found container with container ID [{}]", containerId);
         return container;
     }

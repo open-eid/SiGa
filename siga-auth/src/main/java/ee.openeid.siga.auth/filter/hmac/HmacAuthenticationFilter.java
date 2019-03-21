@@ -1,27 +1,13 @@
 package ee.openeid.siga.auth.filter.hmac;
 
-import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_HMAC_ALGORITHM;
-import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SERVICE_UUID;
-import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SIGNATURE;
-import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_TIMESTAMP;
-import static java.lang.Long.parseLong;
-import static java.time.Instant.now;
-import static java.time.Instant.ofEpochSecond;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-import static lombok.AccessLevel.PRIVATE;
-import static org.apache.commons.io.IOUtils.toByteArray;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.time.Instant;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
+import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.exception.ErrorResponseCode;
+import ee.openeid.siga.webapp.json.ErrorResponse;
+import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -32,14 +18,23 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
-import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEventLogger;
-import ee.openeid.siga.common.event.SigaEventName;
-import ee.openeid.siga.common.exception.ErrorResponseCode;
-import ee.openeid.siga.webapp.json.ErrorResponse;
-import lombok.experimental.FieldDefaults;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.time.Duration;
+import java.time.Instant;
+
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
+import static java.lang.Long.parseLong;
+import static java.time.Instant.*;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.io.IOUtils.toByteArray;
 
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -108,16 +103,20 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
-        sigaEventLogger.logEndEvent(SigaEventName.AUTHENTICATION);
+        SigaEvent endEvent = sigaEventLogger.logEndEvent(SigaEventName.AUTHENTICATION);
+        sigaEventLogger.getFirstMachingEvent(SigaEventName.AUTHENTICATION, SigaEvent.EventType.START).ifPresent(startEvent -> {
+            long executionTimeInMilli = Duration.between(ofEpochMilli(startEvent.getTimestamp()), ofEpochMilli(endEvent.getTimestamp())).toMillis();
+            endEvent.setDuration(executionTimeInMilli);
+        });
         chain.doFilter(request, response);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventName.AUTHENTICATION);
+        exceptionEvent.setErrorCode("AUTHENTICATION_ERROR");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
         try (OutputStream out = response.getOutputStream()) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setErrorCode(ErrorResponseCode.AUTHORIZATION_ERROR.name());

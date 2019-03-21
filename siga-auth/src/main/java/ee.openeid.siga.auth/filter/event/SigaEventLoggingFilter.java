@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Duration;
 
+import static java.time.Instant.ofEpochMilli;
 import static lombok.AccessLevel.PRIVATE;
 
 @Component
@@ -29,7 +31,10 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
 
     @Override
     protected void afterRequest(HttpServletRequest request, String message) {
-        sigaEventLogger.logEndEvent(SigaEventName.REQUEST);
+        SigaEvent startRequest = sigaEventLogger.getEvent(0);
+        SigaEvent endRequest = sigaEventLogger.logEndEvent(SigaEventName.REQUEST);
+        long executionTimeInMilli = Duration.between(ofEpochMilli(startRequest.getTimestamp()), ofEpochMilli(endRequest.getTimestamp())).toMillis();
+        endRequest.setDuration(executionTimeInMilli);
         sigaEventLogger.logEvents();
     }
 }

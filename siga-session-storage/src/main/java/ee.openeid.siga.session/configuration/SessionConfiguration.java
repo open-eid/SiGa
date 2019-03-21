@@ -46,7 +46,6 @@ public class SessionConfiguration {
         ignite.events(ignite.cluster().forCacheNodes(CacheName.CONTAINER.name())).remoteListen((UUID uuid, CacheEvent event) -> {
             BinaryObject sessionObject = (BinaryObject) event.oldValue();
             BinaryObjectBuilder bob = BinaryObjectBuilderImpl.wrap(sessionObject);
-
             SigaEvent sigaEvent = SigaEvent.builder()
                     .clientName(bob.getField("clientName"))
                     .serviceName(bob.getField("serviceName"))

@@ -41,9 +41,6 @@ public class SigaEventLoggingAspect {
         Instant start = now();
         try {
             SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
-            if (eventLog.logParameters().length != 0) {
-                logMethodParameters(joinPoint, eventLog, startEvent);
-            }
 
             start = now();
             Object proceed = joinPoint.proceed();
@@ -51,7 +48,10 @@ public class SigaEventLoggingAspect {
 
             long executionTimeInMilli = Duration.between(start, finish).toMillis();
             SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventName(), executionTimeInMilli);
+
+            logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             if (eventLog.logReturnObject().length != 0) {
+                // FIXME: Possible parameter name collision, when method parameters are logged.
                 logObject(endEvent, eventLog.logReturnObject(), proceed);
             }
             return proceed;
@@ -66,7 +66,7 @@ public class SigaEventLoggingAspect {
         }
     }
 
-    private void logMethodParameters(ProceedingJoinPoint joinPoint, SigaEventLog eventLog, SigaEvent event) {
+    private void logMethodParameters(ProceedingJoinPoint joinPoint, SigaEventLog eventLog, SigaEvent startEvent, SigaEvent endEvent) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         Object[] args = joinPoint.getArgs();
@@ -75,13 +75,14 @@ public class SigaEventLoggingAspect {
             Object arg = args[i];
             containsAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
                 String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, ((PathVariable) annotation).value());
-                event.addEventParameter(name, arg.toString());
+                startEvent.addEventParameter(name, arg.toString());
+                endEvent.addEventParameter(name, arg.toString());
             });
-
             if (eventLog.logParameters().length != 0) {
                 for (Param p : logParameters) {
                     if (p.index() == i) {
-                        logObject(event, p.fields(), arg);
+                        logObject(startEvent, p.fields(), arg);
+                        logObject(endEvent, p.fields(), arg);
                     }
                 }
             }

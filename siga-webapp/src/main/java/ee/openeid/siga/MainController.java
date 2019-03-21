@@ -37,7 +37,7 @@ public class MainController {
         return response;
     }
 
-    @SigaEventLog(eventName = SigaEventName.HC_UPLOAD_CONTAINER)
+    @SigaEventLog(eventName = SigaEventName.HC_UPLOAD_CONTAINER, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @RequestMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public UploadHashcodeContainerResponse uploadContainer(@RequestBody UploadHashcodeContainerRequest uploadContainerRequest) {
         String container = uploadContainerRequest.getContainer();

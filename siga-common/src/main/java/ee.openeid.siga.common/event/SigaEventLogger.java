@@ -10,6 +10,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.time.Instant.now;
 import static lombok.AccessLevel.PRIVATE;
@@ -21,6 +22,15 @@ import static org.slf4j.MarkerFactory.getMarker;
 @FieldDefaults(level = PRIVATE)
 public class SigaEventLogger {
     final List<SigaEvent> events = new ArrayList<>();
+
+    public Optional<SigaEvent> getFirstMachingEvent(SigaEventName eventName, SigaEvent.EventType eventType) {
+        for (SigaEvent e : events) {
+            if (eventName.equals(e.getEventName()) && eventType.equals(e.getEventType())) {
+                return Optional.of(e);
+            }
+        }
+        return Optional.empty();
+    }
 
     public SigaEvent getEvent(int index) {
         return events.get(index);
