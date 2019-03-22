@@ -19,8 +19,11 @@ public class TestData {
     public static final String X_AUTHORIZATION_HMAC_ALGO = "X-Authorization-Hmac-Algorithm";
 
     // User information
-    public static final String SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
-    public static final String SERVICE_SECRET = "746573745365637265744b6579303031";
+    public static final String SERVICE_UUID_1 = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
+    public static final String SERVICE_SECRET_1 = "746573745365637265744b6579303031";
+
+    public static final String SERVICE_UUID_2 = "824dcfe9-5c26-4d76-829a-e6630f434746";
+    public static final String SERVICE_SECRET_2 = "746573745365637265744b6579303032";
 
     // Hashcode datafile mock strings
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo";

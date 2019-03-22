@@ -2,8 +2,8 @@ package ee.openeid.siga.test.model;
 
 import lombok.Data;
 
-import static ee.openeid.siga.test.TestData.SERVICE_SECRET;
-import static ee.openeid.siga.test.TestData.SERVICE_UUID;
+import static ee.openeid.siga.test.TestData.SERVICE_SECRET_1;
+import static ee.openeid.siga.test.TestData.SERVICE_UUID_1;
 
 @Data
 public class SigaApiFlow {
@@ -11,6 +11,6 @@ public class SigaApiFlow {
     private String containerId;
 
     private String signingTime;
-    private String serviceUuid = SERVICE_UUID;
-    private String serviceSecret = SERVICE_SECRET;
+    private String serviceUuid = SERVICE_UUID_1;
+    private String serviceSecret = SERVICE_SECRET_1;
 }
