@@ -82,16 +82,15 @@ public class RequestBuilder {
     }
 
     public static JSONObject hashcodeMidSigningRequestWithDefault (String personIdentifier, String phoneNo) throws JSONException {
-        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", "Testimine", "LT", "something", null, null, null, null, null);
+        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", "LT", "something", null, null, null, null, null);
     }
 
-    public static JSONObject hashcodeMidSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String serviceName, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject hashcodeMidSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", personIdentifier);
         request.put("phoneNo", phoneNo);
-        request.put("originCountry", originCountry);
+        request.put("country", originCountry);
         request.put("language", language);
-        request.put("serviceName", serviceName);
         request.put("signatureProfile", signatureProfile);
 
         if (messageToDisplay != null){

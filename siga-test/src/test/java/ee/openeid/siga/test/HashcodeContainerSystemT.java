@@ -4,11 +4,9 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -30,26 +28,68 @@ public class HashcodeContainerSystemT extends TestBase{
     }
 
     @Test
-    public void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
-        Response response = getValidationReportForContainerInSession(flow);
+    public void createNewHashcodeContainerAndSignWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        pollForMidSigning(flow);
+        Response containerResponse = getHashcodeContainer(flow);
+
+        assertThat(containerResponse.statusCode(), equalTo(200));
+        assertThat(containerResponse.getBody().path("container").toString().length(), notNullValue());
+
+        deleteHashcodeContainer(flow);
+
+        Response response = getHashcodeContainer(flow);
+
         assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(SESSION_NOT_FOUND));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
     }
 
     @Test
-    public void validateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
+    public void uploadHashcodeContainerAndSignRemotly() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+
+        Response containerResponse = getHashcodeContainer(flow);
+
+        assertThat(containerResponse.statusCode(), equalTo(200));
+        assertThat(containerResponse.getBody().path("container").toString().length(), notNullValue());
+
+        deleteHashcodeContainer(flow);
+
+        Response response = getHashcodeSignatureList(flow);
+
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+    }
+
+    @Test
+    public void createHashcodeContainerSignRemotlyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+
+        deleteHashcodeContainer(flow);
+
         Response response = getValidationReportForContainerInSession(flow);
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
     }
 
     @Test
     public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest("hashcode.asice"));
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path("validationConclusion.validSignaturesCount"), equalTo(1));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
     }
+
 
     @Test
     public void startRemoteSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
@@ -93,13 +133,5 @@ public class HashcodeContainerSystemT extends TestBase{
         assertThat(response.getBody().path("container").toString().length(), notNullValue());
     }
 
-    @Test
-    public void deleteContainerShouldRemoveContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
-        deleteHashcodeContainer(flow);
-        Response response = getHashcodeSignatureList(flow);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path("errorCode"), equalTo("SESSION_NOT_FOUND"));
-        assertThat(response.getBody().path("errorMessage"), equalTo("Session [" + flow.getContainerId() + "] not found"));
-    }
+
 }

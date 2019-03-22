@@ -33,12 +33,21 @@ public class TestData {
 
     // Response strings
     public static final String CONTAINER_ID = "containerId";
+    public static final String RESULT = "result";
+    public static final String DATA_TO_SIGN = "dataToSign";
+    public static final String DIGEST_ALGO = "digestAlgorithm";
+
+    // Validation response strings
+    public static final String REPORT_VALID_SIGNATURES_COUNT = "validationConclusion.validSignaturesCount";
+    public static final String REPORT_SIGNATURES_COUNT = "validationConclusion.signaturesCount";
+    public static final String REPORT_SIGNATURES = "validationConclusion.signatures";
 
     // Error response strings
     public static final String ERROR_CODE = "errorCode";
+    public static final String ERROR_MESSAGE = "errorMessage";
 
     // Error codes
-    public static final String SESSION_NOT_FOUND = "SESSION_NOT_FOUND";
-    public static final String INVALID_REQUEST = "INVALID_REQUEST";
+    public static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND_EXCEPTION";
+    public static final String INVALID_REQUEST = "INVALID_REQUEST_EXCEPTION";
 
 }

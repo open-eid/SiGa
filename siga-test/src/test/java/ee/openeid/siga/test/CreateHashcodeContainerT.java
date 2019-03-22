@@ -145,8 +145,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Test
     public void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        Response response = getHashcodeContainer(flow);
+        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
