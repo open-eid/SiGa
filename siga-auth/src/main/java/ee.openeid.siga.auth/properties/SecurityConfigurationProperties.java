@@ -14,7 +14,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class SecurityConfigurationProperties {
 
     HmacConf hmac;
-    VaultConf vault;
+    JasyptConf jasypt;
 
     @Getter
     @Setter
@@ -27,7 +27,8 @@ public class SecurityConfigurationProperties {
     @Getter
     @Setter
     @FieldDefaults(level = PRIVATE)
-    public static class VaultConf {
-        String path;
+    public static class JasyptConf {
+        String encryptionAlgo;
+        String encryptionKey;
     }
 }
