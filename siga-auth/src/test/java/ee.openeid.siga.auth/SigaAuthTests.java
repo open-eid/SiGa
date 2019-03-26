@@ -1,7 +1,6 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.auth.properties.VaultProperties;
 import lombok.experimental.FieldDefaults;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -19,8 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.vault.core.VaultTemplate;
-import org.springframework.vault.support.VaultResponseSupport;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -216,20 +213,6 @@ public class SigaAuthTests {
     @Import(SecurityConfiguration.class)
     @ComponentScan(basePackages = {"ee.openeid.siga.auth", "ee.openeid.siga.common"})
     static class TestConfiguration {
-        @Primary
-        @Bean
-        public VaultTemplate vaultTemplate() {
-            VaultTemplate vaultTemplate = Mockito.mock(VaultTemplate.class);
-            VaultProperties svp = new VaultProperties();
-            svp.setJasyptEncryptionConf(new VaultProperties.JasyptEncryptionConf());
-            svp.getJasyptEncryptionConf().setAlgorithm("PBEWithMD5AndDES");
-            svp.getJasyptEncryptionConf().setKey("encryptorKey");
-            VaultResponseSupport<VaultProperties> vrs = new VaultResponseSupport<>();
-            vrs.setData(svp);
-            Mockito.when(vaultTemplate.read("dev/siga", VaultProperties.class)).thenReturn(vrs);
-            return vaultTemplate;
-        }
-
         @Bean(destroyMethod = "close")
         public Ignite ignite() throws IgniteException {
             return Ignition.start("ignite-test-configuration.xml");

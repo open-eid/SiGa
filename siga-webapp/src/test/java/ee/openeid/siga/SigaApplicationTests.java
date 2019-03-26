@@ -1,9 +1,7 @@
 package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.auth.SecurityConfiguration;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.auth.properties.VaultProperties;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
@@ -14,11 +12,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,8 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.vault.core.VaultTemplate;
-import org.springframework.vault.support.VaultResponseSupport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -48,28 +42,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"test", "digidoc4jTest"})
-@SpringBootTest(classes = {SigaApplication.class, SigaApplicationTests.TestConfiguration.class}, webEnvironment = RANDOM_PORT,
-        properties = {"spring.main.allow-bean-definition-overriding=true",
-                "siga.security.hmac.expiration=120",
-                "siga.security.hmac.clock-skew=2"})
-
+@SpringBootTest(classes = {SigaApplication.class}, webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
 public class SigaApplicationTests {
 
     private final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
     private final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
     private final static String REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
-    private String xAuthorizationTimestamp;
     private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/sign_ESTEID2018.p12", "1234".toCharArray());
-
     @Autowired
     MockMvc mockMvc;
-
+    private String xAuthorizationTimestamp;
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    VaultTemplate vaultTemplate;
 
     @Before
     public void setup() {
@@ -261,27 +246,6 @@ public class SigaApplicationTests {
     private InputStream getFileInputStream() throws IOException {
         Path documentPath = Paths.get(new ClassPathResource("hashcode.asice").getURI());
         return new ByteArrayInputStream(Base64.getEncoder().encode(Files.readAllBytes(documentPath)));
-    }
-
-    @Profile("test")
-    @Configuration
-    @Import(SecurityConfiguration.class)
-
-    static class TestConfiguration {
-
-        @Primary
-        @Bean
-        public VaultTemplate vaultTemplate() {
-            VaultTemplate vaultTemplate = Mockito.mock(VaultTemplate.class);
-            VaultProperties svp = new VaultProperties();
-            svp.setJasyptEncryptionConf(new VaultProperties.JasyptEncryptionConf());
-            svp.getJasyptEncryptionConf().setAlgorithm("PBEWithMD5AndDES");
-            svp.getJasyptEncryptionConf().setKey("encryptorKey");
-            VaultResponseSupport<VaultProperties> vrs = new VaultResponseSupport<>();
-            vrs.setData(svp);
-            Mockito.when(vaultTemplate.read("dev/siga", VaultProperties.class)).thenReturn(vrs);
-            return vaultTemplate;
-        }
     }
 
 }

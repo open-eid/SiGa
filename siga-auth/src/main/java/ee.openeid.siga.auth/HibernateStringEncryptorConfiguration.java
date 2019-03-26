@@ -1,6 +1,6 @@
 package ee.openeid.siga.auth;
 
-import ee.openeid.siga.auth.properties.VaultProperties;
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import lombok.experimental.FieldDefaults;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
@@ -19,7 +19,7 @@ public class HibernateStringEncryptorConfiguration {
     public final static String HIBERNATE_STRING_ENCRYPTOR = "HIBERNATE_STRING_ENCRYPTOR";
 
     @Autowired
-    VaultProperties vaultProperties;
+    SecurityConfigurationProperties securityConfigurationProperties;
 
     @Bean
     public HibernatePBEStringEncryptor hibernatePBEStringEncryptor(PBEStringEncryptor stringEncryptor) {
@@ -31,10 +31,10 @@ public class HibernateStringEncryptorConfiguration {
 
     @Bean
     public PBEStringEncryptor pbeStringEncryptor() {
-        requireNonNull(vaultProperties.getJasyptEncryptionConf(), "Jasypt encryption configuration properties not set in Vault!");
+        requireNonNull(securityConfigurationProperties.getJasypt(), "Jasypt encryption configuration properties not set!");
         PooledPBEStringEncryptor stringEncryptor = new PooledPBEStringEncryptor();
-        stringEncryptor.setPassword(vaultProperties.getJasyptEncryptionConf().getKey());
-        stringEncryptor.setAlgorithm(vaultProperties.getJasyptEncryptionConf().getAlgorithm());
+        stringEncryptor.setPassword(securityConfigurationProperties.getJasypt().getEncryptionKey());
+        stringEncryptor.setAlgorithm(securityConfigurationProperties.getJasypt().getEncryptionAlgo());
         stringEncryptor.setPoolSize(4);
         return stringEncryptor;
     }
