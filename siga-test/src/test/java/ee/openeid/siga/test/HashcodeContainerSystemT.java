@@ -47,7 +47,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void uploadHashcodeContainerAndSignRemotly() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
 
@@ -85,7 +85,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest("hashcode.asice"));
+        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
     }
@@ -100,7 +100,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
         assertThat(response.statusCode(), equalTo(200));
@@ -109,7 +109,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void signWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
         Response response = pollForMidSigning(flow);
         assertThat(response.statusCode(), equalTo(200));
@@ -117,7 +117,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void getSignaturesShouldReturnListOfSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response response = getHashcodeSignatureList(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("signatures[0].id"), equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"));
@@ -125,7 +125,7 @@ public class HashcodeContainerSystemT extends TestBase{
 
     @Test
     public void getSignedContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
         Response response = getHashcodeContainer(flow);

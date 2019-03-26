@@ -33,7 +33,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
@@ -45,7 +45,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-52
     @Test
     public void startRemoteSigningHashcodeContainerWithAllParamsReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn, Estonia"));
 
@@ -57,7 +57,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-52
     @Test
     public void startRemoteSigningHashcodeContainerWithRoleReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null));
 
@@ -69,7 +69,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-52
     @Test
     public void startRemoteSigningHashcodeContainerWithLocationReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn, Estonia"));
 
@@ -80,7 +80,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptyBody() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         JSONObject request = new JSONObject();
         Response response = postHashcodeRemoteSigningInSession(flow, request);
@@ -91,7 +91,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerMissingSigningCertificate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
@@ -103,7 +103,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerMissingProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         JSONObject request = new JSONObject();
         request.put("signingCertificate", SIGNER_CERT_PEM);
@@ -115,7 +115,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptySigningCertificate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("", "LT"));
 
@@ -125,7 +125,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptyProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
 
@@ -135,7 +135,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerInvalidSigningCertificate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("-&32%", "LT"));
 
@@ -145,7 +145,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerInvalidProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
 
@@ -155,7 +155,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerReturnsOk() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
@@ -166,7 +166,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptyBody() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         JSONObject request = new JSONObject();
@@ -178,7 +178,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptySignatureValue() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(""));
@@ -190,7 +190,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-52
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithInvalidSignatureValue() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("12345"));
@@ -202,7 +202,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-50
     @Test
     public void getRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
 
@@ -213,7 +213,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-50
     @Test
     public void headToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
@@ -235,7 +235,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void optionsToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
@@ -258,7 +258,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore //TODO: SIGARIA-50
     @Test
     public void patchToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))

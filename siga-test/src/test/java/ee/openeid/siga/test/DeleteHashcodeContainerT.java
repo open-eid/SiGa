@@ -1,12 +1,9 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,7 +15,6 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeRemoteSigningSignatureValueRequest;
 import static ee.openeid.siga.test.utils.digestSigner.signDigest;
 import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -33,7 +29,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerAndDelete() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
@@ -66,7 +62,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerBeforeSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         deleteHashcodeContainer(flow);
@@ -79,7 +75,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerAfterSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
 
@@ -93,7 +89,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerAfterRetrievingIt() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
         getHashcodeContainer(flow);
@@ -108,7 +104,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerBeforeFinishingMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
 
         deleteHashcodeContainer(flow);
@@ -121,7 +117,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerDuringMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
         getHashcodeMidSigningInSession(flow);
 
@@ -135,7 +131,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerAfterMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
         pollForMidSigning(flow);
 
@@ -149,7 +145,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerAfterValidation() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         getValidationReportForContainerInSession(flow);
 
         deleteHashcodeContainer(flow);
@@ -162,7 +158,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerAfterRetrievingSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         getHashcodeSignatureList(flow);
 
         deleteHashcodeContainer(flow);
@@ -175,7 +171,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void deleteHashcodeContainerForOtherClientNotPossible() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);
@@ -192,7 +188,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     public void postToDeleteHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));

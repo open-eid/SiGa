@@ -40,12 +40,18 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeContainerRequest(String containerName) throws JSONException, IOException {
+    public static JSONObject hashcodeContainerRequestFromFile(String containerName) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
         String path = classLoader.getResource(containerName).getPath().substring(1);
         String file = Base64.encodeBase64String(Files.readAllBytes(FileSystems.getDefault().getPath(path)));
         request.put("container", file);
+        return request;
+    }
+
+    public static JSONObject hashcodeContainerRequest(String containerBase64) throws JSONException, IOException {
+        JSONObject request = new JSONObject();
+        request.put("container", containerBase64);
         return request;
     }
 

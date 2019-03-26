@@ -5,7 +5,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -34,21 +33,21 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
 
     @Test //TODO: At what point the container structure should be validated?
     public void uploadInvalidHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcodeMissingSha256File.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha256File.asice"));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
 
     @Test
     public void uploadHashcodeContainerWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcodeWithoutSignature.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
@@ -97,7 +96,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void putToUploadHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequest("hashcode.asice").toString());
+        Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequestFromFile("hashcode.asice").toString());
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
@@ -150,11 +149,11 @@ public class UploadHashcodeContainerT extends TestBase {
     @Test
     public void patchToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequest("hashcode.asice").toString(), "PATCH", UPLOAD + HASHCODE_CONTAINERS, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequestFromFile("hashcode.asice").toString(), "PATCH", UPLOAD + HASHCODE_CONTAINERS, null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainerRequest("hashcode.asice").toString())
+                .body(hashcodeContainerRequestFromFile("hashcode.asice").toString())
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
