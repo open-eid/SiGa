@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.configuration;
 
-import ee.openeid.siga.mobileid.client.MobileService;
+import ee.openeid.siga.mobileid.client.DdsService;
+import ee.openeid.siga.mobileid.client.MidService;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -37,10 +38,17 @@ public class ClientConfiguration {
     }
 
     @Bean
-    public MobileService mobileService() throws Exception {
-        MobileService mobileService = new MobileService(mobileServiceConfigurationProperties.getUrl());
-        mobileService.setMessageSender(httpComponentsMessageSender());
-        return mobileService;
+    public DdsService ddsService() throws Exception {
+        DdsService ddsService = new DdsService(mobileServiceConfigurationProperties.getUrlV1());
+        ddsService.setMessageSender(httpComponentsMessageSender());
+        return ddsService;
+    }
+
+    @Bean
+    public MidService midService() throws Exception {
+        MidService midService = new MidService(mobileServiceConfigurationProperties.getUrlV2());
+        midService.setMessageSender(httpComponentsMessageSender());
+        return midService;
     }
 
     @Bean

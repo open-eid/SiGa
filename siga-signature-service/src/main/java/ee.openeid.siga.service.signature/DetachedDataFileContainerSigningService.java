@@ -7,10 +7,11 @@ import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
-import ee.openeid.siga.mobileid.client.MobileService;
-import ee.openeid.siga.mobileid.model.GetMobileSignHashStatusResponse;
-import ee.openeid.siga.mobileid.model.MobileSignHashResponse;
-import ee.openeid.siga.mobileid.model.ProcessStatusType;
+import ee.openeid.siga.mobileid.client.DdsService;
+import ee.openeid.siga.mobileid.client.MidService;
+import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
+import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
+import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
@@ -33,7 +34,8 @@ import java.util.Map;
 public class DetachedDataFileContainerSigningService implements DetachedDataFileSessionHolder {
 
     private static final String OK_RESPONSE = "OK";
-    private MobileService mobileService;
+    private DdsService ddsService;
+    private MidService midService;
     private SessionService sessionService;
     private Configuration configuration;
 
@@ -65,11 +67,11 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     public String startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         verifyDataFileExistence(sessionHolder);
-        X509Certificate signingCertificate = mobileService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getCountry());
+        X509Certificate signingCertificate = ddsService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getCountry(), mobileIdInformation.getPhoneNo());
         signatureParameters.setSigningCertificate(signingCertificate);
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
-        MobileSignHashResponse response = mobileService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
+        MobileSignHashResponse response = midService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
         if (!OK_RESPONSE.equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
@@ -83,7 +85,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     public String processMobileStatus(String containerId) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         validateMobileIdSession(sessionHolder);
-        GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileService.getMobileSignHashStatus(sessionHolder.getSessionCode());
+        GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = midService.getMobileSignHashStatus(sessionHolder.getSessionCode());
         ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
         if (ProcessStatusType.SIGNATURE == status) {
             DataToSign dataToSign = sessionHolder.getDataToSign();
@@ -205,8 +207,13 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     }
 
     @Autowired
-    public void setMobileService(MobileService mobileService) {
-        this.mobileService = mobileService;
+    public void setDdsService(DdsService ddsService) {
+        this.ddsService = ddsService;
+    }
+
+    @Autowired
+    public void setMidService(MidService midService) {
+        this.midService = midService;
     }
 
 }

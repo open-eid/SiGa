@@ -38,8 +38,7 @@
         </dependency>
     </dependencies>
 
-    <!--
-    <build>
+    <!--build>
         <plugins>
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
@@ -47,7 +46,21 @@
                 <version>0.14.0</version>
                 <executions>
                     <execution>
-                        <id>generate-classes-from-wsdl</id>
+                        <id>generate-classes-from-dds-wsdl</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/resources</schemaDirectory>
+                            <schemaIncludes>
+                                <include>dds.wsdl</include>
+                            </schemaIncludes>
+                            <generateDirectory>src/main/java</generateDirectory>
+                            <generatePackage>ee.openeid.siga.mobileid.model.dds</generatePackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-classes-from-mid-wsdl</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -57,13 +70,12 @@
                                 <include>mid.wsdl</include>
                             </schemaIncludes>
                             <generateDirectory>src/main/java</generateDirectory>
-                            <generatePackage>ee.openeid.siga.mobileid.model</generatePackage>
+                            <generatePackage>ee.openeid.siga.mobileid.model.mid</generatePackage>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
-    </build>
-    -->
+    </build-->
 
 </project>

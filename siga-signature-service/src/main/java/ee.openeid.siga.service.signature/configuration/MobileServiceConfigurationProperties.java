@@ -7,7 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "siga.dds")
 public class MobileServiceConfigurationProperties {
 
-    private String url;
+    private String urlV1;
+    private String urlV2;
     private String trustStore;
     private String trustStorePassword;
 }
