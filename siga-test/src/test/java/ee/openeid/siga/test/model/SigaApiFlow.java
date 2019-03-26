@@ -2,8 +2,7 @@ package ee.openeid.siga.test.model;
 
 import lombok.Data;
 
-import static ee.openeid.siga.test.TestData.SERVICE_SECRET_1;
-import static ee.openeid.siga.test.TestData.SERVICE_UUID_1;
+import static ee.openeid.siga.test.TestData.*;
 
 @Data
 public class SigaApiFlow {

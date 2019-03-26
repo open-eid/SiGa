@@ -50,32 +50,23 @@ public class RequestBuilder {
     }
 
     public static JSONObject hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
-        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
+        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null);
     }
 
-    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String roles, String signatureProductionPlace) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
-        if (city != null){
-            request.put("city", city);
-        }
-        if (stateOrProvince != null){
-            request.put("stateOrProvince", stateOrProvince);
-        }
-        if (postalCode != null){
-            request.put("postalCode", postalCode);
-        }
-        if (country != null){
-            request.put("country", country);
-        }
         if (roles != null){
             request.put("roles", roles);
+        }
+        if (signatureProductionPlace != null){
+            request.put("signatureProductionPlace", signatureProductionPlace);
         }
         return request;
     }
 
-    public static JSONObject hashcodeRemoteSigningSignatureValueRequest(String signatureValue) throws JSONException, IOException {
+    public static JSONObject hashcodeRemoteSigningSignatureValueRequest(String signatureValue) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
         return request;

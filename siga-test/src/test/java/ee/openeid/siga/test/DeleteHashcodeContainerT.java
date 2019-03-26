@@ -190,11 +190,10 @@ public class DeleteHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path("signatures[0].signerInfo"), equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"));
     }
 
-    @Ignore
     @Test
     public void postToDeleteHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest("hashcode.asice"));
-        Response response = post(HASHCODE_CONTAINERS + flow.getContainerId(), flow, "");
+        Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }

@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CreateHashcodeContainerT extends TestBase {
 
-
     private SigaApiFlow flow;
 
     @Before
