@@ -5,24 +5,22 @@ import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.TechnicalException;
-import ee.openeid.siga.mobileid.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ee.openeid.siga.mobileid.model.mid.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import java.security.cert.X509Certificate;
 
-public class MobileService extends WebServiceGatewaySupport {
+@Slf4j
+public class MidService extends WebServiceGatewaySupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MobileService.class);
-
-    private static final String CONTEXT_PATH = "ee.openeid.siga.mobileid.model";
+    private static final String CONTEXT_PATH = "ee.openeid.siga.mobileid.model.mid";
 
     private final String serviceUrl;
 
-    public MobileService(String serviceUrl) {
+    public MidService(String serviceUrl) {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setContextPath(CONTEXT_PATH);
         setMarshaller(marshaller);
@@ -39,7 +37,7 @@ public class MobileService extends WebServiceGatewaySupport {
             GetMobileCertByIDCodeResponse response = (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
             return CertificateUtil.createX509Certificate(response.getSignCertData());
         } catch (Exception e) {
-            LOGGER.error("Invalid DigiDocService response:", e);
+            log.error("Invalid DigiDocService response:", e);
             throw new ClientException("Unable to receive valid response from DigiDocService");
         }
     }
@@ -60,7 +58,7 @@ public class MobileService extends WebServiceGatewaySupport {
         try {
             return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (Exception e) {
-            LOGGER.error("Invalid DigiDocService response:", e);
+            log.error("Invalid DigiDocService response:", e);
             throw new ClientException("Unable to receive valid response from DigiDocService");
         }
     }
@@ -72,7 +70,7 @@ public class MobileService extends WebServiceGatewaySupport {
         try {
             return (GetMobileSignHashStatusResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (Exception e) {
-            LOGGER.error("Invalid DigiDocService response:", e);
+            log.error("Invalid DigiDocService response:", e);
             throw new ClientException("Unable to receive valid response from DigiDocService");
         }
     }
