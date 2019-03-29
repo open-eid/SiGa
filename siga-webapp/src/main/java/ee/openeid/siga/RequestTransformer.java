@@ -2,11 +2,13 @@ package ee.openeid.siga;
 
 import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningRequest;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -49,13 +51,14 @@ public class RequestTransformer {
     }
 
     public static MobileIdInformation transformMobileIdInformation(CreateHashcodeContainerMobileIdSigningRequest request) {
-        MobileIdInformation mobileIdInformation = new MobileIdInformation();
-        mobileIdInformation.setLanguage(request.getLanguage());
-        mobileIdInformation.setMessageToDisplay(request.getMessageToDisplay());
-        mobileIdInformation.setPersonIdentifier(request.getPersonIdentifier());
-        mobileIdInformation.setCountry(request.getCountry());
-        mobileIdInformation.setPhoneNo(request.getPhoneNo());
-        return mobileIdInformation;
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return MobileIdInformation.builder()
+                .language(request.getLanguage())
+                .messageToDisplay(request.getMessageToDisplay())
+                .personIdentifier(request.getPersonIdentifier())
+                .country(request.getCountry())
+                .phoneNo(request.getPhoneNo())
+                .relyingPartyName(sigaUserDetails.getSkRelyingPartyName()).build();
     }
 
 }

@@ -96,12 +96,13 @@ public class RequestUtil {
     }
 
     public static MobileIdInformation createMobileInformation() {
-        MobileIdInformation mobileIdInformation = new MobileIdInformation();
-        mobileIdInformation.setPhoneNo("+37253410832");
-        mobileIdInformation.setPersonIdentifier("3489348234");
-        mobileIdInformation.setCountry("EE");
-        mobileIdInformation.setLanguage("EST");
-        mobileIdInformation.setMessageToDisplay("Random display");
+        MobileIdInformation mobileIdInformation = MobileIdInformation.builder()
+                .phoneNo("+37253410832")
+                .personIdentifier("3489348234")
+                .country("EE")
+                .language("EST")
+                .relyingPartyName("Testimiseks")
+                .messageToDisplay("Random display").build();
         return mobileIdInformation;
     }
 }

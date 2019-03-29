@@ -22,7 +22,8 @@ public class SigaUserDetails implements UserDetails {
     String serviceName;
     String serviceUuid;
     String signingSecret;
-
+    String skRelyingPartyName;
+    String skRelyingPartyUuid;
     @Builder.Default()
     boolean active = true;
 

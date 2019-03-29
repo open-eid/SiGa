@@ -288,13 +288,13 @@ public class RequestValidatorTest {
     }
 
     public static MobileIdInformation getMobileInformationRequest() {
-        MobileIdInformation mobileIdInformation = new MobileIdInformation();
-        mobileIdInformation.setPhoneNo("+37253410832");
-        mobileIdInformation.setPersonIdentifier("3489348234");
-        mobileIdInformation.setCountry("EE");
-        mobileIdInformation.setLanguage("EST");
-        mobileIdInformation.setMessageToDisplay("Random display");
-        return mobileIdInformation;
+        return MobileIdInformation.builder()
+        .relyingPartyName("Testimiseks")
+        .phoneNo("+37253410832")
+        .personIdentifier("3489348234")
+        .country("EE")
+        .language("EST")
+        .messageToDisplay("Random display").build();
     }
 
     public static CreateHashcodeContainerRequest getCreateHashcodeContainerRequest() {

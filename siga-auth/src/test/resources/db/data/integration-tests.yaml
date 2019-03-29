@@ -60,10 +60,10 @@ databaseChangeLog:
                   valueNumeric: 1
               - column:
                   name: name
-                  value: Testimine
+                  value: test1.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: relying_party_name
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
                   value: 439ffac4-39b1-11e9-b210-d663bd873d93

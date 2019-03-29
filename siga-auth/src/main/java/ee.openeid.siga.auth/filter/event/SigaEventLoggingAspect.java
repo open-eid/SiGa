@@ -22,6 +22,7 @@ import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static java.time.Instant.now;
 import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Aspect
 @Component
@@ -52,7 +53,7 @@ public class SigaEventLoggingAspect {
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             if (eventLog.logReturnObject().length != 0) {
                 // FIXME: Possible parameter name collision, when method parameters are logged.
-                logObject(endEvent, eventLog.logReturnObject(), proceed);
+                logObject(eventLog.logReturnObject(), proceed, endEvent);
             }
             return proceed;
         } catch (SigaApiException e) {
@@ -81,19 +82,25 @@ public class SigaEventLoggingAspect {
             if (eventLog.logParameters().length != 0) {
                 for (Param p : logParameters) {
                     if (p.index() == i) {
-                        logObject(startEvent, p.fields(), arg);
-                        logObject(endEvent, p.fields(), arg);
+                        if (p.fields().length > 0) {
+                            logObject(p.fields(), arg, startEvent, endEvent);
+                        } else {
+                            String parameterName = isBlank(p.name()) ? "parameter_" + i : p.name();
+                            startEvent.addEventParameter(parameterName, arg.toString());
+                        }
                     }
                 }
             }
         }
     }
 
-    private void logObject(SigaEvent event, XPath[] xPaths, Object returnObject) {
+    private void logObject(XPath[] xPaths, Object returnObject, SigaEvent... events) {
         JXPathContext xc = JXPathContext.newContext(returnObject);
         for (XPath p : xPaths) {
             Object value = xc.getValue(p.xpath());
-            event.addEventParameter(p.name(), value != null ? value.toString() : "null");
+            for (SigaEvent event : events) {
+                event.addEventParameter(p.name(), value != null ? value.toString() : "null");
+            }
         }
     }
 

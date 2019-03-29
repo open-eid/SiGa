@@ -72,9 +72,9 @@ public class SigaEventLoggerTests {
         assertEquals(REQUEST.name(), endEvent.getEventName().name());
         Map<String, String> startEventParameters = startEvent.getEventParameters();
         Map<String, String> endEventParameters = endEvent.getEventParameters();
-        assertEquals("value1 with \"characters\" that should be escaped", startEventParameters.get("parameter_1"));
+        assertEquals("value1 with \\\"characters\\\" that should be escaped", startEventParameters.get("parameter_1"));
         assertEquals("value2", startEventParameters.get("parameter_2"));
-        assertEquals("value1 with \"characters\" that should be escaped", endEventParameters.get("return_value_1"));
+        assertEquals("value1 with \\\"characters\\\" that should be escaped", endEventParameters.get("return_value_1"));
         assertEquals("value2", endEventParameters.get("return_value_2"));
         assertEquals(SUCCESS.name(), endEvent.getResultType().name());
 

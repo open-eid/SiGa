@@ -53,4 +53,12 @@ public enum SigaEventName {
     MID_CERTIFICATE_REQUEST,
     MID_INIT_SIGNING,
     MID_GET_SIGNING_STATUS;
+
+    public enum ErrorCode {
+        AUTHENTICATION_ERROR, TSA_REQUEST_ERROR, OCSP_REQUEST_ERROR
+    }
+
+    public enum EventParam {
+        OCSP_URL, TSA_URL, OCSP_SUBJECT_CA, TSA_SUBJECT_CA
+    }
 }

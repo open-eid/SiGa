@@ -2,11 +2,13 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
-import ee.openeid.siga.mobileid.client.DdsService;
-import ee.openeid.siga.mobileid.client.MidService;
+import ee.openeid.siga.mobileid.client.DigiDocService;
+import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
@@ -28,6 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Base64;
+import java.util.Optional;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
@@ -35,10 +38,8 @@ import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DetachedDataFileContainerSigningServiceTest {
-    private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
-
     private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference Id=\"r-id-1\" URI=\"test.txt\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"></ds:DigestMethod><ds:DigestValue>gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA==</ds:DigestValue></ds:Reference><ds:Reference Type=\"http://uri.etsi.org/01903#SignedProperties\"";
-
+    private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
@@ -46,10 +47,10 @@ public class DetachedDataFileContainerSigningServiceTest {
     private DetachedDataFileContainerSigningService signingService;
 
     @Mock
-    private MidService midService;
+    private MobileIdService mobileIdService;
 
     @Mock
-    private DdsService ddsService;
+    private DigiDocService digiDocService;
 
     @Mock
     private SessionService sessionService;
@@ -57,10 +58,16 @@ public class DetachedDataFileContainerSigningServiceTest {
     @Mock
     private Configuration configuration;
 
+    @Mock
+    private SigaEventLogger sigaEventLogger;
+
     @Before
     public void setUp() throws IOException, URISyntaxException {
         configuration = new Configuration(Configuration.Mode.TEST);
         signingService.setConfiguration(configuration);
+        Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
+        Mockito.when(sigaEventLogger.logEndEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
+        Mockito.when(sigaEventLogger.getFirstMachingEvent(any(), any())).thenReturn(Optional.of(SigaEvent.builder().timestamp(0L).build()));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createSessionHolder());
     }
 
@@ -140,8 +147,8 @@ public class DetachedDataFileContainerSigningServiceTest {
 
     @Test
     public void successfulMobileIdSigning() {
-        Mockito.when(ddsService.getMobileCertificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
-        Mockito.when(midService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
+        Mockito.when(digiDocService.getMobileX509Certificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
         signingService.startMobileIdSigning(CONTAINER_ID, mobileIdInformation, signatureParameters);
@@ -153,8 +160,8 @@ public class DetachedDataFileContainerSigningServiceTest {
         exceptionRule.expectMessage("Invalid DigiDocService response");
         MobileSignHashResponse mobileSignHashResponse = createMobileSignHashResponse();
         mobileSignHashResponse.setStatus("Random");
-        Mockito.when(ddsService.getMobileCertificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
-        Mockito.when(midService.initMobileSignHash(any(), any(), any())).thenReturn(mobileSignHashResponse);
+        Mockito.when(digiDocService.getMobileX509Certificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(mobileSignHashResponse);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
         signingService.startMobileIdSigning(CONTAINER_ID, mobileIdInformation, signatureParameters);
@@ -176,7 +183,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         getMobileSignHashStatusResponse.setSignature(signatureRaw);
         getMobileSignHashStatusResponse.setStatus(ProcessStatusType.SIGNATURE);
 
-        Mockito.when(midService.getMobileSignHashStatus(any())).thenReturn(getMobileSignHashStatusResponse);
+        Mockito.when(mobileIdService.getMobileSignHashStatus(any())).thenReturn(getMobileSignHashStatusResponse);
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
 
         signingService.processMobileStatus(CONTAINER_ID);

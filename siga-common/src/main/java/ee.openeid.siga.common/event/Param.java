@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 public @interface Param {
     int index();
 
-    XPath[] fields();
+    String name() default "";
+
+    XPath[] fields() default {};
 }
 

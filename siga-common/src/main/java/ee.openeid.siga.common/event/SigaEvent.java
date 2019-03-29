@@ -29,8 +29,16 @@ public class SigaEvent {
     @Builder.Default
     Map<String, String> eventParameters = new HashMap<>();
 
+    public void addEventParameter(SigaEventName.EventParam eventParam, String parameterValue) {
+        addEventParameter(eventParam.name().toLowerCase(), escapeJava(parameterValue));
+    }
+
     public void addEventParameter(String parameterName, String parameterValue) {
-        eventParameters.put(parameterName, parameterValue);
+        eventParameters.put(escapeJava(parameterName), escapeJava(parameterValue));
+    }
+
+    public void setErrorCode(SigaEventName.ErrorCode errorCode) {
+        this.errorCode = errorCode.name();
     }
 
     @Override
@@ -45,10 +53,12 @@ public class SigaEvent {
 
         if (!eventParameters.isEmpty()) {
             eventParameters.forEach((name, value) -> {
-                if (value.contains(" ")) {
-                    ts.add(escapeJava(name), wrap(escapeJava(value), "\""));
-                } else {
-                    ts.add(escapeJava(name), escapeJava(value));
+                if (value != null) {
+                    if (value.contains(" ")) {
+                        ts.add(name, wrap(value, "\""));
+                    } else {
+                        ts.add(name, value);
+                    }
                 }
             });
         }

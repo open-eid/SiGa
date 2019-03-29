@@ -11,8 +11,7 @@ public class DigiDoc4jTestConfiguration {
     @Bean
     public Configuration configuration() {
         Configuration configuration = new Configuration(Configuration.Mode.TEST);
-//        configuration.setPreferAiaOcsp(true);
-        //TODO: digidoc4j 3.1.0 needed
+        configuration.setPreferAiaOcsp(true);
         return configuration;
     }
 }

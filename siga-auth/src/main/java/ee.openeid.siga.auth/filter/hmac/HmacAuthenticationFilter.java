@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
+import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.AUTHENTICATION_ERROR;
 import static java.lang.Long.parseLong;
 import static java.time.Instant.*;
 import static java.util.Collections.emptyList;
@@ -114,7 +115,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         SigaEvent exceptionEvent = sigaEventLogger.logExceptionEvent(SigaEventName.AUTHENTICATION);
-        exceptionEvent.setErrorCode("AUTHENTICATION_ERROR");
+        exceptionEvent.setErrorCode(AUTHENTICATION_ERROR);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         try (OutputStream out = response.getOutputStream()) {

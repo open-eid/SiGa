@@ -12,8 +12,7 @@ public class DigiDoc4jConfiguration {
     @Bean
     public Configuration configuration() {
         Configuration configuration = new Configuration();
-//        configuration.setPreferAiaOcsp(true);
-        //TODO: digidoc4j 3.1.0 needed
+        configuration.setPreferAiaOcsp(true);
         return configuration;
     }
 }
