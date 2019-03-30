@@ -94,12 +94,16 @@ public class TestBase {
     }
 
     protected String createUrl(String endpoint) {
-        return properties.get("siga.application-url") + endpoint;
+        return properties.get("siga.protocol") + "://" + properties.get("siga.hostname") + ":" + properties.get("siga.port") + properties.get("siga.application-context-path") + endpoint;
+    }
+
+    protected String createUrlToSign(String endpoint) {
+        return properties.getProperty("siga.application-context-path") + endpoint;
     }
 
     protected Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", createUrlToSign(endpoint), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -120,7 +124,7 @@ public class TestBase {
 
     protected Response put(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "PUT", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "PUT", createUrlToSign(endpoint), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -141,7 +145,7 @@ public class TestBase {
 
     protected Response get(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "GET", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "GET", createUrlToSign(endpoint), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -157,7 +161,7 @@ public class TestBase {
 
     protected Response delete(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "DELETE", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "DELETE", createUrlToSign(endpoint), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))

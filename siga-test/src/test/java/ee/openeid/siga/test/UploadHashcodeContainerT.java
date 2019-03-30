@@ -15,7 +15,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -88,30 +89,30 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToUploadHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException {
+    public void deleteToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(UPLOAD + HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
     @Test
-    public void putToUploadHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void putToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequestFromFile("hashcode.asice").toString());
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
     @Test
-    public void getToUploadHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void getToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(UPLOAD + HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
     @Test
-    public void headToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", UPLOAD + HASHCODE_CONTAINERS, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -128,9 +129,9 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", UPLOAD + HASHCODE_CONTAINERS, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -147,9 +148,9 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void patchToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequestFromFile("hashcode.asice").toString(), "PATCH", UPLOAD + HASHCODE_CONTAINERS, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequestFromFile("hashcode.asice").toString(), "PATCH", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
