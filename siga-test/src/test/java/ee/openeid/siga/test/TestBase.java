@@ -32,7 +32,7 @@ public class TestBase {
             properties.load(new FileInputStream(new File(path)));
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException(e);
         }
     }
 
