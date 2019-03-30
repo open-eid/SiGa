@@ -1,15 +1,19 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.test.utils.RequestBuilder;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Properties;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
@@ -18,16 +22,31 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 
 public class TestBase {
 
+    private static Properties properties;
+
+    static {
+        properties = new Properties();
+        try {
+            ClassLoader classLoader = RequestBuilder.class.getClassLoader();
+            String path = classLoader.getResource("application-test.properties").getPath();
+            properties.load(new FileInputStream(new File(path)));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+
     protected Response postCreateHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(HASHCODE_CONTAINERS, flow, request.toString());
     }
 
-     protected Response postUploadHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+    protected Response postUploadHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(UPLOAD + HASHCODE_CONTAINERS, flow, request.toString());
     }
 
     protected Response postHashcodeContainerValidationReport(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS+VALIDATIONREPORT, flow, request.toString());
+        return post(HASHCODE_CONTAINERS + VALIDATIONREPORT, flow, request.toString());
     }
 
     protected Response getValidationReportForContainerInSession(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -62,8 +81,8 @@ public class TestBase {
         return delete(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
     }
 
-    protected Response pollForMidSigning (SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
-        Long endTime = Instant.now().getEpochSecond()  + 15;
+    protected Response pollForMidSigning(SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
+        Long endTime = Instant.now().getEpochSecond() + 15;
         while (Instant.now().getEpochSecond() < endTime) {
             Thread.sleep(3500);
             Response response = getHashcodeMidSigningInSession(flow);
@@ -74,6 +93,9 @@ public class TestBase {
         throw new RuntimeException("No MID response in: 15 seconds");
     }
 
+    protected String createUrl(String endpoint) {
+        return properties.get("siga.application-url") + endpoint;
+    }
 
     protected Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
@@ -85,12 +107,12 @@ public class TestBase {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .post(endpoint)
+                .post(createUrl(endpoint))
                 .then()
                 .log().all()
                 .extract()
                 .response();
-        if (response.getBody().path(CONTAINER_ID) != null){
+        if (response.getBody().path(CONTAINER_ID) != null) {
             flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
         }
         return response;
@@ -106,12 +128,12 @@ public class TestBase {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .put(endpoint)
+                .put(createUrl(endpoint))
                 .then()
                 .log().all()
                 .extract()
                 .response();
-        if (response.getBody().path(CONTAINER_ID) != null){
+        if (response.getBody().path(CONTAINER_ID) != null) {
             flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
         }
         return response;
@@ -126,7 +148,7 @@ public class TestBase {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .get(endpoint)
+                .get(createUrl(endpoint))
                 .then()
                 .log().all()
                 .extract()
@@ -142,7 +164,7 @@ public class TestBase {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .delete(endpoint)
+                .delete(createUrl(endpoint))
                 .then()
                 .log().all()
                 .extract()

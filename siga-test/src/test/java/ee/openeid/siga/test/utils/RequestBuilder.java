@@ -1,16 +1,12 @@
 package ee.openeid.siga.test.utils;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import io.restassured.internal.http.URIBuilder;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
@@ -18,7 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.TestData.DEFAULT_FILESIZE;
 import static ee.openeid.siga.test.utils.HmacSigner.generateHmacSignature;
 
 public class RequestBuilder {
@@ -43,7 +38,7 @@ public class RequestBuilder {
     public static JSONObject hashcodeContainerRequestFromFile(String containerName) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
-        String path = classLoader.getResource(containerName).getPath().substring(1);
+        String path = classLoader.getResource(containerName).getPath();
         String file = Base64.encodeBase64String(Files.readAllBytes(FileSystems.getDefault().getPath(path)));
         request.put("container", file);
         return request;
@@ -63,10 +58,10 @@ public class RequestBuilder {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
-        if (roles != null){
+        if (roles != null) {
             request.put("roles", roles);
         }
-        if (signatureProductionPlace != null){
+        if (signatureProductionPlace != null) {
             request.put("signatureProductionPlace", signatureProductionPlace);
         }
         return request;
@@ -78,7 +73,7 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeMidSigningRequestWithDefault (String personIdentifier, String phoneNo) throws JSONException {
+    public static JSONObject hashcodeMidSigningRequestWithDefault(String personIdentifier, String phoneNo) throws JSONException {
         return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", "LT", "something", null, null, null, null, null);
     }
 
@@ -90,22 +85,22 @@ public class RequestBuilder {
         request.put("language", language);
         request.put("signatureProfile", signatureProfile);
 
-        if (messageToDisplay != null){
+        if (messageToDisplay != null) {
             request.put("messageToDisplay", messageToDisplay);
         }
-        if (city != null){
+        if (city != null) {
             request.put("city", city);
         }
-        if (stateOrProvince != null){
+        if (stateOrProvince != null) {
             request.put("stateOrProvince", stateOrProvince);
         }
-        if (postalCode != null){
+        if (postalCode != null) {
             request.put("postalCode", postalCode);
         }
-        if (country != null){
+        if (country != null) {
             request.put("country", country);
         }
-        if (roles != null){
+        if (roles != null) {
             request.put("roles", roles);
         }
         return request;
@@ -117,8 +112,8 @@ public class RequestBuilder {
         return generateHmacSignature(flow.getServiceSecret(), signableString, hmacAlgo);
     }
 
-    private static Long getSigningTimeInSeconds (){
-        return  Instant.now().getEpochSecond();
+    private static Long getSigningTimeInSeconds() {
+        return Instant.now().getEpochSecond();
     }
 
 }
