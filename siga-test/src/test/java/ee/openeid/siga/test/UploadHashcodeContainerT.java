@@ -8,6 +8,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,8 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
-import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -34,7 +34,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
@@ -88,6 +88,7 @@ public class UploadHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //SIGARIA-50
     @Test
     public void deleteToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(UPLOAD + HASHCODE_CONTAINERS, flow);
@@ -95,13 +96,15 @@ public class UploadHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //SIGARIA-50
     @Test
     public void putToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequestFromFile("hashcode.asice").toString());
+        Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString());
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //SIGARIA-50
     @Test
     public void getToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(UPLOAD + HASHCODE_CONTAINERS, flow);
@@ -109,6 +112,7 @@ public class UploadHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //SIGARIA-50
     @Test
     public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
@@ -147,14 +151,15 @@ public class UploadHashcodeContainerT extends TestBase {
         assertThat(response.getHeader("Allow"), equalTo("POST,OPTIONS"));
     }
 
+    @Ignore //SIGARIA-50
     @Test
     public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequestFromFile("hashcode.asice").toString(), "PATCH", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString(), "PATCH", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainerRequestFromFile("hashcode.asice").toString())
+                .body(hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString())
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()

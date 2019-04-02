@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -142,6 +143,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -149,6 +151,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, "abc"));
@@ -156,6 +159,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidHash256() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, "+-KZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -163,6 +167,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidHash512() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, "+-Vz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==", DEFAULT_FILESIZE));
@@ -170,6 +175,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE + "a", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -177,6 +183,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void createHashcodeContainerInvalidHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE.substring(1), DEFAULT_FILESIZE));
@@ -184,6 +191,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void deleteToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(HASHCODE_CONTAINERS, flow);
@@ -191,6 +199,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void putToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = put(HASHCODE_CONTAINERS, flow, hashcodeContainersDataRequestWithDefault().toString());
@@ -198,6 +207,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void getToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(HASHCODE_CONTAINERS, flow);
@@ -205,6 +215,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void headToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
@@ -243,6 +254,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.getHeader("Allow"), equalTo("POST,OPTIONS"));
     }
 
+    @Ignore //TODO: SIGARIA-50
     @Test
     public void patchToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()

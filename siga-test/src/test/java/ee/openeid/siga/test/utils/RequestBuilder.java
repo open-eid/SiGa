@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -38,9 +39,11 @@ public class RequestBuilder {
     public static JSONObject hashcodeContainerRequestFromFile(String containerName) throws JSONException, IOException {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
-        String path = classLoader.getResource(containerName).getPath();
-        String file = Base64.encodeBase64String(Files.readAllBytes(FileSystems.getDefault().getPath(path)));
-        request.put("container", file);
+
+        File file = new File(classLoader.getResource(containerName).getFile());
+
+        String fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
+        request.put("container", fileBase64);
         return request;
     }
 

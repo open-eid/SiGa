@@ -4,6 +4,7 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.hamcrest.Matchers;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -82,7 +83,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         Response response = getHashcodeContainer(flow);
 
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(37924));
+        assertThat(response.getBody().path(CONTAINER).toString().length(), Matchers.greaterThanOrEqualTo(3500));
     }
 
     @Test
@@ -117,7 +118,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         Response response = getHashcodeContainer(flow);
 
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(39360));
+        assertThat(response.getBody().path(CONTAINER).toString().length(), Matchers.greaterThanOrEqualTo(35000));
     }
 
     @Test

@@ -28,7 +28,7 @@ public class ValidateHashcodeContainerT extends TestBase{
 
     @Test
     public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
+        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
@@ -39,7 +39,7 @@ public class ValidateHashcodeContainerT extends TestBase{
 
     @Test
     public void uploadHashcodeContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
