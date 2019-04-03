@@ -6,7 +6,6 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <!-- Minimum logging level to be presented in the console logs-->
             <level>DEBUG</level>
         </filter>
         <encoder>
@@ -15,24 +14,9 @@
         </encoder>
     </appender>
 
-    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>localhost</syslogHost>
-        <port>514</port>
-        <facility>local1</facility>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SIGA_EVENT</marker>
-            </evaluator>
-            <onMismatch>DENY</onMismatch>
-            <onMatch>NEUTRAL</onMatch>
-        </filter>
-        <suffixPattern>rak-siga_events.log %msg</suffixPattern>
-    </appender>
-
     <logger name="ee.openeid.siga" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="SYSLOG"/>
     </root>
 </configuration>

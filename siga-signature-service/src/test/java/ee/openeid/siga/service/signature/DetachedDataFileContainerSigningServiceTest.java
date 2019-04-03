@@ -66,8 +66,6 @@ public class DetachedDataFileContainerSigningServiceTest {
         configuration = new Configuration(Configuration.Mode.TEST);
         signingService.setConfiguration(configuration);
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
-        Mockito.when(sigaEventLogger.logEndEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
-        Mockito.when(sigaEventLogger.getFirstMachingEvent(any(), any())).thenReturn(Optional.of(SigaEvent.builder().timestamp(0L).build()));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createSessionHolder());
     }
 

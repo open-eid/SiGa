@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventLoggingAspect;
 import lombok.experimental.FieldDefaults;
 import org.junit.After;
 import org.junit.Before;
@@ -14,8 +15,6 @@ import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-
-import java.util.Map;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
@@ -70,12 +69,10 @@ public class SigaEventLoggerTests {
         assertNotNull(endEvent);
         assertEquals(REQUEST.name(), startEvent.getEventName().name());
         assertEquals(REQUEST.name(), endEvent.getEventName().name());
-        Map<String, String> startEventParameters = startEvent.getEventParameters();
-        Map<String, String> endEventParameters = endEvent.getEventParameters();
-        assertEquals("value1 with \\\"characters\\\" that should be escaped", startEventParameters.get("parameter_1"));
-        assertEquals("value2", startEventParameters.get("parameter_2"));
-        assertEquals("value1 with \\\"characters\\\" that should be escaped", endEventParameters.get("return_value_1"));
-        assertEquals("value2", endEventParameters.get("return_value_2"));
+        assertEquals("value1 with \\\"characters\\\" that should be escaped", startEvent.getEventParameter("parameter_1"));
+        assertEquals("value2", startEvent.getEventParameter("parameter_2"));
+        assertEquals("value1 with \\\"characters\\\" that should be escaped", endEvent.getEventParameter("return_value_1"));
+        assertEquals("value2", endEvent.getEventParameter("return_value_2"));
         assertEquals(SUCCESS.name(), endEvent.getResultType().name());
 
         sigaEventLogger.logEvents();

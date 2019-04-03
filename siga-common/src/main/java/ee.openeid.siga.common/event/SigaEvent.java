@@ -1,13 +1,13 @@
 package ee.openeid.siga.common.event;
 
 import com.google.common.base.MoreObjects;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.time.Instant.now;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.apache.commons.text.StringEscapeUtils.escapeJava;
@@ -27,7 +27,21 @@ public class SigaEvent {
     Long duration;
     EventResultType resultType;
     @Builder.Default
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     Map<String, String> eventParameters = new HashMap<>();
+
+    @Builder(buildMethodName = "buildEventWithParameter")
+    public static SigaEvent buildEventWithParameter(SigaEventName eventName, SigaEventName.EventParam parameterName, String parameterValue) {
+        SigaEvent event = SigaEvent.builder()
+                .eventType(SigaEvent.EventType.FINISH)
+                .eventName(eventName)
+                .timestamp(now().toEpochMilli())
+                .resultType(EventResultType.SUCCESS)
+                .build();
+        event.addEventParameter(parameterName, parameterValue);
+        return event;
+    }
 
     public void addEventParameter(SigaEventName.EventParam eventParam, String parameterValue) {
         addEventParameter(eventParam.name().toLowerCase(), escapeJava(parameterValue));
@@ -35,6 +49,18 @@ public class SigaEvent {
 
     public void addEventParameter(String parameterName, String parameterValue) {
         eventParameters.put(escapeJava(parameterName), escapeJava(parameterValue));
+    }
+
+    public String getEventParameter(SigaEventName.EventParam parameterName) {
+        return eventParameters.get(parameterName.name().toLowerCase());
+    }
+
+    public String getEventParameter(String parameterName) {
+        return eventParameters.get(parameterName.toLowerCase());
+    }
+
+    public boolean containsParameterWithValue(String parameterValue) {
+        return eventParameters.containsValue(parameterValue);
     }
 
     public void setErrorCode(SigaEventName.ErrorCode errorCode) {

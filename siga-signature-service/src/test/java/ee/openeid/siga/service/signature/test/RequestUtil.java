@@ -84,9 +84,13 @@ public class RequestUtil {
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {
+        return createSignatureParameters(certificate, SignatureProfile.LT);
+    }
+
+    public static SignatureParameters createSignatureParameters(X509Certificate certificate, SignatureProfile signatureProfile) {
         SignatureParameters signatureParameters = new SignatureParameters();
         signatureParameters.setSigningCertificate(certificate);
-        signatureParameters.setSignatureProfile(SignatureProfile.LT);
+        signatureParameters.setSignatureProfile(signatureProfile);
         signatureParameters.setCountry("Estonia");
         signatureParameters.setStateOrProvince("Harjumaa");
         signatureParameters.setCity("Tallinn");

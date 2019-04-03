@@ -1,6 +1,5 @@
-package ee.openeid.siga.auth.filter.event;
+package ee.openeid.siga.common.event;
 
-import ee.openeid.siga.common.event.*;
 import ee.openeid.siga.common.exception.SigaApiException;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.jxpath.JXPathContext;
