@@ -1,6 +1,6 @@
-<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
-            xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+            xmlns="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
 
     <xsd:annotation>
         <xsd:appinfo>DigiDocService (DDS) ver-3.3</xsd:appinfo>
@@ -67,43 +67,43 @@
 
     <simpleType name="ReturnCertDataType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="AUTH" />
-            <xsd:enumeration value="SIGN" />
-            <xsd:enumeration value="BOTH" />
-            <xsd:enumeration value="AUTHRSA" />
-            <xsd:enumeration value="AUTHECC" />
-            <xsd:enumeration value="SIGNRSA" />
-            <xsd:enumeration value="SIGNECC" />
-            <xsd:enumeration value="BOTHRSA" />
-            <xsd:enumeration value="BOTHECC" />
-            <xsd:enumeration value="NONE" />
+            <xsd:enumeration value="AUTH"/>
+            <xsd:enumeration value="SIGN"/>
+            <xsd:enumeration value="BOTH"/>
+            <xsd:enumeration value="AUTHRSA"/>
+            <xsd:enumeration value="AUTHECC"/>
+            <xsd:enumeration value="SIGNRSA"/>
+            <xsd:enumeration value="SIGNECC"/>
+            <xsd:enumeration value="BOTHRSA"/>
+            <xsd:enumeration value="BOTHECC"/>
+            <xsd:enumeration value="NONE"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="IdCodeType">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="1" />
-            <xsd:maxLength value="20" />
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="20"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="String2To7">
         <restriction base="xsd:string">
-            <xsd:minLength value="2" />
-            <xsd:maxLength value="7" />
+            <xsd:minLength value="2"/>
+            <xsd:maxLength value="7"/>
         </restriction>
     </simpleType>
 
     <simpleType name="CountryType">
         <xsd:restriction base="xsd:string">
-            <xsd:length value="2" />
+            <xsd:length value="2"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="PhoneNumberType">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="5" />
-            <xsd:maxLength value="20" />
+            <xsd:minLength value="5"/>
+            <xsd:maxLength value="20"/>
         </xsd:restriction>
     </simpleType>
 </xsd:schema>

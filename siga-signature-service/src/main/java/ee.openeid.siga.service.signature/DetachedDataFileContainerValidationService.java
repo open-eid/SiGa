@@ -69,13 +69,13 @@ public class DetachedDataFileContainerValidationService implements DetachedDataF
         this.sivaClient = sivaClient;
     }
 
-    @Autowired
-    protected void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-
     @Override
     public SessionService getSessionService() {
         return sessionService;
+    }
+
+    @Autowired
+    protected void setSessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
     }
 }

@@ -1,27 +1,44 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" xmlns:tns="http://json.webapp.siga.openeid.ee/"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://json.webapp.siga.openeid.ee/" version="1.0"
            targetNamespace="http://json.webapp.siga.openeid.ee/">
     <xs:element name="createHashcodeContainerRequest" type="tns:createHashcodeContainerRequest"/>
     <xs:element name="createHashcodeContainerResponse" type="tns:createHashcodeContainerResponse"/>
     <xs:element name="uploadHashcodeContainerRequest" type="tns:uploadHashcodeContainerRequest"/>
     <xs:element name="uploadHashcodeContainerResponse" type="tns:uploadHashcodeContainerResponse"/>
-    <xs:element name="createHashcodeContainerValidationReportRequest" type="tns:createHashcodeContainerValidationReportRequest"/>
-    <xs:element name="createHashcodeContainerValidationReportResponse" type="tns:createHashcodeContainerValidationReportResponse"/>
-    <xs:element name="getHashcodeContainerValidationReportResponse" type="tns:getHashcodeContainerValidationReportResponse"/>
-    <xs:element name="createHashcodeContainerRemoteSigningRequest" type="tns:createHashcodeContainerRemoteSigningRequest"/>
-    <xs:element name="createHashcodeContainerRemoteSigningResponse" type="tns:createHashcodeContainerRemoteSigningResponse"/>
-    <xs:element name="updateHashcodeContainerRemoteSigningRequest" type="tns:updateHashcodeContainerRemoteSigningRequest"/>
-    <xs:element name="updateHashcodeContainerRemoteSigningResponse" type="tns:updateHashcodeContainerRemoteSigningResponse"/>
-    <xs:element name="deleteHashcodeContainerRemoteSigningResponse" type="tns:deleteHashcodeContainerRemoteSigningResponse"/>
-    <xs:element name="createHashcodeContainerMobileIdSigningRequest" type="tns:createHashcodeContainerMobileIdSigningRequest"/>
-    <xs:element name="createHashcodeContainerMobileIdSigningResponse" type="tns:createHashcodeContainerMobileIdSigningResponse"/>
-    <xs:element name="getHashcodeContainerMobileIdSigningStatusResponse" type="tns:getHashcodeContainerMobileIdSigningStatusResponse"/>
-    <xs:element name="deleteHashcodeContainerMobileIdSigningResponse" type="tns:deleteHashcodeContainerMobileIdSigningResponse"/>
-    <xs:element name="createHashcodeContainerSmartIdSigningRequest" type="tns:createHashcodeContainerSmartIdSigningRequest"/>
-    <xs:element name="createHashcodeContainerSmartIdSigningResponse" type="tns:createHashcodeContainerSmartIdSigningResponse"/>
-    <xs:element name="getHashcodeContainerSmartIdSigningStatusResponse" type="tns:getHashcodeContainerSmartIdSigningStatusResponse"/>
-    <xs:element name="deleteHashcodeContainerSmartIdSigningResponse" type="tns:deleteHashcodeContainerSmartIdSigningResponse"/>
+    <xs:element name="createHashcodeContainerValidationReportRequest"
+                type="tns:createHashcodeContainerValidationReportRequest"/>
+    <xs:element name="createHashcodeContainerValidationReportResponse"
+                type="tns:createHashcodeContainerValidationReportResponse"/>
+    <xs:element name="getHashcodeContainerValidationReportResponse"
+                type="tns:getHashcodeContainerValidationReportResponse"/>
+    <xs:element name="createHashcodeContainerRemoteSigningRequest"
+                type="tns:createHashcodeContainerRemoteSigningRequest"/>
+    <xs:element name="createHashcodeContainerRemoteSigningResponse"
+                type="tns:createHashcodeContainerRemoteSigningResponse"/>
+    <xs:element name="updateHashcodeContainerRemoteSigningRequest"
+                type="tns:updateHashcodeContainerRemoteSigningRequest"/>
+    <xs:element name="updateHashcodeContainerRemoteSigningResponse"
+                type="tns:updateHashcodeContainerRemoteSigningResponse"/>
+    <xs:element name="deleteHashcodeContainerRemoteSigningResponse"
+                type="tns:deleteHashcodeContainerRemoteSigningResponse"/>
+    <xs:element name="createHashcodeContainerMobileIdSigningRequest"
+                type="tns:createHashcodeContainerMobileIdSigningRequest"/>
+    <xs:element name="createHashcodeContainerMobileIdSigningResponse"
+                type="tns:createHashcodeContainerMobileIdSigningResponse"/>
+    <xs:element name="getHashcodeContainerMobileIdSigningStatusResponse"
+                type="tns:getHashcodeContainerMobileIdSigningStatusResponse"/>
+    <xs:element name="deleteHashcodeContainerMobileIdSigningResponse"
+                type="tns:deleteHashcodeContainerMobileIdSigningResponse"/>
+    <xs:element name="createHashcodeContainerSmartIdSigningRequest"
+                type="tns:createHashcodeContainerSmartIdSigningRequest"/>
+    <xs:element name="createHashcodeContainerSmartIdSigningResponse"
+                type="tns:createHashcodeContainerSmartIdSigningResponse"/>
+    <xs:element name="getHashcodeContainerSmartIdSigningStatusResponse"
+                type="tns:getHashcodeContainerSmartIdSigningStatusResponse"/>
+    <xs:element name="deleteHashcodeContainerSmartIdSigningResponse"
+                type="tns:deleteHashcodeContainerSmartIdSigningResponse"/>
     <xs:element name="getHashcodeContainerSignaturesResponse" type="tns:getHashcodeContainerSignaturesResponse"/>
-    <xs:element name="getHashcodeContainerSignatureDetailsResponse" type="tns:getHashcodeContainerSignatureDetailsResponse"/>
+    <xs:element name="getHashcodeContainerSignatureDetailsResponse"
+                type="tns:getHashcodeContainerSignatureDetailsResponse"/>
     <xs:element name="createHashcodeContainerDataFileRequest" type="tns:createHashcodeContainerDataFileRequest"/>
     <xs:element name="createHashcodeContainerDataFileResponse" type="tns:createHashcodeContainerDataFileResponse"/>
     <xs:element name="getHashcodeContainerDataFilesResponse" type="tns:getHashcodeContainerDataFilesResponse"/>

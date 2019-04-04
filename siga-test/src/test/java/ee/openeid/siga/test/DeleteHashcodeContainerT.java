@@ -13,9 +13,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeRemoteSigningSignatureValueRequest;
 import static ee.openeid.siga.test.utils.digestSigner.signDigest;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -189,7 +187,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void postToDeleteHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
+    public void postToDeleteHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
         assertThat(response.statusCode(), equalTo(400));

@@ -2,17 +2,14 @@ package ee.openeid.siga.mobileid.client;
 
 import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
-import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.model.mid.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.SoapFaultClientException;
 

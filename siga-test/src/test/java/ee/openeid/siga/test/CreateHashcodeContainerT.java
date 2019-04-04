@@ -193,7 +193,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void deleteToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException {
+    public void deleteToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
@@ -201,7 +201,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void putToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void putToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = put(HASHCODE_CONTAINERS, flow, hashcodeContainersDataRequestWithDefault().toString());
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
@@ -209,7 +209,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void getToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void getToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
@@ -217,7 +217,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void headToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
@@ -236,7 +236,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
@@ -256,7 +256,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void patchToCreateHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", createUrlToSign(HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())

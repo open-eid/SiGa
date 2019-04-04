@@ -1,105 +1,110 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl" targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
-  <wsdl:types>
-    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-      <import namespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl" schemaLocation="mid.xsd"/>
-    </xsd:schema>
-  </wsdl:types>
-  <wsdl:message name="MobileSignHashByIDCodeRequest">
-    <wsdl:part element="tns:MobileSignHashByIDCodeRequest" name="MobileSignHashByIDCodeRequest">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="GetMobileCertByIDCodeRequest">
-    <wsdl:part element="tns:GetMobileCertByIDCodeRequest" name="GetMobileCertByIDCodeRequest">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="GetMobileCertByIDCodeResponse">
-    <wsdl:part element="tns:GetMobileCertByIDCodeResponse" name="GetMobileCertByIDCodeResponse">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="MobileSignHashRequest">
-    <wsdl:part element="tns:MobileSignHashRequest" name="MobileSignHashRequest">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="MobileSignHashResponse">
-    <wsdl:part element="tns:MobileSignHashResponse" name="MobileSignHashResponse">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="GetMobileSignHashStatusRequest">
-    <wsdl:part element="tns:GetMobileSignHashStatusRequest" name="GetMobileSignHashStatusRequest">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="GetMobileSignHashStatusResponse">
-    <wsdl:part element="tns:GetMobileSignHashStatusResponse" name="GetMobileSignHashStatusResponse">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:portType name="MobileId">
-    <wsdl:operation name="MobileSignHashByIDCode">
-      <wsdl:input message="tns:MobileSignHashByIDCodeRequest" name="MobileSignHashByIDCodeRequest">
-      </wsdl:input>
-      <wsdl:output message="tns:MobileSignHashResponse" name="MobileSignHashResponse">
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMobileCertByIDCode">
-      <wsdl:input message="tns:GetMobileCertByIDCodeRequest" name="GetMobileCertByIDCodeRequest">
-      </wsdl:input>
-      <wsdl:output message="tns:GetMobileCertByIDCodeResponse" name="GetMobileCertByIDCodeResponse">
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="MobileSignHash">
-      <wsdl:input message="tns:MobileSignHashRequest" name="MobileSignHashRequest">
-      </wsdl:input>
-      <wsdl:output message="tns:MobileSignHashResponse" name="MobileSignHashResponse">
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMobileSignHashStatus">
-      <wsdl:input message="tns:GetMobileSignHashStatusRequest" name="GetMobileSignHashStatusRequest">
-      </wsdl:input>
-      <wsdl:output message="tns:GetMobileSignHashStatusResponse" name="GetMobileSignHashStatusResponse">
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:portType>
-  <wsdl:binding name="MobileIdService" type="tns:MobileId">
-    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="MobileSignHashByIDCode">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="MobileSignHashByIDCodeRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="MobileSignHashResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMobileCertByIDCode">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="GetMobileCertByIDCodeRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="GetMobileCertByIDCodeResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="MobileSignHash">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="MobileSignHashRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="MobileSignHashResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMobileSignHashStatus">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="GetMobileSignHashStatusRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="GetMobileSignHashStatusResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
-  <wsdl:service name="MobileIdService">
-    <wsdl:port binding="tns:MobileIdService" name="MobileIdService">
-      <soap:address location="https://tsp.demo.sk.ee/v2/"/>
-    </wsdl:port>
-  </wsdl:service>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+                  xmlns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+                  targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl" schemaLocation="mid.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="MobileSignHashByIDCodeRequest">
+        <wsdl:part element="tns:MobileSignHashByIDCodeRequest" name="MobileSignHashByIDCodeRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="GetMobileCertByIDCodeRequest">
+        <wsdl:part element="tns:GetMobileCertByIDCodeRequest" name="GetMobileCertByIDCodeRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="GetMobileCertByIDCodeResponse">
+        <wsdl:part element="tns:GetMobileCertByIDCodeResponse" name="GetMobileCertByIDCodeResponse">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="MobileSignHashRequest">
+        <wsdl:part element="tns:MobileSignHashRequest" name="MobileSignHashRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="MobileSignHashResponse">
+        <wsdl:part element="tns:MobileSignHashResponse" name="MobileSignHashResponse">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="GetMobileSignHashStatusRequest">
+        <wsdl:part element="tns:GetMobileSignHashStatusRequest" name="GetMobileSignHashStatusRequest">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="GetMobileSignHashStatusResponse">
+        <wsdl:part element="tns:GetMobileSignHashStatusResponse" name="GetMobileSignHashStatusResponse">
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="MobileId">
+        <wsdl:operation name="MobileSignHashByIDCode">
+            <wsdl:input message="tns:MobileSignHashByIDCodeRequest" name="MobileSignHashByIDCodeRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:MobileSignHashResponse" name="MobileSignHashResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetMobileCertByIDCode">
+            <wsdl:input message="tns:GetMobileCertByIDCodeRequest" name="GetMobileCertByIDCodeRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:GetMobileCertByIDCodeResponse" name="GetMobileCertByIDCodeResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="MobileSignHash">
+            <wsdl:input message="tns:MobileSignHashRequest" name="MobileSignHashRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:MobileSignHashResponse" name="MobileSignHashResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetMobileSignHashStatus">
+            <wsdl:input message="tns:GetMobileSignHashStatusRequest" name="GetMobileSignHashStatusRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:GetMobileSignHashStatusResponse" name="GetMobileSignHashStatusResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="MobileIdService" type="tns:MobileId">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="MobileSignHashByIDCode">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="MobileSignHashByIDCodeRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="MobileSignHashResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetMobileCertByIDCode">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="GetMobileCertByIDCodeRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="GetMobileCertByIDCodeResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="MobileSignHash">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="MobileSignHashRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="MobileSignHashResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="GetMobileSignHashStatus">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="GetMobileSignHashStatusRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="GetMobileSignHashStatusResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="MobileIdService">
+        <wsdl:port binding="tns:MobileIdService" name="MobileIdService">
+            <soap:address location="https://tsp.demo.sk.ee/v2/"/>
+        </wsdl:port>
+    </wsdl:service>
 </wsdl:definitions>

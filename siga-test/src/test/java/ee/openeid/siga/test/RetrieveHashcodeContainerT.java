@@ -16,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeMidSigningRequestWithDefault;
 import static ee.openeid.siga.test.utils.digestSigner.signDigest;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
@@ -168,7 +167,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void postToGetHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
+    public void postToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
         assertThat(response.statusCode(), equalTo(405));
@@ -176,7 +175,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToGetHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void headToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
@@ -197,7 +196,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToGetHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void optionsToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
@@ -220,7 +219,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void patchToGetHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void patchToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()

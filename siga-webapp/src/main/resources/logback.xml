@@ -50,8 +50,8 @@
     <logger name="ee.sk" level="INFO"/>
 
     <root level="INFO">
-        <appender-ref ref="FILE" />
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
         <!--appender-ref ref="SYSLOG" /-->
     </root>
 </configuration>

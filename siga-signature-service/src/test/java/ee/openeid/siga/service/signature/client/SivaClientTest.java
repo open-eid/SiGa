@@ -26,17 +26,12 @@ public class SivaClientTest {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
-
-
-    private SivaClient sivaClient;
-
-    private String requestUrl;
-
-    @Mock
-    SivaConfigurationProperties sivaConfigurationProperties;
-
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
+    @Mock
+    SivaConfigurationProperties sivaConfigurationProperties;
+    private SivaClient sivaClient;
+    private String requestUrl;
 
     @Before
     public void setUp() {

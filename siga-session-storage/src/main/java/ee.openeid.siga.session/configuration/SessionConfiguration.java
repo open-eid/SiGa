@@ -2,7 +2,6 @@ package ee.openeid.siga.session.configuration;
 
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
-import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.session.CacheName;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.binary.BinaryObjectBuilder;
 import org.apache.ignite.events.CacheEvent;
 import org.apache.ignite.events.EventType;
-import org.apache.ignite.internal.binary.BinaryObjectImpl;
 import org.apache.ignite.internal.binary.builder.BinaryObjectBuilderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;

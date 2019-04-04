@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
@@ -18,13 +18,24 @@ import java.util.zip.ZipOutputStream;
 
 public class DetachedDataFileContainerCreator {
 
-    private final ZipOutputStream zipOutputStream;
-    private static final String ZIP_ENTRY_MIMETYPE = "mimetype";
     public static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
+    private static final String ZIP_ENTRY_MIMETYPE = "mimetype";
     private static final String SIGNATURE_FILE_EXTENSION = ".xml";
+    private final ZipOutputStream zipOutputStream;
 
     public DetachedDataFileContainerCreator(OutputStream outputStream) {
         this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
+    }
+
+    private static ZipEntry getZipEntry(byte[] mimeTypeBytes, String name) {
+        ZipEntry zipEntry = new ZipEntry(name);
+        zipEntry.setMethod(ZipEntry.STORED);
+        zipEntry.setSize(mimeTypeBytes.length);
+        zipEntry.setCompressedSize(mimeTypeBytes.length);
+        CRC32 crc = new CRC32();
+        crc.update(mimeTypeBytes);
+        zipEntry.setCrc(crc.getValue());
+        return zipEntry;
     }
 
     public void writeHashcodeFiles(List<HashcodeDataFile> dataFiles) {
@@ -63,17 +74,6 @@ public class DetachedDataFileContainerCreator {
             String signatureName = SIGNATURE_FILE_PREFIX + i + SIGNATURE_FILE_EXTENSION;
             new BytesEntryCallback(getZipEntry(signatureData, signatureName), signatureData).write();
         }
-    }
-
-    private static ZipEntry getZipEntry(byte[] mimeTypeBytes, String name) {
-        ZipEntry zipEntry = new ZipEntry(name);
-        zipEntry.setMethod(ZipEntry.STORED);
-        zipEntry.setSize(mimeTypeBytes.length);
-        zipEntry.setCompressedSize(mimeTypeBytes.length);
-        CRC32 crc = new CRC32();
-        crc.update(mimeTypeBytes);
-        zipEntry.setCrc(crc.getValue());
-        return zipEntry;
     }
 
     public void writeManifest(List<org.digidoc4j.DataFile> dataFiles) {

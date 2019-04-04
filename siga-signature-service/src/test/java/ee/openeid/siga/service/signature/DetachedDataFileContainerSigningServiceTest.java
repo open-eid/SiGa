@@ -30,7 +30,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Base64;
-import java.util.Optional;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;

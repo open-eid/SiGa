@@ -1,6 +1,6 @@
-<xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
-            xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+            xmlns="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
 
     <xsd:annotation>
         <xsd:appinfo>DigiDocService (DDS) ver-3.3</xsd:appinfo>
@@ -494,41 +494,41 @@
 
     <simpleType name="HashType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="SHA1" />
-            <xsd:enumeration value="SHA256" />
-            <xsd:enumeration value="SHA512" />
+            <xsd:enumeration value="SHA1"/>
+            <xsd:enumeration value="SHA256"/>
+            <xsd:enumeration value="SHA512"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="ReturnCertDataType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="AUTH" />
-            <xsd:enumeration value="SIGN" />
-            <xsd:enumeration value="BOTH" />
-            <xsd:enumeration value="AUTHRSA" />
-            <xsd:enumeration value="AUTHECC" />
-            <xsd:enumeration value="SIGNRSA" />
-            <xsd:enumeration value="SIGNECC" />
-            <xsd:enumeration value="BOTHRSA" />
-            <xsd:enumeration value="BOTHECC" />
-            <xsd:enumeration value="NONE" />
+            <xsd:enumeration value="AUTH"/>
+            <xsd:enumeration value="SIGN"/>
+            <xsd:enumeration value="BOTH"/>
+            <xsd:enumeration value="AUTHRSA"/>
+            <xsd:enumeration value="AUTHECC"/>
+            <xsd:enumeration value="SIGNRSA"/>
+            <xsd:enumeration value="SIGNECC"/>
+            <xsd:enumeration value="BOTHRSA"/>
+            <xsd:enumeration value="BOTHECC"/>
+            <xsd:enumeration value="NONE"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="KeyID">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="RSA" />
-            <xsd:enumeration value="ECC" />
-            <xsd:enumeration value="SIGN_RSA" />
-            <xsd:enumeration value="SIGN_ECC" />
-            <xsd:enumeration value="AUTH_RSA" />
-            <xsd:enumeration value="AUTH_ECC" />
+            <xsd:enumeration value="RSA"/>
+            <xsd:enumeration value="ECC"/>
+            <xsd:enumeration value="SIGN_RSA"/>
+            <xsd:enumeration value="SIGN_ECC"/>
+            <xsd:enumeration value="AUTH_RSA"/>
+            <xsd:enumeration value="AUTH_ECC"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="StatusType">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="2" />
+            <xsd:minLength value="2"/>
         </xsd:restriction>
     </simpleType>
 
@@ -564,63 +564,63 @@
 
     <simpleType name="IdCodeType">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="1" />
-            <xsd:maxLength value="20" />
+            <xsd:minLength value="1"/>
+            <xsd:maxLength value="20"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="String2To7">
         <restriction base="xsd:string">
-            <xsd:minLength value="2" />
-            <xsd:maxLength value="7" />
+            <xsd:minLength value="2"/>
+            <xsd:maxLength value="7"/>
         </restriction>
     </simpleType>
 
     <simpleType name="PhoneNumberType">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="5" />
-            <xsd:maxLength value="20" />
+            <xsd:minLength value="5"/>
+            <xsd:maxLength value="20"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="CountryType">
         <xsd:restriction base="xsd:string">
-            <xsd:length value="2" />
+            <xsd:length value="2"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="LanguageType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="EST" />
-            <xsd:enumeration value="LIT" />
-            <xsd:enumeration value="RUS" />
-            <xsd:enumeration value="ENG" />
+            <xsd:enumeration value="EST"/>
+            <xsd:enumeration value="LIT"/>
+            <xsd:enumeration value="RUS"/>
+            <xsd:enumeration value="ENG"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="SessionIdType">
         <xsd:restriction base="xsd:string">
-            <xsd:length value="31" />
+            <xsd:length value="31"/>
         </xsd:restriction>
     </simpleType>
 
     <simpleType name="String20">
         <restriction base="xsd:string">
-            <minLength value="1" />
-            <maxLength value="20" />
+            <minLength value="1"/>
+            <maxLength value="20"/>
         </restriction>
     </simpleType>
 
     <simpleType name="String40">
         <restriction base="xsd:string">
-            <minLength value="1" />
-            <maxLength value="40" />
+            <minLength value="1"/>
+            <maxLength value="40"/>
         </restriction>
     </simpleType>
 
     <simpleType name="String0To40">
         <restriction base="xsd:string">
-            <maxLength value="40" />
+            <maxLength value="40"/>
         </restriction>
     </simpleType>
 

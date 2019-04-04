@@ -1,14 +1,12 @@
 package ee.openeid.siga.service.signature;
 
-import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
-import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
-import static org.mockito.ArgumentMatchers.any;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Base64;
-import java.util.List;
-
+import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.service.signature.test.RequestUtil;
+import ee.openeid.siga.service.signature.test.TestUtil;
+import ee.openeid.siga.session.SessionResult;
+import ee.openeid.siga.session.SessionService;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
+import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,13 +20,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.service.signature.test.RequestUtil;
-import ee.openeid.siga.service.signature.test.TestUtil;
-import ee.openeid.siga.session.SessionResult;
-import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
-import ee.openeid.siga.webapp.json.Signature;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Base64;
+import java.util.List;
+
+import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DetachedDataFileContainerServiceTest {

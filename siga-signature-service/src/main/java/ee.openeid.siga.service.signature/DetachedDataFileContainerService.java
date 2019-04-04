@@ -13,7 +13,6 @@ import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -106,14 +105,14 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
                 .build();
     }
 
-    @Autowired
-    protected void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-
     @Override
     public SessionService getSessionService() {
         return sessionService;
+    }
+
+    @Autowired
+    protected void setSessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
     }
 
 }

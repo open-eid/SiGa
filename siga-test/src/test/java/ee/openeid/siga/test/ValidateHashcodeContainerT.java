@@ -12,12 +12,11 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeRemoteSigningSignatureValueRequest;
 import static ee.openeid.siga.test.utils.digestSigner.signDigest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ValidateHashcodeContainerT extends TestBase{
+public class ValidateHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 

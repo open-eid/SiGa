@@ -7,7 +7,6 @@ import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
-import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
@@ -167,7 +166,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
 
     private void logExceptionEventFor(SigaEvent ocspStartEvent, TechnicalException e) {
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-        if(StringUtils.contains(errorMessage, "Unable to process GET call for url")) {
+        if (StringUtils.contains(errorMessage, "Unable to process GET call for url")) {
             String errorUrl = StringUtils.substringBetween(e.getCause().getMessage(), "'", "'");
             sigaEventLogger.logExceptionEventFor(ocspStartEvent, SIGNATURE_FINALIZING_REQUEST_ERROR, errorMessage);
             Predicate<SigaEvent> predicate = event -> event.containsParameterWithValue(errorUrl);

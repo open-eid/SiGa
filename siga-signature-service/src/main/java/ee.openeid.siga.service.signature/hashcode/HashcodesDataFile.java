@@ -19,10 +19,10 @@ import java.util.List;
 
 public class HashcodesDataFile {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HashcodesDataFile.class);
     public static final String HASHCODES_SHA256 = "META-INF/hashcodes-sha256.xml";
     public static final String HASHCODES_SHA512 = "META-INF/hashcodes-sha512.xml";
     public static final String HASHCODES_PREFIX = "META-INF/hashcodes-";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HashcodesDataFile.class);
     private Document dom;
     private Element rootElement;
     private DigestAlgorithm digestAlgorithm;

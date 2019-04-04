@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class HmacSigner {
 
-    public static  String generateHmacSignature(final String key, final String data, String hmacAlgo) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static String generateHmacSignature(final String key, final String data, String hmacAlgo) throws NoSuchAlgorithmException, InvalidKeyException {
         if (hmacAlgo == null)
             hmacAlgo = "HmacSHA256";
         if (key == null || data == null) throw new NullPointerException();

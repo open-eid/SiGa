@@ -202,7 +202,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void getRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void getRemoteSigningHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
@@ -213,7 +213,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void headToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void headToRemoteSigningHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
@@ -236,7 +236,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Ignore //TODO: Flaky test due to Allow method order change
     @Test
-    public void optionsToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void optionsToRemoteSigningHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
@@ -259,7 +259,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Ignore //TODO: SIGARIA-50
     @Test
-    public void patchToRemoteSigningHashcodeContainer () throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void patchToRemoteSigningHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()

@@ -16,6 +16,27 @@ public class RequestValidatorTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
+    public static MobileIdInformation getMobileInformationRequest() {
+        return MobileIdInformation.builder()
+                .relyingPartyName("Testimiseks")
+                .phoneNo("+37253410832")
+                .personIdentifier("3489348234")
+                .country("EE")
+                .language("EST")
+                .messageToDisplay("Random display").build();
+    }
+
+    public static CreateHashcodeContainerRequest getCreateHashcodeContainerRequest() {
+        CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
+        HashcodeDataFile dataFile = new HashcodeDataFile();
+        dataFile.setFileName("first datafile.txt");
+        dataFile.setFileSize(6);
+        dataFile.setFileHashSha256("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");
+        dataFile.setFileHashSha512("vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg");
+        request.getDataFiles().add(dataFile);
+        return request;
+    }
+
     @Test
     public void successfulCreateContainerHashcodeRequest() {
         RequestValidator.validateHashcodeDataFiles(getCreateHashcodeContainerRequest().getDataFiles());
@@ -25,7 +46,6 @@ public class RequestValidatorTest {
     public void successfulFileContent() {
         RequestValidator.validateFileContent(CONTENT);
     }
-
 
     @Test
     public void containerContentEmpty() {
@@ -285,26 +305,5 @@ public class RequestValidatorTest {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setCountry("EST");
         RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    public static MobileIdInformation getMobileInformationRequest() {
-        return MobileIdInformation.builder()
-        .relyingPartyName("Testimiseks")
-        .phoneNo("+37253410832")
-        .personIdentifier("3489348234")
-        .country("EE")
-        .language("EST")
-        .messageToDisplay("Random display").build();
-    }
-
-    public static CreateHashcodeContainerRequest getCreateHashcodeContainerRequest() {
-        CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
-        HashcodeDataFile dataFile = new HashcodeDataFile();
-        dataFile.setFileName("first datafile.txt");
-        dataFile.setFileSize(6);
-        dataFile.setFileHashSha256("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");
-        dataFile.setFileHashSha512("vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg");
-        request.getDataFiles().add(dataFile);
-        return request;
     }
 }
