@@ -3,7 +3,6 @@ package ee.openeid.siga.session.configuration;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.session.CacheName;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -22,19 +21,15 @@ import org.springframework.context.annotation.Profile;
 import java.util.UUID;
 
 import static java.time.Instant.now;
-import static lombok.AccessLevel.PRIVATE;
 import static org.slf4j.MarkerFactory.getMarker;
 
 @SpringBootConfiguration
-@EnableConfigurationProperties({
-        SessionConfigurationProperties.class
-})
+@EnableConfigurationProperties({SessionConfigurationProperties.class})
 @Profile("!test")
 @Slf4j
-@FieldDefaults(level = PRIVATE)
 public class SessionConfiguration {
 
-    SessionConfigurationProperties sessionConfigurationProperties;
+    private SessionConfigurationProperties sessionConfigurationProperties;
 
     @Bean(destroyMethod = "close")
     public Ignite ignite() throws IgniteException {

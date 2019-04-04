@@ -5,7 +5,6 @@ import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEventLogger;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,7 +25,6 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -35,22 +33,21 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @EnableJpaRepositories
 @EnableConfigurationProperties(SecurityConfigurationProperties.class)
-@FieldDefaults(level = PRIVATE)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(new AntPathRequestMatcher("/siga.wadl"));
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
 
     @Autowired
-    SecurityConfigurationProperties configurationProperties;
+    private SecurityConfigurationProperties configurationProperties;
 
     @Autowired
-    HmacAuthenticationProvider hmacAuthenticationProvider;
+    private HmacAuthenticationProvider hmacAuthenticationProvider;
 
     @Autowired
-    SigaEventLoggingFilter eventsLoggingFilter;
+    private SigaEventLoggingFilter eventsLoggingFilter;
 
     @Autowired
-    SigaEventLogger sigaEventLogger;
+    private SigaEventLogger sigaEventLogger;
 
     @Override
     public void configure(final WebSecurity web) {

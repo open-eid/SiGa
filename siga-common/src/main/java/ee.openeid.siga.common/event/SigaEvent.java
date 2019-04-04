@@ -2,34 +2,31 @@ package ee.openeid.siga.common.event;
 
 import com.google.common.base.MoreObjects;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.time.Instant.now;
-import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.apache.commons.text.StringEscapeUtils.escapeJava;
 
 @Data
 @Builder
-@FieldDefaults(level = PRIVATE)
 public class SigaEvent {
-    EventType eventType;
-    SigaEventName eventName;
-    String clientName;
-    String serviceName;
-    String serviceUuid;
-    String errorCode;
-    String errorMessage;
-    Long timestamp;
-    Long duration;
-    EventResultType resultType;
+    private EventType eventType;
+    private SigaEventName eventName;
+    private String clientName;
+    private String serviceName;
+    private String serviceUuid;
+    private String errorCode;
+    private String errorMessage;
+    private Long timestamp;
+    private Long duration;
+    private EventResultType resultType;
     @Builder.Default
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    Map<String, String> eventParameters = new HashMap<>();
+    private Map<String, String> eventParameters = new HashMap<>();
 
     @Builder(buildMethodName = "buildEventWithParameter")
     public static SigaEvent buildEventWithParameter(SigaEventName eventName, SigaEventName.EventParam parameterName, String parameterValue) {

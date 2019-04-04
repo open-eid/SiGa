@@ -1,7 +1,6 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import lombok.experimental.FieldDefaults;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
@@ -24,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
-import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-@FieldDefaults(level = PRIVATE)
 public class SigaAuthTests {
 
     final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
@@ -46,10 +43,10 @@ public class SigaAuthTests {
     final static int TOKEN_EXPIRATION_IN_SECONDS = 120;
     final static int TOKEN_CLOCK_SKEW = 2;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-    String xAuthorizationTimestamp;
-    String xAuthorizationSignature;
+    private String xAuthorizationTimestamp;
+    private String xAuthorizationSignature;
 
     @Test
     public void accessShouldBeAuthorized_WithValidToken() throws Exception {

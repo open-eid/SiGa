@@ -3,7 +3,6 @@ package ee.openeid.siga.auth.filter.hmac;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.FieldDefaults;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -15,25 +14,23 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import static java.util.Objects.requireNonNull;
-import static lombok.AccessLevel.PRIVATE;
 
 @Getter
 @Builder
-@FieldDefaults(level = PRIVATE, makeFinal = true)
 public class HmacSignature {
-    static byte DELIMITER = ':';
+    private final static byte DELIMITER = ':';
     @NonNull
-    String macAlgorithm;
-    String signature;
+    private final String macAlgorithm;
+    private final String signature;
     @NonNull
-    String serviceUuid;
+    private final String serviceUuid;
     @NonNull
-    String requestMethod;
+    private final String requestMethod;
     @NonNull
-    String uri;
+    private final String uri;
     @NonNull
-    String timestamp;
-    byte[] payload;
+    private final String timestamp;
+    private final byte[] payload;
 
     public boolean isValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException, InvalidKeyException {
         requireNonNull(signingSecret, "signingSecret");

@@ -6,7 +6,6 @@ import ch.qos.logback.core.Appender;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventLoggingAspect;
-import lombok.experimental.FieldDefaults;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,14 +18,12 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
 import static ee.openeid.siga.common.event.SigaEventName.REQUEST;
-import static lombok.AccessLevel.PRIVATE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
-@FieldDefaults(level = PRIVATE)
 public class SigaEventLoggerTests {
 
     Logger logger = (Logger) LoggerFactory.getLogger(SigaEventLogger.class);

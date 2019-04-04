@@ -1,4 +1,5 @@
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:tns="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl"
             xmlns="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl">
 

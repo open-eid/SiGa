@@ -2,7 +2,6 @@ package ee.openeid.siga.common.auth;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,24 +10,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static lombok.AccessLevel.PRIVATE;
-
 @Data
 @Builder
-@FieldDefaults(level = PRIVATE)
 public class SigaUserDetails implements UserDetails {
-
-    String clientName;
-    String serviceName;
-    String serviceUuid;
-    String signingSecret;
-    String skRelyingPartyName;
-    String skRelyingPartyUuid;
+    private String clientName;
+    private String serviceName;
+    private String serviceUuid;
+    private String signingSecret;
+    private String skRelyingPartyName;
+    private String skRelyingPartyUuid;
     @Builder.Default()
-    boolean active = true;
-
+    private boolean active = true;
     @Builder.Default()
-    List<String> roles = new ArrayList<>();
+    private List<String> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,7 +1,6 @@
 package ee.openeid.siga.auth.model;
 
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -10,7 +9,6 @@ import org.jasypt.hibernate5.type.EncryptedStringType;
 import javax.persistence.*;
 
 import static ee.openeid.siga.auth.HibernateStringEncryptorConfiguration.HIBERNATE_STRING_ENCRYPTOR;
-import static lombok.AccessLevel.PRIVATE;
 
 @TypeDef(
         name = "encryptedString", typeClass = EncryptedStringType.class,
@@ -25,21 +23,23 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@FieldDefaults(level = PRIVATE)
 public class SigaService {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @ToString.Exclude
-    int id;
-
-    @NonNull String name;
-    @NonNull String uuid;
-    @Type(type = "encryptedString")
-    @NonNull String signingSecret;
-    @NonNull String skRelyingPartyName;
-    @NonNull String skRelyingPartyUuid;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CLIENT_ID", unique = true, nullable = false, updatable = false)
     SigaClient client;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Exclude
+    private int id;
+    @NonNull
+    private String name;
+    @NonNull
+    private String uuid;
+    @Type(type = "encryptedString")
+    @NonNull
+    private String signingSecret;
+    @NonNull
+    private String skRelyingPartyName;
+    @NonNull
+    private String skRelyingPartyUuid;
 }

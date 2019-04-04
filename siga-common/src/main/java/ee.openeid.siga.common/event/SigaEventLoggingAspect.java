@@ -1,7 +1,6 @@
 package ee.openeid.siga.common.event;
 
 import ee.openeid.siga.common.exception.SigaApiException;
-import lombok.experimental.FieldDefaults;
 import org.apache.commons.jxpath.JXPathContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -20,16 +19,14 @@ import java.util.Optional;
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static java.time.Instant.now;
-import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Aspect
 @Component
-@FieldDefaults(level = PRIVATE)
 public class SigaEventLoggingAspect {
 
     @Autowired
-    SigaEventLogger sigaEventLogger;
+    private SigaEventLogger sigaEventLogger;
 
     @Pointcut("@annotation(sigaEventLog)")
     public void callAt(SigaEventLog sigaEventLog) {

@@ -3,24 +3,19 @@ package ee.openeid.siga.common.session;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
-import lombok.experimental.FieldDefaults;
 import org.digidoc4j.Container;
-
-import static lombok.AccessLevel.PRIVATE;
-
 
 @Data
 @AllArgsConstructor
-@FieldDefaults(level = PRIVATE)
 public class AttachedDataFileContainerSessionHolder implements Session {
     @NonNull
-    String clientName;
+    private String clientName;
     @NonNull
-    String serviceName;
+    private String serviceName;
     @NonNull
-    String serviceUuid;
+    private String serviceUuid;
     @NonNull
-    String sessionId;
-    String containerName;
-    Container container;
+    private String sessionId;
+    private String containerName;
+    private Container container;
 }

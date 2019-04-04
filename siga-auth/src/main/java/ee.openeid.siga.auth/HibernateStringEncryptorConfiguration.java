@@ -1,7 +1,6 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
-import lombok.experimental.FieldDefaults;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.hibernate5.encryptor.HibernatePBEStringEncryptor;
@@ -10,16 +9,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static java.util.Objects.requireNonNull;
-import static lombok.AccessLevel.PRIVATE;
 
 @Configuration
-@FieldDefaults(level = PRIVATE)
 public class HibernateStringEncryptorConfiguration {
-
     public final static String HIBERNATE_STRING_ENCRYPTOR = "HIBERNATE_STRING_ENCRYPTOR";
 
     @Autowired
-    SecurityConfigurationProperties securityConfigurationProperties;
+    private SecurityConfigurationProperties securityConfigurationProperties;
 
     @Bean
     public HibernatePBEStringEncryptor hibernatePBEStringEncryptor(PBEStringEncryptor stringEncryptor) {

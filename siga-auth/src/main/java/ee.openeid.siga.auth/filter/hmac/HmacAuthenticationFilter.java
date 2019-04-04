@@ -7,7 +7,6 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
-import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -34,14 +33,12 @@ import static java.time.Instant.*;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
-import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
-@FieldDefaults(level = PRIVATE, makeFinal = true)
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    long TOKEN_EXPIRATION_IN_SECONDS;
-    long TOKEN_CLOCK_SKEW;
-    SigaEventLogger sigaEventLogger;
+    private final long TOKEN_EXPIRATION_IN_SECONDS;
+    private final long TOKEN_CLOCK_SKEW;
+    private final SigaEventLogger sigaEventLogger;
 
     public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
