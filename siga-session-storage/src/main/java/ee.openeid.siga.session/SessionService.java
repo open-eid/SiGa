@@ -2,9 +2,8 @@ package ee.openeid.siga.session;
 
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.Session;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -12,17 +11,16 @@ import org.springframework.stereotype.Component;
 import javax.cache.Cache;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class SessionService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
-
     Ignite ignite;
 
     public Session getContainer(String containerId) {
         String sessionId = getSessionId(containerId);
         Session container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        LOGGER.info("Found container with container ID [{}]", containerId);
+        log.info("Found container with container ID [{}]", containerId);
         return container;
     }
 

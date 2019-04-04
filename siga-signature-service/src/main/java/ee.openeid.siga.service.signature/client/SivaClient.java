@@ -7,9 +7,8 @@ import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -23,11 +22,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+@Slf4j
 @Component
 public class SivaClient {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SivaClient.class);
-
     private static final String SIGNATURE_FILE_NAME = "signatures0.xml";
     private static final String VALIDATION_ENDPOINT = "/validateHashcode";
     private RestTemplate restTemplate;
@@ -43,10 +40,10 @@ public class SivaClient {
                 throw new ClientException("Unable to parse client empty response");
             }
         } catch (HttpServerErrorException | HttpClientErrorException e) {
-            LOGGER.error("Unexpected exception was thrown by SiVa: ", e);
+            log.error("Unexpected exception was thrown by SiVa: ", e);
             throw new ClientException("Unable to get valid response from client");
         }
-        LOGGER.info("Container validation details received successfully");
+        log.info("Container validation details received successfully");
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 

@@ -2,9 +2,8 @@ package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.exception.TechnicalException;
+import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -17,12 +16,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.OutputStream;
 import java.util.List;
 
+@Slf4j
 public class HashcodesDataFile {
 
     public static final String HASHCODES_SHA256 = "META-INF/hashcodes-sha256.xml";
     public static final String HASHCODES_SHA512 = "META-INF/hashcodes-sha512.xml";
     public static final String HASHCODES_PREFIX = "META-INF/hashcodes-";
-    private static final Logger LOGGER = LoggerFactory.getLogger(HashcodesDataFile.class);
     private Document dom;
     private Element rootElement;
     private DigestAlgorithm digestAlgorithm;
@@ -32,7 +31,7 @@ public class HashcodesDataFile {
     }
 
     public void generateHashcodeFile(List<HashcodeDataFile> dataFiles) {
-        LOGGER.debug("Writing hashcode files");
+        log.debug("Writing hashcode files");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
