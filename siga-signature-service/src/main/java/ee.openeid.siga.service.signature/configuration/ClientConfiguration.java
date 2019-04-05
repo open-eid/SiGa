@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.ws.transport.http.HttpComponentsMessageSender;
@@ -27,6 +27,9 @@ import javax.net.ssl.SSLContext;
 public class ClientConfiguration {
 
     private MobileServiceConfigurationProperties mobileServiceConfigurationProperties;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @Bean
     RestTemplate restTemplate() throws Exception {
@@ -68,11 +71,12 @@ public class ClientConfiguration {
 
     private SSLContext sslContext() throws Exception {
         SSLContext sslcontext = SSLContexts.custom()
-                .loadTrustMaterial(new ClassPathResource(mobileServiceConfigurationProperties.getTrustStore()).getFile(),
+                .loadTrustMaterial(resourceLoader.getResource(mobileServiceConfigurationProperties.getTrustStore()).getFile(),
                         mobileServiceConfigurationProperties.getTrustStorePassword().toCharArray())
                 .build();
         return sslcontext;
     }
+
 
     @Autowired
     public void setMobileServiceConfigurationProperties(MobileServiceConfigurationProperties mobileServiceConfigurationProperties) {
