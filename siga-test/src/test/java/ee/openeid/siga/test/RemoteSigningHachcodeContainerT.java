@@ -217,14 +217,14 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .head(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING)
+                .head(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
                 .then()
                 .log().all()
                 .extract()
@@ -240,14 +240,14 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .options(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING)
+                .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
                 .then()
                 .log().all()
                 .extract()
@@ -263,7 +263,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -271,7 +271,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING)
+                .patch(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
                 .then()
                 .log().all()
                 .extract()
