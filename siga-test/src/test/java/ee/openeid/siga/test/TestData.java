@@ -41,6 +41,7 @@ public class TestData {
     public static final String RESULT = "result";
     public static final String DATA_TO_SIGN = "dataToSign";
     public static final String DIGEST_ALGO = "digestAlgorithm";
+    public static final String MID_STATUS = "midStatus";
 
     // Validation response strings
     public static final String REPORT_VALID_SIGNATURES_COUNT = "validationConclusion.validSignaturesCount";
@@ -54,5 +55,11 @@ public class TestData {
     // Error codes
     public static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND_EXCEPTION";
     public static final String INVALID_REQUEST = "INVALID_REQUEST_EXCEPTION";
-
+    public static final String CLIENT_EXCEPTION = "CLIENT_EXCEPTION";
+    public static final String SENDING_ERROR = "SENDING_ERROR";
+    public static final String USER_CANCEL = "USER_CANCEL";
+    public static final String NOT_VALID = "NOT_VALID";
+    public static final String SIM_ERROR = "SIM_ERROR";
+    public static final String PHONE_ABSENT = "PHONE_ABSENT";
+    public static final String EXPIRED_TRANSACTION = "EXPIRED_TRANSACTION";
 }

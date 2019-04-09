@@ -86,7 +86,7 @@ public class TestBase {
         while (Instant.now().getEpochSecond() < endTime) {
             Thread.sleep(3500);
             Response response = getHashcodeMidSigningInSession(flow);
-            if ("SIGNATURE".equals(response.getBody().path("midStatus"))) {
+            if (!"OUTSTANDING_TRANSACTION".equals(response.getBody().path(MID_STATUS))) {
                 return response;
             }
         }
