@@ -33,6 +33,20 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
+    public void signContainerRemotely() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+
+        Response response = getValidationReportForContainerInSession(flow);
+
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2))
+                .body("validationConclusion.signaturesCount", equalTo(2));
+    }
+
+    @Test
     public void startRemoteSigningHashcodeContainerReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 

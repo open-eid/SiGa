@@ -83,38 +83,6 @@ public class HashcodeContainerSystemT extends TestBase {
     }
 
     @Test
-    public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
-    }
-
-
-    @Test
-    public void startRemoteSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        assertThat(response.statusCode(), equalTo(200));
-    }
-
-    @Test
-    public void finalizeSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path("result"), equalTo("OK"));
-    }
-
-    @Test
-    public void signWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
-        Response response = pollForMidSigning(flow);
-        assertThat(response.statusCode(), equalTo(200));
-    }
-
-    @Test
     public void getSignaturesShouldReturnListOfSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = getHashcodeSignatureList(flow);
@@ -122,15 +90,7 @@ public class HashcodeContainerSystemT extends TestBase {
         assertThat(response.getBody().path("signatures[0].id"), equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"));
     }
 
-    @Test
-    public void getSignedContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response resp = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(resp.getBody().path("dataToSign"), resp.getBody().path("digestAlgorithm"))));
-        Response response = getHashcodeContainer(flow);
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path("container").toString().length(), notNullValue());
-    }
+
 
 
 }

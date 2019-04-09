@@ -141,6 +141,38 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void mobileIdUserCancelAndRetries() throws Exception {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019950", "+37201100266"));
+        pollForMidSigning(flow);
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        pollForMidSigning(flow);
+
+        Response response = getValidationReportForContainerInSession(flow);
+
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1))
+                .body("validationConclusion.signaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void mobileIdUserTimeoutsAndRetries() throws Exception {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018908", "+37066000266"));
+        pollForMidSigning(flow);
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        pollForMidSigning(flow);
+
+        Response response = getValidationReportForContainerInSession(flow);
+
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1))
+                .body("validationConclusion.signaturesCount", equalTo(1));
+    }
+
+    @Test
     public void missingPersonIdentifier() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("", "+37200000766"));
@@ -253,6 +285,21 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+    }
+
+    @Test
+    public void midStatusRequestForOtherUserContainer() throws Exception {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+
+        flow.setServiceUuid(SERVICE_UUID_2);
+        flow.setServiceSecret(SERVICE_SECRET_2);
+
+        Response response = getHashcodeMidSigningInSession(flow);
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
     }
 
 }
