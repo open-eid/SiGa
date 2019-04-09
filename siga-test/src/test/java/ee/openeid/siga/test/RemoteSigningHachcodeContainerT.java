@@ -48,7 +48,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void startRemoteSigningHashcodeContainerWithAllParamsReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn, Estonia"));
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia"));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(DATA_TO_SIGN).toString().length(), equalTo(1712));
@@ -60,7 +60,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void startRemoteSigningHashcodeContainerWithRoleReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null));
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null,null, null, null));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(DATA_TO_SIGN).toString().length(), equalTo(1712));
@@ -72,7 +72,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void startRemoteSigningHashcodeContainerWithLocationReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn, Estonia"));
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn", null, null, null));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(DATA_TO_SIGN).toString().length(), equalTo(1712));

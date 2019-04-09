@@ -53,18 +53,27 @@ public class RequestBuilder {
     }
 
     public static JSONObject hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
-        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null);
+        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
     }
 
-    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String roles, String signatureProductionPlace) throws JSONException {
+    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String roles, String city, String stateOrProvince, String postalCode, String country) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
+        if (city != null) {
+            request.put("city", city);
+        }
+        if (stateOrProvince != null) {
+            request.put("stateOrProvince", stateOrProvince);
+        }
+        if (postalCode != null) {
+            request.put("postalCode", postalCode);
+        }
+        if (country != null) {
+            request.put("countryName", country);
+        }
         if (roles != null) {
             request.put("roles", roles);
-        }
-        if (signatureProductionPlace != null) {
-            request.put("signatureProductionPlace", signatureProductionPlace);
         }
         return request;
     }
@@ -100,7 +109,7 @@ public class RequestBuilder {
             request.put("postalCode", postalCode);
         }
         if (country != null) {
-            request.put("country", country);
+            request.put("countryName", country);
         }
         if (roles != null) {
             request.put("roles", roles);
