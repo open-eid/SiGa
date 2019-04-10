@@ -22,7 +22,7 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 
 public class TestBase {
 
-    private static Properties properties;
+    protected static Properties properties;
 
     static {
         properties = new Properties();

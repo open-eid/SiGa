@@ -1,6 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
@@ -25,7 +26,7 @@ public class MainController {
     private DetachedDataFileContainerValidationService validationService;
     private DetachedDataFileContainerSigningService signingService;
 
-    @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
+    @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})},  logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerResponse createContainer(@RequestBody CreateHashcodeContainerRequest createContainerRequest) {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
@@ -72,7 +73,7 @@ public class MainController {
         return response;
     }
 
-    @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_INIT)
+    @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_INIT, logParameters = {@Param(index = 1, fields = {@XPath(name = "signature_profile", xpath = "signatureProfile")})})
     @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);

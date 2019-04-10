@@ -1,6 +1,5 @@
 package ee.openeid.siga.mobileid.client;
 
-import ee.openeid.siga.common.CertificateUtil;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -13,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.client.SoapFaultClientException;
-
-import java.security.cert.X509Certificate;
 
 @Slf4j
 public class DigiDocService extends WebServiceGatewaySupport {
@@ -29,11 +26,6 @@ public class DigiDocService extends WebServiceGatewaySupport {
         setMarshaller(marshaller);
         setUnmarshaller(marshaller);
         this.serviceUrl = serviceUrl;
-    }
-
-    public X509Certificate getMobileX509Certificate(String idCode, String country, String phoneNr) {
-        GetMobileCertificateResponse response = getMobileCertificate(idCode, country, phoneNr);
-        return CertificateUtil.createX509Certificate(response.getSignCertData().getBytes());
     }
 
     @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_CERTIFICATE, logParameters = {@Param(name = "person_identifier", index = 0), @Param(name = "country", index = 1), @Param(name = "phone_nr", index = 2)}, logReturnObject = {@XPath(name = "sign_cert_status", xpath = "signCertStatus"), @XPath(name = "dds_response_code", xpath = "authCertStatus")})

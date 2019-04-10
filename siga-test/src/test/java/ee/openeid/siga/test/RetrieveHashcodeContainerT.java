@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.digestSigner.signDigest;
+import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -28,7 +28,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Before
     public void setUp() {
-        flow = new SigaApiFlow();
+        flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test

@@ -88,7 +88,7 @@ databaseChangeLog:
                   value: test2.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: relying_party_name
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
                   value: 439ffd6c-39b1-11e9-b210-d663bd873d93
@@ -113,7 +113,7 @@ databaseChangeLog:
                   value: test3.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: relying_party_name
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
                   value: 439fff10-39b1-11e9-b210-d663bd873d93

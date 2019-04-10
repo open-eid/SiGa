@@ -25,6 +25,9 @@ public class TestData {
     public static final String SERVICE_UUID_2 = "824dcfe9-5c26-4d76-829a-e6630f434746";
     public static final String SERVICE_SECRET_2 = "746573745365637265744b6579303032";
 
+    public static final String SERVICE_UUID_3 = "400ff9a2-b5fb-4fde-b764-9b519963f82e";
+    public static final String SERVICE_SECRET_3 = "746573745365637265744b6579303033";
+
     // Hashcode datafile mock strings
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo";
     public static final String DEFAULT_SHA512_DATAFILE = "hQVz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==";

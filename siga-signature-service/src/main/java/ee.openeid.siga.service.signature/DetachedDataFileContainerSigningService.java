@@ -7,10 +7,12 @@ import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
+import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
@@ -28,16 +30,18 @@ import org.digidoc4j.exceptions.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static ee.openeid.siga.common.CertificateUtil.createX509Certificate;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
-import static ee.openeid.siga.common.event.SigaEventName.OCSP;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.ISSUING_CA;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.SIGNATURE_ID;
+import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
 
 @Slf4j
 @Service
@@ -83,8 +87,8 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     public String startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
         verifyDataFileExistence(sessionHolder);
-        X509Certificate signingCertificate = digiDocService.getMobileX509Certificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getCountry(), mobileIdInformation.getPhoneNo());
-        signatureParameters.setSigningCertificate(signingCertificate);
+        GetMobileCertificateResponse signingCertificate = digiDocService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getCountry(), mobileIdInformation.getPhoneNo());
+        signatureParameters.setSigningCertificate(createX509Certificate(signingCertificate.getSignCertData().getBytes()));
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
         MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
@@ -152,19 +156,36 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
      * @see <a href="https://jira.ria.ee/browse/DD4J-415">Jira task DD4J-415</a>
      */
     private Signature finalizeSignature(DataToSign dataToSign, byte[] base64Decoded) {
-        SigaEvent ocspStartEvent = sigaEventLogger.logStartEvent(OCSP);
+        SigaEvent startEvent = sigaEventLogger.logStartEvent(FINALIZE_SIGNATURE).addEventParameter(SIGNATURE_ID, dataToSign.getSignatureParameters().getSignatureId());
         try {
             Signature signature = dataToSign.finalize(base64Decoded);
-            sigaEventLogger.logEndEventFor(ocspStartEvent);
+            logEndEvent(startEvent, signature);
             return signature;
         } catch (TechnicalException e) {
             log.error("Unable to finalize signature", e);
-            logExceptionEventFor(ocspStartEvent, e);
+            logExceptionEvent(startEvent, e);
             throw new ee.openeid.siga.common.exception.TechnicalException("Unable to finalize signature");
         }
     }
 
-    private void logExceptionEventFor(SigaEvent ocspStartEvent, TechnicalException e) {
+    private void logEndEvent(SigaEvent startEvent, Signature signature) {
+        X509Cert tstCert = signature.getTimeStampTokenCertificate();
+        if (tstCert != null) {
+            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.TSA_REQUEST.equals(e.getEventName())).ifPresent(e -> {
+                e.addEventParameter(ISSUING_CA, tstCert.issuerName());
+            });
+        }
+        X509Cert ocspCert = signature.getOCSPCertificate();
+        if (ocspCert != null) {
+            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.OCSP_REQUEST.equals(e.getEventName())).ifPresent(e -> {
+                e.addEventParameter(ISSUING_CA, ocspCert.issuerName());
+            });
+        }
+        SigaEvent endEvent = sigaEventLogger.logEndEventFor(startEvent);
+        endEvent.addEventParameter(SIGNATURE_ID, signature.getId());
+    }
+
+    private void logExceptionEvent(SigaEvent ocspStartEvent, TechnicalException e) {
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
         if (StringUtils.contains(errorMessage, "Unable to process GET call for url")) {
             String errorUrl = StringUtils.substringBetween(e.getCause().getMessage(), "'", "'");

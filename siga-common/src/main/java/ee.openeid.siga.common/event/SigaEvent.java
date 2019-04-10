@@ -40,12 +40,14 @@ public class SigaEvent {
         return event;
     }
 
-    public void addEventParameter(SigaEventName.EventParam eventParam, String parameterValue) {
+    public SigaEvent addEventParameter(SigaEventName.EventParam eventParam, String parameterValue) {
         addEventParameter(eventParam.name().toLowerCase(), escapeJava(parameterValue));
+        return this;
     }
 
-    public void addEventParameter(String parameterName, String parameterValue) {
+    public SigaEvent addEventParameter(String parameterName, String parameterValue) {
         eventParameters.put(escapeJava(parameterName), escapeJava(parameterValue));
+        return this;
     }
 
     public String getEventParameter(SigaEventName.EventParam parameterName) {

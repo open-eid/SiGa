@@ -2,19 +2,13 @@ package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import static ee.openeid.siga.test.TestData.DEFAULT_HASHCODE_CONTAINER;
 import static ee.openeid.siga.test.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.digestSigner.signDigest;
+import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class SignatureCorrectnessT extends TestBase {
@@ -23,7 +17,7 @@ public class SignatureCorrectnessT extends TestBase {
 
     @Before
     public void setUp() {
-        flow = new SigaApiFlow();
+        flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Ignore //TODO: SIGARIA-63

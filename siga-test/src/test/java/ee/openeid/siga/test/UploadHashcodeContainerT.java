@@ -29,7 +29,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Before
     public void setUp() {
-        flow = new SigaApiFlow();
+        flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test

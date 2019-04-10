@@ -29,8 +29,7 @@ import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
 import static ee.openeid.siga.common.event.SigaEvent.EventType.FINISH;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
-import static ee.openeid.siga.common.event.SigaEventName.EventParam.OCSP_URL;
-import static ee.openeid.siga.common.event.SigaEventName.EventParam.TSA_URL;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 import static ee.openeid.siga.common.event.SigaEventName.*;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -108,19 +107,19 @@ public class SignatureFinalizingTest {
     }
 
     private void assertTSAOCSPEvents(String tsaUrl, String ocspUrl) {
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(OCSP, FINISH).get();
+        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
         Optional<SigaEvent> tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH);
 
         assertNotNull(ocspEvent);
         assertNotNull(ocspRequestEvent);
-        assertEquals(ocspUrl, ocspRequestEvent.getEventParameter(OCSP_URL));
+        assertEquals(ocspUrl, ocspRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals(SUCCESS, ocspEvent.getResultType());
         assertEquals(SUCCESS, ocspRequestEvent.getResultType());
         if (tsaUrl != null) {
             SigaEvent tsaEvent = tsaRequestEvent.get();
             assertNotNull(tsaEvent);
-            assertEquals(tsaUrl, tsaEvent.getEventParameter(TSA_URL));
+            assertEquals(tsaUrl, tsaEvent.getEventParameter(REQUEST_URL));
             assertEquals(SUCCESS, tsaEvent.getResultType());
         } else {
             assertFalse(tsaRequestEvent.isPresent());
@@ -146,13 +145,13 @@ public class SignatureFinalizingTest {
         } catch (TechnicalException e) {
             assertThat(e.getMessage(), containsString("Unable to finalize signature"));
             sigaEventLogger.logEvents();
-            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(OCSP, FINISH).get();
+            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
             SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
 
             assertNotNull(ocspEvent);
             assertNotNull(tsaRequestEvent);
             assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
-            assertEquals("http://demo.invalid.url.sk.ee/tsa", tsaRequestEvent.getEventParameter(TSA_URL));
+            assertEquals("http://demo.invalid.url.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
             assertEquals(EXCEPTION, ocspEvent.getResultType());
             assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspEvent.getErrorCode());
@@ -169,7 +168,7 @@ public class SignatureFinalizingTest {
         when(configuration.getOcspSource()).thenReturn("http://aia.invalid.url.sk.ee/esteid2018");
         String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
         sigaEventLogger.logEvents();
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(OCSP, FINISH).get();
+        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
 
@@ -179,7 +178,7 @@ public class SignatureFinalizingTest {
         assertEquals(SUCCESS, tsaRequestEvent.getResultType());
         assertNull(tsaRequestEvent.getErrorCode());
         assertNull(tsaRequestEvent.getErrorMessage());
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(TSA_URL));
+        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
         assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
         assertEquals("OCSP DSS Exception: Unable to process GET call for url 'http://aia.invalid.url.sk.ee/esteid2018'", ocspRequestEvent.getErrorMessage());
@@ -199,15 +198,15 @@ public class SignatureFinalizingTest {
         } catch (TechnicalException e) {
             assertEquals("Unable to finalize signature", e.getMessage());
             sigaEventLogger.logEvents();
-            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(OCSP, FINISH).get();
+            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
             SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
             SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
 
             assertNotNull(ocspEvent);
             assertNotNull(ocspRequestEvent);
             assertNotNull(tsaRequestEvent);
-            assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(TSA_URL));
-            assertEquals("http://aia.demo.sk.ee/esteid2018", ocspRequestEvent.getEventParameter(OCSP_URL));
+            assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+            assertEquals("http://aia.demo.sk.ee/esteid2018", ocspRequestEvent.getEventParameter(REQUEST_URL));
             assertEquals(EXCEPTION, ocspEvent.getResultType());
             assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
             assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
@@ -233,12 +232,12 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(true);
         String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT));
         sigaEventLogger.logEvents();
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(OCSP, FINISH).get();
+        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
         assertNotNull(ocspEvent);
         assertNotNull(tsaRequestEvent);
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(TSA_URL));
+        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals("OK", result);
     }
 

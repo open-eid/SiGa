@@ -5,7 +5,7 @@ import org.digidoc4j.signers.PKCS12SignatureToken;
 
 import java.util.Base64;
 
-public class digestSigner {
+public class DigestSigner {
 
     public static String signDigest(String digestToSign, String algo) {
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();

@@ -13,12 +13,13 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 @Getter
 @Builder
 public class HmacSignature {
-    private final static byte DELIMITER = ':';
+    private final static String DELIMITER = ":";
     @NonNull
     private final String macAlgorithm;
     private final String signature;
@@ -46,14 +47,7 @@ public class HmacSignature {
         final Mac hmac = Mac.getInstance(macAlgorithm);
         SecretKeySpec secretKey = new SecretKeySpec(signingSecret, macAlgorithm);
         hmac.init(secretKey);
-        hmac.update(serviceUuid.getBytes(StandardCharsets.UTF_8));
-        hmac.update(DELIMITER);
-        hmac.update(timestamp.getBytes(StandardCharsets.UTF_8));
-        hmac.update(DELIMITER);
-        hmac.update(requestMethod.getBytes(StandardCharsets.UTF_8));
-        hmac.update(DELIMITER);
-        hmac.update(uri.getBytes(StandardCharsets.UTF_8));
-        hmac.update(DELIMITER);
+        hmac.update((serviceUuid + DELIMITER + timestamp + DELIMITER + requestMethod + DELIMITER + uri + DELIMITER).getBytes(UTF_8));
         hmac.update(payload);
         final byte[] signatureBytes = hmac.doFinal();
         hmac.reset();

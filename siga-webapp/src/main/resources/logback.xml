@@ -2,9 +2,14 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     ​
-    <property name="LOG_FILE" value="${BUILD_FOLDER:-logs}/SiGa"/>​
+    <property name="COMMON_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-common.log"/>​
+    <property name="EVENTS_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-events.log"/>​
     <property name="CONSOLE_LOG_PATTERN"
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <property name="COMMON_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <property name="ELK_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${HOSTNAME} ${LOG_LEVEL_PATTERN:-%5p} rak-siga-common.log %m%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -15,19 +20,29 @@
             <charset>utf8</charset>
         </encoder>
     </appender>
-
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE}-%d{yyyy-MM-dd}.gz</fileNamePattern>
-        </rollingPolicy>
+    <appender name="COMMON_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${COMMON_LOG_FILE}</file>
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <pattern>${COMMON_LOG_PATTERN}</pattern>
             <charset>utf8</charset>
             <immediateFlush>false</immediateFlush>
         </encoder>
     </appender>
-
+    <appender name="EVENTS_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${EVENTS_LOG_FILE}</file>
+        <encoder>
+            <pattern>${ELK_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+            <immediateFlush>false</immediateFlush>
+        </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SIGA_EVENT</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
+        </filter>
+    </appender>
     <!--appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
         <syslogHost>localhost</syslogHost>
         <port>514</port>
@@ -50,8 +65,9 @@
     <logger name="ee.sk" level="INFO"/>
 
     <root level="INFO">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="COMMON_LOG_FILE"/>
+        <appender-ref ref="EVENTS_LOG_FILE"/>
         <appender-ref ref="CONSOLE"/>
-        <!--appender-ref ref="SYSLOG" /-->
+        <!--appender-ref ref="SYSLOG"/-->
     </root>
 </configuration>

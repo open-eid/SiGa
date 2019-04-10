@@ -1,7 +1,10 @@
 package ee.openeid.siga.common.event;
 
 import ee.openeid.siga.common.exception.SigaApiException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.jxpath.ClassFunctions;
 import org.apache.commons.jxpath.JXPathContext;
+import org.apache.commons.jxpath.JXPathException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,6 +24,7 @@ import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static java.time.Instant.now;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Slf4j
 @Aspect
 @Component
 public class SigaEventLoggingAspect {
@@ -34,18 +38,13 @@ public class SigaEventLoggingAspect {
 
     @Around("callAt(eventLog)")
     public Object logMethodExecution(ProceedingJoinPoint joinPoint, SigaEventLog eventLog) throws Throwable {
-
+        SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
         Instant start = now();
         try {
-            SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
-
-            start = now();
             Object proceed = joinPoint.proceed();
             Instant finish = now();
-
             long executionTimeInMilli = Duration.between(start, finish).toMillis();
             SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventName(), executionTimeInMilli);
-
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             if (eventLog.logReturnObject().length != 0) {
                 // FIXME: Possible parameter name collision, when method parameters are logged.
@@ -54,11 +53,13 @@ public class SigaEventLoggingAspect {
             return proceed;
         } catch (SigaApiException e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
-            sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getErrorCode(), e.getMessage(), executionTimeInMilli);
+            SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getErrorCode(), e.getMessage(), executionTimeInMilli);
+            logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             throw e;
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
-            sigaEventLogger.logExceptionEvent(eventLog.eventName(), "INTERNAL_SERVER_ERROR", "Internal server error", executionTimeInMilli);
+            SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), "INTERNAL_SERVER_ERROR", "Internal server error", executionTimeInMilli);
+            logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             throw e;
         }
     }
@@ -67,22 +68,23 @@ public class SigaEventLoggingAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         Object[] args = joinPoint.getArgs();
-        Param[] logParameters = eventLog.logParameters();
+        Param[] logMethodExecutionParameters = eventLog.logParameters();
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            containsAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
+            createEventParameterForAnnotation(parameterAnnotations[i], PathVariable.class).ifPresent(annotation -> {
                 String name = LOWER_CAMEL.to(LOWER_UNDERSCORE, ((PathVariable) annotation).value());
                 startEvent.addEventParameter(name, arg.toString());
                 endEvent.addEventParameter(name, arg.toString());
             });
-            if (eventLog.logParameters().length != 0) {
-                for (Param p : logParameters) {
-                    if (p.index() == i) {
-                        if (p.fields().length > 0) {
-                            logObject(p.fields(), arg, startEvent, endEvent);
-                        } else {
-                            String parameterName = isBlank(p.name()) ? "parameter_" + i : p.name();
+            if (logMethodExecutionParameters.length != 0) {
+                for (Param param : logMethodExecutionParameters) {
+                    if (param.index() == i) {
+                        boolean parameterIsPrimitiveType = param.fields().length == 0;
+                        if (parameterIsPrimitiveType) {
+                            String parameterName = isBlank(param.name()) ? "parameter_" + i : param.name();
                             startEvent.addEventParameter(parameterName, arg.toString());
+                        } else {
+                            logObject(param.fields(), arg, startEvent, endEvent);
                         }
                     }
                 }
@@ -92,15 +94,20 @@ public class SigaEventLoggingAspect {
 
     private void logObject(XPath[] xPaths, Object returnObject, SigaEvent... events) {
         JXPathContext xc = JXPathContext.newContext(returnObject);
-        for (XPath p : xPaths) {
-            Object value = xc.getValue(p.xpath());
-            for (SigaEvent event : events) {
-                event.addEventParameter(p.name(), value != null ? value.toString() : "null");
+        xc.setFunctions(new ClassFunctions(JXPathHelperFunctions.class, "helper"));
+        try {
+            for (XPath p : xPaths) {
+                Object value = xc.getValue(p.xpath());
+                for (SigaEvent event : events) {
+                    event.addEventParameter(p.name(), value != null ? value.toString() : "null");
+                }
             }
+        } catch (JXPathException e) {
+            log.error("XPath not found when logging method execution: ", e.getMessage());
         }
     }
 
-    private Optional<Annotation> containsAnnotation(Annotation[] annotations, Class annotationClass) {
+    private Optional<Annotation> createEventParameterForAnnotation(Annotation[] annotations, Class annotationClass) {
         for (Annotation annotation : annotations) {
             if (annotation.annotationType().isAssignableFrom(annotationClass)) {
                 return Optional.of(annotation);

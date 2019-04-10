@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.*;
 
 class LogObserver extends AppenderBase<ILoggingEvent> {
     private final Consumer<ILoggingEvent> logEventToSigaEvent;
@@ -37,9 +38,9 @@ class LogObserver extends AppenderBase<ILoggingEvent> {
             String message = loggingEvent.getFormattedMessage();
             String errorUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "<", ">");
             if (message.contains("Getting OCSP response from")) {
-                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, SigaEventName.EventParam.OCSP_URL, errorUrl));
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, REQUEST_URL, errorUrl));
             } else if (message.contains("Getting Timestamp response from")) {
-                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, SigaEventName.EventParam.TSA_URL, errorUrl));
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, REQUEST_URL, errorUrl));
             }
         };
         return new LogObserver(SkDataLoader.class, eventConsumer, level);

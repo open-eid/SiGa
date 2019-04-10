@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.digestSigner.signDigest;
+import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -22,7 +22,7 @@ public class ValidateHashcodeContainerT extends TestBase {
 
     @Before
     public void setUp() {
-        flow = new SigaApiFlow();
+        flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test

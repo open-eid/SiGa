@@ -9,11 +9,14 @@ import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
+import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
+import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Assert;
@@ -28,8 +31,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.Base64;
+import java.util.Optional;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
@@ -65,6 +70,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         configuration = new Configuration(Configuration.Mode.TEST);
         signingService.setConfiguration(configuration);
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
+        Mockito.when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createSessionHolder());
     }
 
@@ -143,8 +149,9 @@ public class DetachedDataFileContainerSigningServiceTest {
     }
 
     @Test
-    public void successfulMobileIdSigning() {
-        Mockito.when(digiDocService.getMobileX509Certificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+    public void successfulMobileIdSigning() throws IOException {
+        GetMobileCertificateResponse mobileCertificateResponse = createMobileCertificateResponse();
+        Mockito.when(digiDocService.getMobileCertificate(any(), any(), any())).thenReturn(mobileCertificateResponse);
         Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
@@ -152,12 +159,13 @@ public class DetachedDataFileContainerSigningServiceTest {
     }
 
     @Test
-    public void invalidMobileSignHashStatus() {
+    public void invalidMobileSignHashStatus() throws IOException {
         exceptionRule.expect(IllegalStateException.class);
         exceptionRule.expectMessage("Invalid DigiDocService response");
         MobileSignHashResponse mobileSignHashResponse = createMobileSignHashResponse();
         mobileSignHashResponse.setStatus("Random");
-        Mockito.when(digiDocService.getMobileX509Certificate(any(), any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        GetMobileCertificateResponse mobileCertificateResponse = createMobileCertificateResponse();
+        Mockito.when(digiDocService.getMobileCertificate(any(), any(), any())).thenReturn(mobileCertificateResponse);
         Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(mobileSignHashResponse);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
@@ -199,5 +207,17 @@ public class DetachedDataFileContainerSigningServiceTest {
         mobileSignHashResponse.setChallengeID("2331");
         mobileSignHashResponse.setSesscode("3223423423424");
         return mobileSignHashResponse;
+    }
+
+    private GetMobileCertificateResponse createMobileCertificateResponse() throws IOException {
+        StringWriter writer = new StringWriter();
+        GetMobileCertificateResponse mobileCertificateResponse = new GetMobileCertificateResponse();
+        try(PemWriter pemWriter = new PemWriter(writer)) {
+            pemWriter.writeObject(new JcaMiscPEMGenerator(pkcs12Esteid2018SignatureToken.getCertificate(), null));
+            pemWriter.flush();
+            String certInPemFormat = writer.toString();
+            mobileCertificateResponse.setSignCertData(certInPemFormat);
+        }
+        return mobileCertificateResponse;
     }
 }

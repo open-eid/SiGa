@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.UUID;
 
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.CONTAINER_ID;
 import static java.time.Instant.now;
 import static org.slf4j.MarkerFactory.getMarker;
 
@@ -48,7 +49,7 @@ public class SessionConfiguration {
                     .timestamp(now().toEpochMilli())
                     .resultType(SigaEvent.EventResultType.SUCCESS)
                     .build();
-            sigaEvent.addEventParameter("container_id", bob.getField("sessionId"));
+            sigaEvent.addEventParameter(CONTAINER_ID, bob.getField("sessionId"));
             log.info(getMarker("SIGA_EVENT"), sigaEvent.toString());
             return true;
         }, null, EventType.EVT_CACHE_OBJECT_EXPIRED);
