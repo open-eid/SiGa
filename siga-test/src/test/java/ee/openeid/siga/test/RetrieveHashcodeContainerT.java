@@ -88,7 +88,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     @Test
     public void retrieveHashcodeContainerBeforeFinishingMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
         Response response = getHashcodeContainer(flow);
 
@@ -99,7 +99,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     @Test
     public void retrieveHashcodeContainerDuringMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         getHashcodeMidSigningInSession(flow);
 
         Response response = getHashcodeContainer(flow);
@@ -111,7 +111,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     @Test
     public void retrieveHashcodeContainerAfterMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
 
         Response response = getHashcodeContainer(flow);

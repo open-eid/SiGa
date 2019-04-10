@@ -22,7 +22,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithMidSuccessfully() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -36,7 +36,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithLtMidSuccessfully() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018865", "+37060000666"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018865", "+37060000666", "LT"));
         pollForMidSigning(flow);
 
         Response response = getValidationReportForContainerInSession(flow);
@@ -50,7 +50,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     public void mobileIdNotActivated() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019928", "+37200000366"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019928", "+37200000366", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -61,7 +61,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     public void mobileIdCertificateRevoked() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019939", "+37200000266"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019939", "+37200000266", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -71,7 +71,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdSendingFailed() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019947", "+37207110066"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019947", "+37207110066", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -83,7 +83,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdUserCancel() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019950", "+37201100266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019950", "+37201100266", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -95,7 +95,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdSignatureNotValid() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019961", "+37200000666"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019961", "+37200000666", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -107,7 +107,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdSimError() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019972", "+37201200266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019972", "+37201200266", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -119,7 +119,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdPhoneNotInNetwork() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019983", "+37213100266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019983", "+37213100266", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -131,7 +131,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdUserTimeout() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018908", "+37066000266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018908", "+37066000266", "LT"));
 
         Response response = pollForMidSigning(flow);
 
@@ -143,9 +143,9 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdUserCancelAndRetries() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019950", "+37201100266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019950", "+37201100266", "LT"));
         pollForMidSigning(flow);
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
 
         Response response = getValidationReportForContainerInSession(flow);
@@ -159,9 +159,9 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void mobileIdUserTimeoutsAndRetries() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018908", "+37066000266"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("50001018908", "+37066000266", "LT"));
         pollForMidSigning(flow);
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
 
         Response response = getValidationReportForContainerInSession(flow);
@@ -175,7 +175,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void missingPersonIdentifier() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("", "+37200000766"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("", "+37200000766", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -186,7 +186,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void invalidPersonIdentifierFormat() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("P:NO-23a.31,23", "+37200000766"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("P:NO-23a.31,23", "+37200000766", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -196,7 +196,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void missingPhoneNumber() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", ""));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -207,7 +207,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void invalidPhoneNumberFormat() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "-/ssasa"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "-/ssasa", "LT"));
 
         response.then()
                 .statusCode(400)
@@ -276,12 +276,13 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-    @Ignore //TODO: SIGARIA-62
+  //  @Ignore //TODO: SIGARIA-62
     @Test
     public void maximumDataInRequest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", "CEO"));
-
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", null));
+        pollForMidSigning(flow);
+        getHashcodeContainer(flow);
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
@@ -290,7 +291,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void midStatusRequestForOtherUserContainer() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);

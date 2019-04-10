@@ -84,8 +84,8 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeMidSigningRequestWithDefault(String personIdentifier, String phoneNo) throws JSONException {
-        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", "LT", "something", null, null, null, null, null);
+    public static JSONObject hashcodeMidSigningRequestWithDefault(String personIdentifier, String phoneNo, String signatureProfile) throws JSONException {
+        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", signatureProfile, "something", null, null, null, null, null);
     }
 
     public static JSONObject hashcodeMidSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {

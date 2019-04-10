@@ -29,7 +29,7 @@ public class HashcodeContainerSystemT extends TestBase {
     @Test
     public void createNewHashcodeContainerAndSignWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766"));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
         Response containerResponse = getHashcodeContainer(flow);
 
