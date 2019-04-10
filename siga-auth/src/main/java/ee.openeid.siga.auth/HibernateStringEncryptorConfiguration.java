@@ -18,20 +18,12 @@ public class HibernateStringEncryptorConfiguration {
     private SecurityConfigurationProperties securityConfigurationProperties;
 
     @Bean
-    public HibernatePBEStringEncryptor hibernatePBEStringEncryptor(PBEStringEncryptor stringEncryptor) {
+    public HibernatePBEStringEncryptor hibernatePBEStringEncryptor() {
+        requireNonNull(securityConfigurationProperties.getJasypt(), "Jasypt encryption configuration properties not set!");
         HibernatePBEStringEncryptor hibernateEncryptor = new HibernatePBEStringEncryptor();
         hibernateEncryptor.setRegisteredName(HIBERNATE_STRING_ENCRYPTOR);
-        hibernateEncryptor.setEncryptor(stringEncryptor);
+        hibernateEncryptor.setPassword(securityConfigurationProperties.getJasypt().getEncryptionKey());
+        hibernateEncryptor.setAlgorithm(securityConfigurationProperties.getJasypt().getEncryptionAlgo());
         return hibernateEncryptor;
-    }
-
-    @Bean
-    public PBEStringEncryptor pbeStringEncryptor() {
-        requireNonNull(securityConfigurationProperties.getJasypt(), "Jasypt encryption configuration properties not set!");
-        PooledPBEStringEncryptor stringEncryptor = new PooledPBEStringEncryptor();
-        stringEncryptor.setPassword(securityConfigurationProperties.getJasypt().getEncryptionKey());
-        stringEncryptor.setAlgorithm(securityConfigurationProperties.getJasypt().getEncryptionAlgo());
-        stringEncryptor.setPoolSize(4);
-        return stringEncryptor;
     }
 }
