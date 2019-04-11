@@ -7,7 +7,6 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,16 +23,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.time.Instant;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.AUTHENTICATION_ERROR;
 import static java.lang.Long.parseLong;
-import static java.time.Instant.*;
+import static java.time.Instant.ofEpochMilli;
+import static java.time.Instant.ofEpochSecond;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.io.IOUtils.toByteArray;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private final long TOKEN_EXPIRATION_IN_SECONDS;
@@ -43,9 +43,9 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
         requireNonNull(securityConfigurationProperties.getHmac(), "siga.security.hmac properties not set!");
-        TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration();
-        TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew();
-        this.sigaEventLogger = sigaEventLogger;
+        requireNonNull(TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration());
+        requireNonNull(TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew());
+        requireNonNull(this.sigaEventLogger = sigaEventLogger);
         setAuthenticationSuccessHandler(noRedirectAuthenticationSuccessHandler());
     }
 
@@ -55,22 +55,10 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
         final String timestamp = ofNullable(request.getHeader(X_AUTHORIZATION_TIMESTAMP.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Timestamp header"));
         final String serviceUuid = ofNullable(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-ServiceUuid header"));
         final String signature = ofNullable(request.getHeader(X_AUTHORIZATION_SIGNATURE.getValue())).orElseThrow(() -> new HmacAuthenticationException("Missing X-Authorization-Signature header"));
+
         checkIfTokenIsExpired(timestamp);
-
-        String uri = request.getRequestURI();
-        if (request.getQueryString() != null) {
-            uri += "?" + request.getQueryString();
-        }
-
-        String hmacAlgo = request.getHeader(X_AUTHORIZATION_HMAC_ALGORITHM.getValue());
-        if (hmacAlgo == null) {
-            hmacAlgo = HmacAlgorithm.HMAC_SHA_256.getValue();
-        } else {
-            if (HmacAlgorithm.fromString(hmacAlgo) == null) {
-                throw new HmacAuthenticationException("Invalid HMAC algorithm");
-            }
-        }
-
+        String uri = getRequestUri(request);
+        String hmacAlgo = getHmacAlgo(request);
         byte[] payload = toByteArray(request.getInputStream());
 
         HmacSignature token = HmacSignature.builder()
@@ -82,17 +70,35 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
                 .payload(payload)
                 .signature(signature)
                 .build();
-
         return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(serviceUuid, token, emptyList()));
+    }
+
+    private String getHmacAlgo(HttpServletRequest request) {
+        String hmacAlgo = request.getHeader(X_AUTHORIZATION_HMAC_ALGORITHM.getValue());
+        if (hmacAlgo == null) {
+            hmacAlgo = HmacAlgorithm.HMAC_SHA_256.getValue();
+        } else {
+            if (HmacAlgorithm.fromString(hmacAlgo) == null) {
+                throw new HmacAuthenticationException("Invalid HMAC algorithm");
+            }
+        }
+        return hmacAlgo;
+    }
+
+    private String getRequestUri(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (request.getQueryString() != null) {
+            uri += "?" + request.getQueryString();
+        }
+        return uri;
     }
 
     private void checkIfTokenIsExpired(String timestamp) {
         if (TOKEN_EXPIRATION_IN_SECONDS != -1) {
-            if (StringUtils.isBlank(timestamp)) {
-                throw new HmacAuthenticationException("Invalid X-Authorization-Timestamp");
+            if (timestamp.length() != 10 || !isNumeric(timestamp)) {
+                throw new HmacAuthenticationException("Invalid X-Authorization-Timestamp format");
             }
-            Instant validUntil = ofEpochSecond(parseLong(timestamp)).plusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW);
-            if (now().isAfter(validUntil)) {
+            if (!HmacSignature.isTimestampValid(ofEpochSecond(parseLong(timestamp)), TOKEN_EXPIRATION_IN_SECONDS, TOKEN_CLOCK_SKEW)) {
                 throw new HmacAuthenticationException("HMAC token is expired");
             }
         }

@@ -8,12 +8,15 @@ import org.apache.commons.codec.binary.Hex;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 
+import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.Instant.now;
+import static java.time.Instant.ofEpochSecond;
 import static java.util.Objects.requireNonNull;
 
 @Getter
@@ -33,10 +36,24 @@ public class HmacSignature {
     private final String timestamp;
     private final byte[] payload;
 
-    public boolean isValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException, InvalidKeyException {
+    public static boolean isTimestampValid(Instant hmacTimestamp, long expirationInSeconds, long clockSkew) {
+        return isTimestampValid(now(), hmacTimestamp, expirationInSeconds, clockSkew);
+    }
+
+    public static boolean isTimestampValid(Instant serverTimestamp, Instant hmacTimestamp, long expirationInSeconds, long clockSkew) {
+        boolean cannotBeInFuture = hmacTimestamp.toEpochMilli() <= serverTimestamp.plusSeconds(clockSkew).toEpochMilli();
+        boolean cannotBeExpired = hmacTimestamp.plusSeconds(expirationInSeconds).toEpochMilli() >= serverTimestamp.minusSeconds(clockSkew).toEpochMilli();
+        return (cannotBeInFuture && cannotBeExpired);
+    }
+
+    public boolean isSignatureValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException, InvalidKeyException {
         requireNonNull(signingSecret, "signingSecret");
         final byte[] calculatedSignature = getSignature(signingSecret);
         return MessageDigest.isEqual(calculatedSignature, Hex.decodeHex(signature));
+    }
+
+    public boolean isTimestampValid(long expirationInSeconds, long clockSkew) {
+        return HmacSignature.isTimestampValid(ofEpochSecond(parseLong(timestamp)), expirationInSeconds, clockSkew);
     }
 
     public String getSignature(String signingSecret) throws NoSuchAlgorithmException, InvalidKeyException {
