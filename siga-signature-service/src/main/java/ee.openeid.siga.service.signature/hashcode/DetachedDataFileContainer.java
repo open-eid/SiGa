@@ -2,13 +2,14 @@ package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.exception.InvalidRequestException;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
 import eu.europa.esig.dss.MimeType;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,11 +45,54 @@ public class DetachedDataFileContainer {
             }
             zipStream.close();
             if (!isValidZip) {
-                throw new InvalidRequestException("Invalid container");
+                throw new InvalidContainerException("Invalid hashcode container");
             }
+            validateDataFiles();
         } catch (IOException e) {
-            throw new InvalidRequestException("Unable to open hashcode container");
+            throw new InvalidContainerException("Unable to open hashcode container");
         }
+    }
+
+    public List<SignatureWrapper> getSignatures() {
+        return signatures;
+    }
+
+    public List<HashcodeDataFile> getDataFiles() {
+        return dataFiles;
+    }
+
+    public void addSignature(SignatureWrapper signature) {
+        signatures.add(signature);
+    }
+
+    public void addDataFile(HashcodeDataFile dataFile) {
+        if (signatures.size() > 0)
+            throw new SignatureExistsException("Unable to add data file when signature exists");
+        dataFiles.add(dataFile);
+    }
+
+    private void validateDataFiles() {
+        if (dataFiles.isEmpty()) {
+            throw new InvalidContainerException("Container must have data files");
+        }
+        dataFiles.forEach(dataFile -> {
+            if (StringUtils.isBlank(dataFile.getFileHashSha256())) {
+                throw new InvalidContainerException("Hashcode container is missing SHA256 hash");
+            }
+            if (StringUtils.isBlank(dataFile.getFileHashSha512())) {
+                throw new InvalidContainerException("Hashcode container is missing SHA512 hash");
+            }
+            if (!isValidFileName(dataFile.getFileName())) {
+                throw new InvalidContainerException("Hashcode container contains invalid file name");
+            }
+        });
+    }
+
+    private boolean isValidFileName(String fileName) {
+        if (fileName.contains("/")) {
+            return false;
+        }
+        return !fileName.contains("\\");
     }
 
     private void createHashcodeContainer(OutputStream outputStream) {
@@ -126,21 +170,4 @@ public class DetachedDataFileContainer {
         }).collect(Collectors.toList());
     }
 
-    public List<SignatureWrapper> getSignatures() {
-        return signatures;
-    }
-
-    public List<HashcodeDataFile> getDataFiles() {
-        return dataFiles;
-    }
-
-    public void addSignature(SignatureWrapper signature) {
-        signatures.add(signature);
-    }
-
-    public void addDataFile(HashcodeDataFile dataFile) {
-        if (signatures.size() > 0)
-            throw new SignatureExistsException("Unable to add data file when signature exists");
-        dataFiles.add(dataFile);
-    }
 }

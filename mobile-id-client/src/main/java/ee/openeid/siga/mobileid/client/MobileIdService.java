@@ -27,22 +27,6 @@ public class MobileIdService extends WebServiceGatewaySupport {
         this.serviceUrl = serviceUrl;
     }
 
-    @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_CERTIFICATE, logParameters = {@Param(name = "person_identifier", index = 0), @Param(name = "country", index = 1)}, logReturnObject = {@XPath(name = "sign_cert_status", xpath = "signCertStatus"), @XPath(name = "dds_response_code", xpath = "authCertStatus")})
-    public GetMobileCertByIDCodeResponse getMobileCertificate(String idCode, String country) {
-        GetMobileCertByIDCodeRequest request = new GetMobileCertByIDCodeRequest();
-        request.setIDCode(idCode);
-        request.setCountry(country);
-        request.setReturnCertData(ReturnCertDataType.SIGN);
-        try {
-            return (GetMobileCertByIDCodeResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
-        } catch (SoapFaultClientException e) {
-            throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
-        } catch (Exception e) {
-            log.error("Invalid DigiDocService response:", e);
-            throw new ClientException("Unable to receive valid response from DigiDocService");
-        }
-    }
-
     @SigaEventLog(eventName = SigaEventName.DDS_MOBILE_SIGN_HASH, logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})}, logReturnObject = {@XPath(name = "dds_session_id", xpath = "sesscode"), @XPath(name = "dds_response_code", xpath = "status")})
     public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();

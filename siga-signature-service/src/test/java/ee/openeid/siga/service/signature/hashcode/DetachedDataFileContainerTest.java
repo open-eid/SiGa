@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature.hashcode;
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.test.DetachedDataFileContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -65,6 +66,29 @@ public class DetachedDataFileContainerTest {
         hashcodeContainer.addDataFile(hashcodeDataFile);
     }
 
+    @Test(expected = InvalidContainerException.class)
+    public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        try (OutputStream outputStream = new ByteArrayOutputStream()) {
+            hashcodeContainer.save(outputStream);
+            DetachedDataFileContainer newHashcodeContainer = new DetachedDataFileContainer();
+            ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) outputStream;
+            newHashcodeContainer.open(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        }
+    }
+
+    @Test(expected = InvalidContainerException.class)
+    public void hashcodeContainerMissingSha512() throws IOException, URISyntaxException {
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeMissingSha512File.asice"));
+    }
+
+    @Test(expected = InvalidContainerException.class)
+    public void directoryNotAllowedForFileName() throws IOException, URISyntaxException {
+        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeShaFileIsDirectory.asice"));
+    }
+
     @Test
     public void validHashcodeContainerAddedNewData() throws IOException, URISyntaxException {
         DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
@@ -76,6 +100,7 @@ public class DetachedDataFileContainerTest {
         HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
         hashcodeDataFile.setFileName("randomFile.txt");
         hashcodeDataFile.setFileHashSha256("asdasd=");
+        hashcodeDataFile.setFileHashSha512("oasdokasdoask=");
         hashcodeDataFile.setFileSize(10);
         hashcodeContainer.addDataFile(hashcodeDataFile);
 
