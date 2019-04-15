@@ -57,7 +57,7 @@ public class TestData {
 
     // Error codes
     public static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND_EXCEPTION";
-    public static final String INVALID_REQUEST = "INVALID_REQUEST_EXCEPTION";
+    public static final String INVALID_REQUEST = "REQUEST_VALIDATION_EXCEPTION";
     public static final String CLIENT_EXCEPTION = "CLIENT_EXCEPTION";
     public static final String SENDING_ERROR = "SENDING_ERROR";
     public static final String USER_CANCEL = "USER_CANCEL";

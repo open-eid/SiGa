@@ -1,7 +1,7 @@
 package ee.openeid.siga.validation;
 
 import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.exception.InvalidRequestException;
+import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.lang3.StringUtils;
@@ -49,21 +49,21 @@ public class RequestValidatorTest {
 
     @Test
     public void containerContentEmpty() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("File content is invalid");
         RequestValidator.validateFileContent("");
     }
 
     @Test
     public void containerContentNotBase64() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("File content is invalid");
         RequestValidator.validateFileContent("?&%");
     }
 
     @Test
     public void createContainer_NoDataFiles() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Data files are needed");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
@@ -72,7 +72,7 @@ public class RequestValidatorTest {
 
     @Test
     public void createContainer_DataFileContentIsEmpty() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Data file name is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
@@ -82,7 +82,7 @@ public class RequestValidatorTest {
 
     @Test
     public void createContainer_DataFileHashIsNotBase64() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("File hash is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
@@ -91,7 +91,7 @@ public class RequestValidatorTest {
 
     @Test
     public void createContainer_DataFileHashTooLong() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("File hash is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
@@ -100,21 +100,21 @@ public class RequestValidatorTest {
 
     @Test
     public void containerIdIsNull() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Container Id is invalid");
         RequestValidator.validateContainerId(null);
     }
 
     @Test
     public void containerIdIsEmpty() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Container Id is invalid");
         RequestValidator.validateContainerId("");
     }
 
     @Test
     public void containerIdIsTooLong() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Container Id is invalid");
         RequestValidator.validateContainerId(StringUtils.repeat("a", 37));
     }
@@ -126,35 +126,35 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidSigningCertificate() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signing certificate");
         RequestValidator.validateRemoteSigning("+=?!%", "LT");
     }
 
     @Test
     public void emptySigningCertificate() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signing certificate");
         RequestValidator.validateRemoteSigning("", "LT");
     }
 
     @Test
     public void oldSignatureProfile() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
         RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "B_BES");
     }
 
     @Test
     public void invalidSignatureProfile() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
         RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "TL");
     }
 
     @Test
     public void emptySignatureProfile() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
         RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "");
     }
@@ -166,14 +166,14 @@ public class RequestValidatorTest {
 
     @Test
     public void emptySignatureValue() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature value");
         RequestValidator.validateSignatureValue("");
     }
 
     @Test
     public void invalidSignatureValue() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature value");
         RequestValidator.validateSignatureValue("+=?!%");
     }
@@ -185,7 +185,7 @@ public class RequestValidatorTest {
 
     @Test
     public void nullLanguage() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage(null);
@@ -194,7 +194,7 @@ public class RequestValidatorTest {
 
     @Test
     public void emptyLanguage() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("");
@@ -203,7 +203,7 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidLanguage() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("ESTO");
@@ -212,7 +212,7 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidMessageToDisplay() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id message to display");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 41));
@@ -228,7 +228,7 @@ public class RequestValidatorTest {
 
     @Test
     public void nullPhoneNo() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(null);
@@ -237,7 +237,7 @@ public class RequestValidatorTest {
 
     @Test
     public void emptyPhoneNo() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("");
@@ -246,7 +246,7 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidPhoneNo() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(StringUtils.repeat("a", 21));
@@ -255,7 +255,7 @@ public class RequestValidatorTest {
 
     @Test
     public void nullPersonIdentifier() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(null);
@@ -264,7 +264,7 @@ public class RequestValidatorTest {
 
     @Test
     public void emptyPersonIdentifier() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier("");
@@ -273,7 +273,7 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidPersonIdentifier() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
@@ -282,7 +282,7 @@ public class RequestValidatorTest {
 
     @Test
     public void nullCountry() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid country of origin");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setCountry(null);
@@ -291,7 +291,7 @@ public class RequestValidatorTest {
 
     @Test
     public void emptyCountry() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid country of origin");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setCountry("");
@@ -300,7 +300,7 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidCountry() {
-        exceptionRule.expect(InvalidRequestException.class);
+        exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid country of origin");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setCountry("EST");

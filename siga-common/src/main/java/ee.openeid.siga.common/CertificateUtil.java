@@ -1,6 +1,6 @@
 package ee.openeid.siga.common;
 
-import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
@@ -13,7 +13,7 @@ public class CertificateUtil {
             CertificateFactory cf = CertificateFactory.getInstance("X509");
             return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificate));
         } catch (Exception e) {
-            throw new TechnicalException("Invalid signing certificate");
+            throw new InvalidCertificateException("Invalid signing certificate");
         }
     }
 }

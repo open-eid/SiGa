@@ -32,7 +32,6 @@ public class DigiDocService extends WebServiceGatewaySupport {
     public GetMobileCertificateResponse getMobileCertificate(String idCode, String country, String phoneNr) {
         GetMobileCertificate request = new GetMobileCertificate();
         request.setIDCode(idCode);
-        request.setCountry(country);
         request.setPhoneNo(phoneNr);
         request.setReturnCertData(ReturnCertDataType.SIGN);
         try {
