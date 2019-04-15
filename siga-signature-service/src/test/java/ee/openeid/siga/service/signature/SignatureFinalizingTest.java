@@ -78,13 +78,14 @@ public class SignatureFinalizingTest {
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
 
+    @Ignore
     @Test
     public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() {
         configuration.setPreferAiaOcsp(false);
         String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM));
         sigaEventLogger.logEvents();
         assertEquals("OK", result);
-        assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
+        assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
 
     @Ignore
