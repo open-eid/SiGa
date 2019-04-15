@@ -276,16 +276,17 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-  //  @Ignore //TODO: SIGARIA-62
     @Test
     public void maximumDataInRequest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", null));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", null));
         pollForMidSigning(flow);
-        getHashcodeContainer(flow);
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
     @Test

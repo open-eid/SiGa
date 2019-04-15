@@ -60,21 +60,11 @@ public class RequestBuilder {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
-        if (city != null) {
-            request.put("city", city);
+
+        if (city != null || stateOrProvince != null || postalCode != null || country != null || roles != null) {
+            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country, roles));
         }
-        if (stateOrProvince != null) {
-            request.put("stateOrProvince", stateOrProvince);
-        }
-        if (postalCode != null) {
-            request.put("postalCode", postalCode);
-        }
-        if (country != null) {
-            request.put("countryName", country);
-        }
-        if (roles != null) {
-            request.put("roles", roles);
-        }
+
         return request;
     }
 
@@ -99,22 +89,31 @@ public class RequestBuilder {
         if (messageToDisplay != null) {
             request.put("messageToDisplay", messageToDisplay);
         }
-        if (city != null) {
-            request.put("city", city);
-        }
-        if (stateOrProvince != null) {
-            request.put("stateOrProvince", stateOrProvince);
-        }
-        if (postalCode != null) {
-            request.put("postalCode", postalCode);
-        }
-        if (country != null) {
-            request.put("countryName", country);
-        }
-        if (roles != null) {
-            request.put("roles", roles);
+
+        if (city != null || stateOrProvince != null || postalCode != null || country != null || roles != null) {
+            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country, roles));
         }
         return request;
+    }
+
+    public static JSONObject buildSignatureProductionPlace(String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+        JSONObject signatureProductionPlace = new JSONObject();
+        if (city != null) {
+            signatureProductionPlace.put("city", city);
+        }
+        if (stateOrProvince != null) {
+            signatureProductionPlace.put("stateOrProvince", stateOrProvince);
+        }
+        if (postalCode != null) {
+            signatureProductionPlace.put("postalCode", postalCode);
+        }
+        if (country != null) {
+            signatureProductionPlace.put("country", country);
+        }
+        if (roles != null) {
+            signatureProductionPlace.put("roles", roles);
+        }
+        return signatureProductionPlace;
     }
 
     public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
