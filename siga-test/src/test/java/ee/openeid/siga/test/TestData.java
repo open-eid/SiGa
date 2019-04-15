@@ -65,4 +65,5 @@ public class TestData {
     public static final String SIM_ERROR = "SIM_ERROR";
     public static final String PHONE_ABSENT = "PHONE_ABSENT";
     public static final String EXPIRED_TRANSACTION = "EXPIRED_TRANSACTION";
+    public static final String INVALID_CONTAINER = "INVALID_CONTAINER_EXCEPTION";
 }

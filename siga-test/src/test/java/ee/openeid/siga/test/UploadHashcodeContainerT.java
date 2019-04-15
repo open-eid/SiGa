@@ -20,6 +20,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UploadHashcodeContainerT extends TestBase {
@@ -32,90 +33,113 @@ public class UploadHashcodeContainerT extends TestBase {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
-    @Test
+    @Test //TODO: More elaborate rules should be checked on container ID
     public void uploadHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID, notNullValue());
     }
 
-    @Test //TODO: At what point the container structure should be validated?
+    @Test
     public void uploadInvalidHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha256File.asice"));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_CONTAINER));
     }
 
     @Test
     public void uploadHashcodeContainerWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID, notNullValue());
     }
 
     @Test
     public void uploadHashcodeContainerEmptyBody() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONObject request = new JSONObject();
         Response response = postUploadHashcodeContainer(flow, request);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test
     public void uploadHashcodeContainerEmptyContainerField() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONObject request = new JSONObject();
         request.put("container", "");
+
         Response response = postUploadHashcodeContainer(flow, request);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test
     public void uploadHashcodeContainerNotBase64Container() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONObject request = new JSONObject();
         request.put("container", "-32/432+*");
+
         Response response = postUploadHashcodeContainer(flow, request);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test
     public void uploadHashcodeContainerNotValidContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONObject request = new JSONObject();
         request.put("container", Base64.encodeBase64String("random string".getBytes()));
+
         Response response = postUploadHashcodeContainer(flow, request);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_CONTAINER));
     }
 
     @Ignore //SIGARIA-50
     @Test
     public void deleteToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(UPLOAD + HASHCODE_CONTAINERS, flow);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Ignore //SIGARIA-50
     @Test
     public void putToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString());
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Ignore //SIGARIA-50
     @Test
     public void getToUploadHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(UPLOAD + HASHCODE_CONTAINERS, flow);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Ignore //SIGARIA-50
     @Test
     public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = given()
+        given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
@@ -126,15 +150,13 @@ public class UploadHashcodeContainerT extends TestBase {
                 .head(createUrl(UPLOAD + HASHCODE_CONTAINERS))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-    @Test
+    @Test //TODO: Flaky test due to Allow method order change
     public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = given()
+        given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
@@ -145,16 +167,14 @@ public class UploadHashcodeContainerT extends TestBase {
                 .options(createUrl(UPLOAD + HASHCODE_CONTAINERS))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getHeader("Allow"), equalTo("POST,OPTIONS"));
+                .statusCode(200)
+                .header("Allow", equalTo("POST,OPTIONS"));
     }
 
     @Ignore //SIGARIA-50
     @Test
     public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        Response response = given()
+        given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString(), "PATCH", createUrlToSign(UPLOAD + HASHCODE_CONTAINERS), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
@@ -166,9 +186,7 @@ public class UploadHashcodeContainerT extends TestBase {
                 .patch(createUrl(UPLOAD + HASHCODE_CONTAINERS))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 }
