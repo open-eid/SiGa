@@ -6,6 +6,7 @@ import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.exception.InvalidLanguageException;
 import ee.openeid.siga.mobileid.model.mid.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -31,7 +32,7 @@ public class MobileIdService extends WebServiceGatewaySupport {
     public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();
         request.setServiceName(mobileIdInformation.getRelyingPartyName());
-        request.setLanguage(LanguageType.fromValue(mobileIdInformation.getLanguage()));
+        request.setLanguage(getLanguage(mobileIdInformation.getLanguage()));
         request.setIDCode(mobileIdInformation.getPersonIdentifier());
         request.setPhoneNo(mobileIdInformation.getPhoneNo());
         request.setHash(hash);
@@ -60,6 +61,15 @@ public class MobileIdService extends WebServiceGatewaySupport {
             log.error("Invalid DigiDocService response:", e);
             throw new ClientException("Unable to receive valid response from DigiDocService");
         }
+    }
+
+    private LanguageType getLanguage(String language) {
+        for (LanguageType languageType : LanguageType.values()) {
+            if (languageType.value().equals(language)) {
+                return languageType;
+            }
+        }
+        throw new InvalidLanguageException("Invalid language");
     }
 
 }

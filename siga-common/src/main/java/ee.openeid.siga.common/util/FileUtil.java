@@ -1,4 +1,4 @@
-package ee.openeid.siga.common;
+package ee.openeid.siga.common.util;
 
 public class FileUtil {
 

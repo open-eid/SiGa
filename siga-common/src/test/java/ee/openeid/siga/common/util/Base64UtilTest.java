@@ -1,4 +1,4 @@
-package ee.openeid.siga.common;
+package ee.openeid.siga.common.util;
 
 import org.junit.Assert;
 import org.junit.Test;

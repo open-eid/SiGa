@@ -1,6 +1,6 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.common.CertificateUtil;
+import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;

@@ -1,9 +1,10 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.Base64Util;
-import ee.openeid.siga.common.FileUtil;
+import ee.openeid.siga.common.util.Base64Util;
+import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.RequestValidationException;
+import ee.openeid.siga.common.util.PhoneNumberUtil;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +118,7 @@ public class RequestValidator {
     }
 
     private static void validatePhoneNo(String phoneNo) {
-        if (StringUtils.isBlank(phoneNo) || phoneNo.length() > 20)
+        if (StringUtils.isBlank(phoneNo) || !PhoneNumberUtil.isPhoneNumberValid(phoneNo))
             throw new RequestValidationException("Invalid phone No.");
     }
 

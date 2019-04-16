@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static ee.openeid.siga.common.CertificateUtil.createX509Certificate;
+import static ee.openeid.siga.common.util.CertificateUtil.createX509Certificate;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;

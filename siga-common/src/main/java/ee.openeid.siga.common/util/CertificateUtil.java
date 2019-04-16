@@ -1,4 +1,4 @@
-package ee.openeid.siga.common;
+package ee.openeid.siga.common.util;
 
 import ee.openeid.siga.common.exception.InvalidCertificateException;
 
