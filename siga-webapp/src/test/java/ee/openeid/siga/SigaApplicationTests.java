@@ -90,6 +90,9 @@ public class SigaApplicationTests {
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatureList(containerId);
+        List<Signature> signatures1 = getSignatureList(containerId);
+        List<Signature> signatures2 = getSignatureList(containerId);
+        List<Signature> signatures3 = getSignatureList(containerId);
         Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());

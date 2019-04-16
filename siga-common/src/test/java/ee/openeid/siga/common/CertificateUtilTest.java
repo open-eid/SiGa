@@ -1,7 +1,6 @@
-package ee.openeid.siga.service.common;
+package ee.openeid.siga.common;
 
-import ee.openeid.siga.common.CertificateUtil;
-import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class CertificateUtilTest {
         Assert.assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 
-    @Test(expected = TechnicalException.class)
+    @Test(expected = InvalidCertificateException.class)
     public void createInvalidCertificate() {
         String invalidCertificate = CERTIFICATE.replace("a", "b");
         CertificateUtil.createX509Certificate(Base64.getDecoder().decode(invalidCertificate.getBytes()));
