@@ -22,6 +22,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 
 public class RemoteSigningHachcodeContainerT extends TestBase {
 
@@ -69,7 +70,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         assertThat(response.getBody().path(DIGEST_ALGO), equalTo("SHA512"));
     }
 
-    @Ignore //TODO: SIGARIA-52
     @Test
     public void startRemoteSigningHashcodeContainerWithRoleReturnsDigestToSign() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
@@ -77,7 +77,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null,null, null, null));
 
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(DATA_TO_SIGN).toString().length(), equalTo(1712));
+        assertThat(response.getBody().path(DATA_TO_SIGN).toString().length(), Matchers.greaterThanOrEqualTo(1500));
         assertThat(response.getBody().path(DIGEST_ALGO), equalTo("SHA512"));
     }
 

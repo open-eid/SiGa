@@ -279,7 +279,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     @Test
     public void maximumDataInRequest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", null));
+        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequest("60001019906", "+37200000766", "EE","EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", "I hava a role"));
         pollForMidSigning(flow);
 
         Response validationResponse = getValidationReportForContainerInSession(flow);

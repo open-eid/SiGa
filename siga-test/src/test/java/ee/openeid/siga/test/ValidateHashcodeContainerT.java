@@ -68,4 +68,17 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
     }
 
+    @Test
+    public void createHashcodeContainerAndValidateContainerStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+        Response containerResponse = getHashcodeContainer(flow);
+
+        Response validationResponse = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(containerResponse.getBody().path("container")));
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+    }
+
 }

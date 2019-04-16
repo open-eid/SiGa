@@ -61,8 +61,14 @@ public class RequestBuilder {
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
 
-        if (city != null || stateOrProvince != null || postalCode != null || country != null || roles != null) {
-            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country, roles));
+        if (roles != null) {
+            JSONArray rolesArray = new JSONArray();
+            rolesArray.put(roles);
+            request.put("roles", rolesArray);
+        }
+
+        if (city != null || stateOrProvince != null || postalCode != null || country != null) {
+            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country));
         }
 
         return request;
@@ -90,13 +96,19 @@ public class RequestBuilder {
             request.put("messageToDisplay", messageToDisplay);
         }
 
-        if (city != null || stateOrProvince != null || postalCode != null || country != null || roles != null) {
-            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country, roles));
+        if (roles != null) {
+            JSONArray rolesArray = new JSONArray();
+            rolesArray.put(roles);
+            request.put("roles", rolesArray);
+        }
+
+        if (city != null || stateOrProvince != null || postalCode != null || country != null) {
+            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country));
         }
         return request;
     }
 
-    public static JSONObject buildSignatureProductionPlace(String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject buildSignatureProductionPlace(String city, String stateOrProvince, String postalCode, String country) throws JSONException {
         JSONObject signatureProductionPlace = new JSONObject();
         if (city != null) {
             signatureProductionPlace.put("city", city);
@@ -109,9 +121,6 @@ public class RequestBuilder {
         }
         if (country != null) {
             signatureProductionPlace.put("country", country);
-        }
-        if (roles != null) {
-            signatureProductionPlace.put("roles", roles);
         }
         return signatureProductionPlace;
     }
