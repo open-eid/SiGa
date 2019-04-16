@@ -9,6 +9,7 @@ import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
@@ -164,7 +165,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         } catch (TechnicalException e) {
             log.error("Unable to finalize signature", e);
             logExceptionEvent(startEvent, e);
-            throw new ee.openeid.siga.common.exception.TechnicalException("Unable to finalize signature");
+            throw new SignatureCreationException("Unable to finalize signature");
         }
     }
 

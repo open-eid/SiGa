@@ -2,6 +2,7 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
@@ -138,12 +139,12 @@ public class SignatureFinalizingTest {
         }
     }
 
-    @Test(expected = TechnicalException.class)
+    @Test(expected = SignatureCreationException.class)
     public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() {
         when(configuration.getTspSource()).thenReturn("http://demo.invalid.url.sk.ee/tsa");
         try {
             signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
-        } catch (TechnicalException e) {
+        } catch (SignatureCreationException e) {
             assertThat(e.getMessage(), containsString("Unable to finalize signature"));
             sigaEventLogger.logEvents();
             SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();

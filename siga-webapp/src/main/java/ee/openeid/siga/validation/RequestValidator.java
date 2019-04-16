@@ -1,9 +1,10 @@
 package ee.openeid.siga.validation;
 
+import ee.openeid.siga.common.Base64Util;
+import ee.openeid.siga.common.FileUtil;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
@@ -26,13 +27,13 @@ public class RequestValidator {
     }
 
     public static void validateFileContent(String content) {
-        if (StringUtils.isBlank(content) || !isBase64StringEncoded(content)) {
+        if (StringUtils.isBlank(content) || isNotBase64StringEncoded(content)) {
             throw new RequestValidationException("File content is invalid");
         }
     }
 
     private static void validateFileName(String fileName, String errorMessage) {
-        if (StringUtils.isBlank(fileName) || fileName.length() < 1 || fileName.length() > 260) {
+        if (StringUtils.isBlank(fileName) || !FileUtil.isFilenameValid(fileName) || fileName.length() < 1 || fileName.length() > 260) {
             throw new RequestValidationException(errorMessage);
         }
     }
@@ -40,18 +41,32 @@ public class RequestValidator {
     private static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
         validateFileName(dataFile.getFileName(), "Data file name is invalid");
         validateFileSize(dataFile.getFileSize());
-        validateHash(dataFile.getFileHashSha256());
-        validateHash(dataFile.getFileHashSha512());
+        validateHashSha256(dataFile.getFileHashSha256());
+        validateHashSha512(dataFile.getFileHashSha512());
+    }
+
+    private static void validateHashSha256(String hash) {
+        validateHash(hash);
+        if (hash.length() != 44) {
+            throw new RequestValidationException("File hash SHA256 length is invalid");
+        }
+    }
+
+    private static void validateHashSha512(String hash) {
+        validateHash(hash);
+        if (hash.length() != 88) {
+            throw new RequestValidationException("File hash SHA512 length is invalid");
+        }
     }
 
     private static void validateHash(String hash) {
-        if (StringUtils.isBlank(hash) || !isBase64StringEncoded(hash) || hash.length() > 100) {
+        if (StringUtils.isBlank(hash) || isNotBase64StringEncoded(hash)) {
             throw new RequestValidationException("File hash is invalid");
         }
     }
 
-    private static boolean isBase64StringEncoded(String base64String) {
-        return Base64.isBase64(base64String.getBytes());
+    private static boolean isNotBase64StringEncoded(String base64String) {
+        return !Base64Util.isValidBase64(base64String);
     }
 
     private static void validateFileSize(Integer fileSize) {
@@ -61,7 +76,7 @@ public class RequestValidator {
     }
 
     public static void validateRemoteSigning(String signingCertificate, String signatureProfile) {
-        if (StringUtils.isBlank(signingCertificate) || !isBase64StringEncoded(signingCertificate)) {
+        if (StringUtils.isBlank(signingCertificate) || isNotBase64StringEncoded(signingCertificate)) {
             throw new RequestValidationException("Invalid signing certificate");
         }
         validateSignatureProfile(signatureProfile);
@@ -75,7 +90,7 @@ public class RequestValidator {
     }
 
     public static void validateSignatureValue(String signatureValue) {
-        if (StringUtils.isBlank(signatureValue) || !isBase64StringEncoded(signatureValue)) {
+        if (StringUtils.isBlank(signatureValue) || isNotBase64StringEncoded(signatureValue)) {
             throw new RequestValidationException("Invalid signature value");
         }
     }

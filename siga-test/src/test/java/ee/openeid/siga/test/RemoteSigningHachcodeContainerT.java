@@ -208,7 +208,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("12345"));
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="));
 
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));

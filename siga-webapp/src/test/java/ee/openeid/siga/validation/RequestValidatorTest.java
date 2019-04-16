@@ -31,8 +31,8 @@ public class RequestValidatorTest {
         HashcodeDataFile dataFile = new HashcodeDataFile();
         dataFile.setFileName("first datafile.txt");
         dataFile.setFileSize(6);
-        dataFile.setFileHashSha256("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");
-        dataFile.setFileHashSha512("vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg");
+        dataFile.setFileHashSha256("VKZIO4rKVcnfKjW69x2ZZd39YjRo2B1RIpvV630eHBs=");
+        dataFile.setFileHashSha512("hIVQtdcSnvLY9JK3VnZkKrJ41s1fHYFqzpiNFY4ZlkVeXiPL5Nu7Kd/cVXYEBuME26QIeI2q6gI7OjLIbl9SUw==");
         request.getDataFiles().add(dataFile);
         return request;
     }
@@ -81,6 +81,16 @@ public class RequestValidatorTest {
     }
 
     @Test
+    public void createContainer_DataFileNameInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Data file name is invalid");
+        CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
+        request.getDataFiles().add(new HashcodeDataFile());
+        request.getDataFiles().get(0).setFileName("*/random.txt");
+        RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
+    }
+
+    @Test
     public void createContainer_DataFileHashIsNotBase64() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("File hash is invalid");
@@ -121,7 +131,7 @@ public class RequestValidatorTest {
 
     @Test
     public void successfulRemoteSigning() {
-        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "LT");
+        RequestValidator.validateRemoteSigning("dGVzdCBoYXNo", "LT");
     }
 
     @Test
@@ -142,26 +152,26 @@ public class RequestValidatorTest {
     public void oldSignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "B_BES");
+        RequestValidator.validateRemoteSigning("dGVzdCBoYXNo", "B_BES");
     }
 
     @Test
     public void invalidSignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "TL");
+        RequestValidator.validateRemoteSigning("dGVzdCBoYXNo", "TL");
     }
 
     @Test
     public void emptySignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        RequestValidator.validateRemoteSigning("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols", "");
+        RequestValidator.validateRemoteSigning("dGVzdCBoYXNo", "");
     }
 
     @Test
     public void successfulSignatureValue() {
-        RequestValidator.validateSignatureValue("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols");
+        RequestValidator.validateSignatureValue("dGVzdCBoYXNo");
     }
 
     @Test
