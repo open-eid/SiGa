@@ -7,6 +7,7 @@ import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.signers.PKCS12SignatureToken;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -90,9 +91,6 @@ public class SigaApplicationTests {
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatureList(containerId);
-        List<Signature> signatures1 = getSignatureList(containerId);
-        List<Signature> signatures2 = getSignatureList(containerId);
-        List<Signature> signatures3 = getSignatureList(containerId);
         Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -180,6 +178,10 @@ public class SigaApplicationTests {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
+        JSONArray roles = new JSONArray();
+        roles.put("Manager");
+        roles.put("Developer");
+        request.put("roles", roles);
         String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/remotesigning", request.toString());
         MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/remotesigning");
 
