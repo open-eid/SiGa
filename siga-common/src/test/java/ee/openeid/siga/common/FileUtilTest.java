@@ -16,7 +16,12 @@ public class FileUtilTest {
     }
 
     @Test
-    public void asteriskIncludedInFileName(){
+    public void asteriskIncludedInFileName() {
         Assert.assertFalse(FileUtil.isFilenameValid("*.txt"));
+    }
+
+    @Test
+    public void FileNameWithDirectory() {
+        Assert.assertFalse(FileUtil.isFilenameValid("Data/file.txt"));
     }
 }

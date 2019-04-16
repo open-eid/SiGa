@@ -33,7 +33,7 @@ public class RequestValidator {
     }
 
     private static void validateFileName(String fileName, String errorMessage) {
-        if (StringUtils.isBlank(fileName) || !FileUtil.isFilenameValid(fileName) ||fileName.length() < 1 || fileName.length() > 260) {
+        if (StringUtils.isBlank(fileName) || !FileUtil.isFilenameValid(fileName) || fileName.length() < 1 || fileName.length() > 260) {
             throw new RequestValidationException(errorMessage);
         }
     }
@@ -41,12 +41,26 @@ public class RequestValidator {
     private static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
         validateFileName(dataFile.getFileName(), "Data file name is invalid");
         validateFileSize(dataFile.getFileSize());
-        validateHash(dataFile.getFileHashSha256());
-        validateHash(dataFile.getFileHashSha512());
+        validateHashSha256(dataFile.getFileHashSha256());
+        validateHashSha512(dataFile.getFileHashSha512());
+    }
+
+    private static void validateHashSha256(String hash) {
+        validateHash(hash);
+        if (hash.length() != 44) {
+            throw new RequestValidationException("File hash SHA256 length is invalid");
+        }
+    }
+
+    private static void validateHashSha512(String hash) {
+        validateHash(hash);
+        if (hash.length() != 88) {
+            throw new RequestValidationException("File hash SHA512 length is invalid");
+        }
     }
 
     private static void validateHash(String hash) {
-        if (StringUtils.isBlank(hash) || isNotBase64StringEncoded(hash) || hash.length() > 100) {
+        if (StringUtils.isBlank(hash) || isNotBase64StringEncoded(hash)) {
             throw new RequestValidationException("File hash is invalid");
         }
     }
