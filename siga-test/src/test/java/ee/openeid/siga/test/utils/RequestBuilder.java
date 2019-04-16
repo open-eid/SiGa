@@ -117,7 +117,10 @@ public class RequestBuilder {
     }
 
     public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
-        flow.setSigningTime(getSigningTimeInSeconds().toString());
+        if (flow.getSigningTime() == null) {
+            flow.setSigningTime(getSigningTimeInSeconds().toString());
+        }
+
         String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url + ":" + request;
         return generateHmacSignature(flow.getServiceSecret(), signableString, hmacAlgo);
     }

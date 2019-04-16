@@ -12,8 +12,8 @@ public class SigaApiFlow {
     private String containerId;
 
     private String signingTime;
-    private String serviceUuid = SERVICE_UUID_1;
-    private String serviceSecret = SERVICE_SECRET_1;
+    private String serviceUuid;
+    private String serviceSecret;
 
     @Builder(buildMethodName = "buildForTestClient1Service1")
     public static SigaApiFlow buildForTestClient1Service1() {
