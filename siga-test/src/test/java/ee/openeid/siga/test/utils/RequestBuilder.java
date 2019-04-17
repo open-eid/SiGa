@@ -125,8 +125,8 @@ public class RequestBuilder {
         return signatureProductionPlace;
     }
 
-    public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
-        if (flow.getSigningTime() == null) {
+    public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo, Boolean useSetTime) throws InvalidKeyException, NoSuchAlgorithmException {
+        if (useSetTime == false) {
             flow.setSigningTime(getSigningTimeInSeconds().toString());
         }
 

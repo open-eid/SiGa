@@ -4,15 +4,8 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.hamcrest.Matchers;
-import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
@@ -20,7 +13,7 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class RetrieveHashcodeContainerT extends TestBase {
 
@@ -32,154 +25,168 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveIt() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void uploadHashcodeContainerAndRetrieveIt() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test
-    public void createHashcodeContainerAndRetrieve() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    public void createHashcodeContainerAndRetrieve() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(1440));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER + ".length()", equalTo(1440));
     }
 
     @Test
-    public void retrieveHashcodeContainerTwice() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    public void retrieveHashcodeContainerTwice() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         getHashcodeContainer(flow);
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(1440));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER + ".length()", equalTo(1440));
     }
 
     @Test
-    public void retrieveHashcodeContainerBeforeSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void retrieveHashcodeContainerBeforeSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(19660));
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void retrieveHashcodeContainerAfterSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), Matchers.greaterThanOrEqualTo(3500));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(37208));
     }
 
     @Test
-    public void retrieveHashcodeContainerBeforeFinishingMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
+    public void retrieveHashcodeContainerBeforeFinishingMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(19660));
     }
 
     @Test
-    public void retrieveHashcodeContainerDuringMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
+    public void retrieveHashcodeContainerDuringMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         getHashcodeMidSigningInSession(flow);
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(19660));
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterMidSigning() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
+    public void retrieveHashcodeContainerAfterMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         pollForMidSigning(flow);
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), Matchers.greaterThanOrEqualTo(35000));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", greaterThanOrEqualTo(35000));
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterValidation() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void retrieveHashcodeContainerAfterValidation() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getValidationReportForContainerInSession(flow);
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(19660));
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterRetrievingSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void retrieveHashcodeContainerAfterRetrievingSignatures() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getHashcodeSignatureList(flow);
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(CONTAINER).toString().length(), equalTo(19660));
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER  + ".length()", equalTo(19660));
     }
 
     @Test
-    public void retrieveHashcodeContainerForOtherClientNotPossible() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void retrieveHashcodeContainerForOtherClientNotPossible() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
     }
 
     @Test
-    public void deleteHashcodeContainerAndRetrieveIt() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void deleteHashcodeContainerAndRetrieveIt() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
     }
 
-    @Ignore //TODO: SIGARIA-50
     @Test
-    public void postToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, IOException, JSONException {
+    public void postToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+
+        response.then()
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test
-    public void headToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void headToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null))
+        given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -189,18 +196,15 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .head(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-
-        assertThat(response.statusCode(), equalTo(200));
+                .statusCode(200);
     }
 
     @Test
-    public void optionsToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void optionsToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null))
+        given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -210,20 +214,16 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getHeader("Allow"), equalTo("GET,HEAD,DELETE,OPTIONS"));
+                .statusCode(200)
+                .header("Allow", equalTo("GET,HEAD,DELETE,OPTIONS"));
     }
 
-    @Ignore //TODO: SIGARIA-50
     @Test
-    public void patchToGetHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    public void patchToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null))
+        given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", createUrlToSign(HASHCODE_CONTAINERS + "/" + flow.getContainerId()), null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -234,10 +234,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .patch(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 }
