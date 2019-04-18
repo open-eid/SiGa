@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>SiGa Demo application</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-vue/dist/bootstrap-vue.css}">
+    <link rel="stylesheet" th:href="@{/webjars/vue2-dropzone/dist/vue2Dropzone.css}">
+    <link rel="stylesheet" th:href="@{/webjars/dropzone/dropzone.css}">
+    <link rel="stylesheet" th:href="@{/webjars/highlightjs/styles/default.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+<div id="siga-app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="img/open-eid-logo.svg" class="d-inline-block align-top" alt=""> SiGa Sample Application
+            </a>
+        </div>
+    </nav>
+    <main role="main" class="container">
+        <div class="container">
+            <siga-container-processing></siga-container-processing>
+        </div>
+    </main>
+</div>
+<script th:src="@{/webjars/jquery/jquery.js}"></script>
+<script th:src="@{/webjars/sockjs-client/dist/sockjs.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/lib/stomp.min.js}"></script>
+<script th:src="@{/webjars/highlightjs/highlight.pack.js}"></script>
+<script th:src="@{/webjars/requirejs/require.min.js}" data-main="js/app"></script>
+</body>
+</html>
