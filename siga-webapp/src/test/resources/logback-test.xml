@@ -9,7 +9,7 @@
     <property name="COMMON_LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
     <property name="ELK_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${HOSTNAME} ${LOG_LEVEL_PATTERN:-%5p} rak-siga-common.log %m%n"/>
+              value="%d{MMM dd HH:mm:ss} ${HOSTNAME} rak-siga-common.log [x_b3_traceid=%X{X-B3-TraceId}, x_b3_spanid=%X{X-B3-SpanId}] %m%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -43,7 +43,19 @@
             <onMatch>NEUTRAL</onMatch>
         </filter>
     </appender>
-
+    <!--appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+       <syslogHost>localhost</syslogHost>
+       <port>514</port>
+       <facility>local1</facility>
+       <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+           <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+               <marker>SIGA_EVENT</marker>
+           </evaluator>
+           <onMismatch>DENY</onMismatch>
+           <onMatch>NEUTRAL</onMatch>
+       </filter>
+       <suffixPattern>rak-siga_events.log [x_b3_traceid=%X{X-B3-TraceId}, x_b3_spanid=%X{X-B3-SpanId}] %msg</suffixPattern>
+   </appender-->
     <logger name="ee.openeid.siga" level="INFO"/>
     <logger name="org.digidoc4j" level="INFO"/>
     <logger name="eu.europa" level="INFO"/>
@@ -55,5 +67,6 @@
         <appender-ref ref="COMMON_LOG_FILE"/>
         <appender-ref ref="EVENTS_LOG_FILE"/>
         <appender-ref ref="CONSOLE"/>
+        <!--appender-ref ref="SYSLOG"/-->
     </root>
 </configuration>
