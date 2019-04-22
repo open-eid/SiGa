@@ -7,11 +7,10 @@ import lombok.Data;
 @Builder
 public class ProcessingStatus {
 
-    private Status status;
-    private String message;
+    private boolean containerReadyForDownload;
+    private String errorMessage;
+    private String requestMethod;
+    private String apiEndpoint;
+    private Object apiRequestObject;
     private Object apiResponseObject;
-
-    public enum Status {
-        START, PROCESSING, CHALLENGE, VALIDATION, RESULT, FINISH, ERROR
-    }
 }

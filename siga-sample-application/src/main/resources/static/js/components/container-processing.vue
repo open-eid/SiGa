@@ -64,18 +64,20 @@
                         <div class="process-callout process-start" v-bind:class="{ 'process-default': item.status === 'PROCESSING', 'process-highlight': item.status === 'VALIDATION', 'process-highlight': item.status === 'CHALLENGE', 'process-result': item.status === 'RESULT', 'process-error': item.status === 'ERROR'}" v-for="(item, index) in processingSteps">
                             <h6>
                                 <b-badge variant="primary">{{index}}</b-badge>
-                                {{ item.status }}
+                                {{item.requestMethod}} {{item.apiEndpoint}}
                             </h6>
                             <b-container>
                                 <b-row>
-                                    <b-col>{{ item.message }}
-                                        <b-button v-if="item.status === 'RESULT'" v-bind:href="downloadUrl" size="sm" variant="link">Download signed hashcode container</b-button>
+                                    <b-col>
+                                        <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadUrl" size="sm" variant="link">Download signed hashcode container</b-button>
                                     </b-col>
-                                    <b-col cols="auto" align-self="end" v-if="item.apiResponseObject !== null">
-                                        <b-badge v-b-toggle="'process-details-' + index" href="#" variant="warning">Details</b-badge>
-                                    </b-col>
+                                    <b-badge v-if="item.apiRequestObject !== null" v-b-toggle="'process-request-' + index" href="#" variant="success">Request</b-badge>
+                                    <b-badge v-b-toggle="'process-response-' + index" href="#" variant="warning">Response</b-badge>
                                 </b-row>
-                                <b-collapse :id="'process-details-' + index">
+                                <b-collapse :id="'process-request-' + index">
+                                    <pre class="process-details" v-highlightjs><code class="json">{{ item.apiRequestObject }}</code></pre>
+                                </b-collapse>
+                                <b-collapse :id="'process-response-' + index">
                                     <pre class="process-details" v-highlightjs><code class="json">{{ item.apiResponseObject }}</code></pre>
                                 </b-collapse>
                             </b-container>

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@CacheConfig(cacheNames = "file")
-public class ContainerCacheService {
+@CacheConfig(cacheNames = "container")
+public class ContainerService {
 
     @CachePut(key = "#id")
     public Container cache(String id, String fileName, byte[] file) {
@@ -22,5 +22,4 @@ public class ContainerCacheService {
         log.info("Get file from cache: {}", id);
         return new Container();
     }
-
 }

@@ -4,7 +4,7 @@ import ee.openeid.siga.client.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.client.hashcode.util.ContainerUtil;
 import ee.openeid.siga.client.model.Container;
 import ee.openeid.siga.client.model.MobileSigningRequest;
-import ee.openeid.siga.client.service.ContainerCacheService;
+import ee.openeid.siga.client.service.ContainerService;
 import ee.openeid.siga.client.service.SigaApiClientService;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import lombok.SneakyThrows;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,7 @@ public class MainController {
     private SigaApiClientService sigaApiClientService;
 
     @Autowired
-    private ContainerCacheService containerCacheService;
+    private ContainerService containerService;
 
     @RequestMapping("/")
     public String startPage(final Model model) {
@@ -59,7 +58,7 @@ public class MainController {
         hashcodeContainer.save(outputStream);
         String id = UUID.randomUUID().toString();
         log.info("Generated file id: {}", id);
-        return containerCacheService.cache(id, file.getOriginalFilename(), outputStream.toByteArray());
+        return containerService.cache(id, file.getOriginalFilename(), outputStream.toByteArray());
     }
 
     @RequestMapping(value = "/create-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -79,7 +78,7 @@ public class MainController {
     @GetMapping(value = "/download/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     public ResponseEntity downloadContainer(@PathVariable("id") String id) {
-        Container cachedFile = containerCacheService.get(id);
+        Container cachedFile = containerService.get(id);
         log.info("Downloading file {} with id {}", cachedFile.getFileName(), cachedFile.getId());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cachedFile.getFileName() + "\"")
