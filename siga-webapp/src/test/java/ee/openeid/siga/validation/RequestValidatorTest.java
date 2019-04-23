@@ -21,7 +21,6 @@ public class RequestValidatorTest {
                 .relyingPartyName("Testimiseks")
                 .phoneNo("+37253410832")
                 .personIdentifier("3489348234")
-                .country("EE")
                 .language("EST")
                 .messageToDisplay("Random display").build();
     }
@@ -287,33 +286,6 @@ public class RequestValidatorTest {
         exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
-    public void nullCountry() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid country of origin");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setCountry(null);
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
-    public void emptyCountry() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid country of origin");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setCountry("");
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-    }
-
-    @Test
-    public void invalidCountry() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid country of origin");
-        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setCountry("EST");
         RequestValidator.validateMobileIdInformation(mobileIdInformation);
     }
 }

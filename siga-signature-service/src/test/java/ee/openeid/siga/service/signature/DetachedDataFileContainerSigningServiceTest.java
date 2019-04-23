@@ -151,7 +151,7 @@ public class DetachedDataFileContainerSigningServiceTest {
     @Test
     public void successfulMobileIdSigning() throws IOException {
         GetMobileCertificateResponse mobileCertificateResponse = createMobileCertificateResponse();
-        Mockito.when(digiDocService.getMobileCertificate(any(), any(), any())).thenReturn(mobileCertificateResponse);
+        Mockito.when(digiDocService.getMobileCertificate(any(), any())).thenReturn(mobileCertificateResponse);
         Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
@@ -165,7 +165,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         MobileSignHashResponse mobileSignHashResponse = createMobileSignHashResponse();
         mobileSignHashResponse.setStatus("Random");
         GetMobileCertificateResponse mobileCertificateResponse = createMobileCertificateResponse();
-        Mockito.when(digiDocService.getMobileCertificate(any(), any(), any())).thenReturn(mobileCertificateResponse);
+        Mockito.when(digiDocService.getMobileCertificate(any(), any())).thenReturn(mobileCertificateResponse);
         Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(mobileSignHashResponse);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();

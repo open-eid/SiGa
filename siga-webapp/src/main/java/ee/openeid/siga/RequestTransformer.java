@@ -56,7 +56,6 @@ public class RequestTransformer {
                 .language(request.getLanguage())
                 .messageToDisplay(request.getMessageToDisplay())
                 .personIdentifier(request.getPersonIdentifier())
-                .country(request.getCountry())
                 .phoneNo(request.getPhoneNo())
                 .relyingPartyName(sigaUserDetails.getSkRelyingPartyName()).build();
     }

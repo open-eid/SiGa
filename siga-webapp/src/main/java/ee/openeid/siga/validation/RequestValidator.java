@@ -101,14 +101,6 @@ public class RequestValidator {
         validateMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         validatePhoneNo(mobileIdInformation.getPhoneNo());
         validatePersonIdentifier(mobileIdInformation.getPersonIdentifier());
-        validateOriginCounty(mobileIdInformation.getCountry());
-
-    }
-
-    private static void validateOriginCounty(String country) {
-        if (StringUtils.isBlank(country) || country.length() != 2) {
-            throw new RequestValidationException("Invalid country of origin");
-        }
     }
 
     private static void validatePersonIdentifier(String personIdentifier) {

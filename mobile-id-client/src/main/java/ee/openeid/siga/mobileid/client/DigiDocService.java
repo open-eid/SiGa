@@ -29,7 +29,7 @@ public class DigiDocService extends WebServiceGatewaySupport {
     }
 
     @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_CERTIFICATE, logParameters = {@Param(name = "person_identifier", index = 0), @Param(name = "country", index = 1), @Param(name = "phone_nr", index = 2)}, logReturnObject = {@XPath(name = "sign_cert_status", xpath = "signCertStatus"), @XPath(name = "dds_response_code", xpath = "authCertStatus")})
-    public GetMobileCertificateResponse getMobileCertificate(String idCode, String country, String phoneNr) {
+    public GetMobileCertificateResponse getMobileCertificate(String idCode, String phoneNr) {
         GetMobileCertificate request = new GetMobileCertificate();
         request.setIDCode(idCode);
         request.setPhoneNo(phoneNr);

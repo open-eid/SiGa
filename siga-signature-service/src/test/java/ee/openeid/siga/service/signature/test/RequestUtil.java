@@ -103,7 +103,6 @@ public class RequestUtil {
         MobileIdInformation mobileIdInformation = MobileIdInformation.builder()
                 .phoneNo("+37253410832")
                 .personIdentifier("3489348234")
-                .country("EE")
                 .language("EST")
                 .relyingPartyName("Testimiseks")
                 .messageToDisplay("Random display").build();

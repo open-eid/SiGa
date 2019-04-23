@@ -129,7 +129,6 @@ public class SigaApiClientService {
         request.setMessageToDisplay("SiGa DEMO app");
         request.setSignatureProfile("LT");
         request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
-        request.setCountry(mobileSigningRequest.getCountry());
         request.setLanguage("EST");
         request.setPhoneNo(mobileSigningRequest.getPhoneNr());
         CreateHashcodeContainerMobileIdSigningResponse response = restTemplate.postForObject(endpoint, request, CreateHashcodeContainerMobileIdSigningResponse.class);

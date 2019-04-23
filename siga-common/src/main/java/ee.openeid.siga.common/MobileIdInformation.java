@@ -10,7 +10,6 @@ public class MobileIdInformation {
     private String personIdentifier;
     private String phoneNo;
     private String language;
-    private String country;
     private String messageToDisplay;
     @NonNull
     private String relyingPartyName;

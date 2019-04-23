@@ -147,7 +147,6 @@
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
             <xs:element name="phoneNo" type="xs:string"/>
-            <xs:element name="country" type="xs:string"/>
             <xs:element name="language" type="xs:string"/>
             <xs:element minOccurs="0" name="messageToDisplay" type="xs:string"/>
             <xs:element name="signatureProfile" type="xs:string"/>
