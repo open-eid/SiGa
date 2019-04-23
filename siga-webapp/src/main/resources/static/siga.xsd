@@ -423,7 +423,7 @@
     </xs:complexType>
     <xs:complexType name="signatureProductionPlace">
         <xs:sequence>
-            <xs:element minOccurs="0" name="country" type="xs:string"/>
+            <xs:element minOccurs="0" name="countryName" type="xs:string"/>
             <xs:element minOccurs="0" name="city" type="xs:string"/>
             <xs:element minOccurs="0" name="stateOrProvince" type="xs:string"/>
             <xs:element minOccurs="0" name="postalCode" type="xs:string"/>

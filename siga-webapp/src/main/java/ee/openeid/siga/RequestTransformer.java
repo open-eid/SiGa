@@ -25,7 +25,7 @@ public class RequestTransformer {
         signatureParameters.setSignatureProfile(signatureProfile);
         SignatureProductionPlace signatureProductionPlace = remoteSigningRequest.getSignatureProductionPlace();
         if (signatureProductionPlace != null) {
-            signatureParameters.setCountry(signatureProductionPlace.getCountry());
+            signatureParameters.setCountry(signatureProductionPlace.getCountryName());
             signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
             signatureParameters.setCity(signatureProductionPlace.getCity());
             signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
@@ -40,7 +40,7 @@ public class RequestTransformer {
         signatureParameters.setSignatureProfile(signatureProfile);
         SignatureProductionPlace signatureProductionPlace = request.getSignatureProductionPlace();
         if (signatureProductionPlace != null) {
-            signatureParameters.setCountry(signatureProductionPlace.getCountry());
+            signatureParameters.setCountry(signatureProductionPlace.getCountryName());
             signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
             signatureParameters.setCity(signatureProductionPlace.getCity());
             signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
