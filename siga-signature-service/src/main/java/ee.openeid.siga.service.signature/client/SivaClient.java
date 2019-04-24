@@ -9,6 +9,7 @@ import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperti
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.SignatureProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,6 +22,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
+import static ee.openeid.siga.service.signature.util.ContainerUtil.transformSignature;
 
 @Slf4j
 @Component
@@ -40,8 +43,12 @@ public class SivaClient {
                 throw new ClientException("Unable to parse client empty response");
             }
         } catch (HttpServerErrorException | HttpClientErrorException e) {
-            log.error("Unexpected exception was thrown by SiVa: ", e);
-            throw new ClientException("Unable to get valid response from client");
+            log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
+            if (SignatureProfile.LTA.name().equals(transformSignature(signatureWrapper).getSignatureProfile())) {
+                throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
+            } else {
+                throw new ClientException("Unable to get valid response from client");
+            }
         }
         log.info("Container validation details received successfully");
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
