@@ -159,7 +159,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hashcodecontainers/{containerId}/remotesigning">
+            <resource path="hashcodecontainers/{containerId}/remotesigning/{signatureId}">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="updateHashcodeContainerRemoteSigning" name="PUT">
@@ -252,7 +252,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hashcodecontainers/{containerId}/mobileidsigning/status">
+            <resource path="hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getHashcodeContainerMobileIdSigningStatus" name="GET">
