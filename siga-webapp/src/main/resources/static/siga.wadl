@@ -339,7 +339,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hashcodecontainers/{containerId}/smartidsigning/status">
+            <resource path="hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getHashcodeContainerSmartIdSigningStatus" name="GET">
