@@ -9,7 +9,7 @@
     <property name="COMMON_LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
     <property name="ELK_LOG_PATTERN"
-              value="%d{MMM dd HH:mm:ss} ${HOSTNAME} rak-siga-common.log [x_b3_traceid=%X{X-B3-TraceId}, x_b3_spanid=%X{X-B3-SpanId}] %m%n"/>
+              value="%d{MMM dd HH:mm:ss} ${HOSTNAME} rak-siga-events.log [x_b3_traceid=%X{X-B3-TraceId}, x_b3_spanid=%X{X-B3-SpanId}] %m%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
