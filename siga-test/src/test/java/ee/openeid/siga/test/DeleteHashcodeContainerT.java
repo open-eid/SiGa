@@ -1,13 +1,15 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class DeleteHashcodeContainerT extends TestBase {
@@ -72,8 +74,8 @@ public class DeleteHashcodeContainerT extends TestBase {
     @Test
     public void deleteHashcodeContainerAfterSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         deleteHashcodeContainer(flow);
 
@@ -87,10 +89,9 @@ public class DeleteHashcodeContainerT extends TestBase {
     @Test
     public void deleteHashcodeContainerAfterRetrievingIt() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         getHashcodeContainer(flow);
-
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
@@ -103,11 +104,11 @@ public class DeleteHashcodeContainerT extends TestBase {
     @Test
     public void deleteHashcodeContainerBeforeFinishingMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         deleteHashcodeContainer(flow);
 
-        Response response = getHashcodeMidSigningInSession(flow);
+        response = getHashcodeMidSigningInSession(flow, signatureId);
 
         response.then()
                 .statusCode(400)
@@ -117,12 +118,13 @@ public class DeleteHashcodeContainerT extends TestBase {
     @Test
     public void deleteHashcodeContainerDuringMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        getHashcodeMidSigningInSession(flow);
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        getHashcodeMidSigningInSession(flow, signatureId);
 
         deleteHashcodeContainer(flow);
 
-        Response response = getHashcodeMidSigningInSession(flow);
+        response = getHashcodeMidSigningInSession(flow, signatureId);
 
         response.then()
                 .statusCode(400)
@@ -132,12 +134,13 @@ public class DeleteHashcodeContainerT extends TestBase {
     @Test
     public void deleteHashcodeContainerAfterMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        pollForMidSigning(flow);
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
 
         deleteHashcodeContainer(flow);
 
-        Response response = getHashcodeSignatureList(flow);
+        response = getHashcodeSignatureList(flow);
 
         response.then()
                 .statusCode(400)

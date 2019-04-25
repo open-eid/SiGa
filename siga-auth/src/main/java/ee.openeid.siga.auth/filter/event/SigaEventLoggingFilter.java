@@ -24,6 +24,7 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
         SigaEvent event = sigaEventLogger.logStartEvent(SigaEventName.REQUEST);
         String xAuthorizationServiceUuid = request.getHeader(HmacHeader.X_AUTHORIZATION_SERVICE_UUID.getValue());
         event.setServiceUuid(xAuthorizationServiceUuid);
+        event.addEventParameter("request_uri", request.getRequestURI());
     }
 
     @Override

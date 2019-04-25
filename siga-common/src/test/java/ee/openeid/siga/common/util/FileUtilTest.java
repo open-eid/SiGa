@@ -1,6 +1,5 @@
 package ee.openeid.siga.common.util;
 
-import ee.openeid.siga.common.util.FileUtil;
 import org.junit.Assert;
 import org.junit.Test;
 

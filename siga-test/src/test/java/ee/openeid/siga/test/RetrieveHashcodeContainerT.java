@@ -1,6 +1,8 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -8,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -67,20 +69,20 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test
     public void retrieveHashcodeContainerAfterSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getHashcodeContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(37208));
+                .body(CONTAINER + ".length()", equalTo(37208));
     }
 
     @Test
@@ -92,33 +94,35 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test
     public void retrieveHashcodeContainerDuringMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        getHashcodeMidSigningInSession(flow);
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        getHashcodeMidSigningInSession(flow, signatureId);
 
-        Response response = getHashcodeContainer(flow);
+        response = getHashcodeContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test
     public void retrieveHashcodeContainerAfterMidSigning() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        pollForMidSigning(flow);
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
 
-        Response response = getHashcodeContainer(flow);
+        response = getHashcodeContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", greaterThanOrEqualTo(35000));
+                .body(CONTAINER + ".length()", greaterThanOrEqualTo(35000));
     }
 
     @Test
@@ -130,7 +134,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test
@@ -142,7 +146,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER  + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19660));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -10,8 +11,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,11 +31,10 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Test
     public void signContainerRemotely() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getValidationReportForContainerInSession(flow);
-
         response.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2))
@@ -69,7 +69,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void startRemoteSigningHashcodeContainerWithRoleReturnsDigestToSign() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null,null, null, null));
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
 
         response.then()
                 .statusCode(200)
@@ -174,10 +174,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Test
     public void finalizeRemoteSigningHashcodeContainerReturnsOk() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
-
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo("OK"));
     }
@@ -185,11 +184,10 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptyBody() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
         JSONObject request = new JSONObject();
-        Response response = putHashcodeRemoteSigningInSession(flow, request);
-
+        Response response = putHashcodeRemoteSigningInSession(flow, request, dataToSignResponse.getGeneratedSignatureId());
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
@@ -198,10 +196,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptySignatureValue() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(""));
-
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(""), dataToSignResponse.getGeneratedSignatureId());
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
@@ -210,10 +207,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithInvalidSignatureValue() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="));
-
+        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse.getGeneratedSignatureId());
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(INVALID_SIGNATURE));
@@ -230,7 +226,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-     @Test
+    @Test
     public void headToRemoteSigningHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 

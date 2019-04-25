@@ -57,16 +57,16 @@ public class TestBase {
         return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, request.toString());
     }
 
-    protected Response putHashcodeRemoteSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return put(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, request.toString());
+    protected Response putHashcodeRemoteSigningInSession(SigaApiFlow flow, JSONObject request, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        return put(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + signatureId, flow, request.toString());
     }
 
     protected Response postHashcodeMidSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING, flow, request.toString());
     }
 
-    protected Response getHashcodeMidSigningInSession(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + STATUS, flow);
+    protected Response getHashcodeMidSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
     }
 
     protected Response getHashcodeSignatureList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -81,11 +81,11 @@ public class TestBase {
         return delete(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
     }
 
-    protected Response pollForMidSigning(SigaApiFlow flow) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
+    protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
         Long endTime = Instant.now().getEpochSecond() + 15;
         while (Instant.now().getEpochSecond() < endTime) {
             Thread.sleep(3500);
-            Response response = getHashcodeMidSigningInSession(flow);
+            Response response = getHashcodeMidSigningInSession(flow, signatureId);
             if (!"OUTSTANDING_TRANSACTION".equals(response.getBody().path(MID_STATUS))) {
                 return response;
             }

@@ -46,6 +46,8 @@ public class TestData {
     public static final String DATA_TO_SIGN = "dataToSign";
     public static final String DIGEST_ALGO = "digestAlgorithm";
     public static final String MID_STATUS = "midStatus";
+    public static final String GENERATED_SIGNATURE_ID = "generatedSignatureId";
+    public static final String CHALLENGE_ID = "challengeId";
 
     // Validation response strings
     public static final String REPORT_VALID_SIGNATURES_COUNT = "validationConclusion.validSignaturesCount";

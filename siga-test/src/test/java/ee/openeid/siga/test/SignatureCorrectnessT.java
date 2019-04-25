@@ -1,14 +1,16 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.SIGNER_CERT_PEM;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class SignatureCorrectnessT extends TestBase {
@@ -24,14 +26,15 @@ public class SignatureCorrectnessT extends TestBase {
     @Test
     public void signatureProfileTest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT_TM"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        pollForMidSigning(flow);
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT_TM")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
 
         getHashcodeContainer(flow);
 
-        Response response = getValidationReportForContainerInSession(flow);
+        response = getValidationReportForContainerInSession(flow);
 
         response.then()
                 .statusCode(200)

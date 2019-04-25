@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.statistics;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchResponse;
@@ -59,13 +60,14 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
         assertThat(response.statusCode(), equalTo(200));
         assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", response.getBody().path("signatures[0].id"));
 
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        response = pollForMidSigning(flow);
+        response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        response = pollForMidSigning(flow, signatureId);
         assertThat(response.statusCode(), equalTo(200));
 
-        Response validationResponse = getValidationReportForContainerInSession(flow);
-        assertThat(validationResponse.statusCode(), equalTo(200));
-        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(2));
+        response = getValidationReportForContainerInSession(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(2));
 
         response = deleteHashcodeContainer(flow);
         assertThat(response.statusCode(), equalTo(200));

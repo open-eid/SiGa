@@ -29,8 +29,7 @@ import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 import static org.springframework.http.HttpMethod.*;
-import static org.springframework.http.HttpStatus.Series.CLIENT_ERROR;
-import static org.springframework.http.HttpStatus.Series.SERVER_ERROR;
+import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @Slf4j
@@ -83,8 +82,9 @@ public class SigaApiClientService {
         }
 
         getSignatureList(containerId);
-        if (prepareMobileIdSignatureSigning(mobileSigningRequest, containerId)) {
-            if (getMobileSigningStatus(containerId)) {
+        String generatedSignatureId = prepareMobileIdSignatureSigning(mobileSigningRequest, containerId);
+        if (StringUtils.isNotBlank(generatedSignatureId)) {
+            if (getMobileSigningStatus(containerId, generatedSignatureId)) {
                 getContainerValidation(containerId);
                 getContainer(fileId, containerId);
                 deleteContainer(containerId);
@@ -123,7 +123,7 @@ public class SigaApiClientService {
         sendStatus(GET, endpoint, response);
     }
 
-    private boolean prepareMobileIdSignatureSigning(MobileSigningRequest mobileSigningRequest, String containerId) {
+    private String prepareMobileIdSignatureSigning(MobileSigningRequest mobileSigningRequest, String containerId) {
         String endpoint = getSigaApiUri(containerId, "mobileidsigning");
         CreateHashcodeContainerMobileIdSigningRequest request = new CreateHashcodeContainerMobileIdSigningRequest();
         request.setMessageToDisplay("SiGa DEMO app");
@@ -133,12 +133,12 @@ public class SigaApiClientService {
         request.setPhoneNo(mobileSigningRequest.getPhoneNr());
         CreateHashcodeContainerMobileIdSigningResponse response = restTemplate.postForObject(endpoint, request, CreateHashcodeContainerMobileIdSigningResponse.class);
         sendStatus(POST, endpoint, request, response);
-        return StringUtils.isNotBlank(response.getChallengeId());
+        return response.getGeneratedSignatureId();
     }
 
     @SneakyThrows
-    private boolean getMobileSigningStatus(String containerId) {
-        String endpoint = getSigaApiUri(containerId, "mobileidsigning", "status");
+    private boolean getMobileSigningStatus(String containerId, String generatedSignatureId) {
+        String endpoint = getSigaApiUri(containerId, "mobileidsigning", generatedSignatureId, "status");
         GetHashcodeContainerMobileIdSigningStatusResponse response;
         for (int i = 0; i < 6; i++) {
             response = restTemplate.getForObject(endpoint, GetHashcodeContainerMobileIdSigningStatusResponse.class);
@@ -180,7 +180,7 @@ public class SigaApiClientService {
     }
 
     private void sendError(String message, String... messageArgs) {
-        ProcessingStatus processingStatus = ProcessingStatus.builder().errorMessage(format(message, messageArgs)).build();
+        ProcessingStatus processingStatus = ProcessingStatus.builder().errorMessage(format(message, (Object[]) messageArgs)).build();
         messagingTemplate.convertAndSend(websocketChannelId, processingStatus);
     }
 
@@ -206,8 +206,7 @@ public class SigaApiClientService {
         @Override
         public boolean hasError(ClientHttpResponse httpResponse) throws IOException {
             log.info("HttpResponse: {}, {}", httpResponse.getStatusCode(), httpResponse.getStatusText());
-            return (httpResponse.getStatusCode().series() == CLIENT_ERROR
-                    || httpResponse.getStatusCode().series() == SERVER_ERROR);
+            return (httpResponse.getStatusCode().series() != SUCCESSFUL);
         }
 
         @Override

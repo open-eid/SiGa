@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.statistics;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -64,9 +65,9 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         assertThat(dataToSign.getBody().path(DIGEST_ALGO), equalTo("SHA512"));
         dataToSignResponses.put(flow.getContainerId(), dataToSign);
 
-        Response dataToSignResponse = dataToSignResponses.get(flow.getContainerId());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = dataToSignResponses.get(flow.getContainerId()).as(CreateHashcodeContainerRemoteSigningResponse.class);
         assertNotNull(dataToSignResponse);
-        response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path(DATA_TO_SIGN), dataToSignResponse.getBody().path(DIGEST_ALGO))));
+        response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo("OK"));
 

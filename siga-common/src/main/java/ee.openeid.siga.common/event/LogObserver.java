@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
-import static ee.openeid.siga.common.event.SigaEventName.EventParam.*;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 
 class LogObserver extends AppenderBase<ILoggingEvent> {
     private final Consumer<ILoggingEvent> logEventToSigaEvent;

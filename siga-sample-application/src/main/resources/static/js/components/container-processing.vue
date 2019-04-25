@@ -17,7 +17,7 @@
                         <b-container>
                             <b-row>
                                 <b-col>
-                                    <h6 v-if="!containerConverted && containerConversionType === 'convertContainer'">Supported file types are: BDOC and XRoad ASiCE</h6>
+                                    <h6 v-if="!containerConverted && containerConversionType === 'convertContainer'">Upload container</h6>
                                     <h6 v-if="!containerConverted && containerConversionType === 'createContainer'">Upload any type of files to create new hashcode container</h6>
                                 </b-col>
                                 <b-col cols="auto" align-self="end">
@@ -69,6 +69,7 @@
                             <b-container>
                                 <b-row>
                                     <b-col>
+                                        <b-alert v-if="item.errorMessage !== null" show variant="danger">{{item.errorMessage}}</b-alert>
                                         <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadUrl" size="sm" variant="link">Download signed hashcode container</b-button>
                                     </b-col>
                                     <b-badge v-if="item.apiRequestObject !== null" v-b-toggle="'process-request-' + index" href="#" variant="success">Request</b-badge>

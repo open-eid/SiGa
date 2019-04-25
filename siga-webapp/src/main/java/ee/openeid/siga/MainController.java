@@ -1,5 +1,6 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
@@ -83,17 +84,18 @@ public class MainController {
         DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
 
         CreateHashcodeContainerRemoteSigningResponse response = new CreateHashcodeContainerRemoteSigningResponse();
+        response.setGeneratedSignatureId(dataToSign.getSignatureParameters().getSignatureId());
         response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_FINISH)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
-    public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
+    @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
+    public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
-        String result = signingService.finalizeSigning(containerId, updateRemoteSigningRequest.getSignatureValue());
+        String result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateHashcodeContainerRemoteSigningResponse response = new UpdateHashcodeContainerRemoteSigningResponse();
         response.setResult(result);
         return response;
@@ -108,19 +110,20 @@ public class MainController {
         SignatureParameters signatureParameters = RequestTransformer.transformMobileIdSignatureParameters(createMobileIdSigningRequest);
         RequestValidator.validateMobileIdInformation(mobileIdInformation);
 
-        String challengeId = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+        MobileIdChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 
         CreateHashcodeContainerMobileIdSigningResponse response = new CreateHashcodeContainerMobileIdSigningResponse();
-        response.setChallengeId(challengeId);
+        response.setChallengeId(challenge.getChallengeId());
+        response.setGeneratedSignatureId(challenge.getGeneratedSignatureId());
         return response;
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_STATUS)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId) {
+    @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
 
-        String status = signingService.processMobileStatus(containerId);
+        String status = signingService.processMobileStatus(containerId, signatureId);
 
         GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

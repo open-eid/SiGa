@@ -1,6 +1,7 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
@@ -11,7 +12,8 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.TestData.DEFAULT_HASHCODE_CONTAINER;
+import static ee.openeid.siga.test.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -82,11 +84,10 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     @Test
     public void createSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getBody().path("dataToSign"), dataToSignResponse.getBody().path("digestAlgorithm"))));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getHashcodeSignatureList(flow);
-
         response.then()
                 .statusCode(200)
                 .body("signatures[0].id", notNullValue())

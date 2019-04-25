@@ -6,6 +6,7 @@ import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
@@ -34,7 +35,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.Base64;
-import java.util.Optional;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
@@ -129,23 +129,51 @@ public class DetachedDataFileContainerSigningServiceTest {
     }
 
     @Test
-    public void finalizeAndValidateSignature() {
+    public void finalizeAndValidateSignature() throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
-        String result = signingService.finalizeSigning(CONTAINER_ID, base64EncodedSignature);
+
+        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();
+        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        String result = signingService.finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
         Assert.assertEquals("OK", result);
     }
 
     @Test
     public void noDataToSignInSession() {
         exceptionRule.expect(InvalidSessionDataException.class);
-        exceptionRule.expectMessage("Unable to finalize signature. Invalid session found");
+        exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, Base64.getDecoder().decode("kZLQdTYDtWjSbmFlM3RO+vAfygvKDKfQHQkYrDflIDj98r28vlSTMkewVDzlsuzeIY6G+Skr1jmpQmuDr7usJQ=="));
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
-        signingService.finalizeSigning(CONTAINER_ID, base64EncodedSignature);
+        signingService.finalizeSigning(CONTAINER_ID, "someUnknownSignatureId", base64EncodedSignature);
+    }
+
+    @Test
+    public void noDataToSignInSessionForSignatureId() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
+        String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
+
+        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();
+        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        try {
+            signingService.finalizeSigning(CONTAINER_ID, "someUnknownSignatureId", base64EncodedSignature);
+        } catch (InvalidSessionDataException e) {
+            String result = signingService.finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
+            Assert.assertEquals("OK", result);
+            throw e;
+        }
     }
 
     @Test
@@ -180,9 +208,7 @@ public class DetachedDataFileContainerSigningServiceTest {
 
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         DetachedDataFileContainerSessionHolder session = RequestUtil.createSessionHolder();
-        session.setSessionCode("2342384932");
-        session.setDataToSign(dataToSign);
-        session.setSigningType(SigningType.MOBILE_ID);
+        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode("2342384932").build());
 
         GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = new GetMobileSignHashStatusResponse();
         getMobileSignHashStatusResponse.setSignature(signatureRaw);
@@ -191,14 +217,14 @@ public class DetachedDataFileContainerSigningServiceTest {
         Mockito.when(mobileIdService.getMobileSignHashStatus(any())).thenReturn(getMobileSignHashStatusResponse);
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
 
-        signingService.processMobileStatus(CONTAINER_ID);
+        signingService.processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
     }
 
     @Test
     public void noSessionFoundMobileSigning() {
         exceptionRule.expect(InvalidSessionDataException.class);
-        exceptionRule.expectMessage("Unable to finalize signature. Invalid session found");
-        signingService.processMobileStatus(CONTAINER_ID);
+        exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
+        signingService.processMobileStatus(CONTAINER_ID, "someUnknownSignatureId");
     }
 
     private MobileSignHashResponse createMobileSignHashResponse() {
@@ -212,7 +238,7 @@ public class DetachedDataFileContainerSigningServiceTest {
     private GetMobileCertificateResponse createMobileCertificateResponse() throws IOException {
         StringWriter writer = new StringWriter();
         GetMobileCertificateResponse mobileCertificateResponse = new GetMobileCertificateResponse();
-        try(PemWriter pemWriter = new PemWriter(writer)) {
+        try (PemWriter pemWriter = new PemWriter(writer)) {
             pemWriter.writeObject(new JcaMiscPEMGenerator(pkcs12Esteid2018SignatureToken.getCertificate(), null));
             pemWriter.flush();
             String certInPemFormat = writer.toString();

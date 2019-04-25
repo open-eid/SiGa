@@ -2,13 +2,18 @@ package ee.openeid.siga.common.session;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
-import ee.openeid.siga.common.SigningType;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
-import org.digidoc4j.DataToSign;
+import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
 
 @Data
 @Builder
@@ -23,13 +28,23 @@ public class DetachedDataFileContainerSessionHolder implements Session {
     private String sessionId;
     private List<HashcodeDataFile> dataFiles;
     private List<SignatureWrapper> signatures;
-    private DataToSign dataToSign;
-    private String sessionCode;
-    private SigningType signingType;
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
+    @Builder.Default
+    private Map<String, DataToSignHolder> dataToSignHolder = new HashMap<>();
 
-    public void clearSigning() {
-        this.dataToSign = null;
-        this.sessionCode = null;
-        this.signingType = null;
+    public void addDataToSign(String signatureId, DataToSignHolder dataToSign) {
+        requireNonNull(signatureId);
+        requireNonNull(dataToSign);
+        this.dataToSignHolder.put(signatureId, dataToSign);
+    }
+
+    public DataToSignHolder getDataToSignHolder(String signatureId) {
+        requireNonNull(signatureId);
+        return dataToSignHolder.get(signatureId);
+    }
+
+    public DataToSignHolder clearSigning(String signatureId) {
+        return dataToSignHolder.remove(signatureId);
     }
 }

@@ -249,7 +249,6 @@ public class AuthenticationT extends TestBase {
     }
 
 
-
     @Test
     public void missingTimeStampHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
@@ -313,7 +312,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void wrongMethodInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
-          given()
+        given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "PUT", createUrlToSign(HASHCODE_CONTAINERS), null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())

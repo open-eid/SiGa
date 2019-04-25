@@ -1,14 +1,18 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.session.DataToSignHolder;
+import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
@@ -17,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -71,9 +76,10 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_AndPreferAiaOcspFalse() {
+    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
+        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         assertEquals("OK", result);
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
@@ -81,9 +87,10 @@ public class SignatureFinalizingTest {
 
     @Ignore
     @Test
-    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() {
+    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM));
+        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         assertEquals("OK", result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
@@ -91,18 +98,20 @@ public class SignatureFinalizingTest {
 
     @Ignore
     @Test
-    public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() {
+    public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM));
+        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         assertEquals("OK", result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
 
     @Test
-    public void shouldRequest_TSA_AIAOCSP_WithSignatureProfile_LT_AndPreferAiaOcspTrue() {
+    public void shouldRequest_TSA_AIAOCSP_WithSignatureProfile_LT_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
+        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         assertEquals("OK", result);
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://aia.demo.sk.ee/esteid2018");
@@ -129,9 +138,10 @@ public class SignatureFinalizingTest {
     }
 
     @Test(expected = DSSException.class)
-    public void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() {
+    public void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() throws IOException, URISyntaxException {
         try {
-            signingService.finalizeSigning(CONTAINER_ID, createSignature(EXPIRED_PKCS12_Esteid2011, SignatureProfile.LT));
+            Pair<String, String> signature = createSignature(EXPIRED_PKCS12_Esteid2011, SignatureProfile.LT);
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         } catch (DSSException e) {
             assertThat(e.getMessage(), containsString("is not in certificate validity range"));
             assertNull(sigaEventLogger.getEvent(0));
@@ -140,10 +150,11 @@ public class SignatureFinalizingTest {
     }
 
     @Test(expected = SignatureCreationException.class)
-    public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() {
+    public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() throws IOException, URISyntaxException {
         when(configuration.getTspSource()).thenReturn("http://demo.invalid.url.sk.ee/tsa");
         try {
-            signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
+            Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         } catch (SignatureCreationException e) {
             assertThat(e.getMessage(), containsString("Unable to finalize signature"));
             sigaEventLogger.logEvents();
@@ -165,10 +176,11 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() {
+    public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         when(configuration.getOcspSource()).thenReturn("http://aia.invalid.url.sk.ee/esteid2018");
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT));
+        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
@@ -193,10 +205,11 @@ public class SignatureFinalizingTest {
      */
     @Ignore
     @Test(expected = TechnicalException.class)
-    public void shouldRequest_TSA_OCSP_WithRevokedCertificate() {
+    public void shouldRequest_TSA_OCSP_WithRevokedCertificate() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         try {
-            signingService.finalizeSigning(CONTAINER_ID, createSignature(REVOKED_PKCS12_Esteid2018, SignatureProfile.LT));
+            Pair<String, String> signature = createSignature(REVOKED_PKCS12_Esteid2018, SignatureProfile.LT);
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         } catch (TechnicalException e) {
             assertEquals("Unable to finalize signature", e.getMessage());
             sigaEventLogger.logEvents();
@@ -230,9 +243,10 @@ public class SignatureFinalizingTest {
      */
     @Ignore
     @Test
-    public void shouldRequestOnly_TSA_WithUnknownIssuer() {
+    public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
-        String result = signingService.finalizeSigning(CONTAINER_ID, createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT));
+        Pair<String, String> signature = createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT);
+        String result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         sigaEventLogger.logEvents();
         SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
@@ -243,10 +257,15 @@ public class SignatureFinalizingTest {
         assertEquals("OK", result);
     }
 
-    private String createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) {
+    private Pair<String, String> createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = RequestUtil.createSignatureParameters(signatureToken.getCertificate(), signatureProfile);
         DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
         byte[] signatureRaw = signatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
-        return new String(Base64.getEncoder().encode(signatureRaw));
+
+        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();
+        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        return Pair.of(dataToSign.getSignatureParameters().getSignatureId(), new String(Base64.getEncoder().encode(signatureRaw)));
     }
 }

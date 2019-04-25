@@ -124,6 +124,7 @@
     </xs:complexType>
     <xs:complexType name="createHashcodeContainerRemoteSigningResponse">
         <xs:sequence>
+            <xs:element name="generatedSignatureId" type="xs:string"/>
             <xs:element name="dataToSign" type="xs:string"/>
             <xs:element name="digestAlgorithm" type="xs:string"/>
         </xs:sequence>
@@ -156,6 +157,7 @@
     </xs:complexType>
     <xs:complexType name="createHashcodeContainerMobileIdSigningResponse">
         <xs:sequence>
+            <xs:element name="generatedSignatureId" type="xs:string"/>
             <xs:element name="challengeId" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
