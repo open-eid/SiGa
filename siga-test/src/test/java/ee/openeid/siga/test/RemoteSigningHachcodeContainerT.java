@@ -2,6 +2,7 @@ package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerValidationReportResponse;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -18,6 +19,7 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class RemoteSigningHachcodeContainerT extends TestBase {
 
@@ -39,6 +41,25 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2))
                 .body("validationConclusion.signaturesCount", equalTo(2));
+    }
+
+    @Test
+    public void signContainerRemotelyWithMultipleSignatures() throws Exception {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse2 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse2.getDataToSign(), dataToSignResponse2.getDigestAlgorithm())), dataToSignResponse2.getGeneratedSignatureId());
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(3))
+                .body("validationConclusion.signaturesCount", equalTo(3));
+
+        GetHashcodeContainerValidationReportResponse r = validationResponse.body().as(GetHashcodeContainerValidationReportResponse.class);
+        assertEquals(2, r.getValidationConclusion().getSignatures().stream().filter(signature -> dataToSignResponse1.getGeneratedSignatureId().equals(signature.getId()) || dataToSignResponse2.getGeneratedSignatureId().equals(signature.getId())).count());
     }
 
     @Test
