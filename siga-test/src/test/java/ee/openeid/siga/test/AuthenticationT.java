@@ -41,7 +41,7 @@ public class AuthenticationT extends TestBase {
     public void defaultAlgoHmacSHA256() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -59,7 +59,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA256ExplicitlySet() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA256", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA256", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
@@ -78,7 +78,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA384ExplicitlySet() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA384", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA384", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA384")
@@ -97,7 +97,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA512ExplicitlySet() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA512", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA512", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA512")
@@ -116,7 +116,7 @@ public class AuthenticationT extends TestBase {
     public void notDefaultAlgoUsedAndNotSpecifiedInHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA512", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA512", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -136,7 +136,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA3224ExplicitlySet() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA3-224", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA3-224", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA3-224")
@@ -155,7 +155,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA224ExplicitlySetShouldNotBeAllowed() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA224", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA224", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA224")
@@ -175,7 +175,7 @@ public class AuthenticationT extends TestBase {
     public void algoHmacSHA1ExplicitlySetShouldNotBeAllowed() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA1", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA1", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA1")
@@ -195,7 +195,7 @@ public class AuthenticationT extends TestBase {
     public void algoSetInHeaderAndActuallyUsedDoNotMatch() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA256", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA256", false))
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -214,7 +214,7 @@ public class AuthenticationT extends TestBase {
     public void missingServiceUuid() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA512", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA512", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA512")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -253,7 +253,7 @@ public class AuthenticationT extends TestBase {
     public void missingTimeStampHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), "HmacSHA512", false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, "HmacSHA512", false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
@@ -274,7 +274,7 @@ public class AuthenticationT extends TestBase {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         flow.setServiceUuid("a3a2a728-a3ea-4975-bfab-f240a67e894f");
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -294,7 +294,7 @@ public class AuthenticationT extends TestBase {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         flow.setServiceSecret("746573715365637265724b6579304031");
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -313,7 +313,7 @@ public class AuthenticationT extends TestBase {
     public void wrongMethodInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "PUT", createUrlToSign(HASHCODE_CONTAINERS), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "PUT", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -332,7 +332,7 @@ public class AuthenticationT extends TestBase {
     public void wrongUrlInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", createUrlToSign(VALIDATIONREPORT), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", VALIDATIONREPORT, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -351,7 +351,7 @@ public class AuthenticationT extends TestBase {
     public void missingBodyInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, null, "POST", createUrlToSign(HASHCODE_CONTAINERS), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, null, "POST", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -370,7 +370,7 @@ public class AuthenticationT extends TestBase {
     public void wrongOrderInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), createUrlToSign(HASHCODE_CONTAINERS), "POST", null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), HASHCODE_CONTAINERS, "POST", null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -388,7 +388,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void signatureFromDifferentRequest() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
-        String signature = signRequest(flow, request.toString(), "POST", createUrlToSign(HASHCODE_CONTAINERS), null, false);
+        String signature = signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS, null, false);
         JSONObject request2 = hashcodeContainerRequestFromFile("hashcode.asice");
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signature)

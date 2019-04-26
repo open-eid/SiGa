@@ -15,8 +15,8 @@ public class SecurityConfigurationProperties {
     @Getter
     @Setter
     public static class HmacConf {
-        private long expiration;
-        private long clockSkew;
+        private Long expiration;
+        private Long clockSkew;
     }
 
     @Getter

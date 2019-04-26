@@ -7,6 +7,7 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,8 +37,8 @@ import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    private final long TOKEN_EXPIRATION_IN_SECONDS;
-    private final long TOKEN_CLOCK_SKEW;
+    private final Long TOKEN_EXPIRATION_IN_SECONDS;
+    private final Long TOKEN_CLOCK_SKEW;
     private final SigaEventLogger sigaEventLogger;
 
     public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
@@ -86,7 +87,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     private String getRequestUri(HttpServletRequest request) {
-        String uri = request.getRequestURI();
+        String uri = request.getRequestURI().replace(request.getContextPath(), StringUtils.EMPTY);
         if (request.getQueryString() != null) {
             uri += "?" + request.getQueryString();
         }
