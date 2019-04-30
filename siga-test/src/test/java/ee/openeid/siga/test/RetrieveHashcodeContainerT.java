@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
@@ -203,6 +204,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .statusCode(200);
     }
 
+    @Ignore //TODO: SIGARIA-67
     @Test
     public void optionsToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));

@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
@@ -141,6 +142,7 @@ public class UploadHashcodeContainerT extends TestBase {
                 .statusCode(405);
     }
 
+    @Ignore //TODO: SIGARIA-67
     @Test
     public void optionsToCreateHashcodeContainer() throws Exception {
         given()

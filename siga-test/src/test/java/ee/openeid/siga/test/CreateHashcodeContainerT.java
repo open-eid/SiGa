@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -224,6 +225,7 @@ public class CreateHashcodeContainerT extends TestBase {
         assertThat(response.statusCode(), equalTo(405));
     }
 
+    @Ignore //TODO: SIGARIA-67
     @Test
     public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         given()
