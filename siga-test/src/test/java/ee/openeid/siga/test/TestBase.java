@@ -34,6 +34,7 @@ public class TestBase {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        RestAssured.useRelaxedHTTPSValidation();
     }
 
 
