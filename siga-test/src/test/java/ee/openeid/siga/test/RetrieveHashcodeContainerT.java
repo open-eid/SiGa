@@ -15,7 +15,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 
 public class RetrieveHashcodeContainerT extends TestBase {
 
@@ -216,10 +216,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .contentType(ContentType.JSON)
                 .when()
                 .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
-                .then()
+               .then()
                 .log().all()
-                .statusCode(200)
-                .header("Allow", equalTo("GET,HEAD,DELETE,OPTIONS"));
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test

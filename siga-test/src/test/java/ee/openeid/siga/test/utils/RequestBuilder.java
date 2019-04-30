@@ -120,7 +120,7 @@ public class RequestBuilder {
             signatureProductionPlace.put("postalCode", postalCode);
         }
         if (country != null) {
-            signatureProductionPlace.put("country", country);
+            signatureProductionPlace.put("countryName", country);
         }
         return signatureProductionPlace;
     }

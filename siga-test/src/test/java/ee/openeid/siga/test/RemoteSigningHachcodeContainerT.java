@@ -8,7 +8,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
@@ -16,8 +15,7 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -271,7 +269,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .statusCode(405);
     }
 
-    @Ignore //TODO: Flaky test due to Allow method order change
     @Test
     public void optionsToRemoteSigningHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
@@ -287,8 +284,8 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
                 .then()
                 .log().all()
-                .statusCode(200)
-                .header("Allow", equalTo("PUT,POST,OPTIONS"));
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test

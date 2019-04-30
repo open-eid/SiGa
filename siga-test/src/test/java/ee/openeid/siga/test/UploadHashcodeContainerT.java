@@ -13,8 +13,7 @@ import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 
 public class UploadHashcodeContainerT extends TestBase {
 
@@ -142,7 +141,7 @@ public class UploadHashcodeContainerT extends TestBase {
                 .statusCode(405);
     }
 
-    @Test //TODO: Flaky test due to Allow method order change
+    @Test
     public void optionsToCreateHashcodeContainer() throws Exception {
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", UPLOAD + HASHCODE_CONTAINERS, null, false))
@@ -155,9 +154,8 @@ public class UploadHashcodeContainerT extends TestBase {
                 .options(createUrl(UPLOAD + HASHCODE_CONTAINERS))
                 .then()
                 .log().all()
-                .statusCode(200)
-                .header("Allow", equalTo("POST,OPTIONS"));
-    }
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));    }
 
     @Test
     public void patchToCreateHashcodeContainer() throws Exception {

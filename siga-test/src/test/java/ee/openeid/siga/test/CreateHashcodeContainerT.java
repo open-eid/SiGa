@@ -226,7 +226,7 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Test
     public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = given()
+        given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS, null, false))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
@@ -237,10 +237,8 @@ public class CreateHashcodeContainerT extends TestBase {
                 .options(createUrl(HASHCODE_CONTAINERS))
                 .then()
                 .log().all()
-                .extract()
-                .response();
-        assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getHeader("Allow"), equalTo("POST,OPTIONS"));
+                .statusCode(405)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
     @Test
