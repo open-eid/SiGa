@@ -1,6 +1,7 @@
 package ee.openeid.siga.client.hmac;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -16,14 +17,16 @@ public class HmacTokenAuthorizationHeaderInterceptor implements ClientHttpReques
     public static final String X_AUTHORIZATION_TIMESTAMP = "X-Authorization-Timestamp";
     public static final String X_AUTHORIZATION_SERVICE_UUID = "X-Authorization-ServiceUUID";
     public static final String X_AUTHORIZATION_SIGNATURE = "X-Authorization-Signature";
+    private final String SIGA_API_URL;
     private final String HMAC_ALGORITHM;
     private final String HMAC_SERVICE_UUID;
     private final String HMAC_SHARED_SIGNING_KEY;
 
-    public HmacTokenAuthorizationHeaderInterceptor(String HMAC_ALGORITHM, String HMAC_SERVICE_UUID, String HMAC_SHARED_SIGNING_KEY) {
-        this.HMAC_ALGORITHM = HMAC_ALGORITHM;
-        this.HMAC_SERVICE_UUID = HMAC_SERVICE_UUID;
-        this.HMAC_SHARED_SIGNING_KEY = HMAC_SHARED_SIGNING_KEY;
+    public HmacTokenAuthorizationHeaderInterceptor(String sigaApiUri, String hmacAlgorithm, String hmacServiceUuid, String hmacSharedSigningKey) {
+        this.SIGA_API_URL = StringUtils.removeEnd(sigaApiUri, "/");
+        this.HMAC_ALGORITHM = hmacAlgorithm;
+        this.HMAC_SERVICE_UUID = hmacServiceUuid;
+        this.HMAC_SHARED_SIGNING_KEY = hmacSharedSigningKey;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class HmacTokenAuthorizationHeaderInterceptor implements ClientHttpReques
         try {
             HmacSignature token = HmacSignature.builder()
                     .macAlgorithm(HMAC_ALGORITHM)
-                    .uri(request.getURI().getPath())
+                    .uri(request.getURI().toString().replace(SIGA_API_URL, StringUtils.EMPTY))
                     .requestMethod(request.getMethod().name())
                     .serviceUuid(HMAC_SERVICE_UUID)
                     .payload(body)

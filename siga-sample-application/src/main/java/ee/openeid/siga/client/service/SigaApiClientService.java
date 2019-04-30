@@ -8,19 +8,27 @@ import ee.openeid.siga.webapp.json.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -52,17 +60,27 @@ public class SigaApiClientService {
                                 @Value("${siga.client.hmac.algorithm}") String hmacAlgorithm,
                                 @Value("${siga.client.hmac.service-uuid}") String hmacServiceUuid,
                                 @Value("${siga.client.hmac.shared-signing-key}") String hmacSharedSigningKey,
-                                @Value("${siga.api.uri}") String sigaApiUri) {
+                                @Value("${siga.api.uri}") String sigaApiUri,
+                                @Value("${siga.api.trustStore}") String trustStore,
+                                @Value("${siga.api.trustStorePassword}") String trustStorePassword) {
         this.hmacAlgorithm = hmacAlgorithm;
         this.hmacServiceUuid = hmacServiceUuid;
         this.hmacSharedSigningKey = hmacSharedSigningKey;
-        this.sigaApiUri = sigaApiUri;
-        setUpRestTemplateForRequestScope(restTemplateBuilder);
+        this.sigaApiUri = sigaApiUri + "/";
+        setUpRestTemplateForRequestScope(restTemplateBuilder, trustStore, trustStorePassword);
     }
 
-    private void setUpRestTemplateForRequestScope(RestTemplateBuilder restTemplateBuilder) {
+    @SneakyThrows
+    private void setUpRestTemplateForRequestScope(RestTemplateBuilder restTemplateBuilder, String trustStore, String trustStorePassword) {
+        SSLContext sslContext = new SSLContextBuilder()
+                .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword.toCharArray())
+                .build();
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext);
+        HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
+
         restTemplate = restTemplateBuilder
-                .interceptors(new HmacTokenAuthorizationHeaderInterceptor(hmacAlgorithm, hmacServiceUuid, hmacSharedSigningKey))
+                .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
+                .interceptors(new HmacTokenAuthorizationHeaderInterceptor(sigaApiUri, hmacAlgorithm, hmacServiceUuid, hmacSharedSigningKey))
                 .errorHandler(new RestTemplateResponseErrorHandler()).build();
     }
 
@@ -72,7 +90,7 @@ public class SigaApiClientService {
         String fileId = mobileSigningRequest.getFileId();
         setUpClientNotificationChannel(fileId);
 
-        String containerId = null;
+        String containerId;
         if (mobileSigningRequest.isContainerCreated()) {
             log.info("Container is already uploaded. Getting container {} from cache", fileId);
             containerId = containerService.get(fileId).getId();
