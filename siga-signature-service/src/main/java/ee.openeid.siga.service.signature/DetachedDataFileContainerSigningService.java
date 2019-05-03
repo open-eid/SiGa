@@ -78,7 +78,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
 
         sessionHolder.getSignatures().add(signatureWrapper);
-        sessionHolder.clearSigning(signatureWrapper.getGeneratedSignatureId());
+        sessionHolder.clearSigning(signatureId);
         sessionService.update(containerId, sessionHolder);
         return SessionResult.OK.name();
     }
