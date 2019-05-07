@@ -1,7 +1,6 @@
 package ee.openeid.siga.client.controller;
 
 import ee.openeid.siga.client.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.client.hashcode.util.ContainerUtil;
 import ee.openeid.siga.client.model.Container;
 import ee.openeid.siga.client.model.MobileSigningRequest;
 import ee.openeid.siga.client.service.ContainerService;
@@ -15,18 +14,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 
 @Slf4j
 @Controller
@@ -51,14 +56,12 @@ public class MainController {
         log.info("Nr of files uploaded: {}", fileMap.size());
         MultipartFile file = fileMap.entrySet().iterator().next().getValue();
         log.info("Converting container: {}", file.getOriginalFilename());
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = new ByteArrayInputStream(file.getBytes());
-        hashcodeContainer.open(inputStream);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        hashcodeContainer.save(outputStream);
+        DetachedDataFileContainer hashcodeContainer = DetachedDataFileContainer.builder().inputStream(inputStream).build();
+
         String id = UUID.randomUUID().toString();
         log.info("Generated file id: {}", id);
-        return containerService.cache(id, file.getOriginalFilename(), outputStream.toByteArray());
+        return containerService.cache(id, file.getOriginalFilename(), hashcodeContainer.getHashcodeContainer());
     }
 
     @RequestMapping(value = "/create-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,7 +73,7 @@ public class MainController {
         List<HashcodeDataFile> dataFiles = new ArrayList<>();
         for (MultipartFile file : fileMap.values()) {
             log.info("Processing file: {}", file.getOriginalFilename());
-            dataFiles.add(ContainerUtil.createHashcodeDataFile(file.getOriginalFilename(), file.getSize(), file.getBytes()));
+            dataFiles.add(createHashcodeDataFile(file.getOriginalFilename(), file.getSize(), file.getBytes()).convertToRequest());
         }
         return sigaApiClientService.createContainer(dataFiles);
     }

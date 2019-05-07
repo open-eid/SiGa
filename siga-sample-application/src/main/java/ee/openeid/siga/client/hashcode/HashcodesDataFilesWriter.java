@@ -1,5 +1,6 @@
 package ee.openeid.siga.client.hashcode;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
 import org.w3c.dom.Document;
@@ -10,12 +11,11 @@ import org.w3c.dom.ls.LSSerializer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.OutputStream;
 import java.util.List;
 
 @Slf4j
-public class HashcodesDataFile {
+public class HashcodesDataFilesWriter {
 
     public static final String HASHCODES_SHA256 = "META-INF/hashcodes-sha256.xml";
     public static final String HASHCODES_SHA512 = "META-INF/hashcodes-sha512.xml";
@@ -24,24 +24,26 @@ public class HashcodesDataFile {
     private Element rootElement;
     private DigestAlgorithm digestAlgorithm;
 
-    public HashcodesDataFile(DigestAlgorithm digestAlgorithm) {
+    public HashcodesDataFilesWriter(DigestAlgorithm digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
     }
 
+    @SneakyThrows
     public void generateHashcodeFile(List<HashcodeDataFile> dataFiles) {
-        log.debug("Writing hashcode files");
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            dom = documentBuilder.newDocument();
-            rootElement = dom.createElement("hashcodes");
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        dom = documentBuilder.newDocument();
+        rootElement = dom.createElement("hashcodes");
+        dataFiles.forEach(this::addFileEntry);
+        dom.appendChild(rootElement);
+    }
 
-            dataFiles.forEach(this::addFileEntry);
-            dom.appendChild(rootElement);
-
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Error creating hashcodes file");
-        }
+    public void writeTo(OutputStream outputStream) {
+        DOMImplementationLS implementation = (DOMImplementationLS) dom.getImplementation();
+        LSOutput lsOutput = implementation.createLSOutput();
+        lsOutput.setByteStream(outputStream);
+        LSSerializer writer = implementation.createLSSerializer();
+        writer.write(dom, lsOutput);
     }
 
     private void addFileEntry(HashcodeDataFile dataFile) {
@@ -54,13 +56,5 @@ public class HashcodesDataFile {
         }
         child.setAttribute("size", dataFile.getFileSize().toString());
         rootElement.appendChild(child);
-    }
-
-    public void writeTo(OutputStream outputStream) {
-        DOMImplementationLS implementation = (DOMImplementationLS) dom.getImplementation();
-        LSOutput lsOutput = implementation.createLSOutput();
-        lsOutput.setByteStream(outputStream);
-        LSSerializer writer = implementation.createLSSerializer();
-        writer.write(dom, lsOutput);
     }
 }
