@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
-
 @Data
 @Builder
 public class DetachedDataFileContainerSessionHolder implements Session {
@@ -34,13 +32,10 @@ public class DetachedDataFileContainerSessionHolder implements Session {
     private Map<String, DataToSignHolder> dataToSignHolder = new HashMap<>();
 
     public void addDataToSign(String signatureId, DataToSignHolder dataToSign) {
-        requireNonNull(signatureId);
-        requireNonNull(dataToSign);
         this.dataToSignHolder.put(signatureId, dataToSign);
     }
 
     public DataToSignHolder getDataToSignHolder(String signatureId) {
-        requireNonNull(signatureId);
         return dataToSignHolder.get(signatureId);
     }
 
