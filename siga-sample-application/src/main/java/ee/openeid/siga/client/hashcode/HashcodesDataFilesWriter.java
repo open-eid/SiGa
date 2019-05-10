@@ -1,7 +1,6 @@
 package ee.openeid.siga.client.hashcode;
 
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,15 +13,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.OutputStream;
 import java.util.List;
 
-@Slf4j
-public class HashcodesDataFilesWriter {
+class HashcodesDataFilesWriter {
 
     public static final String HASHCODES_SHA256 = "META-INF/hashcodes-sha256.xml";
     public static final String HASHCODES_SHA512 = "META-INF/hashcodes-sha512.xml";
     public static final String HASHCODES_PREFIX = "META-INF/hashcodes-";
+    private final DigestAlgorithm digestAlgorithm;
     private Document dom;
     private Element rootElement;
-    private DigestAlgorithm digestAlgorithm;
 
     public HashcodesDataFilesWriter(DigestAlgorithm digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;

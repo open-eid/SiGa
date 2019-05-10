@@ -13,12 +13,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class DetachedDataFileContainerWriter {
+class DetachedDataFileContainerWriter {
 
     public static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
     private static final String ZIP_ENTRY_MIMETYPE = "mimetype";
@@ -65,6 +66,10 @@ public class DetachedDataFileContainerWriter {
     public void writeMimeType() {
         byte[] mimeType = MimeType.ASICE.getMimeTypeString().getBytes();
         new BytesEntryCallback(createZipEntry(mimeType, ZIP_ENTRY_MIMETYPE), mimeType).write();
+    }
+
+    public void writeRegularDataFiles(Map<String, byte[]> regularDataFiles) {
+        regularDataFiles.forEach((fileName, fileContent) -> new BytesEntryCallback(createZipEntry(fileContent, fileName), fileContent).write());
     }
 
     public void writeSignatures(List<byte[]> wrappers) {

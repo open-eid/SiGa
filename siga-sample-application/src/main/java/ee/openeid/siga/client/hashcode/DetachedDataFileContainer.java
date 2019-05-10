@@ -1,14 +1,18 @@
 package ee.openeid.siga.client.hashcode;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,20 +23,69 @@ import static ee.openeid.siga.client.hashcode.DetachedDataFileContainerWriter.SI
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.convertToHashcodeEntries;
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 
+
 public class DetachedDataFileContainer {
 
-    private List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
-    private List<byte[]> signatures = new ArrayList<>();
+    private final List<byte[]> signatures = new ArrayList<>();
+    private final List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+    @Getter
+    private Map<String, byte[]> regularDataFiles = new HashMap<>();
 
-    @Builder
+    @Builder(builderClassName = "FromRegularContainerBuilder", builderMethodName = "fromRegularContainerBuilder")
     @SneakyThrows
-    public DetachedDataFileContainer(InputStream inputStream) {
-        ZipInputStream zipStream = new ZipInputStream(inputStream);
+    public DetachedDataFileContainer(InputStream containerInputStream) {
+        processContainer(containerInputStream);
+    }
+
+    @Builder(builderClassName = "FromHashcodeContainerBuilder", builderMethodName = "fromHashcodeContainerBuilder")
+    @SneakyThrows
+    public DetachedDataFileContainer(String base64Container, Map<String, byte[]> regularDataFiles) {
+        InputStream containerInputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64Container));
+        processContainer(containerInputStream);
+        this.regularDataFiles = regularDataFiles;
+    }
+
+    private void processContainer(InputStream regularContainerInputStream) throws IOException {
+        ZipInputStream zipStream = new ZipInputStream(regularContainerInputStream);
         ZipEntry entry;
         while ((entry = zipStream.getNextEntry()) != null) {
             operateWithEntry(entry, zipStream);
         }
         zipStream.close();
+    }
+
+    public byte[] getRegularContainer() {
+        validateDataFileHashes(regularDataFiles);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DetachedDataFileContainerWriter cw = new DetachedDataFileContainerWriter(outputStream);
+        cw.writeMimeType();
+        cw.writeManifest(hashcodeDataFiles);
+        cw.writeRegularDataFiles(regularDataFiles);
+        cw.writeSignatures(signatures);
+        cw.finalizeZipFile();
+        return outputStream.toByteArray();
+    }
+
+    private void validateDataFileHashes(Map<String, byte[]> regularDataFiles) {
+        hashcodeDataFiles.stream()
+                .filter(hc -> !regularDataFiles.containsKey(hc.getFileName()))
+                .findFirst().ifPresent(hc -> {
+            throw new RuntimeException("Cannot create regular container. File not found in hashcode container: " + hc.getFileName());
+        });
+
+        hashcodeDataFiles.stream()
+                .filter(hc -> validateFileHash(regularDataFiles, hc)).findFirst()
+                .ifPresent(hc -> {
+                    throw new RuntimeException("Cannot create regular container. File hash does not match file hash in hashcode container: " + hc.getFileName());
+                });
+    }
+
+    @SneakyThrows
+    private boolean validateFileHash(Map<String, byte[]> regularDataFiles, HashcodeDataFile hc) {
+        byte[] dataFile = regularDataFiles.get(hc.getFileName());
+        MessageDigest digest256 = MessageDigest.getInstance("SHA-256");
+        String hash256 = Base64.getEncoder().encodeToString(digest256.digest(dataFile));
+        return !hc.getFileHashSha256().equals(hash256);
     }
 
     public byte[] getHashcodeContainer() {
@@ -61,7 +114,9 @@ public class DetachedDataFileContainer {
             if (isSignatureEntry(entryName)) {
                 signatures.add(baos.toByteArray());
             } else if (isDataFileEntry(entryName)) {
-                hashcodeDataFiles.add(createHashcodeDataFile(entry, baos.toByteArray()));
+                byte[] dataFile = baos.toByteArray();
+                regularDataFiles.put(entryName, dataFile);
+                hashcodeDataFiles.add(createHashcodeDataFile(entry, dataFile));
             } else if (isHashcodeDatafileEntry(entryName)) {
                 addDataFilesFromHashcodeEntries(convertToHashcodeEntries(baos.toByteArray()), entryName);
             }

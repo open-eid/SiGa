@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @Builder
@@ -16,5 +17,7 @@ public class Container implements Serializable {
     private String id;
     private String fileName;
     @JsonIgnore
-    private transient byte[] file;
+    private Map<String, byte[]> originalDataFiles;
+    @JsonIgnore
+    private transient byte[] hashcodeContainer;
 }
