@@ -29,7 +29,7 @@
                             {{ dropzoneError }}
                         </b-alert>
                         <vue-dropzone id="filedropzone" v-if="!containerConverted" ref="fileDropzone" :options="dropzoneOptions" v-on:vdropzone-success-multiple="onUploadContainerSuccess" v-on:vdropzone-error="onDropzoneError"></vue-dropzone>
-                        <b-button target="_blank" v-if="containerConverted" v-bind:href="downloadUrl" size="sm">Download unsigned hashcode container</b-button>
+                        <b-button target="_blank" v-if="containerConverted" v-bind:href="downloadHashcodeUrl" size="sm">Download unsigned hashcode container</b-button>
                     </div>
                 </div>
             </b-col>
@@ -70,7 +70,8 @@
                                 <b-row>
                                     <b-col>
                                         <b-alert v-if="item.errorMessage !== null" show variant="danger">{{item.errorMessage}}</b-alert>
-                                        <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadUrl" size="sm" variant="link">Download signed hashcode container</b-button>
+                                        <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadHashcodeUrl" size="sm" variant="link">Download signed hashcode container</b-button>
+                                        <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadRegularUrl" size="sm" variant="link">Download signed regular container</b-button>
                                     </b-col>
                                     <b-badge v-if="item.apiRequestObject !== null" v-b-toggle="'process-request-' + index" href="#" variant="success">Request</b-badge>
                                     <b-badge v-b-toggle="'process-response-' + index" href="#" variant="warning">Response</b-badge>
@@ -103,7 +104,8 @@
                     fileId: null,
                     containerConversionType: 'convertContainer',
                     containerConverted: false,
-                    downloadUrl: null,
+                    downloadHashcodeUrl: null,
+                    downloadRegularUrl: null,
                     mobileSigningForm: {
                         fileId: null,
                         personIdentifier: '60001019906',
@@ -136,7 +138,8 @@
                 onUploadContainerSuccess: function (files, response) {
                     console.log('File upload id: ' + response.id);
                     this.$refs.fileDropzone.removeAllFiles();
-                    this.$data.downloadUrl = '/download/' + response.id;
+                    this.$data.downloadHashcodeUrl = '/download/hashcode/' + response.id;
+                    this.$data.downloadRegularUrl = '/download/regular/' + response.id;
                     this.$data.mobileSigningForm.fileId = response.id;
                     this.$data.containerConverted = true;
                     let processingSteps = this.$data.processingSteps;

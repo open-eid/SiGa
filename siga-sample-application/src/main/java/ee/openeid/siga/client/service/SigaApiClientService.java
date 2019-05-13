@@ -27,12 +27,16 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
@@ -114,19 +118,25 @@ public class SigaApiClientService {
         websocketChannelId = "/progress/" + fileId;
     }
 
-    public Container createContainer(List<HashcodeDataFile> files) {
+    @SneakyThrows
+    public Container createContainer(Collection<MultipartFile> files) {
         CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
-        files.forEach(f -> request.getDataFiles().add(f));
+        Map<String, byte[]> originalDataFiles = new HashMap<>();
+        for (MultipartFile file : files) {
+            log.info("Processing file: {}", file.getOriginalFilename());
+            request.getDataFiles().add(createHashcodeDataFile(file.getOriginalFilename(), file.getSize(), file.getBytes()).convertToRequest());
+            originalDataFiles.put(file.getOriginalFilename(), file.getBytes());
+        }
         CreateHashcodeContainerResponse createContainerResponse = restTemplate.postForObject(fromUriString(sigaApiUri).path("hashcodecontainers").build().toUriString(), request, CreateHashcodeContainerResponse.class);
         String containerId = createContainerResponse.getContainerId();
         GetHashcodeContainerResponse getContainerResponse = restTemplate.getForObject(getSigaApiUri(containerId), GetHashcodeContainerResponse.class);
         log.info("Created container with id {}", containerId);
-        return containerService.cache(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()));
+        return containerService.cache(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()), originalDataFiles);
     }
 
     private String uploadContainer(String fileId) {
         String endpoint = fromUriString(sigaApiUri).path("upload/hashcodecontainers").build().toUriString();
-        String encodedContainerContent = encodeBase64String(containerService.get(fileId).getFile());
+        String encodedContainerContent = encodeBase64String(containerService.get(fileId).getHashcodeContainer());
         UploadHashcodeContainerRequest request = new UploadHashcodeContainerRequest();
         request.setContainer(encodedContainerContent);
         UploadHashcodeContainerResponse response = restTemplate.postForObject(endpoint, request, UploadHashcodeContainerResponse.class);
@@ -188,7 +198,9 @@ public class SigaApiClientService {
                 .apiEndpoint(endpoint)
                 .apiResponseObject(response).build();
         messagingTemplate.convertAndSend(websocketChannelId, processingStatus);
-        return containerService.cache(fileId, container.getFileName(), Base64.getDecoder().decode(response.getContainer()));
+
+        Container cachedContainer = containerService.get(fileId);
+        return containerService.cache(fileId, container.getFileName(), Base64.getDecoder().decode(response.getContainer()), cachedContainer.getOriginalDataFiles());
     }
 
     private void deleteContainer(String containerId) {

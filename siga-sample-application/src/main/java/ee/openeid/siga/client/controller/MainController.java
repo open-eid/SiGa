@@ -1,12 +1,10 @@
 package ee.openeid.siga.client.controller;
 
 import ee.openeid.siga.client.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.client.hashcode.util.ContainerUtil;
 import ee.openeid.siga.client.model.Container;
 import ee.openeid.siga.client.model.MobileSigningRequest;
 import ee.openeid.siga.client.service.ContainerService;
 import ee.openeid.siga.client.service.SigaApiClientService;
-import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +13,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
+
 
 @Slf4j
 @Controller
@@ -51,14 +53,11 @@ public class MainController {
         log.info("Nr of files uploaded: {}", fileMap.size());
         MultipartFile file = fileMap.entrySet().iterator().next().getValue();
         log.info("Converting container: {}", file.getOriginalFilename());
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         InputStream inputStream = new ByteArrayInputStream(file.getBytes());
-        hashcodeContainer.open(inputStream);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        hashcodeContainer.save(outputStream);
+        DetachedDataFileContainer hashcodeContainer = DetachedDataFileContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
         String id = UUID.randomUUID().toString();
         log.info("Generated file id: {}", id);
-        return containerService.cache(id, file.getOriginalFilename(), outputStream.toByteArray());
+        return containerService.cache(id, file.getOriginalFilename(), hashcodeContainer);
     }
 
     @RequestMapping(value = "/create-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -67,22 +66,33 @@ public class MainController {
     public Container createHashcodeContainerFromFiles(MultipartHttpServletRequest request) {
         Map<String, MultipartFile> fileMap = request.getFileMap();
         log.info("Nr of files uploaded: {}", fileMap.size());
-        List<HashcodeDataFile> dataFiles = new ArrayList<>();
-        for (MultipartFile file : fileMap.values()) {
-            log.info("Processing file: {}", file.getOriginalFilename());
-            dataFiles.add(ContainerUtil.createHashcodeDataFile(file.getOriginalFilename(), file.getSize(), file.getBytes()));
-        }
-        return sigaApiClientService.createContainer(dataFiles);
+        return sigaApiClientService.createContainer(fileMap.values());
     }
 
-    @GetMapping(value = "/download/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/download/hashcode/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
-    public ResponseEntity downloadContainer(@PathVariable("id") String id) {
+    public ResponseEntity downloadHashcodeContainer(@PathVariable("id") String id) {
         Container cachedFile = containerService.get(id);
-        log.info("Downloading file {} with id {}", cachedFile.getFileName(), cachedFile.getId());
+        log.info("Downloading hashcode container {} with id {}", cachedFile.getFileName(), cachedFile.getId());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cachedFile.getFileName() + "\"")
-                .body(cachedFile.getFile());
+                .body(cachedFile.getHashcodeContainer());
+    }
+
+    @GetMapping(value = "/download/regular/{id}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    public ResponseEntity downloadRegularContainer(@PathVariable("id") String id) {
+        Container cachedFile = containerService.get(id);
+        log.info("Downloading regular container {} with id {}", cachedFile.getFileName(), cachedFile.getId());
+
+        DetachedDataFileContainer detachedDataFileContainer = DetachedDataFileContainer.fromHashcodeContainerBuilder()
+                .base64Container(Base64.getEncoder().encodeToString(cachedFile.getHashcodeContainer()))
+                .regularDataFiles(cachedFile.getOriginalDataFiles())
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cachedFile.getFileName() + "\"")
+                .body(detachedDataFileContainer.getRegularContainer());
     }
 
     @RequestMapping(value = "/mobile-signing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)

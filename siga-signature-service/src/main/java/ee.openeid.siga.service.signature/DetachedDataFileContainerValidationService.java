@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
@@ -25,12 +26,19 @@ public class DetachedDataFileContainerValidationService implements DetachedDataF
     public ValidationConclusion validateContainer(String container) {
         DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
         detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes())));
+        validateContainerSignatures(detachedDataFileContainer.getSignatures());
         return createValidationConclusion(detachedDataFileContainer.getSignatures(), detachedDataFileContainer.getDataFiles());
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
         DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        validateContainerSignatures(sessionHolder.getSignatures());
         return createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
+    }
+
+    private void validateContainerSignatures(List<SignatureWrapper> signatureWrappers) {
+        if (signatureWrappers == null || signatureWrappers.size() == 0)
+            throw new InvalidContainerException("Missing signatures");
     }
 
     private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
