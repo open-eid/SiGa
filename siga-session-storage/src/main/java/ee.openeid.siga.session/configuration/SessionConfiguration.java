@@ -35,7 +35,7 @@ public class SessionConfiguration {
     @Bean(destroyMethod = "close")
     public Ignite ignite() throws IgniteException {
         Ignition.setClientMode(true);
-        Ignite ignite = Ignition.start(sessionConfigurationProperties.getConfigurationLocation());
+        Ignite ignite = Ignition.start(sessionConfigurationProperties.getLocation());
 
         ignite.events(ignite.cluster().forCacheNodes(CacheName.CONTAINER.name())).remoteListen((UUID uuid, CacheEvent event) -> {
             BinaryObject sessionObject = (BinaryObject) event.oldValue();

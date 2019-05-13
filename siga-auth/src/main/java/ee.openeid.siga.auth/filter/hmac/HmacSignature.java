@@ -17,6 +17,7 @@ import static java.lang.Long.parseLong;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
 import static java.time.Instant.ofEpochSecond;
+import static java.util.Objects.requireNonNull;
 
 @Getter
 @Builder
@@ -46,6 +47,7 @@ public class HmacSignature {
     }
 
     public boolean isSignatureValid(byte[] signingSecret) throws DecoderException, NoSuchAlgorithmException, InvalidKeyException {
+        requireNonNull(signingSecret, "signingSecret");
         final byte[] calculatedSignature = getSignature(signingSecret);
         return MessageDigest.isEqual(calculatedSignature, Hex.decodeHex(signature));
     }

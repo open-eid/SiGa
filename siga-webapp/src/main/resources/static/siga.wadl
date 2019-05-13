@@ -192,6 +192,33 @@
                     </response>
                 </method>
             </resource>
+            <resource path="hashcodecontainers/{containerId}/remotesigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteHashcodeContainerRemoteSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteHashcodeContainerRemoteSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
             <resource path="hashcodecontainers/{containerId}/mobileidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -252,6 +279,120 @@
                     </response>
                 </method>
             </resource>
+            <resource path="hashcodecontainers/{containerId}/mobileidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteHashcodeContainerMobileIdSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteHashcodeContainerMobileIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createHashcodeContainerSmartIdSigning" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerSmartIdSigningRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerSmartIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getHashcodeContainerSmartIdSigningStatus" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getHashcodeContainerSmartIdSigningStatusResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteHashcodeContainerSmartIdSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteHashcodeContainerSmartIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
             <resource path="hashcodecontainers/{containerId}/signatures">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -259,6 +400,124 @@
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getHashcodeContainerSignaturesResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/signatures/{sigantureId}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
+                       type="xs:string"/>
+                <method id="getHashcodeContainerSignatureDetails" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getHashcodeContainerSignatureDetailsResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/datafiles">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createHashcodeContainerDataFile" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerDataFileRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerDataFileResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/datafiles">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getHashcodeContainerDataFiles" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getHashcodeContainerDataFilesResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/datafiles/{datafileName}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="datafileName" style="template"
+                       type="xs:string"/>
+                <method id="deleteHashcodeContainerDataFile" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteHashcodeContainerDataFileResponse"
                                             mediaType="application/json"
                                             xmlns=""/>
                     </response>
@@ -313,6 +572,585 @@
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:deleteHashcodeContainerResponse"
                                             mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers">
+                <method id="createContainer" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerRequest" mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerResponse" mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="upload/containers">
+                <method id="uploadContainer" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:uploadContainerRequest" mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:uploadContainerResponse" mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/validationreport">
+                <method id="createContainerValidationReport" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerValidationReportRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerValidationReportResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/validationreport">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerValidationReport" name="GET">
+                    <request>
+                        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="Authorization" style="header"
+                               type="xs:string"/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerValidationReportResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/remotesigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createContainerRemoteSigning" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerRemoteSigningRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerRemoteSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/remotesigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="updateContainerRemoteSigning" name="PUT">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:updateContainerRemoteSigningRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:updateContainerRemoteSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/remotesigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteContainerRemoteSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteContainerRemoteSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/mobileidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createContainerMobileIdSigning" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerMobileIdSigningRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerMobileIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/mobileidsigning/status">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerMobileIdSigningStatus" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerMobileIdSigningStatusResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/mobileidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteContainerMobileIdSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteContainerMobileIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/smartidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createContainerSmartIdSigning" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerSmartIdSigningRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerSmartIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/smartidsigning/status">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerSmartIdSigningStatus" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerSmartIdSigningStatusResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/smartidsigning">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteContainerSmartIdSigning" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteContainerSmartIdSigningResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hcontainers/{containerId}/signatures">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerSignatures" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerSignaturesResponse"
+                                            mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/signatures/{sigantureId}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
+                       type="xs:string"/>
+                <method id="getHContainerSignatureDetails" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerSignatureDetailsResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/datafiles">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createContainerDataFile" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerDataFileRequest"
+                                            mediaType="application/json" xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerDataFileResponse"
+                                            mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/datafiles">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerDataFiles" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerDataFilesResponse"
+                                            mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/datafiles/{datafileName}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="datafileName" style="template"
+                       type="xs:string"/>
+                <method id="deleteContainerDataFile" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteHContainerDataFileResponse"
+                                            mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainer" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerResponse" mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="deleteContainer" name="DELETE">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:deleteContainerResponse" mediaType="application/json"
+                                            xmlns=""/>
                     </response>
                     <response status="400">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"

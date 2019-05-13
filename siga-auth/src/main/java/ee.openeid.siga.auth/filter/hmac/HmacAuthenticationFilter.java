@@ -31,6 +31,7 @@ import static java.lang.Long.parseLong;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.Instant.ofEpochSecond;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
@@ -42,9 +43,10 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
     public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
-        TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration();
-        TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew();
-        this.sigaEventLogger = sigaEventLogger;
+        requireNonNull(securityConfigurationProperties.getHmac(), "siga.security.hmac properties not set!");
+        requireNonNull(TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration());
+        requireNonNull(TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew());
+        requireNonNull(this.sigaEventLogger = sigaEventLogger);
         setAuthenticationSuccessHandler(noRedirectAuthenticationSuccessHandler());
     }
 
