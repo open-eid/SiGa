@@ -50,8 +50,8 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         String signatureId5s = responseSigingDelay5s.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         String signatureId7s = responseSigningDelay7s.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
 
-        await().atMost(10, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId5s).body().as(GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus()));
-        await().atMost(10, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId7s).body().as(GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus()));
+        await().atMost(16, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId5s).body().as(GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus()));
+        await().atMost(16, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId7s).body().as(GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus()));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
         validationResponse.then().statusCode(200);
