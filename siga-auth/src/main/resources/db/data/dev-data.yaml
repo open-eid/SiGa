@@ -54,7 +54,7 @@ databaseChangeLog:
                   value: a7fd7728-a3ea-4975-bfab-f240a67e894f
               - column:
                   name: signing_secret
-                  value: doUVniPFtYTK1eq2BzeB1EG902OswUfN+UR+FTJHCGXlchM0zyTqfCogEi813B/0
+                  value: zXTTdPFdntdwMsN8LCBXw4Eb+BnD/YPU87mWvpOaQwp6PrFNKQZ21fP1CPY/zITFQE0BANHIP7VwRwAsa+657Q==
               - column:
                   name: client_id
                   valueNumeric: 1
@@ -79,7 +79,7 @@ databaseChangeLog:
                   value: 824dcfe9-5c26-4d76-829a-e6630f434746
               - column:
                   name: signing_secret
-                  value: Amhsd4UCDyfsmQpxgbhiBwl2n04q/Kla+5NLrfAzhAEs3MJ/MNF7uc8L5VbutMJv
+                  value: 12jhtOyrvL7uGHwJvgS4dctxbZonndJy+/dA64/gUHFmDDm+8zoLamZa7oUmG8EWbvyR7VK7tvearWXUkxYo+g==
               - column:
                   name: client_id
                   valueNumeric: 1
@@ -104,7 +104,7 @@ databaseChangeLog:
                   value: 400ff9a2-b5fb-4fde-b764-9b519963f82e
               - column:
                   name: signing_secret
-                  value: ZAcilypF2hV1c5uuDlZ9ZULUu3u/4HUZSnRtnF0a7TJjZL/Jv10Y3BOJL3auqFdj
+                  value: cNiiWvK6d+O7fElAYmVo1ty34NScS6+ZDLxnm8Duc4RGGZE1u3t0GIGaq4DqhVR+N/qTrd979dpFmYeQJ5gJGg==
               - column:
                   name: client_id
                   valueNumeric: 2
