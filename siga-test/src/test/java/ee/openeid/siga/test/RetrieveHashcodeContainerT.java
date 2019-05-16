@@ -191,7 +191,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -210,7 +210,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
@@ -229,7 +229,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null, false))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
