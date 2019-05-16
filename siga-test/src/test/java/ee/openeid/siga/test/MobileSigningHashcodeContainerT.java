@@ -214,15 +214,14 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-    @Ignore //TODO: Should we check the format before sending to DDS? SIGARIA-62
     @Test
-    public void invalidPersonIdentifierFormat() throws Exception {
+    public void invalidPersonIdentifierFormatReturnsSoapErrorFromDds() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("P:NO-23a.31,23", "+37200000766", "LT"));
+        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("P!NO-23a.31,23", "+37200000766", "LT"));
 
         response.then()
                 .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+                .body(ERROR_CODE, equalTo(CLIENT_EXCEPTION));
     }
 
     @Test
@@ -235,7 +234,6 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-    @Ignore //TODO: Should we check the format before sending to DDS? SIGARIA-62
     @Test
     public void invalidPhoneNumberFormat() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -278,7 +276,6 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
 
-    @Ignore //TODO: SIGARIA-62
     @Test
     public void invalidLanguageInRequest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -286,7 +283,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+                .body(ERROR_CODE, equalTo(INVALID_LANGUAGE));
     }
 
     @Test
