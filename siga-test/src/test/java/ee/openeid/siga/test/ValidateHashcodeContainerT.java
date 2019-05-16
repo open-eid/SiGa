@@ -34,6 +34,7 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
         assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path("validationConclusion.policy.policyName"), equalTo("POLv4"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-02-22T11:04:25Z"));
     }
