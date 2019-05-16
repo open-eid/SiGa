@@ -187,10 +187,21 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningHashcodeContainerInvalidProfile() throws Exception {
+    public void startRemoteSigningHashcodeContainerInvalidProfileFormat() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerInvalidProfile() throws Exception {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
 
         response.then()
                 .statusCode(400)
