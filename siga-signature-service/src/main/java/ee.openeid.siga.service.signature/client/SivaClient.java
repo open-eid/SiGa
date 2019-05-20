@@ -2,7 +2,7 @@ package ee.openeid.siga.service.signature.client;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
@@ -33,7 +33,7 @@ public class SivaClient {
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
 
-    public ValidationConclusion validateDetachedDataFileContainer(SignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
+    public ValidationConclusion validateDetachedDataFileContainer(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
         ResponseEntity<ValidationResponse> responseEntity;
         try {
@@ -54,7 +54,7 @@ public class SivaClient {
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 
-    private SivaValidationRequest createRequest(SignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
+    private SivaValidationRequest createRequest(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(SIGNATURE_FILE_NAME);
         request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));

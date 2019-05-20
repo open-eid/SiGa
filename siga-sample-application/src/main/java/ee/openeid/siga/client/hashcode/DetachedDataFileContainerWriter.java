@@ -11,7 +11,7 @@ import org.digidoc4j.impl.asic.manifest.AsicManifest;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ class DetachedDataFileContainerWriter {
     private final ZipOutputStream zipOutputStream;
 
     public DetachedDataFileContainerWriter(OutputStream outputStream) {
-        this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
+        this.zipOutputStream = new ZipOutputStream(outputStream, StandardCharsets.UTF_8);
     }
 
     private static ZipEntry createZipEntry(byte[] mimeTypeBytes, String name) {

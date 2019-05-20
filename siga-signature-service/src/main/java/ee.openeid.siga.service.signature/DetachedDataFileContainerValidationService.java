@@ -2,11 +2,12 @@ package ee.openeid.siga.service.signature;
 
 
 import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,17 +32,17 @@ public class DetachedDataFileContainerValidationService implements DetachedDataF
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateContainerSignatures(sessionHolder.getSignatures());
         return createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
     }
 
-    private void validateContainerSignatures(List<SignatureWrapper> signatureWrappers) {
+    private void validateContainerSignatures(List<HashcodeSignatureWrapper> signatureWrappers) {
         if (signatureWrappers == null || signatureWrappers.size() == 0)
             throw new InvalidContainerException("Missing signatures");
     }
 
-    private ValidationConclusion createValidationConclusion(List<SignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
+    private ValidationConclusion createValidationConclusion(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         List<ValidationConclusion> validationConclusions = new ArrayList<>();
         signatureWrappers.forEach(signatureWrapper ->
                 validationConclusions.add(sivaClient.validateDetachedDataFileContainer(signatureWrapper, dataFiles)));

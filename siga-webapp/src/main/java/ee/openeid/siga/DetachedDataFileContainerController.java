@@ -15,13 +15,17 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.List;
 
 @RestController
-public class MainController {
+public class DetachedDataFileContainerController {
 
     private DetachedDataFileContainerService containerService;
     private DetachedDataFileContainerValidationService validationService;
@@ -33,7 +37,7 @@ public class MainController {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
         RequestValidator.validateHashcodeDataFiles(dataFiles);
 
-        String sessionId = containerService.createContainer(dataFiles);
+        String sessionId = containerService.createContainer(RequestTransformer.transformHashcodeDataFiles(dataFiles));
         CreateHashcodeContainerResponse response = new CreateHashcodeContainerResponse();
         response.setContainerId(sessionId);
         return response;
@@ -135,9 +139,9 @@ public class MainController {
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        List<Signature> signatures = containerService.getSignatures(containerId);
+        List<ee.openeid.siga.common.Signature> signatures = containerService.getSignatures(containerId);
         GetHashcodeContainerSignaturesResponse response = new GetHashcodeContainerSignaturesResponse();
-        response.getSignatures().addAll(signatures);
+        response.getSignatures().addAll(RequestTransformer.transformSignatures(signatures));
         return response;
     }
 

@@ -1,10 +1,11 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.util.Base64Util;
-import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.exception.RequestValidationException;
+import ee.openeid.siga.common.util.Base64Util;
+import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
+import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,10 +17,18 @@ public class RequestValidator {
 
     public static void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
         if (CollectionUtils.isEmpty(dataFiles)) {
-            throw new RequestValidationException("Data files are needed");
+            throw new RequestValidationException("Must be at least one data file in request");
         }
         dataFiles.forEach(RequestValidator::validateHashcodeDataFile);
     }
+
+    public static void validateDataFiles(List<DataFile> dataFiles) {
+        if (CollectionUtils.isEmpty(dataFiles)) {
+            throw new RequestValidationException("Must be at least one data file in request");
+        }
+        dataFiles.forEach(RequestValidator::validateDataFile);
+    }
+
 
     public static void validateContainerId(String containerId) {
         if (StringUtils.isBlank(containerId) || containerId.length() > 36) {
@@ -44,6 +53,11 @@ public class RequestValidator {
         validateFileSize(dataFile.getFileSize());
         validateHashSha256(dataFile.getFileHashSha256());
         validateHashSha512(dataFile.getFileHashSha512());
+    }
+
+    private static void validateDataFile(DataFile dataFile) {
+        validateFileName(dataFile.getFileName(), "Data file name is invalid");
+        validateHash(dataFile.getFileContent());
     }
 
     private static void validateHashSha256(String hash) {

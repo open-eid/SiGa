@@ -1,13 +1,10 @@
 package ee.openeid.siga.common;
 
 import lombok.Data;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.digidoc4j.Signature;
 
 @Data
 public class SignatureWrapper {
     private String generatedSignatureId;
-    private byte[] signature;
-    private List<SignatureHashcodeDataFile> dataFiles = new ArrayList<>();
+    private Signature signature;
 }

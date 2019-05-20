@@ -1,7 +1,11 @@
 package ee.openeid.siga.service.signature;
 
 
-import ee.openeid.siga.common.*;
+import ee.openeid.siga.common.HashcodeDataFile;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.MobileIdChallenge;
+import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -16,6 +20,7 @@ import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
+import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
@@ -59,7 +64,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     private Configuration configuration;
 
     public DataToSign createDataToSign(String containerId, SignatureParameters signatureParameters) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         verifyDataFileExistence(sessionHolder);
         DataToSign dataToSign = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters).buildDataToSign();
         sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
@@ -69,13 +74,13 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     }
 
     public String finalizeSigning(String containerId, String signatureId, String signatureValue) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateRemoteSession(sessionHolder, signatureId);
         DataToSign dataToSign = sessionHolder.getDataToSignHolder(signatureId).getDataToSign();
 
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
         Signature signature = finalizeSignature(dataToSign, base64Decoded);
-        SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
+        HashcodeSignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
 
         sessionHolder.getSignatures().add(signatureWrapper);
         sessionHolder.clearSigning(signatureId);
@@ -84,7 +89,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     }
 
     public MobileIdChallenge startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         verifyDataFileExistence(sessionHolder);
         GetMobileCertificateResponse signingCertificate = digiDocService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getPhoneNo());
         signatureParameters.setSigningCertificate(createX509Certificate(signingCertificate.getSignCertData().getBytes()));
@@ -102,7 +107,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
     }
 
     public String processMobileStatus(String containerId, String signatureId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateMobileIdSession(sessionHolder, signatureId);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileIdService.getMobileSignHashStatus(dataToSignHolder.getSessionCode());
@@ -110,7 +115,7 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         if (ProcessStatusType.SIGNATURE == status) {
             DataToSign dataToSign = dataToSignHolder.getDataToSign();
             Signature signature = finalizeSignature(dataToSign, getMobileSignHashStatusResponse.getSignature());
-            SignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
+            HashcodeSignatureWrapper signatureWrapper = createSignatureWrapper(signature.getAdESSignature());
             sessionHolder.getSignatures().add(signatureWrapper);
             sessionHolder.clearSigning(signatureId);
             sessionService.update(containerId, sessionHolder);
@@ -138,8 +143,8 @@ public class DetachedDataFileContainerSigningService implements DetachedDataFile
         return builder;
     }
 
-    private SignatureWrapper createSignatureWrapper(byte[] signature) {
-        SignatureWrapper signatureWrapper = new SignatureWrapper();
+    private HashcodeSignatureWrapper createSignatureWrapper(byte[] signature) {
+        HashcodeSignatureWrapper signatureWrapper = new HashcodeSignatureWrapper();
         SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
         Map<String, String> dataFiles = parser.getEntries();
         signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());

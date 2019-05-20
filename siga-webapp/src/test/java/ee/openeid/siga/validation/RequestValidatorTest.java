@@ -63,7 +63,7 @@ public class RequestValidatorTest {
     @Test
     public void createContainer_NoDataFiles() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Data files are needed");
+        exceptionRule.expectMessage("Must be at least one data file in request");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
         RequestValidator.validateHashcodeDataFiles(request.getDataFiles());

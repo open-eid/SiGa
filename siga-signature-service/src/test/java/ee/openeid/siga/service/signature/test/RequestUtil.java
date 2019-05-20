@@ -1,14 +1,12 @@
 package ee.openeid.siga.service.signature.test;
 
 
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
-import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
@@ -25,7 +23,7 @@ public class RequestUtil {
     public static final String SIGNED_HASHCODE = "hashcode.asice";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
-    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFiles() {
+    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
         List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
         ee.openeid.siga.common.HashcodeDataFile dataFile = new ee.openeid.siga.common.HashcodeDataFile();
         dataFile.setFileName("test.txt");
@@ -36,7 +34,7 @@ public class RequestUtil {
         return hashcodeDataFiles;
     }
 
-    public static SignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
+    public static HashcodeSignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
 
         DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
@@ -54,25 +52,25 @@ public class RequestUtil {
         return response;
     }
 
-    public static CreateHashcodeContainerRequest getHashcodeCreateContainerRequest() {
-        CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
-        HashcodeDataFile dataFile1 = new HashcodeDataFile();
+    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFiles() {
+        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+        ee.openeid.siga.common.HashcodeDataFile dataFile1 = new ee.openeid.siga.common.HashcodeDataFile();
         dataFile1.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile1.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile1.setFileSize(10);
         dataFile1.setFileName("first datafile.txt");
-        request.getDataFiles().add(dataFile1);
-        HashcodeDataFile dataFile2 = new HashcodeDataFile();
+        hashcodeDataFiles.add(dataFile1);
+        ee.openeid.siga.common.HashcodeDataFile dataFile2 = new ee.openeid.siga.common.HashcodeDataFile();
         dataFile2.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile2.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile2.setFileSize(10);
         dataFile2.setFileName("second datafile.txt");
-        request.getDataFiles().add(dataFile2);
-        return request;
+        hashcodeDataFiles.add(dataFile2);
+        return hashcodeDataFiles;
     }
 
     public static DetachedDataFileContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
-        List<SignatureWrapper> signatureWrappers = new ArrayList<>();
+        List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper());
         return DetachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
@@ -80,7 +78,7 @@ public class RequestUtil {
                 .serviceName("Testimine")
                 .serviceUuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
                 .signatures(signatureWrappers)
-                .dataFiles(RequestUtil.createHashcodeDataFiles()).build();
+                .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {

@@ -1,14 +1,14 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.HashcodeDataFile;
+import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
-import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.HashcodeDataFile;
-import ee.openeid.siga.webapp.json.Signature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,9 +31,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     public String createContainer(List<HashcodeDataFile> dataFiles) {
 
         DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
-        dataFiles.forEach(dataFile ->
-                hashcodeContainer.addDataFile(ContainerUtil.transformDataFileToHashcodeDataFile(dataFile))
-        );
+        dataFiles.forEach(hashcodeContainer::addDataFile);
         OutputStream outputStream = new ByteArrayOutputStream();
         hashcodeContainer.save(outputStream);
 
@@ -52,7 +50,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public String getContainer(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
 
         DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
         sessionHolder.getSignatures().forEach(signatureWrapper -> hashcodeContainer.getSignatures().add(signatureWrapper));
@@ -72,11 +70,9 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public List<Signature> getSignatures(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSession(containerId);
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         List<Signature> signatures = new ArrayList<>();
-        sessionHolder.getSignatures().forEach(signatureWrapper -> {
-            signatures.add(transformSignature(signatureWrapper));
-        });
+        sessionHolder.getSignatures().forEach(signatureWrapper -> signatures.add(transformSignature(signatureWrapper)));
         return signatures;
     }
 

@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
@@ -28,7 +28,7 @@ import static ee.openeid.siga.service.signature.hashcode.DetachedDataFileContain
 public class DetachedDataFileContainer {
 
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
-    private List<SignatureWrapper> signatures = new ArrayList<>();
+    private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
 
     public void save(OutputStream outputStream) {
         createHashcodeContainer(outputStream);
@@ -53,7 +53,7 @@ public class DetachedDataFileContainer {
         }
     }
 
-    public List<SignatureWrapper> getSignatures() {
+    public List<HashcodeSignatureWrapper> getSignatures() {
         return signatures;
     }
 
@@ -61,7 +61,7 @@ public class DetachedDataFileContainer {
         return dataFiles;
     }
 
-    public void addSignature(SignatureWrapper signature) {
+    public void addSignature(HashcodeSignatureWrapper signature) {
         signatures.add(signature);
     }
 
@@ -123,12 +123,12 @@ public class DetachedDataFileContainer {
         }
     }
 
-    private SignatureWrapper createSignatureWrapper(byte[] signature) {
+    private HashcodeSignatureWrapper createSignatureWrapper(byte[] signature) {
 
         SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
         Map<String, String> dataFiles = parser.getEntries();
 
-        SignatureWrapper signatureWrapper = new SignatureWrapper();
+        HashcodeSignatureWrapper signatureWrapper = new HashcodeSignatureWrapper();
         signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);

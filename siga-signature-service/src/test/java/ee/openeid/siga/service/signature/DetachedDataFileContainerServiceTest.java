@@ -1,12 +1,11 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
-import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,9 +52,9 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulCreateContainer() {
-        CreateHashcodeContainerRequest request = RequestUtil.getHashcodeCreateContainerRequest();
+        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         containerService.setSessionService(sessionService);
-        String containerId = containerService.createContainer(request.getDataFiles());
+        String containerId = containerService.createContainer(hashcodeDataFiles);
         Assert.assertFalse(StringUtils.isBlank(containerId));
     }
 

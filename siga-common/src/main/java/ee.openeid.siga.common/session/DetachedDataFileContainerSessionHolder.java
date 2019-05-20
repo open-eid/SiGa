@@ -1,7 +1,7 @@
 package ee.openeid.siga.common.session;
 
 import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +25,7 @@ public class DetachedDataFileContainerSessionHolder implements Session {
     @NonNull
     private String sessionId;
     private List<HashcodeDataFile> dataFiles;
-    private List<SignatureWrapper> signatures;
+    private List<HashcodeSignatureWrapper> signatures;
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default

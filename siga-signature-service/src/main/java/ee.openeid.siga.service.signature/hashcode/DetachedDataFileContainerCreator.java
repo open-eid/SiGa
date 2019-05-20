@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Container;
@@ -10,7 +10,7 @@ import org.digidoc4j.impl.asic.manifest.AsicManifest;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
@@ -24,7 +24,7 @@ public class DetachedDataFileContainerCreator {
     private final ZipOutputStream zipOutputStream;
 
     public DetachedDataFileContainerCreator(OutputStream outputStream) {
-        this.zipOutputStream = new ZipOutputStream(outputStream, Charset.forName("UTF-8"));
+        this.zipOutputStream = new ZipOutputStream(outputStream, StandardCharsets.UTF_8);
     }
 
     private static ZipEntry getZipEntry(byte[] mimeTypeBytes, String name) {
@@ -68,7 +68,7 @@ public class DetachedDataFileContainerCreator {
         new BytesEntryCallback(getZipEntry(mimeType, ZIP_ENTRY_MIMETYPE), mimeType).write();
     }
 
-    public void writeSignatures(List<SignatureWrapper> wrappers) {
+    public void writeSignatures(List<HashcodeSignatureWrapper> wrappers) {
         for (int i = 0; i < wrappers.size(); i++) {
             byte[] signatureData = wrappers.get(i).getSignature();
             String signatureName = SIGNATURE_FILE_PREFIX + i + SIGNATURE_FILE_EXTENSION;

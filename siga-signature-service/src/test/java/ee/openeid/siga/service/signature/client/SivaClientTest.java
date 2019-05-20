@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import ee.openeid.siga.common.SignatureWrapper;
+import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
@@ -55,7 +55,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(body))
         );
-        ValidationConclusion response = sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFiles());
+        ValidationConclusion response = sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
         Assert.assertEquals(Integer.valueOf(1), response.getSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
     }
@@ -69,7 +69,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(404))
         );
-        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFiles());
+        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(500))
         );
-        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFiles());
+        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class SivaClientTest {
         exceptionRule.expect(InvalidHashAlgorithmException.class);
         exceptionRule.expectMessage("Container contains invalid hash algorithms");
 
-        SignatureWrapper signatureWrapper = RequestUtil.createSignatureWrapper();
+        HashcodeSignatureWrapper signatureWrapper = RequestUtil.createSignatureWrapper();
         signatureWrapper.getDataFiles().get(0).setHashAlgo("SHA386");
         sivaClient.validateDetachedDataFileContainer(signatureWrapper, RequestUtil.createHashcodeDataFiles());
     }
