@@ -59,10 +59,10 @@ public class SigaAuthTests {
     @Test
     public void accessShouldBeUnauthorized_WithNonMatchingRequestUriComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/path/not/specified/in/hmac"), "/"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(buildRequest(get("/"), "/path/not/specified/in/hmac"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -75,10 +75,10 @@ public class SigaAuthTests {
     @Test
     public void accessShouldBeUnauthorized_WithNonMatchingRequestParametersComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/?parameter_name=parameter_value"), "/"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(buildRequest(get("/"), "/?parameter_name=parameter_value"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -91,7 +91,7 @@ public class SigaAuthTests {
     @Test
     public void accessShouldBeUnauthorized_WithNonMatchingRequestMethodComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(post("/"), "/"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -99,7 +99,7 @@ public class SigaAuthTests {
     public void accessShouldBeUnauthorized_WithInvalidXAuthorizationHmacAlgorithmHeader() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/")
                 .header(X_AUTHORIZATION_HMAC_ALGORITHM.getValue(), "HmacSHA111"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC algorithm"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC algorithm: HmacSHA111"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -131,7 +131,7 @@ public class SigaAuthTests {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         xAuthorizationTimestamp = xAuthorizationTimestamp.substring(0, xAuthorizationTimestamp.length() - 1);
         String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
-        ResultMatcher expectErrorMessage = MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid X-Authorization-Timestamp format");
+        ResultMatcher expectErrorMessage = MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid X-Authorization-Timestamp header. Not in Unix epoch seconds format.");
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
 
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
@@ -172,7 +172,7 @@ public class SigaAuthTests {
     @Test
     public void accessShouldBeUnauthorized_WithInvalidSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/").header(X_AUTHORIZATION_SIGNATURE.getValue(), "2c4a5baedfc1ebae179ed5be3a1855aea28f5fbab7d2bd1a957bf8822f6f2f40"), "/"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC signature"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -188,14 +188,14 @@ public class SigaAuthTests {
     public void accessShouldBeUnauthorized_WithTokenTimestampInFuture() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().plusSeconds(TOKEN_CLOCK_SKEW).plusSeconds(10).getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp);
-        performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired"));
+        performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in future."));
     }
 
     @Test
     public void accessShouldBeUnauthorized_WithExpiredToken() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().minusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW).getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp);
-        performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired"));
+        performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in past."));
     }
 
     private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String uriForSignatureBuilder) throws InvalidKeyException, NoSuchAlgorithmException {

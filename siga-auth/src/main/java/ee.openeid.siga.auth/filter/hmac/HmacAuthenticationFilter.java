@@ -76,10 +76,8 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
         String hmacAlgo = request.getHeader(X_AUTHORIZATION_HMAC_ALGORITHM.getValue());
         if (hmacAlgo == null) {
             hmacAlgo = HmacAlgorithm.HMAC_SHA_256.getValue();
-        } else {
-            if (HmacAlgorithm.fromString(hmacAlgo) == null) {
-                throw new HmacAuthenticationException("Invalid HMAC algorithm");
-            }
+        } else if (HmacAlgorithm.fromString(hmacAlgo) == null) {
+            throw new HmacAuthenticationException("Invalid HMAC algorithm: " + hmacAlgo);
         }
         return hmacAlgo;
     }
@@ -94,12 +92,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
 
     private void checkIfTokenIsExpired(String timestamp) {
         if (TOKEN_EXPIRATION_IN_SECONDS != -1) {
-            if (timestamp.length() != 10 || !isNumeric(timestamp)) {
-                throw new HmacAuthenticationException("Invalid X-Authorization-Timestamp format");
-            }
-            if (!HmacSignature.isTimestampValid(ofEpochSecond(parseLong(timestamp)), TOKEN_EXPIRATION_IN_SECONDS, TOKEN_CLOCK_SKEW)) {
-                throw new HmacAuthenticationException("HMAC token is expired");
-            }
+            HmacSignature.validateTimestamp(timestamp, TOKEN_EXPIRATION_IN_SECONDS, TOKEN_CLOCK_SKEW);
         }
     }
 
