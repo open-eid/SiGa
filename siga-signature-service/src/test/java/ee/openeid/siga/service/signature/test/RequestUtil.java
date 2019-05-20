@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.test;
 
 
+import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
@@ -32,6 +33,15 @@ public class RequestUtil {
         dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");
         hashcodeDataFiles.add(dataFile);
         return hashcodeDataFiles;
+    }
+
+    public static List<DataFile> createDataFileListWithOneFile() {
+        List<DataFile> dataFiles = new ArrayList<>();
+        DataFile dataFile = new DataFile();
+        dataFile.setFileName("test.txt");
+        dataFile.setContent("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
+        dataFiles.add(dataFile);
+        return dataFiles;
     }
 
     public static HashcodeSignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
