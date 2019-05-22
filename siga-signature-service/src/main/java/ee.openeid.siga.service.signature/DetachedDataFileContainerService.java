@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
@@ -9,6 +10,8 @@ import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,12 +24,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static ee.openeid.siga.service.signature.util.ContainerUtil.transformSignature;
-
 @Service
 public class DetachedDataFileContainerService implements DetachedDataFileSessionHolder {
 
     private SessionService sessionService;
+    private Configuration configuration;
 
     public String createContainer(List<HashcodeDataFile> dataFiles) {
 
@@ -80,6 +82,17 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return signatures;
     }
 
+    public Signature transformSignature(SignatureWrapper signatureWrapper) {
+        Signature signature = new Signature();
+        DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);
+        org.digidoc4j.Signature dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
+        signature.setId(dd4jSignature.getId());
+        signature.setGeneratedSignatureId(signatureWrapper.getGeneratedSignatureId());
+        signature.setSignatureProfile(dd4jSignature.getProfile().name());
+        signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
+        return signature;
+    }
+
     private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -103,4 +116,8 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         this.sessionService = sessionService;
     }
 
+    @Autowired
+    protected void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 }

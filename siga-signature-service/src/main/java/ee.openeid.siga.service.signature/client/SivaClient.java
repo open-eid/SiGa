@@ -5,7 +5,9 @@ import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.SignatureWrapper;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
+import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
+import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
@@ -23,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static ee.openeid.siga.service.signature.util.ContainerUtil.transformSignature;
-
 @Slf4j
 @Component
 public class SivaClient {
@@ -32,6 +32,7 @@ public class SivaClient {
     private static final String VALIDATION_ENDPOINT = "/validateHashcode";
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
+    private DetachedDataFileContainerService detachedDataFileContainerService;
 
     public ValidationConclusion validateDetachedDataFileContainer(SignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
@@ -44,7 +45,8 @@ public class SivaClient {
             }
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
-            if (SignatureProfile.LTA.name().equals(transformSignature(signatureWrapper).getSignatureProfile())) {
+            Signature signature = detachedDataFileContainerService.transformSignature(signatureWrapper);
+            if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
                 throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
             } else {
                 throw new ClientException("Unable to get valid response from client");
@@ -104,5 +106,10 @@ public class SivaClient {
     @Autowired
     protected void setConfigurationProperties(SivaConfigurationProperties configurationProperties) {
         this.configurationProperties = configurationProperties;
+    }
+
+    @Autowired
+    public void setDetachedDataFileContainerService(DetachedDataFileContainerService detachedDataFileContainerService) {
+        this.detachedDataFileContainerService = detachedDataFileContainerService;
     }
 }

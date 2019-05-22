@@ -21,17 +21,6 @@ public class ContainerUtil {
         return hashcodeDataFile;
     }
 
-    public static Signature transformSignature(SignatureWrapper signatureWrapper) {
-        Signature signature = new Signature();
-        DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(new Configuration());
-        org.digidoc4j.Signature dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
-        signature.setId(dd4jSignature.getId());
-        signature.setGeneratedSignatureId(signatureWrapper.getGeneratedSignatureId());
-        signature.setSignatureProfile(dd4jSignature.getProfile().name());
-        signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
-        return signature;
-    }
-
     public static void addSignatureDataFilesEntries(SignatureWrapper wrapper, Map<String, String> dataFiles) {
         dataFiles.forEach((fileName, fileHashAlgo) -> {
             SignatureHashcodeDataFile hashcodeDataFile = new SignatureHashcodeDataFile();
