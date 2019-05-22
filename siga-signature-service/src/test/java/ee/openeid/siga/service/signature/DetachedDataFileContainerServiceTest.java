@@ -7,6 +7,7 @@ import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import org.apache.commons.lang3.StringUtils;
+import org.digidoc4j.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class DetachedDataFileContainerServiceTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        containerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
     }
 
     @Test

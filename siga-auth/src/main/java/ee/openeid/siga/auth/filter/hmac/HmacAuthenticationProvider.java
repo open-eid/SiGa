@@ -19,9 +19,7 @@ public class HmacAuthenticationProvider extends DaoAuthenticationProvider {
         final HmacSignature token = (HmacSignature) authentication.getCredentials();
         final byte[] signingSecret = userDetails.getPassword().getBytes();
         try {
-            if (!token.isSignatureValid(signingSecret)) {
-                throw new HmacAuthenticationException("Invalid HMAC signature");
-            }
+            token.validateSignature(signingSecret);
         } catch (HmacAuthenticationException e) {
             throw e;
         } catch (Exception e) {
