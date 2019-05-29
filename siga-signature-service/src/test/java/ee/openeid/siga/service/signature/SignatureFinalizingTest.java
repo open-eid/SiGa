@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
@@ -259,7 +260,8 @@ public class SignatureFinalizingTest {
 
     private Pair<String, String> createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = RequestUtil.createSignatureParameters(signatureToken.getCertificate(), signatureProfile);
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = dataToSignWrapper.getDataToSign();
         byte[] signatureRaw = signatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
 
         DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();

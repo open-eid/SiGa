@@ -1,5 +1,6 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.event.Param;
@@ -81,10 +82,10 @@ public class MainController {
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
         SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(createRemoteSigningRequest);
-        DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
-
+        DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
+        DataToSign dataToSign = dataToSignWrapper.getDataToSign();
         CreateHashcodeContainerRemoteSigningResponse response = new CreateHashcodeContainerRemoteSigningResponse();
-        response.setGeneratedSignatureId(dataToSign.getSignatureParameters().getSignatureId());
+        response.setGeneratedSignatureId(dataToSignWrapper.getGeneratedSignatureId());
         response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;

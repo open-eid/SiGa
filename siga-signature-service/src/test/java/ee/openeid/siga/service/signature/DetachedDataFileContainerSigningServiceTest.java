@@ -18,7 +18,11 @@ import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.digidoc4j.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.Signature;
+import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Assert;
 import org.junit.Before;
@@ -76,7 +80,7 @@ public class DetachedDataFileContainerSigningServiceTest {
 
     @Test
     public void createDataToSignSuccessful() {
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate())).getDataToSign();
         Assert.assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
         Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(EXPECTED_DATATOSIGN_PREFIX));
     }
@@ -107,7 +111,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         signatureParameters.setPostalCode(null);
         signatureParameters.setStateOrProvince(null);
         signatureParameters.setCity(null);
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         Assert.assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
         Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(EXPECTED_DATATOSIGN_PREFIX));
     }
@@ -117,7 +121,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         signatureParameters.setDigestAlgorithm(DigestAlgorithm.SHA512);
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         Signature signature = dataToSign.finalize(signatureRaw);
         Assert.assertEquals("Tallinn", signature.getCity());
@@ -132,7 +136,7 @@ public class DetachedDataFileContainerSigningServiceTest {
     public void finalizeAndValidateSignature() throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
 
@@ -159,7 +163,7 @@ public class DetachedDataFileContainerSigningServiceTest {
         exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
 
@@ -204,7 +208,7 @@ public class DetachedDataFileContainerSigningServiceTest {
     public void successfulMobileIdSignatureProcessing() throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
 
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         DetachedDataFileContainerSessionHolder session = RequestUtil.createSessionHolder();
