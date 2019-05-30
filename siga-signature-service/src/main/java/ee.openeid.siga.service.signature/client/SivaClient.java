@@ -6,8 +6,8 @@ import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
-import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
+import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
@@ -29,20 +29,17 @@ import java.util.List;
 @Component
 public class SivaClient {
     private static final String SIGNATURE_FILE_NAME = "signatures0.xml";
-    private static final String VALIDATION_ENDPOINT = "/validateHashcode";
+    private static final String HASHCODE_VALIDATION_ENDPOINT = "/validateHashcode";
+    private static final String VALIDATION_ENDPOINT = "/validate";
+
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
     private DetachedDataFileContainerService detachedDataFileContainerService;
 
     public ValidationConclusion validateDetachedDataFileContainer(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
-        SivaValidationRequest request = createRequest(signatureWrapper, dataFiles);
-        ResponseEntity<ValidationResponse> responseEntity;
+        SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrapper, dataFiles);
         try {
-            responseEntity = restTemplate.exchange(configurationProperties.getUrl() + VALIDATION_ENDPOINT,
-                    HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
-            if (responseEntity.getBody() == null) {
-                throw new ClientException("Unable to parse client empty response");
-            }
+            return validate(request, HASHCODE_VALIDATION_ENDPOINT);
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
             Signature signature = detachedDataFileContainerService.transformSignature(signatureWrapper);
@@ -52,12 +49,34 @@ public class SivaClient {
                 throw new ClientException("Unable to get valid response from client");
             }
         }
+    }
+
+    public ValidationConclusion validateAttachedDataFileContainer(String name, String container) {
+        SivaValidationRequest request = new SivaValidationRequest();
+        request.setFilename(name);
+        request.setDocument(container);
+        try {
+            return validate(request, VALIDATION_ENDPOINT);
+        } catch (HttpServerErrorException | HttpClientErrorException e) {
+            log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
+            throw new ClientException("Unable to get valid response from client");
+        }
+    }
+
+    private ValidationConclusion validate(Object request, String validationEndpoint) {
+        ResponseEntity<ValidationResponse> responseEntity;
+        responseEntity = restTemplate.exchange(configurationProperties.getUrl() + validationEndpoint,
+                HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
+        if (responseEntity.getBody() == null) {
+            throw new ClientException("Unable to parse client empty response");
+        }
         log.info("Container validation details received successfully");
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 
-    private SivaValidationRequest createRequest(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
-        SivaValidationRequest request = new SivaValidationRequest();
+    private SivaHashcodeValidationRequest createHashcodeRequest(HashcodeSignatureWrapper
+                                                                        signatureWrapper, List<HashcodeDataFile> dataFiles) {
+        SivaHashcodeValidationRequest request = new SivaHashcodeValidationRequest();
         request.setFilename(SIGNATURE_FILE_NAME);
         request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));
 
@@ -80,7 +99,8 @@ public class SivaClient {
         return request;
     }
 
-    private String getDataFileHashAlgorithm(List<SignatureHashcodeDataFile> signatureDataFiles, HashcodeDataFile dataFile) {
+    private String getDataFileHashAlgorithm(List<SignatureHashcodeDataFile> signatureDataFiles, HashcodeDataFile
+            dataFile) {
         for (SignatureHashcodeDataFile signatureDataFile : signatureDataFiles) {
             if (signatureDataFile.getFileName().equals(dataFile.getFileName())) {
                 String hashAlgorithm = signatureDataFile.getHashAlgo();
@@ -109,7 +129,8 @@ public class SivaClient {
     }
 
     @Autowired
-    public void setDetachedDataFileContainerService(DetachedDataFileContainerService detachedDataFileContainerService) {
+    public void setDetachedDataFileContainerService(DetachedDataFileContainerService
+                                                            detachedDataFileContainerService) {
         this.detachedDataFileContainerService = detachedDataFileContainerService;
     }
 }

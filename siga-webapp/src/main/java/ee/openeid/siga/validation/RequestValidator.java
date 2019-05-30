@@ -29,6 +29,9 @@ public class RequestValidator {
         dataFiles.forEach(RequestValidator::validateDataFile);
     }
 
+    public static void validateContainerName(String fileName) {
+        validateFileName(fileName, "Container name is invalid");
+    }
 
     public static void validateContainerId(String containerId) {
         if (StringUtils.isBlank(containerId) || containerId.length() > 36) {

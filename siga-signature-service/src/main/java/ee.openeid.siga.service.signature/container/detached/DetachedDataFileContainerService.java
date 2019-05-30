@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature;
+package ee.openeid.siga.service.signature.container.detached;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
@@ -108,12 +108,12 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     @Autowired
-    protected void setSessionService(SessionService sessionService) {
+    public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
 
     @Autowired
-    protected void setConfiguration(Configuration configuration) {
+    public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 }

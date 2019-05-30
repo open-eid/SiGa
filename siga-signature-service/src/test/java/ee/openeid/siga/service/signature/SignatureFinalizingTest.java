@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
@@ -9,6 +10,7 @@ import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
+import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSException;
@@ -71,7 +73,7 @@ public class SignatureFinalizingTest {
     public void setUp() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         signingService.setConfiguration(configuration);
-        when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createSessionHolder());
+        when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
         sigaEventLogger.afterPropertiesSet();
     }
 
@@ -259,10 +261,11 @@ public class SignatureFinalizingTest {
 
     private Pair<String, String> createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = RequestUtil.createSignatureParameters(signatureToken.getCertificate(), signatureProfile);
-        DataToSign dataToSign = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(CONTAINER_ID, signatureParameters);
+        DataToSign dataToSign = dataToSignWrapper.getDataToSign();
         byte[] signatureRaw = signatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
 
-        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createSessionHolder();
+        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createDetachedDataFileSessionHolder();
         sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 

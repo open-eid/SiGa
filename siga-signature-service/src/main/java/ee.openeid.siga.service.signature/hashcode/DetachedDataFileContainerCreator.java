@@ -16,14 +16,14 @@ import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class DetachedDataFileContainerCreator {
+class DetachedDataFileContainerCreator {
 
-    public static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
+    static final String SIGNATURE_FILE_PREFIX = "META-INF/signatures";
     private static final String ZIP_ENTRY_MIMETYPE = "mimetype";
     private static final String SIGNATURE_FILE_EXTENSION = ".xml";
     private final ZipOutputStream zipOutputStream;
 
-    public DetachedDataFileContainerCreator(OutputStream outputStream) {
+    DetachedDataFileContainerCreator(OutputStream outputStream) {
         this.zipOutputStream = new ZipOutputStream(outputStream, StandardCharsets.UTF_8);
     }
 
@@ -38,7 +38,7 @@ public class DetachedDataFileContainerCreator {
         return zipEntry;
     }
 
-    public void writeHashcodeFiles(List<HashcodeDataFile> dataFiles) {
+    void writeHashcodeFiles(List<HashcodeDataFile> dataFiles) {
         writeHashcodeFile(dataFiles, DigestAlgorithm.SHA256, HashcodesDataFile.HASHCODES_SHA256);
         writeHashcodeFile(dataFiles, DigestAlgorithm.SHA512, HashcodesDataFile.HASHCODES_SHA512);
     }
@@ -54,7 +54,7 @@ public class DetachedDataFileContainerCreator {
         }.write();
     }
 
-    public void finalizeZipFile() {
+    void finalizeZipFile() {
         try {
             zipOutputStream.finish();
             zipOutputStream.close();
@@ -63,12 +63,12 @@ public class DetachedDataFileContainerCreator {
         }
     }
 
-    public void writeMimeType() {
+    void writeMimeType() {
         byte[] mimeType = MimeType.ASICE.getMimeTypeString().getBytes();
         new BytesEntryCallback(getZipEntry(mimeType, ZIP_ENTRY_MIMETYPE), mimeType).write();
     }
 
-    public void writeSignatures(List<HashcodeSignatureWrapper> wrappers) {
+    void writeSignatures(List<HashcodeSignatureWrapper> wrappers) {
         for (int i = 0; i < wrappers.size(); i++) {
             byte[] signatureData = wrappers.get(i).getSignature();
             String signatureName = SIGNATURE_FILE_PREFIX + i + SIGNATURE_FILE_EXTENSION;
@@ -76,7 +76,7 @@ public class DetachedDataFileContainerCreator {
         }
     }
 
-    public void writeManifest(List<org.digidoc4j.DataFile> dataFiles) {
+    void writeManifest(List<org.digidoc4j.DataFile> dataFiles) {
         final AsicManifest asicManifest = new AsicManifest(Container.DocumentType.ASICE.name());
         asicManifest.addFileEntry(dataFiles);
         new EntryCallback(new ZipEntry(AsicManifest.XML_PATH)) {

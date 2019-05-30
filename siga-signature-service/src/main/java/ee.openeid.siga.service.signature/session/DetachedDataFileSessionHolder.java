@@ -7,12 +7,11 @@ import ee.openeid.siga.common.session.Session;
 public interface DetachedDataFileSessionHolder extends DataFileSessionHolder {
 
     default DetachedDataFileContainerSessionHolder getSessionHolder(String containerId) {
-        Session session = getSession(containerId);
+        Session session = getContainerSession(containerId);
         if (session instanceof DetachedDataFileContainerSessionHolder) {
             return (DetachedDataFileContainerSessionHolder) session;
         }
         throw new TechnicalException("Unable to parse session object");
     }
-
 
 }

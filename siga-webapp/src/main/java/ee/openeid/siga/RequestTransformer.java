@@ -5,7 +5,6 @@ import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningRequest;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
@@ -61,22 +60,21 @@ class RequestTransformer {
         return signatures;
     }
 
-    static SignatureParameters transformRemoteRequest(CreateHashcodeContainerRemoteSigningRequest remoteSigningRequest) {
+    static SignatureParameters transformRemoteRequest(String signingCertificate, String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
         SignatureParameters signatureParameters = new SignatureParameters();
-        byte[] base64DecodedCertificate = Base64.getDecoder().decode(remoteSigningRequest.getSigningCertificate().getBytes());
+        byte[] base64DecodedCertificate = Base64.getDecoder().decode(signingCertificate.getBytes());
         X509Certificate x509Certificate = CertificateUtil.createX509Certificate(base64DecodedCertificate);
 
         signatureParameters.setSigningCertificate(x509Certificate);
-        SignatureProfile signatureProfile = SignatureProfile.findByProfile(remoteSigningRequest.getSignatureProfile());
+        SignatureProfile signatureProfile = SignatureProfile.findByProfile(requestSignatureProfile);
         signatureParameters.setSignatureProfile(signatureProfile);
-        SignatureProductionPlace signatureProductionPlace = remoteSigningRequest.getSignatureProductionPlace();
         if (signatureProductionPlace != null) {
             signatureParameters.setCountry(signatureProductionPlace.getCountryName());
             signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
             signatureParameters.setCity(signatureProductionPlace.getCity());
             signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
         }
-        signatureParameters.setRoles(remoteSigningRequest.getRoles());
+        signatureParameters.setRoles(roles);
         return signatureParameters;
     }
 

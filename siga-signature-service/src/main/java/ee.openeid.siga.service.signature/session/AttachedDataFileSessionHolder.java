@@ -7,7 +7,7 @@ import ee.openeid.siga.common.session.Session;
 public interface AttachedDataFileSessionHolder extends DataFileSessionHolder {
 
     default AttachedDataFileContainerSessionHolder getSessionHolder(String containerId) {
-        Session session = getSession(containerId);
+        Session session = getContainerSession(containerId);
         if (session instanceof AttachedDataFileContainerSessionHolder) {
             return (AttachedDataFileContainerSessionHolder) session;
         }

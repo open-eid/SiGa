@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature;
+package ee.openeid.siga.service.signature.container.detached;
 
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -43,7 +43,7 @@ public class DetachedDataFileContainerValidationServiceTest {
         detachedDataFileContainerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         sivaClient.setDetachedDataFileContainerService(detachedDataFileContainerService);
         Mockito.when(sivaClient.validateDetachedDataFileContainer(any(), any())).thenReturn(validationConclusion);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
     }
 
     @Test

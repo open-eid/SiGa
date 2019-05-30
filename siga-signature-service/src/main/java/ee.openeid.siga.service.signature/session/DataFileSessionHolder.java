@@ -5,7 +5,7 @@ import ee.openeid.siga.session.SessionService;
 
 public interface DataFileSessionHolder {
 
-    default Session getSession(String containerId) {
+    default Session getContainerSession(String containerId) {
         return getSessionService().getContainer(containerId);
     }
 

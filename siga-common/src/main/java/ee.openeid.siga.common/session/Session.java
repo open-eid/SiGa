@@ -8,4 +8,8 @@ public interface Session {
     String getServiceUuid();
 
     String getSessionId();
+
+    void addDataToSign(String signatureId, DataToSignHolder dataToSign);
+
+    DataToSignHolder getDataToSignHolder(String signatureId);
 }

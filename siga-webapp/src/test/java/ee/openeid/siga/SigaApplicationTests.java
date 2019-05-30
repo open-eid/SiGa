@@ -64,8 +64,9 @@ public class SigaApplicationTests {
 
     @Test
     public void getAnotherUserContainer() throws Exception {
-
-        String containerId = uploadContainer();
+        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
+        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
+        String containerId = containerResponse.getContainerId();
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
@@ -88,9 +89,25 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void mobileIdSigningFlow() throws Exception {
-        String containerId = uploadContainer();
-        List<Signature> signatures = getSignatureList(containerId);
+    public void mobileIdSigningFlow() throws Exception{
+//        String container = IOUtils.toString(getFileInputStream("datafile.asice"), Charset.defaultCharset());
+//        UploadContainerResponse containerResponse = (UploadContainerResponse) uploadContainer(container, "/upload/containers", "test.asice", UploadContainerResponse.class);
+//        String containerId = containerResponse.getContainerId();
+//
+//        GetContainerSignaturesResponse signaturesResponse = (GetContainerSignaturesResponse) getSignatureList("/containers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
+//        List<Signature> signatures = signaturesResponse.getSignatures();
+
+    }
+
+    @Test
+    public void mobileIdHashcodeSigningFlow() throws Exception {
+        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
+        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
+        String containerId = containerResponse.getContainerId();
+
+        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
+        List<Signature> signatures = signaturesResponse.getSignatures();
+
         Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -108,9 +125,14 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void remoteSigningFlow() throws Exception {
-        String containerId = uploadContainer();
-        List<Signature> signatures = getSignatureList(containerId);
+    public void remoteHashcodeSigningFlow() throws Exception {
+        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
+        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
+        String containerId = containerResponse.getContainerId();
+
+        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
+        List<Signature> signatures = signaturesResponse.getSignatures();
+
         Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -127,21 +149,24 @@ public class SigaApplicationTests {
         DetachedDataFileContainer container = getContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
-        List<Signature> signatures = getSignatureList(containerId);
+
+        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
+        List<Signature> signatures = signaturesResponse.getSignatures();
+
         Assert.assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getValidationConclusion(containerId);
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
-    private List<Signature> getSignatureList(String containerId) throws Exception {
+    private Object getSignatureList(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
-        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/signatures", request.toString());
-        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/signatures");
+        String signature = getSignature("GET", url, request.toString());
+        MockHttpServletRequestBuilder builder = get(url);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        GetHashcodeContainerSignaturesResponse signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerSignaturesResponse.class);
-        return signatureListResponse.getSignatures();
+        Object signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+        return signatureListResponse;
     }
 
     private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
@@ -220,16 +245,18 @@ public class SigaApplicationTests {
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeContainerMobileIdSigningResponse.class);
     }
 
-    private String uploadContainer() throws Exception {
+    private Object uploadContainer(String container, String url, String containerName, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
-        String container = IOUtils.toString(getFileInputStream(), Charset.defaultCharset());
+        if (containerName != null) {
+            request.put("containerName", containerName);
+        }
         request.put("container", container);
-        String signature = getSignature("POST", "/upload/hashcodecontainers", request.toString());
-        MockHttpServletRequestBuilder builder = post("/upload/hashcodecontainers");
+        String signature = getSignature("POST", url, request.toString());
+        MockHttpServletRequestBuilder builder = post(url);
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), UploadHashcodeContainerResponse.class).getContainerId();
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
     }
 
     private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String signature, JSONObject request, String serviceUUID) {
@@ -252,8 +279,8 @@ public class SigaApplicationTests {
                 .build().getSignature(HMAC_SHARED_SECRET);
     }
 
-    private InputStream getFileInputStream() throws IOException {
-        Path documentPath = Paths.get(new ClassPathResource("hashcode.asice").getURI());
+    private InputStream getFileInputStream(String name) throws IOException {
+        Path documentPath = Paths.get(new ClassPathResource(name).getURI());
         return new ByteArrayInputStream(Base64.getEncoder().encode(Files.readAllBytes(documentPath)));
     }
 

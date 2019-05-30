@@ -1,14 +1,15 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
-import ee.openeid.siga.service.signature.DetachedDataFileContainerService;
-import ee.openeid.siga.service.signature.DetachedDataFileContainerSigningService;
-import ee.openeid.siga.service.signature.DetachedDataFileContainerValidationService;
+import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerService;
+import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerSigningService;
+import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
 import org.digidoc4j.DataToSign;
@@ -84,13 +85,20 @@ public class DetachedDataFileContainerController {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
-        SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(createRemoteSigningRequest);
-        DataToSign dataToSign = signingService.createDataToSign(containerId, signatureParameters);
+        String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
+        String signatureProfile = createRemoteSigningRequest.getSignatureProfile();
+        SignatureProductionPlace signatureProductionPlace = createRemoteSigningRequest.getSignatureProductionPlace();
+        List<String> roles = createRemoteSigningRequest.getRoles();
+
+        SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(signingCertificate, signatureProfile, signatureProductionPlace, roles);
+        DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
+        DataToSign dataToSign = dataToSignWrapper.getDataToSign();
 
         CreateHashcodeContainerRemoteSigningResponse response = new CreateHashcodeContainerRemoteSigningResponse();
-        response.setGeneratedSignatureId(dataToSign.getSignatureParameters().getSignatureId());
+        response.setGeneratedSignatureId(dataToSignWrapper.getGeneratedSignatureId());
         response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
+
         return response;
     }
 

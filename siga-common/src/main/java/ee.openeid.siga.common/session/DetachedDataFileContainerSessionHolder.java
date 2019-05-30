@@ -31,6 +31,7 @@ public class DetachedDataFileContainerSessionHolder implements Session {
     @Builder.Default
     private Map<String, DataToSignHolder> dataToSignHolder = new HashMap<>();
 
+    @Override
     public void addDataToSign(String signatureId, DataToSignHolder dataToSign) {
         this.dataToSignHolder.put(signatureId, dataToSign);
     }

@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature;
+package ee.openeid.siga.service.signature.container.detached;
 
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
@@ -69,14 +69,14 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulGetContainer() throws IOException, URISyntaxException {
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
         String container = containerService.getContainer(CONTAINER_ID);
         Assert.assertFalse(StringUtils.isBlank(container));
     }
 
     @Test
     public void successfulGetSignatures() throws IOException, URISyntaxException {
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
         List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatures.get(0).getId());
         Assert.assertEquals("LT", signatures.get(0).getSignatureProfile());

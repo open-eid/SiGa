@@ -4,24 +4,39 @@ package ee.openeid.siga.service.signature.test;
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.digidoc4j.Container.DocumentType.ASICE;
 
 public class RequestUtil {
-
+    public static final String SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
+    public static final String CLIENT_NAME = "client1";
+    public static final String SERVICE_NAME = "Testimine";
     public static final String SIGNED_HASHCODE = "hashcode.asice";
+    public static final String VALID_ASICE = "test.asice";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
     public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
@@ -79,16 +94,32 @@ public class RequestUtil {
         return hashcodeDataFiles;
     }
 
-    public static DetachedDataFileContainerSessionHolder createSessionHolder() throws IOException, URISyntaxException {
+    public static DetachedDataFileContainerSessionHolder createDetachedDataFileSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper());
         return DetachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
-                .clientName("client1")
-                .serviceName("Testimine")
-                .serviceUuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
                 .signatures(signatureWrappers)
                 .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
+    }
+
+    public static AttachedDataFileContainerSessionHolder createAttachedDataFileSessionHolder() throws IOException, URISyntaxException {
+        String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
+        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
+        Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
+        Map<Integer, String> signatureIdHolder = new HashMap<>();
+        signatureIdHolder.put(container.getSignatures().get(0).hashCode(), SessionIdGenerator.generateSessionId());
+        return AttachedDataFileContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
+                .signatureIdHolder(signatureIdHolder)
+                .containerName("test.asice")
+                .container(container).build();
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {
