@@ -4,7 +4,6 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.util.CertificateUtil;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
@@ -78,29 +77,28 @@ class RequestTransformer {
         return signatureParameters;
     }
 
-    static SignatureParameters transformMobileIdSignatureParameters(CreateHashcodeContainerMobileIdSigningRequest request) {
+    static SignatureParameters transformMobileIdSignatureParameters(String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
         SignatureParameters signatureParameters = new SignatureParameters();
-        SignatureProfile signatureProfile = SignatureProfile.findByProfile(request.getSignatureProfile());
+        SignatureProfile signatureProfile = SignatureProfile.findByProfile(requestSignatureProfile);
         signatureParameters.setSignatureProfile(signatureProfile);
-        SignatureProductionPlace signatureProductionPlace = request.getSignatureProductionPlace();
         if (signatureProductionPlace != null) {
             signatureParameters.setCountry(signatureProductionPlace.getCountryName());
             signatureParameters.setStateOrProvince(signatureProductionPlace.getStateOrProvince());
             signatureParameters.setCity(signatureProductionPlace.getCity());
             signatureParameters.setPostalCode(signatureProductionPlace.getPostalCode());
         }
-        signatureParameters.setRoles(request.getRoles());
+        signatureParameters.setRoles(roles);
         return signatureParameters;
 
     }
 
-    static MobileIdInformation transformMobileIdInformation(CreateHashcodeContainerMobileIdSigningRequest request) {
+    static MobileIdInformation transformMobileIdInformation(String language, String messageToDisplay, String personIdentifier, String phoneNo) {
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return MobileIdInformation.builder()
-                .language(request.getLanguage())
-                .messageToDisplay(request.getMessageToDisplay())
-                .personIdentifier(request.getPersonIdentifier())
-                .phoneNo(request.getPhoneNo())
+                .language(language)
+                .messageToDisplay(messageToDisplay)
+                .personIdentifier(personIdentifier)
+                .phoneNo(phoneNo)
                 .relyingPartyName(sigaUserDetails.getSkRelyingPartyName()).build();
     }
 

@@ -1,6 +1,8 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.common.DataToSignWrapper;
+import ee.openeid.siga.common.MobileIdChallenge;
+import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -98,7 +100,7 @@ public class AttachedDataFileContainerController {
         DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
         DataToSign dataToSign = dataToSignWrapper.getDataToSign();
         CreateContainerRemoteSigningResponse response = new CreateContainerRemoteSigningResponse();
-        response.setGeneratedSignatureId(dataToSign.getSignatureParameters().getSignatureId());
+        response.setGeneratedSignatureId(dataToSignWrapper.getGeneratedSignatureId());
         response.setDataToSign(new String(Base64.getEncoder().encode(dataToSign.getDataToSign())));
         response.setDigestAlgorithm(dataToSign.getDigestAlgorithm().name());
         return response;
@@ -112,6 +114,45 @@ public class AttachedDataFileContainerController {
         String result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateContainerRemoteSigningResponse response = new UpdateContainerRemoteSigningResponse();
         response.setResult(result);
+        return response;
+    }
+
+
+    @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
+    @RequestMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    public CreateContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
+
+        String language = createMobileIdSigningRequest.getLanguage();
+        String messageToDisplay = createMobileIdSigningRequest.getMessageToDisplay();
+        String phoneNo = createMobileIdSigningRequest.getPhoneNo();
+        String personIdentifier = createMobileIdSigningRequest.getPersonIdentifier();
+        List<String> roles = createMobileIdSigningRequest.getRoles();
+        String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
+        SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
+
+        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation(language, messageToDisplay, personIdentifier, phoneNo);
+        SignatureParameters signatureParameters = RequestTransformer.transformMobileIdSignatureParameters(signatureProfile, signatureProductionPlace, roles);
+        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+
+        MobileIdChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+
+        CreateContainerMobileIdSigningResponse response = new CreateContainerMobileIdSigningResponse();
+        response.setChallengeId(challenge.getChallengeId());
+        response.setGeneratedSignatureId(challenge.getGeneratedSignatureId());
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_STATUS)
+    @RequestMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
+        RequestValidator.validateContainerId(containerId);
+
+        String status = signingService.processMobileStatus(containerId, signatureId);
+
+        GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
+        response.setMidStatus(status);
         return response;
     }
 
@@ -155,5 +196,10 @@ public class AttachedDataFileContainerController {
     @Autowired
     public void setValidationService(AttachedDataFileContainerValidationService validationService) {
         this.validationService = validationService;
+    }
+
+    @Autowired
+    public void setSigningService(AttachedDataFileContainerSigningService signingService) {
+        this.signingService = signingService;
     }
 }

@@ -4,6 +4,7 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.session.AttachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
@@ -20,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -59,7 +61,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     public String getContainer(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        Container container = sessionHolder.getContainer();
+        Container container = sessionHolder.getContainerHolder().getContainer();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
         return new String(Base64.getEncoder().encode(outputStream.toByteArray()));
@@ -68,8 +70,8 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     public List<Signature> getSignatures(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         List<Signature> signatures = new ArrayList<>();
-        sessionHolder.getContainer().getSignatures().forEach(sessionSignature -> sessionHolder.getSignatureIdHolder().forEach((hashcode, generatedSignatureId) -> {
-            if (sessionSignature.hashCode() == hashcode) {
+        sessionHolder.getContainerHolder().getContainer().getSignatures().forEach(sessionSignature -> sessionHolder.getSignatureIdHolder().forEach((hashcode, generatedSignatureId) -> {
+            if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
                 signatures.add(transformSignature(generatedSignatureId, sessionSignature));
             }
         }));
@@ -99,10 +101,10 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
                 .clientName(authenticatedUser.getClientName())
                 .serviceName(authenticatedUser.getServiceName())
                 .serviceUuid(authenticatedUser.getServiceUuid())
-                .container(container)
+                .containerHolder(new ContainerHolder(container))
                 .build();
         container.getSignatures().forEach(signature ->
-                sessionHolder.addSignatureId(signature.hashCode(), SessionIdGenerator.generateSessionId())
+                sessionHolder.addSignatureId(Arrays.hashCode(signature.getAdESSignature()), SessionIdGenerator.generateSessionId())
         );
         return sessionHolder;
     }

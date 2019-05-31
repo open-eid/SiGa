@@ -118,8 +118,17 @@ public class DetachedDataFileContainerController {
     public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
-        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation(createMobileIdSigningRequest);
-        SignatureParameters signatureParameters = RequestTransformer.transformMobileIdSignatureParameters(createMobileIdSigningRequest);
+
+        String language = createMobileIdSigningRequest.getLanguage();
+        String messageToDisplay = createMobileIdSigningRequest.getMessageToDisplay();
+        String phoneNo = createMobileIdSigningRequest.getPhoneNo();
+        String personIdentifier = createMobileIdSigningRequest.getPersonIdentifier();
+        List<String> roles = createMobileIdSigningRequest.getRoles();
+        String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
+        SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
+
+        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation(language, messageToDisplay, personIdentifier, phoneNo);
+        SignatureParameters signatureParameters = RequestTransformer.transformMobileIdSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         RequestValidator.validateMobileIdInformation(mobileIdInformation);
 
         MobileIdChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);

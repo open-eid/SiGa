@@ -70,9 +70,9 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
 
     @Test
     public void noContainerInSession() throws IOException, URISyntaxException {
-        exceptionRule.expectMessage("container is marked @NonNull but is null");
+        exceptionRule.expectMessage("containerHolder is marked @NonNull but is null");
         AttachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createAttachedDataFileSessionHolder();
-        sessionHolder.setContainer(null);
+        sessionHolder.setContainerHolder(null);
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
         signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));

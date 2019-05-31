@@ -13,12 +13,14 @@ import org.digidoc4j.SignatureBuilder;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 public class AttachedDataFileContainerSigningService extends ContainerSigningService implements AttachedDataFileSessionHolder {
 
     @Override
     public DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
-        Container container = ((AttachedDataFileContainerSessionHolder) session).getContainer();
+        Container container = ((AttachedDataFileContainerSessionHolder) session).getContainerHolder().getContainer();
         SignatureBuilder signatureBuilder = buildSignatureBuilder(container, signatureParameters);
         return signatureBuilder.buildDataToSign();
     }
@@ -32,8 +34,8 @@ public class AttachedDataFileContainerSigningService extends ContainerSigningSer
     public void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
         AttachedDataFileContainerSessionHolder attachedDataFileContainerSessionHolder = (AttachedDataFileContainerSessionHolder) sessionHolder;
 
-        attachedDataFileContainerSessionHolder.getContainer().addSignature(signature);
-        attachedDataFileContainerSessionHolder.addSignatureId(signature.hashCode(), signatureId);
+        attachedDataFileContainerSessionHolder.getContainerHolder().getContainer().addSignature(signature);
+        attachedDataFileContainerSessionHolder.addSignatureId(Arrays.hashCode(signature.getAdESSignature()), signatureId);
         attachedDataFileContainerSessionHolder.clearSigning(signatureId);
     }
 
@@ -61,7 +63,7 @@ public class AttachedDataFileContainerSigningService extends ContainerSigningSer
     }
 
     private void verifyContainerExistence(AttachedDataFileContainerSessionHolder sessionHolder) {
-        if (sessionHolder.getContainer() == null) {
+        if (sessionHolder.getContainerHolder().getContainer() == null) {
             throw new InvalidSessionDataException("Unable to create signature. Container must exists");
         }
     }

@@ -5,6 +5,7 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,7 +113,7 @@ public class RequestUtil {
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
         Map<Integer, String> signatureIdHolder = new HashMap<>();
-        signatureIdHolder.put(container.getSignatures().get(0).hashCode(), SessionIdGenerator.generateSessionId());
+        signatureIdHolder.put(Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()), SessionIdGenerator.generateSessionId());
         return AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
@@ -119,7 +121,7 @@ public class RequestUtil {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .container(container).build();
+                .containerHolder(new ContainerHolder(container)).build();
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {

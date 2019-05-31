@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.digidoc4j.Container;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class AttachedDataFileContainerSessionHolder implements Session {
     @NonNull
     private String sessionId;
     @NonNull
-    private Container container;
+    private ContainerHolder containerHolder;
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private Map<Integer, String> signatureIdHolder = new HashMap<>();
@@ -50,4 +49,5 @@ public class AttachedDataFileContainerSessionHolder implements Session {
     public DataToSignHolder clearSigning(String signatureId) {
         return dataToSignHolder.remove(signatureId);
     }
+
 }

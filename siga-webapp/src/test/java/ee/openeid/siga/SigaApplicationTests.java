@@ -5,6 +5,8 @@ import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.json.JSONArray;
@@ -64,10 +66,9 @@ public class SigaApplicationTests {
 
     @Test
     public void getAnotherUserContainer() throws Exception {
-        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
-        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
-        String containerId = containerResponse.getContainerId();
-        DetachedDataFileContainer originalContainer = getContainer(containerId);
+
+        String containerId = uploadHashcodeContainer();
+        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
 
@@ -89,33 +90,14 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void mobileIdSigningFlow() throws Exception{
-//        String container = IOUtils.toString(getFileInputStream("datafile.asice"), Charset.defaultCharset());
-//        UploadContainerResponse containerResponse = (UploadContainerResponse) uploadContainer(container, "/upload/containers", "test.asice", UploadContainerResponse.class);
-//        String containerId = containerResponse.getContainerId();
-//
-//        GetContainerSignaturesResponse signaturesResponse = (GetContainerSignaturesResponse) getSignatureList("/containers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
-//        List<Signature> signatures = signaturesResponse.getSignatures();
-
-    }
-
-    @Test
-    public void mobileIdHashcodeSigningFlow() throws Exception {
-        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
-        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
-        String containerId = containerResponse.getContainerId();
-
-        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
-        List<Signature> signatures = signaturesResponse.getSignatures();
-
+    public void mobileIdSigningFlow() throws Exception {
+        String containerId = uploadContainer();
+        List<Signature> signatures = getSignatures(containerId);
         Assert.assertEquals(1, signatures.size());
-        DetachedDataFileContainer originalContainer = getContainer(containerId);
+        Container originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
-
-        CreateHashcodeContainerMobileIdSigningResponse response = startMobileSigning(containerId);
-        String signatureId = response.getGeneratedSignatureId();
+        String signatureId = startMobileSigning(containerId);
         String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
         Thread.sleep(8000);
@@ -125,84 +107,167 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void remoteHashcodeSigningFlow() throws Exception {
-        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
-        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
-        String containerId = containerResponse.getContainerId();
-
-        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
-        List<Signature> signatures = signaturesResponse.getSignatures();
+    public void remoteSigningFlow() throws Exception {
+        String containerId = uploadContainer();
+        List<Signature> signatures = getSignatures(containerId);
 
         Assert.assertEquals(1, signatures.size());
-        DetachedDataFileContainer originalContainer = getContainer(containerId);
+        Container originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
+
+        CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
-        finalizeRemoteSigning(containerId, startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+        finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
         assertSignedContainer(containerId);
     }
 
-    private void assertSignedContainer(String containerId) throws Exception {
-        DetachedDataFileContainer container = getContainer(containerId);
+    @Test
+    public void mobileIdHashcodeSigningFlow() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        String signatureId = startHashcodeMobileSigning(containerId);
+        String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
+        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        Thread.sleep(8000);
+        String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
+        Assert.assertEquals("SIGNATURE", mobileStatus);
+        assertHashcodeSignedContainer(containerId);
+    }
+
+    @Test
+    public void remoteHashcodeSigningFlow() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId);
+        byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
+        byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
+        String signatureValue = new String(Base64.getEncoder().encode(signedData));
+        finalizeRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+        assertHashcodeSignedContainer(containerId);
+    }
+
+    private void assertHashcodeSignedContainer(String containerId) throws Exception {
+        DetachedDataFileContainer container = getHashcodeContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
 
-        GetHashcodeContainerSignaturesResponse signaturesResponse = (GetHashcodeContainerSignaturesResponse) getSignatureList("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
-        List<Signature> signatures = signaturesResponse.getSignatures();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
 
         Assert.assertEquals(2, signatures.size());
-        ValidationConclusion validationConclusion = getValidationConclusion(containerId);
+        ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
-    private Object getSignatureList(String url, Class responseObject) throws Exception {
+    private void assertSignedContainer(String containerId) throws Exception {
+        Container container = getContainer(containerId);
+        Assert.assertEquals(2, container.getSignatures().size());
+        Assert.assertEquals(2, container.getDataFiles().size());
+
+        List<Signature> signatures = getSignatures(containerId);
+
+        Assert.assertEquals(2, signatures.size());
+        ValidationConclusion validationConclusion = getValidationConclusion(containerId);
+        Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
+        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
+    }
+
+    private Object getSignatureResponse(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
         String signature = getSignature("GET", url, request.toString());
         MockHttpServletRequestBuilder builder = get(url);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        Object signatureListResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
-        return signatureListResponse;
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private List<Signature> getHashcodeSignatures(String containerId) throws Exception {
+        GetContainerSignaturesResponse signaturesResponse = (GetContainerSignaturesResponse) getSignatureResponse("/hashcodecontainers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
+        return signaturesResponse.getSignatures();
+    }
+
+    private List<Signature> getSignatures(String containerId) throws Exception {
+        GetContainerSignaturesResponse signaturesResponse = (GetContainerSignaturesResponse) getSignatureResponse("/containers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
+        return signaturesResponse.getSignatures();
+    }
+
+    private Object getValidationConclusion(String url, Class responseObject) throws Exception {
+
+        JSONObject request = new JSONObject();
+        String signature = getSignature("GET", url, request.toString());
+        MockHttpServletRequestBuilder builder = get(url);
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
+
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private ValidationConclusion getHashcodeValidationConclusion(String containerId) throws Exception {
+        GetHashcodeContainerValidationReportResponse response = (GetHashcodeContainerValidationReportResponse) getValidationConclusion("/hashcodecontainers/" + containerId + "/validationreport", GetHashcodeContainerValidationReportResponse.class);
+        return response.getValidationConclusion();
     }
 
     private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
-
-        JSONObject request = new JSONObject();
-        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/validationreport", request.toString());
-        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/validationreport");
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-
-        GetHashcodeContainerValidationReportResponse reportResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerValidationReportResponse.class);
-        return reportResponse.getValidationConclusion();
+        GetContainerValidationReportResponse response = (GetContainerValidationReportResponse) getValidationConclusion("/containers/" + containerId + "/validationreport", GetContainerValidationReportResponse.class);
+        return response.getValidationConclusion();
     }
 
-    private DetachedDataFileContainer getContainer(String containerId) throws Exception {
+    private Object getContainer(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
-        String signature = getSignature("GET", "/hashcodecontainers/" + containerId, request.toString());
-        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
+        String signature = getSignature("GET", url, request.toString());
+        MockHttpServletRequestBuilder builder = get(url);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        GetHashcodeContainerResponse getHashcodeContainerResponse = objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerResponse.class);
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private DetachedDataFileContainer getHashcodeContainer(String containerId) throws Exception {
+        GetHashcodeContainerResponse originalContainer = (GetHashcodeContainerResponse) getContainer("/hashcodecontainers/" + containerId, GetHashcodeContainerResponse.class);
+
         DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
-        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(getHashcodeContainerResponse.getContainer())));
+        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer())));
         return detachedDataFileContainer;
     }
 
-    private String getMobileIdStatus(String containerId, String signatureId) throws Exception {
-        JSONObject request = new JSONObject();
-        String signature = getSignature("GET", "/hashcodecontainers/" + containerId + "/mobileidsigning/" + signatureId + "/status", request.toString());
-        MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId + "/mobileidsigning/" + signatureId + "/status");
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus();
+    private Container getContainer(String containerId) throws Exception {
+        GetContainerResponse originalContainer = (GetContainerResponse) getContainer("/containers/" + containerId, GetContainerResponse.class);
+        return ContainerBuilder.aContainer().fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer().getBytes()))).build();
     }
 
-    private CreateHashcodeContainerRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
+    private Object getMobileIdStatus(String url, Class responseObject) throws Exception {
+        JSONObject request = new JSONObject();
+        String signature = getSignature("GET", url, request.toString());
+        MockHttpServletRequestBuilder builder = get(url);
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private String getHashcodeMobileIdStatus(String containerId, String signatureId) throws Exception {
+        GetHashcodeContainerMobileIdSigningStatusResponse response = (GetHashcodeContainerMobileIdSigningStatusResponse) getMobileIdStatus("/hashcodecontainers/" + containerId + "/mobileidsigning/" + signatureId + "/status", GetHashcodeContainerMobileIdSigningStatusResponse.class);
+        return response.getMidStatus();
+    }
+
+    private String getMobileIdStatus(String containerId, String signatureId) throws Exception {
+        GetContainerMobileIdSigningStatusResponse response = (GetContainerMobileIdSigningStatusResponse) getMobileIdStatus("/containers/" + containerId + "/mobileidsigning/" + signatureId + "/status", GetContainerMobileIdSigningStatusResponse.class);
+        return response.getMidStatus();
+    }
+
+    private Object startRemoteSigning(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
@@ -210,39 +275,70 @@ public class SigaApplicationTests {
         roles.put("Manager");
         roles.put("Developer");
         request.put("roles", roles);
-        String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/remotesigning", request.toString());
-        MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/remotesigning");
+        String signature = getSignature("POST", url, request.toString());
+        MockHttpServletRequestBuilder builder = post(url);
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeContainerRemoteSigningResponse.class);
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
     }
 
-    private void finalizeRemoteSigning(String containerId, String signatureId, String signatureValue) throws Exception {
+    private CreateHashcodeContainerRemoteSigningResponse startHashcodeRemoteSigning(String containerId) throws Exception {
+        return (CreateHashcodeContainerRemoteSigningResponse) startRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning", CreateHashcodeContainerRemoteSigningResponse.class);
+    }
+
+    private CreateContainerRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
+        return (CreateContainerRemoteSigningResponse) startRemoteSigning("/containers/" + containerId + "/remotesigning", CreateContainerRemoteSigningResponse.class);
+    }
+
+    private void finalizeRemoteSigning(String url, String signatureValue) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
 
-        String signature = getSignature("PUT", "/hashcodecontainers/" + containerId + "/remotesigning/" + signatureId, request.toString());
-        MockHttpServletRequestBuilder builder = put("/hashcodecontainers/" + containerId + "/remotesigning/" + signatureId);
+        String signature = getSignature("PUT", url, request.toString());
+        MockHttpServletRequestBuilder builder = put(url);
 
         mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
 
     }
 
-    private CreateHashcodeContainerMobileIdSigningResponse startMobileSigning(String containerId) throws Exception {
+
+    private Object startMobileSigning(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", "60001019906");
         request.put("phoneNo", "+37200000766");
         request.put("country", "EE");
         request.put("language", "EST");
         request.put("signatureProfile", "LT");
-        String signature = getSignature("POST", "/hashcodecontainers/" + containerId + "/mobileidsigning", request.toString());
-        MockHttpServletRequestBuilder builder = post("/hashcodecontainers/" + containerId + "/mobileidsigning");
+        String signature = getSignature("POST", url, request.toString());
+        MockHttpServletRequestBuilder builder = post(url);
 
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), CreateHashcodeContainerMobileIdSigningResponse.class);
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private String startHashcodeMobileSigning(String containerId) throws Exception {
+        CreateHashcodeContainerMobileIdSigningResponse response = (CreateHashcodeContainerMobileIdSigningResponse) startMobileSigning("/hashcodecontainers/" + containerId + "/mobileidsigning", CreateHashcodeContainerMobileIdSigningResponse.class);
+        return response.getGeneratedSignatureId();
+    }
+
+    private String startMobileSigning(String containerId) throws Exception {
+        CreateContainerMobileIdSigningResponse response = (CreateContainerMobileIdSigningResponse) startMobileSigning("/containers/" + containerId + "/mobileidsigning", CreateContainerMobileIdSigningResponse.class);
+        return response.getGeneratedSignatureId();
+    }
+
+    private String uploadHashcodeContainer() throws Exception {
+        String container = IOUtils.toString(getFileInputStream("hashcode.asice"), Charset.defaultCharset());
+        UploadHashcodeContainerResponse containerResponse = (UploadHashcodeContainerResponse) uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
+        return containerResponse.getContainerId();
+    }
+
+    private String uploadContainer() throws Exception {
+        String container = IOUtils.toString(getFileInputStream("datafile.asice"), Charset.defaultCharset());
+        UploadContainerResponse containerResponse = (UploadContainerResponse) uploadContainer(container, "/upload/containers", "datafile.asice", UploadContainerResponse.class);
+        return containerResponse.getContainerId();
     }
 
     private Object uploadContainer(String container, String url, String containerName, Class responseObject) throws Exception {

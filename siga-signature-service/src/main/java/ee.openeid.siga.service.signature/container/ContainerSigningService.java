@@ -175,7 +175,7 @@ public abstract class ContainerSigningService {
         validateSession(dataToSignHolder, signatureId, SigningType.REMOTE);
     }
 
-    protected void validateMobileIdSession(DataToSignHolder dataToSignHolder, String signatureId) {
+    private void validateMobileIdSession(DataToSignHolder dataToSignHolder, String signatureId) {
         validateSession(dataToSignHolder, signatureId, SigningType.MOBILE_ID);
         if (StringUtils.isBlank(dataToSignHolder.getSessionCode())) {
             throw new InvalidSessionDataException("Unable to finalize signature. Session code not found");

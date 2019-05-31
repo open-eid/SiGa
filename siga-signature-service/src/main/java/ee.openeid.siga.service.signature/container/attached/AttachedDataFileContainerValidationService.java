@@ -25,7 +25,7 @@ public class AttachedDataFileContainerValidationService implements AttachedDataF
     public ValidationConclusion validateExistingContainer(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        sessionHolder.getContainer().save(outputStream);
+        sessionHolder.getContainerHolder().getContainer().save(outputStream);
         String container = new String(Base64.getEncoder().encode(outputStream.toByteArray()));
         return sivaClient.validateAttachedDataFileContainer(sessionHolder.getContainerName(), container);
     }
