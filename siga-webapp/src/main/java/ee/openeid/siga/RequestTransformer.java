@@ -1,10 +1,10 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.common.DataFile;
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.util.CertificateUtil;
-import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
@@ -18,11 +18,11 @@ import java.util.List;
 
 class RequestTransformer {
 
-    static List<ee.openeid.siga.common.HashcodeDataFile> transformHashcodeDataFiles(List<HashcodeDataFile> requestHashcodeDataFiles) {
-        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+    static List<ee.openeid.siga.common.HashcodeDataFile> transformHashcodeDataFilesForApplication(List<ee.openeid.siga.webapp.json.HashcodeDataFile> requestHashcodeDataFiles) {
+        List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
         requestHashcodeDataFiles.forEach(
                 requestHashcodeDataFile -> {
-                    ee.openeid.siga.common.HashcodeDataFile hashcodeDataFile = new ee.openeid.siga.common.HashcodeDataFile();
+                    HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
                     hashcodeDataFile.setFileName(requestHashcodeDataFile.getFileName());
                     hashcodeDataFile.setFileSize(hashcodeDataFile.getFileSize());
                     hashcodeDataFile.setFileHashSha256(hashcodeDataFile.getFileHashSha256());
@@ -33,7 +33,7 @@ class RequestTransformer {
         return hashcodeDataFiles;
     }
 
-    static List<DataFile> transformDataFiles(List<ee.openeid.siga.webapp.json.DataFile> requestDataFiles) {
+    static List<DataFile> transformDataFilesForApplication(List<ee.openeid.siga.webapp.json.DataFile> requestDataFiles) {
         List<DataFile> dataFiles = new ArrayList<>();
         requestDataFiles.forEach(
                 requestDataFile -> {
@@ -45,7 +45,7 @@ class RequestTransformer {
         return dataFiles;
     }
 
-    static List<Signature> transformSignatures(List<ee.openeid.siga.common.Signature> requestSignatures) {
+    static List<Signature> transformSignaturesForResponse(List<ee.openeid.siga.common.Signature> requestSignatures) {
         List<Signature> signatures = new ArrayList<>();
         requestSignatures.forEach(
                 requestSignature -> {
@@ -57,6 +57,34 @@ class RequestTransformer {
                     signatures.add(signature);
                 });
         return signatures;
+    }
+
+    static List<ee.openeid.siga.webapp.json.HashcodeDataFile> transformHashcodeDataFilesForResponse(List<HashcodeDataFile> requestHashcodeDataFiles) {
+        List<ee.openeid.siga.webapp.json.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+        requestHashcodeDataFiles.forEach(
+                requestHashcodeDataFile -> {
+                    ee.openeid.siga.webapp.json.HashcodeDataFile hashcodeDataFile = new ee.openeid.siga.webapp.json.HashcodeDataFile();
+                    hashcodeDataFile.setFileName(requestHashcodeDataFile.getFileName());
+                    hashcodeDataFile.setFileSize(hashcodeDataFile.getFileSize());
+                    hashcodeDataFile.setFileHashSha256(hashcodeDataFile.getFileHashSha256());
+                    hashcodeDataFile.setFileHashSha512(hashcodeDataFile.getFileHashSha512());
+                    hashcodeDataFiles.add(hashcodeDataFile);
+                }
+        );
+        return hashcodeDataFiles;
+    }
+
+    static List<ee.openeid.siga.webapp.json.DataFile> transformDataFilesForResponse(List<DataFile> requestDataFiles) {
+        List<ee.openeid.siga.webapp.json.DataFile> dataFiles = new ArrayList<>();
+        requestDataFiles.forEach(
+                requestHashcodeDataFile -> {
+                    ee.openeid.siga.webapp.json.DataFile dataFile = new ee.openeid.siga.webapp.json.DataFile();
+                    dataFile.setFileName(requestHashcodeDataFile.getFileName());
+                    dataFile.setFileContent(requestHashcodeDataFile.getContent());
+                    dataFiles.add(dataFile);
+                }
+        );
+        return dataFiles;
     }
 
     static SignatureParameters transformRemoteRequest(String signingCertificate, String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {

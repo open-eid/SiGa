@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
 
@@ -70,12 +71,20 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     public List<Signature> getSignatures(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         List<Signature> signatures = new ArrayList<>();
-        sessionHolder.getContainerHolder().getContainer().getSignatures().forEach(sessionSignature -> sessionHolder.getSignatureIdHolder().forEach((hashcode, generatedSignatureId) -> {
-            if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
-                signatures.add(transformSignature(generatedSignatureId, sessionSignature));
-            }
-        }));
+        sessionHolder.getContainerHolder().getContainer().getSignatures()
+                .forEach(sessionSignature -> sessionHolder.getSignatureIdHolder()
+                        .forEach((hashcode, generatedSignatureId) -> {
+                            if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
+                                signatures.add(transformSignature(generatedSignatureId, sessionSignature));
+                            }
+                        }));
         return signatures;
+    }
+
+    public List<DataFile> getDataFiles(String containerId) {
+        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        List<org.digidoc4j.DataFile> dataFiles = sessionHolder.getContainerHolder().getContainer().getDataFiles();
+        return dataFiles.stream().map(this::transformDataFile).collect(Collectors.toList());
     }
 
     public String closeSession(String containerId) {
@@ -90,6 +99,13 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
         signature.setSignatureProfile(dd4jSignature.getProfile().name());
         return signature;
+    }
+
+    private DataFile transformDataFile(org.digidoc4j.DataFile digidoc4jDataFile) {
+        DataFile dataFile = new DataFile();
+        dataFile.setFileName(digidoc4jDataFile.getName());
+        dataFile.setContent(new String(Base64.getEncoder().encode(digidoc4jDataFile.getBytes())));
+        return dataFile;
     }
 
     private AttachedDataFileContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {

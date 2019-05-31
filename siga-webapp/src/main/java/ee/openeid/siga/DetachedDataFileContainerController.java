@@ -38,7 +38,7 @@ public class DetachedDataFileContainerController {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
         RequestValidator.validateHashcodeDataFiles(dataFiles);
 
-        String sessionId = containerService.createContainer(RequestTransformer.transformHashcodeDataFiles(dataFiles));
+        String sessionId = containerService.createContainer(RequestTransformer.transformHashcodeDataFilesForApplication(dataFiles));
         CreateHashcodeContainerResponse response = new CreateHashcodeContainerResponse();
         response.setContainerId(sessionId);
         return response;
@@ -158,7 +158,18 @@ public class DetachedDataFileContainerController {
 
         List<ee.openeid.siga.common.Signature> signatures = containerService.getSignatures(containerId);
         GetHashcodeContainerSignaturesResponse response = new GetHashcodeContainerSignaturesResponse();
-        response.getSignatures().addAll(RequestTransformer.transformSignatures(signatures));
+        response.getSignatures().addAll(RequestTransformer.transformSignaturesForResponse(signatures));
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.HC_GET_DATAFILES_LIST)
+    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetHashcodeContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
+        RequestValidator.validateContainerId(containerId);
+
+        List<ee.openeid.siga.common.HashcodeDataFile> dataFiles = containerService.getDataFiles(containerId);
+        GetHashcodeContainerDataFilesResponse response = new GetHashcodeContainerDataFilesResponse();
+        response.getDataFiles().addAll(RequestTransformer.transformHashcodeDataFilesForResponse(dataFiles));
         return response;
     }
 

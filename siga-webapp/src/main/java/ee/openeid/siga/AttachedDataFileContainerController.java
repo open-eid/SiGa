@@ -40,7 +40,7 @@ public class AttachedDataFileContainerController {
         RequestValidator.validateDataFiles(dataFiles);
         RequestValidator.validateContainerName(containerName);
 
-        String sessionId = containerService.createContainer(containerName, RequestTransformer.transformDataFiles(dataFiles));
+        String sessionId = containerService.createContainer(containerName, RequestTransformer.transformDataFilesForApplication(dataFiles));
         CreateContainerResponse response = new CreateContainerResponse();
         response.setContainerId(sessionId);
         return response;
@@ -163,7 +163,18 @@ public class AttachedDataFileContainerController {
 
         List<ee.openeid.siga.common.Signature> signatures = containerService.getSignatures(containerId);
         GetContainerSignaturesResponse response = new GetContainerSignaturesResponse();
-        response.getSignatures().addAll(RequestTransformer.transformSignatures(signatures));
+        response.getSignatures().addAll(RequestTransformer.transformSignaturesForResponse(signatures));
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.GET_DATAFILES_LIST)
+    @RequestMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
+        RequestValidator.validateContainerId(containerId);
+
+        List<ee.openeid.siga.common.DataFile> dataFiles = containerService.getDataFiles(containerId);
+        GetContainerDataFilesResponse response = new GetContainerDataFilesResponse();
+        response.getDataFiles().addAll(RequestTransformer.transformDataFilesForResponse(dataFiles));
         return response;
     }
 

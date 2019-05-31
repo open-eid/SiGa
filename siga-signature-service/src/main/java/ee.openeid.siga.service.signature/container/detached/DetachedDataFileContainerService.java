@@ -78,6 +78,11 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return signatures;
     }
 
+    public List<HashcodeDataFile> getDataFiles(String containerId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        return sessionHolder.getDataFiles();
+    }
+
     public Signature transformSignature(HashcodeSignatureWrapper signatureWrapper) {
         Signature signature = new Signature();
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);

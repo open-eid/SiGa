@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.container.detached;
 
+import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -72,6 +73,16 @@ public class DetachedDataFileContainerServiceTest {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
         String container = containerService.getContainer(CONTAINER_ID);
         Assert.assertFalse(StringUtils.isBlank(container));
+    }
+
+    @Test
+    public void successfulGetDataFiles() throws IOException, URISyntaxException {
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        List<HashcodeDataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
+        Assert.assertEquals("test.txt", dataFiles.get(0).getFileName());
+        Assert.assertEquals(Integer.valueOf(10), dataFiles.get(0).getFileSize());
+        Assert.assertEquals("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg", dataFiles.get(0).getFileHashSha256());
+        Assert.assertEquals("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA", dataFiles.get(0).getFileHashSha512());
     }
 
     @Test
