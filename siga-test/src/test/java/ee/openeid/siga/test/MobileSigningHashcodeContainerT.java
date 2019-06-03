@@ -59,7 +59,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         assertEquals(2, r.getValidationConclusion().getSignatures().stream().filter(signature -> signatureId5s.equals(signature.getId()) || signatureId7s.equals(signature.getId())).count());
     }
 
-    @Ignore //TODO: OCSP is not fetched for some reason, needs investigation
+    @Ignore ("OCSP is not fetched for some reason, needs investigation")
     @Test
     public void signWithLtMidSuccessfully() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());

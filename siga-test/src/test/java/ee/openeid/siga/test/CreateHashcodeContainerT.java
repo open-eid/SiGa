@@ -1,8 +1,6 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,8 +14,6 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -230,56 +226,20 @@ public class CreateHashcodeContainerT extends TestBase {
 
     @Test
     public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .head(createUrl(HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
-                .extract()
-                .response();
+        Response response = head(HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(405));
     }
 
-    @Ignore //TODO: SIGARIA-67
+    @Ignore ("SIGARIA-67")
     @Test
     public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .options(createUrl(HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        Response response = options(HASHCODE_CONTAINERS, flow);
+        assertThat(response.statusCode(), equalTo(405));
     }
 
     @Test
     public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainersDataRequestWithDefault().toString())
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .patch(createUrl(HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
-                .extract()
-                .response();
+        Response response = patch(HASHCODE_CONTAINERS, flow);
         assertThat(response.statusCode(), equalTo(405));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
     }
