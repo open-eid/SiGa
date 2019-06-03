@@ -1,15 +1,18 @@
 package ee.openeid.siga.service.signature.container.attached;
 
 import ee.openeid.siga.common.DataFile;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.session.AttachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
-import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.DSSDocument;
+import eu.europa.esig.dss.InMemoryDocument;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -87,9 +90,28 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         return dataFiles.stream().map(this::transformDataFile).collect(Collectors.toList());
     }
 
+    public Result addDataFile(String containerId, DataFile dataFile) {
+        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        validateIfSessionMutable(sessionHolder);
+
+        org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
+        DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
+        digidoc4jDataFile.setDocument(dssDocument);
+
+        sessionHolder.getContainerHolder().getContainer().getDataFiles().add(digidoc4jDataFile);
+        sessionService.update(containerId, sessionHolder);
+        return Result.OK;
+    }
+
     public String closeSession(String containerId) {
         sessionService.remove(containerId);
-        return SessionResult.OK.name();
+        return Result.OK.name();
+    }
+
+    private void validateIfSessionMutable(AttachedDataFileContainerSessionHolder session) {
+        if (session.getContainerHolder().getContainer().getSignatures().size() != 0) {
+            throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
+        }
     }
 
     private Signature transformSignature(String generatedSignatureId, org.digidoc4j.Signature dd4jSignature) {
@@ -135,5 +157,4 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
-
 }

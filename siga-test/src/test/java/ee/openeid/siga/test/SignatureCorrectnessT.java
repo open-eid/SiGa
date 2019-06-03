@@ -1,12 +1,11 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.SIGNER_CERT_PEM;
@@ -73,6 +72,6 @@ public class SignatureCorrectnessT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("result", equalTo("OK"));
+                .body("result", equalTo(Result.OK.name()));
     }
 }

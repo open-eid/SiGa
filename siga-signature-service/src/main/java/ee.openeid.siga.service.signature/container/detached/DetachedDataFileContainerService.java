@@ -2,13 +2,14 @@ package ee.openeid.siga.service.signature.container.detached;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
-import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
@@ -66,9 +67,9 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
 
-    public String closeSession(String containerId) {
+    public Result closeSession(String containerId) {
         sessionService.remove(containerId);
-        return SessionResult.OK.name();
+        return Result.OK;
     }
 
     public List<Signature> getSignatures(String containerId) {
@@ -83,6 +84,14 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return sessionHolder.getDataFiles();
     }
 
+    public Result addDataFile(String containerId, HashcodeDataFile dataFile) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        validateIfSessionMutable(sessionHolder);
+        sessionHolder.getDataFiles().add(dataFile);
+        sessionService.update(containerId, sessionHolder);
+        return Result.OK;
+    }
+
     public Signature transformSignature(HashcodeSignatureWrapper signatureWrapper) {
         Signature signature = new Signature();
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);
@@ -92,6 +101,12 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         signature.setSignatureProfile(dd4jSignature.getProfile().name());
         signature.setSignerInfo(dd4jSignature.getSigningCertificate().getSubjectName());
         return signature;
+    }
+
+    private void validateIfSessionMutable(DetachedDataFileContainerSessionHolder session) {
+        if (session.getSignatures().size() != 0) {
+            throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
+        }
     }
 
     private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
@@ -121,4 +136,5 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
+
 }

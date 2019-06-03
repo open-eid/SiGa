@@ -65,6 +65,30 @@ public class SigaApplicationTests {
     }
 
     @Test
+    public void createHashcodeNewContainerFlow() throws Exception {
+        String containerId = createHashcodeContainer();
+        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(0, originalContainer.getSignatures().size());
+        Assert.assertEquals(1, originalContainer.getDataFiles().size());
+        addHashcodeDataFile(containerId);
+        DetachedDataFileContainer updatedContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(0, updatedContainer.getSignatures().size());
+        Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+    }
+
+    @Test
+    public void createNewContainerFlow() throws Exception {
+        String containerId = createContainer();
+        Container originalContainer = getContainer(containerId);
+        Assert.assertEquals(0, originalContainer.getSignatures().size());
+        Assert.assertEquals(1, originalContainer.getDataFiles().size());
+        addDataFile(containerId);
+        Container updatedContainer = getContainer(containerId);
+        Assert.assertEquals(0, updatedContainer.getSignatures().size());
+        Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+    }
+
+    @Test
     public void getAnotherUserContainer() throws Exception {
 
         String containerId = uploadHashcodeContainer();
@@ -192,17 +216,6 @@ public class SigaApplicationTests {
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
-
-    private Object getRequest(String url, Class responseObject) throws Exception {
-        JSONObject request = new JSONObject();
-        String signature = getSignature("GET", url, request.toString());
-        MockHttpServletRequestBuilder builder = get(url);
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
-    }
-
-
     private List<HashcodeDataFile> getHashcodeDataFiles(String containerId) throws Exception {
         GetHashcodeContainerDataFilesResponse signaturesResponse = (GetHashcodeContainerDataFilesResponse) getRequest("/hashcodecontainers/" + containerId + "/datafiles", GetHashcodeContainerDataFilesResponse.class);
         return signaturesResponse.getDataFiles();
@@ -264,12 +277,7 @@ public class SigaApplicationTests {
         roles.put("Manager");
         roles.put("Developer");
         request.put("roles", roles);
-        String signature = getSignature("POST", url, request.toString());
-        MockHttpServletRequestBuilder builder = post(url);
-
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+        return postRequest(url, request, responseObject);
     }
 
     private CreateHashcodeContainerRemoteSigningResponse startHashcodeRemoteSigning(String containerId) throws Exception {
@@ -283,15 +291,8 @@ public class SigaApplicationTests {
     private void finalizeRemoteSigning(String url, String signatureValue) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
-
-        String signature = getSignature("PUT", url, request.toString());
-        MockHttpServletRequestBuilder builder = put(url);
-
-        mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-
+        putRequest(url, request);
     }
-
 
     private Object startMobileSigning(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
@@ -300,12 +301,7 @@ public class SigaApplicationTests {
         request.put("country", "EE");
         request.put("language", "EST");
         request.put("signatureProfile", "LT");
-        String signature = getSignature("POST", url, request.toString());
-        MockHttpServletRequestBuilder builder = post(url);
-
-        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
-                .andExpect(status().is2xxSuccessful());
-        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+        return postRequest(url, request, responseObject);
     }
 
     private String startHashcodeMobileSigning(String containerId) throws Exception {
@@ -336,9 +332,80 @@ public class SigaApplicationTests {
             request.put("containerName", containerName);
         }
         request.put("container", container);
+        return postRequest(url, request, responseObject);
+    }
+
+    private String createHashcodeContainer() throws Exception {
+        JSONObject request = new JSONObject();
+        JSONObject dataFile = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
+        dataFile.put("fileName", "test.txt");
+        dataFile.put("fileHashSha256", "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=");
+        dataFile.put("fileHashSha512", "vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg==");
+        dataFile.put("fileSize", 10);
+        dataFiles.put(dataFile);
+        request.put("dataFiles", dataFiles);
+        CreateHashcodeContainerResponse response = (CreateHashcodeContainerResponse) postRequest("/hashcodecontainers", request, CreateHashcodeContainerResponse.class);
+        return response.getContainerId();
+    }
+
+    private String createContainer() throws Exception {
+        JSONObject request = new JSONObject();
+        JSONObject dataFile = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
+        request.put("containerName", "test.asice");
+        dataFile.put("fileName", "test.txt");
+        dataFile.put("fileContent", "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=");
+        dataFiles.put(dataFile);
+        request.put("dataFiles", dataFiles);
+        CreateContainerResponse response = (CreateContainerResponse) postRequest("/containers", request, CreateContainerResponse.class);
+        return response.getContainerId();
+    }
+
+
+    private String addDataFile(String containerId) throws Exception {
+        JSONObject request = new JSONObject();
+        JSONObject dataFile = new JSONObject();
+        dataFile.put("fileName", "test1.txt");
+        dataFile.put("fileContent", "WxFhjC5EAnh30M0JIe0Wa58Xb1BYf8kedTTdKUbbd9Y=");
+        request.put("dataFile", dataFile);
+        CreateContainerDataFileResponse response = (CreateContainerDataFileResponse) postRequest("/containers/" + containerId + "/datafiles", request, CreateContainerDataFileResponse.class);
+        return response.getResult();
+    }
+
+    private String addHashcodeDataFile(String containerId) throws Exception {
+        JSONObject request = new JSONObject();
+        JSONObject dataFile = new JSONObject();
+        dataFile.put("fileName", "test1.txt");
+        dataFile.put("fileHashSha256", "WxFhjC5EAnh30M0JIe0Wa58Xb1BYf8kedTTdKUbbd9Y=");
+        dataFile.put("fileHashSha512", "HD6Xh+Y6oIZnXv4XqbKxrb6t3RkoPYv+NkqOBE8MwkssuATRE2aFBp8Nm9kp/Xn5a4l2Ki8QkX5qIUlbXQgO4Q==");
+        dataFile.put("fileSize", 10);
+        request.put("dataFile", dataFile);
+        CreateHashcodeContainerDataFileResponse response = (CreateHashcodeContainerDataFileResponse) postRequest("/hashcodecontainers/" + containerId + "/datafiles", request, CreateHashcodeContainerDataFileResponse.class);
+        return response.getResult();
+    }
+
+    private Object postRequest(String url, JSONObject request, Class responseObject) throws Exception {
         String signature = getSignature("POST", url, request.toString());
         MockHttpServletRequestBuilder builder = post(url);
 
+        ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    private void putRequest(String url, JSONObject request) throws Exception {
+        String signature = getSignature("PUT", url, request.toString());
+        MockHttpServletRequestBuilder builder = put(url);
+
+        mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    private Object getRequest(String url, Class responseObject) throws Exception {
+        JSONObject request = new JSONObject();
+        String signature = getSignature("GET", url, request.toString());
+        MockHttpServletRequestBuilder builder = get(url);
         ResultActions response = mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
                 .andExpect(status().is2xxSuccessful());
         return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);

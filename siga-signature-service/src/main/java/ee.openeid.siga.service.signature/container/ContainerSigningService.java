@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature.container;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
@@ -18,7 +19,6 @@ import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
-import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public abstract class ContainerSigningService {
 
     private SigaEventLogger sigaEventLogger;
     protected SessionService sessionService;
-    private static final String OK_RESPONSE = "OK";
+    private static final String OK_RESPONSE = Result.OK.name();
     private DigiDocService digiDocService;
     private MobileIdService mobileIdService;
 
@@ -61,7 +61,7 @@ public abstract class ContainerSigningService {
         return DataToSignWrapper.builder().dataToSign(dataToSign).generatedSignatureId(generatedSignatureId).build();
     }
 
-    public String finalizeSigning(String containerId, String signatureId, String signatureValue) {
+    public Result finalizeSigning(String containerId, String signatureId, String signatureValue) {
         Session sessionHolder = getSession(containerId);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         validateRemoteSession(dataToSignHolder, signatureId);
@@ -72,7 +72,7 @@ public abstract class ContainerSigningService {
 
         addSignatureToSession(sessionHolder, signature, signatureId);
         sessionService.update(containerId, sessionHolder);
-        return SessionResult.OK.name();
+        return Result.OK;
     }
 
     public MobileIdChallenge startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {

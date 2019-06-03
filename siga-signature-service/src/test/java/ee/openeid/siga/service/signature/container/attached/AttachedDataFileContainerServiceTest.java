@@ -2,18 +2,22 @@ package ee.openeid.siga.service.signature.container.attached;
 
 
 import ee.openeid.siga.common.DataFile;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
-import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,14 +34,15 @@ import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
 
-import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
-import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE;
+import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AttachedDataFileContainerServiceTest {
 
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     @InjectMocks
     AttachedDataFileContainerService containerService;
@@ -60,7 +65,7 @@ public class AttachedDataFileContainerServiceTest {
 
     @Test
     public void successfulCreateContainer() {
-        List<DataFile> dataFiles = RequestUtil.createDataFileListWithOneFile();
+        List<DataFile> dataFiles = createDataFileListWithOneFile();
         containerService.setSessionService(sessionService);
 
         String containerId = containerService.createContainer("test.asice", dataFiles);
@@ -102,8 +107,27 @@ public class AttachedDataFileContainerServiceTest {
     }
 
     @Test
+    public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to add/remove data file. Container contains signatures");
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAttachedDataFileSessionHolder());
+        containerService.addDataFile(CONTAINER_ID, createDataFileListWithOneFile().get(0));
+    }
+
+    @Test
+    public void successfulAddDataFile() throws IOException, URISyntaxException {
+        AttachedDataFileContainerSessionHolder session = createAttachedDataFileSessionHolder();
+
+        session.getContainerHolder().getContainer().getSignatures().clear();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.addDataFile(CONTAINER_ID, createDataFileListWithOneFile().get(0));
+        Assert.assertEquals(Result.OK, result);
+    }
+
+    @Test
     public void successfulCloseSession() {
         String result = containerService.closeSession(CONTAINER_ID);
-        Assert.assertEquals(SessionResult.OK.name(), result);
+        Assert.assertEquals(Result.OK.name(), result);
     }
 }

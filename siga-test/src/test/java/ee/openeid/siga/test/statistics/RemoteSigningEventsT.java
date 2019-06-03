@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.statistics;
 
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
@@ -69,7 +70,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         assertNotNull(dataToSignResponse);
         response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(RESULT), equalTo("OK"));
+        assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
         assertThat(validationResponse.statusCode(), equalTo(200));
@@ -77,7 +78,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
 
         response = deleteHashcodeContainer(flow);
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(RESULT), equalTo("OK"));
+        assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
 
     @Test

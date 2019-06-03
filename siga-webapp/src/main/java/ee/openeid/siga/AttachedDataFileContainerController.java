@@ -3,6 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -111,9 +113,9 @@ public class AttachedDataFileContainerController {
     public UpdateContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
-        String result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
+        Result result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateContainerRemoteSigningResponse response = new UpdateContainerRemoteSigningResponse();
-        response.setResult(result);
+        response.setResult(result.name());
         return response;
     }
 
@@ -178,6 +180,20 @@ public class AttachedDataFileContainerController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.ADD_DATAFILE)
+    @RequestMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    public CreateContainerDataFileResponse addContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerDataFileRequest containerDataFileRequest) {
+        RequestValidator.validateContainerId(containerId);
+        DataFile DataFile = containerDataFileRequest.getDataFile();
+        RequestValidator.validateDataFile(DataFile);
+
+        ee.openeid.siga.common.DataFile dataFileForApplication = RequestTransformer.transformDataFilesForApplication(Collections.singletonList(DataFile)).get(0);
+        Result result = containerService.addDataFile(containerId, dataFileForApplication);
+        CreateContainerDataFileResponse response = new CreateContainerDataFileResponse();
+        response.setResult(result.name());
+        return response;
+    }
+    
     @SigaEventLog(eventName = SigaEventName.GET_CONTAINER)
     @RequestMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {

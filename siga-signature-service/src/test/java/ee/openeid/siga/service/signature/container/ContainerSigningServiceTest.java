@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
@@ -83,8 +84,8 @@ public abstract class ContainerSigningServiceTest {
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
         mockRemoteSessionHolder(dataToSign);
-        String result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
-        Assert.assertEquals("OK", result);
+        Result result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
+        Assert.assertEquals(Result.OK, result);
     }
 
     protected void noDataToSignInSession() {
@@ -104,8 +105,8 @@ public abstract class ContainerSigningServiceTest {
         try {
             getSigningService().finalizeSigning(CONTAINER_ID, "someUnknownSignatureId", base64EncodedSignature);
         } catch (InvalidSessionDataException e) {
-            String result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
-            Assert.assertEquals("OK", result);
+            Result result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
+            Assert.assertEquals(Result.OK, result);
             throw e;
         }
     }
@@ -155,7 +156,7 @@ public abstract class ContainerSigningServiceTest {
 
     private MobileSignHashResponse createMobileSignHashResponse() {
         MobileSignHashResponse mobileSignHashResponse = new MobileSignHashResponse();
-        mobileSignHashResponse.setStatus("OK");
+        mobileSignHashResponse.setStatus(Result.OK.name());
         mobileSignHashResponse.setChallengeID("2331");
         mobileSignHashResponse.setSesscode("3223423423424");
         return mobileSignHashResponse;

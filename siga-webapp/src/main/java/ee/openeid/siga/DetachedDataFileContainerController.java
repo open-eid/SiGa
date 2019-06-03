@@ -3,6 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -107,9 +109,9 @@ public class DetachedDataFileContainerController {
     public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
-        String result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
+        Result result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateHashcodeContainerRemoteSigningResponse response = new UpdateHashcodeContainerRemoteSigningResponse();
-        response.setResult(result);
+        response.setResult(result.name());
         return response;
     }
 
@@ -173,6 +175,20 @@ public class DetachedDataFileContainerController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_ADD_DATAFILE)
+    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    public CreateHashcodeContainerDataFileResponse addHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerDataFileRequest containerDataFileRequest) {
+        RequestValidator.validateContainerId(containerId);
+        HashcodeDataFile hashcodeDataFile = containerDataFileRequest.getDataFile();
+        RequestValidator.validateHashcodeDataFile(hashcodeDataFile);
+
+        ee.openeid.siga.common.HashcodeDataFile dataFileForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(Collections.singletonList(hashcodeDataFile)).get(0);
+        Result result = containerService.addDataFile(containerId, dataFileForApplication);
+        CreateHashcodeContainerDataFileResponse response = new CreateHashcodeContainerDataFileResponse();
+        response.setResult(result.name());
+        return response;
+    }
+
     @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
@@ -188,9 +204,9 @@ public class DetachedDataFileContainerController {
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
-        String result = containerService.closeSession(containerId);
+        Result result = containerService.closeSession(containerId);
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
-        response.setResult(result);
+        response.setResult(result.name());
         return response;
     }
 

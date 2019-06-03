@@ -51,14 +51,14 @@ public class RequestValidator {
         }
     }
 
-    private static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
+    public static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
         validateFileName(dataFile.getFileName(), "Data file name is invalid");
         validateFileSize(dataFile.getFileSize());
         validateHashSha256(dataFile.getFileHashSha256());
         validateHashSha512(dataFile.getFileHashSha512());
     }
 
-    private static void validateDataFile(DataFile dataFile) {
+    public static void validateDataFile(DataFile dataFile) {
         validateFileName(dataFile.getFileName(), "Data file name is invalid");
         validateHash(dataFile.getFileContent());
     }

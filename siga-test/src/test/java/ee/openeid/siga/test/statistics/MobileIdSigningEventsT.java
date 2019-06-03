@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.statistics;
 
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import io.restassured.response.Response;
@@ -71,7 +72,7 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
 
         response = deleteHashcodeContainer(flow);
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(RESULT), equalTo("OK"));
+        assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
 
     @Test
@@ -109,8 +110,8 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
         query = createQueryForSuccessEvent(DDS_GET_MOBILE_CERTIFICATE, FINISH);
         response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, "OK"));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.SIGN_CERT_STATUS, "OK"));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, Result.OK.name()));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.SIGN_CERT_STATUS, Result.OK.name()));
     }
 
     @Test
@@ -124,7 +125,7 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
         query = createQueryForSuccessEvent(DDS_MOBILE_SIGN_HASH, FINISH);
         response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, "OK"));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, Result.OK.name()));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.DDS_SESSION_ID));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.PERSON_IDENTIFIER, "60001019906"));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.RELYING_PARTY_NAME, "Testimine"));

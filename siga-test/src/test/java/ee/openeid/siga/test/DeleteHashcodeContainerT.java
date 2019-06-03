@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
@@ -54,7 +55,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(RESULT, equalTo("OK"));
+                .body(RESULT, equalTo(Result.OK.name()));
     }
 
     @Test
