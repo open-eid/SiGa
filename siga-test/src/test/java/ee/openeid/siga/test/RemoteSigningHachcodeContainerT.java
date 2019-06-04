@@ -67,10 +67,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(3))
                 .body("validationConclusion.signaturesCount", equalTo(3));
-
-        GetHashcodeContainerValidationReportResponse r = validationResponse.body().as(GetHashcodeContainerValidationReportResponse.class);
-
-        assertEquals(2, r.getValidationConclusion().getSignatures().stream().filter(signature -> dataToSignResponse1.getGeneratedSignatureId().equals(signature.getId()) || dataToSignResponse2.getGeneratedSignatureId().equals(signature.getId())).count());
     }
 
     @Test
