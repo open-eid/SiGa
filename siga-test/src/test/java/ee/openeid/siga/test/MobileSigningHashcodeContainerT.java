@@ -54,12 +54,12 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         await().atMost(16, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId7s).body().as(GetHashcodeContainerMobileIdSigningStatusResponse.class).getMidStatus()));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
-        validationResponse.then().statusCode(200);
-        GetHashcodeContainerValidationReportResponse r = validationResponse.body().as(GetHashcodeContainerValidationReportResponse.class);
-        assertEquals(2, r.getValidationConclusion().getSignatures().stream().filter(signature -> signatureId5s.equals(signature.getId()) || signatureId7s.equals(signature.getId())).count());
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
     }
 
-    @Ignore //TODO: OCSP is not fetched for some reason, needs investigation
+    @Ignore ("OCSP is not fetched for some reason, needs investigation")
     @Test
     public void signWithLtMidSuccessfully() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());

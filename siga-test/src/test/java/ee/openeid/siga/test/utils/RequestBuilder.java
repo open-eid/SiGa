@@ -125,13 +125,13 @@ public class RequestBuilder {
         return signatureProductionPlace;
     }
 
-    public static String signRequest(SigaApiFlow flow, String request, String method, String url, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
+    public static String signRequest(SigaApiFlow flow, String request, String method, String url) throws InvalidKeyException, NoSuchAlgorithmException {
         if (!flow.getForceSigningTime()) {
             flow.setSigningTime(getSigningTimeInSeconds().toString());
         }
 
         String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url + ":" + request;
-        return generateHmacSignature(flow.getServiceSecret(), signableString, hmacAlgo);
+        return generateHmacSignature(flow.getServiceSecret(), signableString, flow.getHmacAlgorithm());
     }
 
     private static Long getSigningTimeInSeconds() {

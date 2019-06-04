@@ -37,7 +37,6 @@ public class TestBase {
         RestAssured.useRelaxedHTTPSValidation();
     }
 
-
     protected Response postCreateHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(HASHCODE_CONTAINERS, flow, request.toString());
     }
@@ -100,9 +99,10 @@ public class TestBase {
 
     protected Response post(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
                 .log().all()
@@ -121,9 +121,10 @@ public class TestBase {
 
     protected Response put(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "PUT", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "PUT", endpoint))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
                 .log().all()
@@ -142,9 +143,10 @@ public class TestBase {
 
     protected Response get(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "GET", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "GET", endpoint))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
                 .contentType(ContentType.JSON)
@@ -158,9 +160,10 @@ public class TestBase {
 
     protected Response delete(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "DELETE", endpoint, null))
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "DELETE", endpoint))
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
                 .contentType(ContentType.JSON)
@@ -172,5 +175,54 @@ public class TestBase {
                 .response();
     }
 
+    protected Response head(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", endpoint))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .head(createUrl(endpoint))
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
 
+    protected Response options(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", endpoint))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .options(createUrl(endpoint))
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
+
+    protected Response patch(String endpoint, SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "PATCH", endpoint))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .patch(createUrl(endpoint))
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
 }

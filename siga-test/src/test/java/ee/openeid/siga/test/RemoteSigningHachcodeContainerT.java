@@ -3,9 +3,6 @@ package ee.openeid.siga.test;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import ee.openeid.siga.webapp.json.GetHashcodeContainerValidationReportResponse;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -15,12 +12,9 @@ import org.junit.Test;
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class RemoteSigningHachcodeContainerT extends TestBase {
 
@@ -56,17 +50,19 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse2 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
+
         response.then().statusCode(200).body("result", equalTo(Result.OK.name()));
+
         response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse2.getDataToSign(), dataToSignResponse2.getDigestAlgorithm())), dataToSignResponse2.getGeneratedSignatureId());
+
         response.then().statusCode(200).body("result", equalTo(Result.OK.name()));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
+
         validationResponse.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(3))
                 .body("validationConclusion.signaturesCount", equalTo(3));
-        GetHashcodeContainerValidationReportResponse r = validationResponse.body().as(GetHashcodeContainerValidationReportResponse.class);
-        assertEquals(2, r.getValidationConclusion().getSignatures().stream().filter(signature -> dataToSignResponse1.getGeneratedSignatureId().equals(signature.getId()) || dataToSignResponse2.getGeneratedSignatureId().equals(signature.getId())).count());
     }
 
     @Test
@@ -269,36 +265,20 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void headToRemoteSigningHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .head(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
-                .then()
-                .log().all()
+        Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        response.then()
                 .statusCode(405);
     }
 
-    @Ignore //TODO: SIGARIA-67
+    @Ignore("SIGARIA-67")
     @Test
     public void optionsToRemoteSigningHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
-                .then()
-                .log().all()
+        Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        response.then()
                 .statusCode(405)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
@@ -307,18 +287,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     public void patchToRemoteSigningHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainersDataRequestWithDefault().toString())
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .patch(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING))
-                .then()
-                .log().all()
+        Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        response.then()
                 .statusCode(405)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }

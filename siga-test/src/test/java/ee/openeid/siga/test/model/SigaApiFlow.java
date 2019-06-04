@@ -16,19 +16,20 @@ public class SigaApiFlow {
 
     private String serviceUuid;
     private String serviceSecret;
+    private String hmacAlgorithm;
 
     @Builder(buildMethodName = "buildForTestClient1Service1")
     public static SigaApiFlow buildForTestClient1Service1() {
-        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_1).serviceSecret(SERVICE_SECRET_1).forceSigningTime(false).build();
+        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_1).serviceSecret(SERVICE_SECRET_1).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
     }
 
     @Builder(buildMethodName = "buildForTestClient1Service2")
     public static SigaApiFlow buildForTestClient1Service2() {
-        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_2).serviceSecret(SERVICE_SECRET_2).forceSigningTime(false).build();
+        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_2).serviceSecret(SERVICE_SECRET_2).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
     }
 
     @Builder(buildMethodName = "buildForTestClient2Service3")
     public static SigaApiFlow buildForTestClient2Service3() {
-        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_3).serviceSecret(SERVICE_SECRET_3).forceSigningTime(false).build();
+        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_3).serviceSecret(SERVICE_SECRET_3).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
     }
 }

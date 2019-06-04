@@ -1,8 +1,6 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
@@ -12,8 +10,6 @@ import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.*;
 
 public class UploadHashcodeContainerT extends TestBase {
@@ -26,18 +22,18 @@ public class UploadHashcodeContainerT extends TestBase {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
-    @Test //TODO: More elaborate rules should be checked on container ID
+    @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws Exception {
         Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
+                .body(CONTAINER_ID + ".length()", equalTo(36));
     }
 
     @Test
     public void uploadInvalidHashcodeContainer() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
 
         response.then()
                 .statusCode(400)
@@ -50,7 +46,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
+                .body(CONTAINER_ID + ".length()", equalTo(36));
     }
 
     @Test
@@ -127,52 +123,28 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToCreateHashcodeContainer() throws Exception {
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", UPLOAD + HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .head(createUrl(UPLOAD + HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
+    public void headToUploadHashcodeContainer() throws Exception {
+        Response response = head(UPLOAD + HASHCODE_CONTAINERS, flow);
+
+        response.then()
                 .statusCode(405);
     }
 
-    @Ignore //TODO: SIGARIA-67
+    @Ignore ("SIGARIA-67")
     @Test
-    public void optionsToCreateHashcodeContainer() throws Exception {
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", UPLOAD + HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .options(createUrl(UPLOAD + HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
+    public void optionsToUploadHashcodeContainer() throws Exception {
+        Response response = options(UPLOAD + HASHCODE_CONTAINERS, flow);
+
+        response.then()
                 .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));    }
+                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+    }
 
     @Test
-    public void patchToCreateHashcodeContainer() throws Exception {
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString(), "PATCH", UPLOAD + HASHCODE_CONTAINERS, null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString())
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .patch(createUrl(UPLOAD + HASHCODE_CONTAINERS))
-                .then()
-                .log().all()
+    public void patchToUploadHashcodeContainer() throws Exception {
+        Response response = patch(UPLOAD + HASHCODE_CONTAINERS, flow);
+
+        response.then()
                 .statusCode(405)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }

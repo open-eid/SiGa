@@ -190,36 +190,20 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void headToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "HEAD", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .head(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
-                .then()
-                .log().all()
+        Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+
+        response.then()
                 .statusCode(200);
     }
 
-    @Ignore //TODO: SIGARIA-67
+    @Ignore ("SIGARIA-67")
     @Test
     public void optionsToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, "", "OPTIONS", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .options(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
-               .then()
-                .log().all()
+        Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+
+        response.then()
                 .statusCode(405)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
@@ -228,18 +212,9 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void patchToGetHashcodeContainer() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, hashcodeContainersDataRequestWithDefault().toString(), "PATCH", HASHCODE_CONTAINERS + "/" + flow.getContainerId(), null))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(hashcodeContainersDataRequestWithDefault().toString())
-                .log().all()
-                .contentType(ContentType.JSON)
-                .when()
-                .patch(createUrl(HASHCODE_CONTAINERS + "/" + flow.getContainerId()))
-                .then()
-                .log().all()
+        Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+
+        response.then()
                 .statusCode(405)
                 .body(ERROR_CODE, equalTo(INVALID_REQUEST));
     }
