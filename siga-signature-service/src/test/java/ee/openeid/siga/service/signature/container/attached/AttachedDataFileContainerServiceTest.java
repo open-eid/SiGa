@@ -6,11 +6,14 @@ import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.apache.commons.lang3.StringUtils;
+import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.junit.Assert;
@@ -32,9 +35,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
+import static ee.openeid.siga.service.signature.test.RequestUtil.createDataFileListWithOneFile;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -120,8 +126,50 @@ public class AttachedDataFileContainerServiceTest {
 
         session.getContainerHolder().getContainer().getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        List<DataFile> dataFiles = createDataFileListWithOneFile();
+        dataFiles.get(0).setFileName("test.pdf");
+        Result result = containerService.addDataFile(CONTAINER_ID, dataFiles.get(0));
+        Assert.assertEquals(Result.OK, result);
+    }
 
-        Result result = containerService.addDataFile(CONTAINER_ID, createDataFileListWithOneFile().get(0));
+    @Test
+    public void successfulRemoveDataFile() {
+
+        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain")).build();
+        Map<Integer, String> signatureIdHolder = new HashMap<>();
+        AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
+                .signatureIdHolder(signatureIdHolder)
+                .containerName("test.asice")
+                .containerHolder(new ContainerHolder(container)).build();
+
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
+        Assert.assertEquals(Result.OK, result);
+    }
+
+    @Test
+    public void removeDataFileNoDataFile() {
+        exceptionRule.expect(ResourceNotFoundException.class);
+        exceptionRule.expectMessage("Data file named test.xml not found");
+        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml1", "text/plain")).build();
+        Map<Integer, String> signatureIdHolder = new HashMap<>();
+        AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
+                .signatureIdHolder(signatureIdHolder)
+                .containerName("test.asice")
+                .containerHolder(new ContainerHolder(container)).build();
+
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
         Assert.assertEquals(Result.OK, result);
     }
 

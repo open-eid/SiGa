@@ -5,6 +5,7 @@ import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.Session;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
@@ -98,7 +100,22 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
         digidoc4jDataFile.setDocument(dssDocument);
 
-        sessionHolder.getContainerHolder().getContainer().getDataFiles().add(digidoc4jDataFile);
+        sessionHolder.getContainerHolder().getContainer().addDataFile(digidoc4jDataFile);
+        sessionService.update(containerId, sessionHolder);
+        return Result.OK;
+    }
+
+    public Result removeDataFile(String containerId, String datafileName) {
+        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        validateIfSessionMutable(sessionHolder);
+        Container container = sessionHolder.getContainerHolder().getContainer();
+        Optional<org.digidoc4j.DataFile> dataFile = container.getDataFiles().stream()
+                .filter(df -> df.getName().equals(datafileName))
+                .findAny();
+        if (dataFile.isEmpty()) {
+            throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
+        }
+        container.removeDataFile(dataFile.get());
         sessionService.update(containerId, sessionHolder);
         return Result.OK;
     }
@@ -157,4 +174,5 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
+
 }

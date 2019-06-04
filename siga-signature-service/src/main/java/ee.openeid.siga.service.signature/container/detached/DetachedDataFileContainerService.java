@@ -6,6 +6,7 @@ import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
@@ -92,6 +93,17 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return Result.OK;
     }
 
+    public Result removeDataFile(String containerId, String datafileName) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        validateIfSessionMutable(sessionHolder);
+        if (sessionHolder.getDataFiles().stream().noneMatch(dataFile -> dataFile.getFileName().equals(datafileName))) {
+            throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
+        }
+        sessionHolder.getDataFiles().removeIf(dataFile -> dataFile.getFileName().equals(datafileName));
+        sessionService.update(containerId, sessionHolder);
+        return Result.OK;
+    }
+
     public Signature transformSignature(HashcodeSignatureWrapper signatureWrapper) {
         Signature signature = new Signature();
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);
@@ -109,7 +121,8 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         }
     }
 
-    private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
+    private DetachedDataFileContainerSessionHolder transformContainerToSession(String
+                                                                                       sessionId, DetachedDataFileContainer container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return DetachedDataFileContainerSessionHolder.builder()

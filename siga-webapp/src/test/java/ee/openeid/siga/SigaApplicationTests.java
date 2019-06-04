@@ -65,7 +65,7 @@ public class SigaApplicationTests {
     }
 
     @Test
-    public void createHashcodeNewContainerFlow() throws Exception {
+    public void hashcodeModifyingContainerFlow() throws Exception {
         String containerId = createHashcodeContainer();
         DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(0, originalContainer.getSignatures().size());
@@ -74,18 +74,24 @@ public class SigaApplicationTests {
         DetachedDataFileContainer updatedContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(0, updatedContainer.getSignatures().size());
         Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+        deleteHashcodeDataFile(containerId, updatedContainer.getDataFiles().get(0).getFileName());
+        DetachedDataFileContainer updatedContainer2 = getHashcodeContainer(containerId);
+        Assert.assertEquals(0, updatedContainer2.getSignatures().size());
+        Assert.assertEquals(1, updatedContainer2.getDataFiles().size());
     }
 
     @Test
-    public void createNewContainerFlow() throws Exception {
+    public void dataFileModifyingContainerFlow() throws Exception {
         String containerId = createContainer();
         Container originalContainer = getContainer(containerId);
         Assert.assertEquals(0, originalContainer.getSignatures().size());
         Assert.assertEquals(1, originalContainer.getDataFiles().size());
         addDataFile(containerId);
         Container updatedContainer = getContainer(containerId);
-        Assert.assertEquals(0, updatedContainer.getSignatures().size());
         Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+        deleteDataFile(containerId, updatedContainer.getDataFiles().get(0).getName());
+        Container updatedContainer2 = getContainer(containerId);
+        Assert.assertEquals(1, updatedContainer2.getDataFiles().size());
     }
 
     @Test
@@ -363,17 +369,16 @@ public class SigaApplicationTests {
     }
 
 
-    private String addDataFile(String containerId) throws Exception {
+    private void addDataFile(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
         dataFile.put("fileName", "test1.txt");
         dataFile.put("fileContent", "WxFhjC5EAnh30M0JIe0Wa58Xb1BYf8kedTTdKUbbd9Y=");
         request.put("dataFile", dataFile);
-        CreateContainerDataFileResponse response = (CreateContainerDataFileResponse) postRequest("/containers/" + containerId + "/datafiles", request, CreateContainerDataFileResponse.class);
-        return response.getResult();
+        postRequest("/containers/" + containerId + "/datafiles", request, CreateContainerDataFileResponse.class);
     }
 
-    private String addHashcodeDataFile(String containerId) throws Exception {
+    private void addHashcodeDataFile(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
         dataFile.put("fileName", "test1.txt");
@@ -381,8 +386,23 @@ public class SigaApplicationTests {
         dataFile.put("fileHashSha512", "HD6Xh+Y6oIZnXv4XqbKxrb6t3RkoPYv+NkqOBE8MwkssuATRE2aFBp8Nm9kp/Xn5a4l2Ki8QkX5qIUlbXQgO4Q==");
         dataFile.put("fileSize", 10);
         request.put("dataFile", dataFile);
-        CreateHashcodeContainerDataFileResponse response = (CreateHashcodeContainerDataFileResponse) postRequest("/hashcodecontainers/" + containerId + "/datafiles", request, CreateHashcodeContainerDataFileResponse.class);
-        return response.getResult();
+        postRequest("/hashcodecontainers/" + containerId + "/datafiles", request, CreateHashcodeContainerDataFileResponse.class);
+    }
+
+    private void deleteDataFile(String containerId, String dataFileName) throws Exception {
+        deleteRequest("/containers/" + containerId + "/datafiles/" + dataFileName);
+    }
+
+    private void deleteHashcodeDataFile(String containerId, String dataFileName) throws Exception {
+        deleteRequest("/hashcodecontainers/" + containerId + "/datafiles/" + dataFileName);
+    }
+
+    private void deleteRequest(String url) throws Exception {
+        JSONObject request = new JSONObject();
+        String signature = getSignature("DELETE", url, request.toString());
+        MockHttpServletRequestBuilder builder = delete(url);
+        mockMvc.perform(buildRequest(builder, signature, request, REQUESTING_SERVICE_UUID))
+                .andExpect(status().is2xxSuccessful());
     }
 
     private Object postRequest(String url, JSONObject request, Class responseObject) throws Exception {

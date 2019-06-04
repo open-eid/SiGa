@@ -45,6 +45,11 @@ public class RequestValidator {
         }
     }
 
+    public static void validateFileName(String fileName) {
+        validateFileName(fileName, "Data file name is invalid");
+    }
+
+
     private static void validateFileName(String fileName, String errorMessage) {
         if (StringUtils.isBlank(fileName) || !FileUtil.isFilenameValid(fileName) || fileName.length() < 1 || fileName.length() > 260) {
             throw new RequestValidationException(errorMessage);

@@ -189,6 +189,19 @@ public class DetachedDataFileContainerController {
         return response;
     }
 
+    @SigaEventLog(eventName = SigaEventName.HC_DELETE_DATAFILE)
+    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    public DeleteHashcodeContainerDataFileResponse deleteHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "datafileName") String datafileName) {
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateFileName(datafileName);
+
+        Result result = containerService.removeDataFile(containerId, datafileName);
+        DeleteHashcodeContainerDataFileResponse response = new DeleteHashcodeContainerDataFileResponse();
+        response.setResult(result.name());
+        return response;
+    }
+
+
     @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
     @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {

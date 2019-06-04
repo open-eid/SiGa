@@ -5,6 +5,7 @@ import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
@@ -118,6 +119,31 @@ public class DetachedDataFileContainerServiceTest {
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
         Result result = containerService.addDataFile(CONTAINER_ID, createHashcodeDataFileListWithOneFile().get(0));
+        Assert.assertEquals(Result.OK, result);
+    }
+
+    @Test
+    public void successfulRemoveDataFile() throws IOException, URISyntaxException {
+        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+
+        session.getSignatures().clear();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test.txt");
+        Assert.assertEquals(Result.OK, result);
+    }
+
+    @Test
+    public void removeDataFileNoDataFile() throws IOException, URISyntaxException {
+        exceptionRule.expect(ResourceNotFoundException.class);
+        exceptionRule.expectMessage("Data file named test.xml not found");
+
+        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+
+        session.getSignatures().clear();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
         Assert.assertEquals(Result.OK, result);
     }
 

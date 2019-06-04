@@ -193,6 +193,18 @@ public class AttachedDataFileContainerController {
         response.setResult(result.name());
         return response;
     }
+
+    @SigaEventLog(eventName = SigaEventName.DELETE_DATAFILE)
+    @RequestMapping(value = "/containers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    public DeleteContainerDataFileResponse deleteContainerDataFile(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "datafileName") String datafileName) {
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateFileName(datafileName);
+
+        Result result = containerService.removeDataFile(containerId, datafileName);
+        DeleteContainerDataFileResponse response = new DeleteContainerDataFileResponse();
+        response.setResult(result.name());
+        return response;
+    }
     
     @SigaEventLog(eventName = SigaEventName.GET_CONTAINER)
     @RequestMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
