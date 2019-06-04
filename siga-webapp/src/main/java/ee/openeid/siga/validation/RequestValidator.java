@@ -39,6 +39,12 @@ public class RequestValidator {
         }
     }
 
+    public static void validateSignatureId(String containerId) {
+        if (StringUtils.isBlank(containerId) || containerId.length() > 36) {
+            throw new RequestValidationException("Signature Id is invalid");
+        }
+    }
+
     public static void validateFileContent(String content) {
         if (StringUtils.isBlank(content) || isNotBase64StringEncoded(content)) {
             throw new RequestValidationException("File content is invalid");

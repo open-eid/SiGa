@@ -112,6 +112,7 @@ public class AttachedDataFileContainerController {
     @RequestMapping(value = "/containers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
     public UpdateContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSignatureId(signatureId);
         RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
         Result result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateContainerRemoteSigningResponse response = new UpdateContainerRemoteSigningResponse();
@@ -150,7 +151,7 @@ public class AttachedDataFileContainerController {
     @RequestMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
-
+        RequestValidator.validateSignatureId(signatureId);
         String status = signingService.processMobileStatus(containerId, signatureId);
 
         GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
@@ -167,6 +168,15 @@ public class AttachedDataFileContainerController {
         GetContainerSignaturesResponse response = new GetContainerSignaturesResponse();
         response.getSignatures().addAll(RequestTransformer.transformSignaturesForResponse(signatures));
         return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.GET_SIGNATURE)
+    @RequestMapping(value = "/containers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    public GetContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSignatureId(signatureId);
+        org.digidoc4j.Signature signature = containerService.getSignature(containerId, signatureId);
+        return RequestTransformer.transformSignatureToDetails(signature);
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_DATAFILES_LIST)

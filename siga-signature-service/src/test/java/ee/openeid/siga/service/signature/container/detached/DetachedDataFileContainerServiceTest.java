@@ -104,6 +104,14 @@ public class DetachedDataFileContainerServiceTest {
     }
 
     @Test
+    public void successfulGetSignature() throws IOException, URISyntaxException {
+        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, session.getSignatures().get(0).getGeneratedSignatureId());
+        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signature.getId());
+    }
+
+    @Test
     public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to add/remove data file. Container contains signatures");

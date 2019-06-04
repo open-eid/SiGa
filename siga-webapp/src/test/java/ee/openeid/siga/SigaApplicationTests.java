@@ -143,7 +143,8 @@ public class SigaApplicationTests {
     public void remoteSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
-
+        GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        Assert.assertEquals("S0", signatureResponse.getId());
         Assert.assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
@@ -183,6 +184,8 @@ public class SigaApplicationTests {
     public void remoteHashcodeSigningFlow() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
+        GetHashcodeContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
 
         Assert.assertEquals(1, signatures.size());
         DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
@@ -240,6 +243,14 @@ public class SigaApplicationTests {
     private List<Signature> getSignatures(String containerId) throws Exception {
         GetContainerSignaturesResponse signaturesResponse = (GetContainerSignaturesResponse) getRequest("/containers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
         return signaturesResponse.getSignatures();
+    }
+
+    private GetContainerSignatureDetailsResponse getSignature(String containerId, String signatureId) throws Exception {
+        return (GetContainerSignatureDetailsResponse) getRequest("/containers/" + containerId + "/signatures/" + signatureId, GetContainerSignatureDetailsResponse.class);
+    }
+
+    private GetHashcodeContainerSignatureDetailsResponse getHashcodeSignature(String containerId, String signatureId) throws Exception {
+        return (GetHashcodeContainerSignatureDetailsResponse) getRequest("/hashcodecontainers/" + containerId + "/signatures/" + signatureId, GetHashcodeContainerSignatureDetailsResponse.class);
     }
 
     private ValidationConclusion getHashcodeValidationConclusion(String containerId) throws Exception {

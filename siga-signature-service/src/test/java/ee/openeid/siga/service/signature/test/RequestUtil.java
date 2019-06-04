@@ -112,8 +112,8 @@ public class RequestUtil {
         String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
-        Map<Integer, String> signatureIdHolder = new HashMap<>();
-        signatureIdHolder.put(Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()), SessionIdGenerator.generateSessionId());
+        Map<String, Integer> signatureIdHolder = new HashMap<>();
+        signatureIdHolder.put(SessionIdGenerator.generateSessionId(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
         return AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)

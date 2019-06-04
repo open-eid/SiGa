@@ -38,9 +38,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
-import static ee.openeid.siga.service.signature.test.RequestUtil.createDataFileListWithOneFile;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -105,6 +105,16 @@ public class AttachedDataFileContainerServiceTest {
     }
 
     @Test
+    public void successfulGetSignature() throws IOException, URISyntaxException {
+        AttachedDataFileContainerSessionHolder session = createAttachedDataFileSessionHolder();
+        AtomicReference<String> signatureId = new AtomicReference<>();
+        session.getSignatureIdHolder().forEach((sigId, integer) -> signatureId.set(sigId));
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, signatureId.get());
+        Assert.assertEquals("S0", signature.getId());
+    }
+
+    @Test
     public void successfulGetDataFiles() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAttachedDataFileSessionHolder());
         List<DataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
@@ -136,7 +146,7 @@ public class AttachedDataFileContainerServiceTest {
     public void successfulRemoveDataFile() {
 
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain")).build();
-        Map<Integer, String> signatureIdHolder = new HashMap<>();
+        Map<String, Integer> signatureIdHolder = new HashMap<>();
         AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
@@ -157,7 +167,7 @@ public class AttachedDataFileContainerServiceTest {
         exceptionRule.expect(ResourceNotFoundException.class);
         exceptionRule.expectMessage("Data file named test.xml not found");
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml1", "text/plain")).build();
-        Map<Integer, String> signatureIdHolder = new HashMap<>();
+        Map<String, Integer> signatureIdHolder = new HashMap<>();
         AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)

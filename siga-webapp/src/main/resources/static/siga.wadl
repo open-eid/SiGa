@@ -1003,12 +1003,12 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/signatures/{sigantureId}">
+            <resource path="containers/{containerId}/signatures/{signatureId}">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
                        type="xs:string"/>
-                <method id="getHContainerSignatureDetails" name="GET">
+                <method id="getContainerSignatureDetails" name="GET">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getContainerSignatureDetailsResponse"

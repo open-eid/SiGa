@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DetachedDataFileContainerService implements DetachedDataFileSessionHolder {
@@ -78,6 +79,18 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         List<Signature> signatures = new ArrayList<>();
         sessionHolder.getSignatures().forEach(signatureWrapper -> signatures.add(transformSignature(signatureWrapper)));
         return signatures;
+    }
+
+    public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
+        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        Optional<HashcodeSignatureWrapper> signatureWrapper = sessionHolder.getSignatures().stream()
+                .filter(wrapper -> wrapper.getGeneratedSignatureId().equals(signatureId))
+                .findAny();
+        if (signatureWrapper.isEmpty()) {
+            throw new ResourceNotFoundException("Signature with id  " + signatureId + " not found");
+        }
+        DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);
+        return builder.openAdESSignature(signatureWrapper.get().getSignature());
     }
 
     public List<HashcodeDataFile> getDataFiles(String containerId) {

@@ -78,12 +78,26 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         List<Signature> signatures = new ArrayList<>();
         sessionHolder.getContainerHolder().getContainer().getSignatures()
                 .forEach(sessionSignature -> sessionHolder.getSignatureIdHolder()
-                        .forEach((hashcode, generatedSignatureId) -> {
+                        .forEach((generatedSignatureId, hashcode) -> {
                             if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
                                 signatures.add(transformSignature(generatedSignatureId, sessionSignature));
                             }
                         }));
         return signatures;
+    }
+
+    public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
+        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get(signatureId);
+
+        Optional<org.digidoc4j.Signature> digidoc4jSignature = sessionHolder.getContainerHolder().getContainer().getSignatures().stream()
+                .filter(signature -> signatureHashCode == Arrays.hashCode(signature.getAdESSignature()))
+                .findAny();
+
+        if (digidoc4jSignature.isEmpty()) {
+            throw new ResourceNotFoundException("Signature with id  " + signatureId + " not found");
+        }
+        return digidoc4jSignature.get();
     }
 
     public List<DataFile> getDataFiles(String containerId) {
@@ -159,7 +173,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
                 .containerHolder(new ContainerHolder(container))
                 .build();
         container.getSignatures().forEach(signature ->
-                sessionHolder.addSignatureId(Arrays.hashCode(signature.getAdESSignature()), SessionIdGenerator.generateSessionId())
+                sessionHolder.addSignatureId(SessionIdGenerator.generateSessionId(), Arrays.hashCode(signature.getAdESSignature()))
         );
         return sessionHolder;
     }

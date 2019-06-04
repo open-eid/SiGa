@@ -35,7 +35,7 @@ public class AttachedDataFileContainerSigningService extends ContainerSigningSer
         AttachedDataFileContainerSessionHolder attachedDataFileContainerSessionHolder = (AttachedDataFileContainerSessionHolder) sessionHolder;
 
         attachedDataFileContainerSessionHolder.getContainerHolder().getContainer().addSignature(signature);
-        attachedDataFileContainerSessionHolder.addSignatureId(Arrays.hashCode(signature.getAdESSignature()), signatureId);
+        attachedDataFileContainerSessionHolder.addSignatureId( signatureId, Arrays.hashCode(signature.getAdESSignature()));
         attachedDataFileContainerSessionHolder.clearSigning(signatureId);
     }
 

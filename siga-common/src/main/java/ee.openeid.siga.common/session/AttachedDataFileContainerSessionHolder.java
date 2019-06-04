@@ -27,7 +27,7 @@ public class AttachedDataFileContainerSessionHolder implements Session {
     private ContainerHolder containerHolder;
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
-    private Map<Integer, String> signatureIdHolder = new HashMap<>();
+    private Map<String, Integer> signatureIdHolder = new HashMap<>();
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
@@ -38,8 +38,8 @@ public class AttachedDataFileContainerSessionHolder implements Session {
         this.dataToSignHolder.put(signatureId, dataToSign);
     }
 
-    public void addSignatureId(Integer hash, String signatureId) {
-        this.signatureIdHolder.put(hash, signatureId);
+    public void addSignatureId(String signatureId, Integer hash) {
+        this.signatureIdHolder.put(signatureId, hash);
     }
 
     public DataToSignHolder getDataToSignHolder(String signatureId) {
