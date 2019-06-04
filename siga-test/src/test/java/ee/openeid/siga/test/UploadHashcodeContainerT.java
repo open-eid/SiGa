@@ -1,8 +1,6 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
@@ -12,8 +10,6 @@ import org.junit.Test;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.*;
 
 public class UploadHashcodeContainerT extends TestBase {
@@ -26,18 +22,18 @@ public class UploadHashcodeContainerT extends TestBase {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
-    @Test //TODO: More elaborate rules should be checked on container ID
+    @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws Exception {
         Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
+                .body(CONTAINER_ID + ".length()", equalTo(36));
     }
 
     @Test
     public void uploadInvalidHashcodeContainer() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
 
         response.then()
                 .statusCode(400)
@@ -50,7 +46,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
+                .body(CONTAINER_ID + ".length()", equalTo(36));
     }
 
     @Test
