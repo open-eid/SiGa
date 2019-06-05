@@ -33,7 +33,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadInvalidHashcodeContainer() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
 
         response.then()
                 .statusCode(400)
