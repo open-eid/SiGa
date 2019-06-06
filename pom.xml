@@ -24,6 +24,7 @@
         <module>siga-signature-service</module>
         <module>siga-test</module>
         <module>siga-sample-application</module>
+        <module>siga-monitoring</module>
     </modules>
 
     <properties>

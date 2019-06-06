@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
+import org.apache.ignite.cache.CachePeekMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,10 @@ public class SessionService {
 
     private Cache<String, Session> getContainerConfigCache() {
         return ignite.getOrCreateCache(CacheName.CONTAINER.name());
+    }
+
+    public int getCacheSize() {
+        return ignite.cache(CacheName.CONTAINER.name()).size(CachePeekMode.ALL);
     }
 
     private String getSessionId(String containerId) {
