@@ -11,11 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SigaHealthIndicator implements HealthIndicator {
 
-    @Autowired
     private SessionService sessionService;
 
-    @Autowired
-    JdbcTemplate template;
+    private JdbcTemplate template;
 
     @Override
     public Health health() {
@@ -52,4 +50,13 @@ public class SigaHealthIndicator implements HealthIndicator {
         return Status.UNKNOWN;
     }
 
+    @Autowired
+    public void setSessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
+
+    @Autowired
+    public void setTemplate(JdbcTemplate template) {
+        this.template = template;
+    }
 }
