@@ -14,4 +14,6 @@ import javax.validation.constraints.NotBlank;
 public class SessionConfigurationProperties {
     @NotBlank(message = "siga.ignite.configuration-location propery must be set")
     private String configurationLocation;
+    @NotBlank(message = "siga.ignite.application-cache-version propery must be set")
+    private String applicationCacheVersion;
 }
