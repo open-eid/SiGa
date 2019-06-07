@@ -19,8 +19,7 @@ public class DigiDoc4jTestConfiguration {
     @Bean
     public Configuration configuration() {
         Configuration configuration = new Configuration(Configuration.Mode.TEST);
-        if (dd4jConfigurationProperties.getTspSource() != null)
-            configuration.setTspSource(dd4jConfigurationProperties.getTspSource());
+        configuration.loadConfiguration(dd4jConfigurationProperties.getConfigurationLocation());
         configuration.setPreferAiaOcsp(true);
         return configuration;
     }

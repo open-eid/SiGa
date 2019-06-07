@@ -20,8 +20,7 @@ public class DigiDoc4jConfiguration {
     @Bean
     public Configuration configuration() {
         Configuration configuration = new Configuration();
-        if (dd4jConfigurationProperties.getTspSource() != null)
-            configuration.setTspSource(dd4jConfigurationProperties.getTspSource());
+        configuration.loadConfiguration(dd4jConfigurationProperties.getConfigurationLocation());
         configuration.setPreferAiaOcsp(true);
         return configuration;
     }
