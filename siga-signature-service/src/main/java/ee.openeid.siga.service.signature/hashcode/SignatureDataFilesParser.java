@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature.hashcode;
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import eu.europa.esig.dss.DigestAlgorithm;
 import eu.europa.esig.dss.DomUtils;
+import lombok.SneakyThrows;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -46,9 +47,10 @@ public class SignatureDataFilesParser {
         }
     }
 
+    @SneakyThrows
     private void addFileEntry(Node child) {
         NamedNodeMap attributes = child.getAttributes();
-        String fileName = URLDecoder.decode(attributes.getNamedItem("URI").getTextContent(), StandardCharsets.UTF_8);
+        String fileName = URLDecoder.decode(attributes.getNamedItem("URI").getTextContent(), StandardCharsets.UTF_8.name());
         validateNotDuplicateFile(fileName);
         child = child.getFirstChild();
         String digestAlgorithm = "";
