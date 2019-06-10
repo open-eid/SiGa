@@ -33,6 +33,7 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.exclusions>ee/openeid/siga/webapp/json/*, ee/openeid/siga/client/**/*, ee/openeid/siga/service/signature/configuration/*</sonar.exclusions>
         <sonar.language>java</sonar.language>
     </properties>
     <dependencies>
@@ -84,13 +85,6 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.2</version>
-                <configuration>
-                    <excludes>
-                        <exclude>ee/openeid/siga/webapp/json/*</exclude>
-                        <exclude>ee/openeid/siga/client/**/*</exclude>
-                        <exclude>ee/openeid/siga/service/signature/configuration/*</exclude>
-                    </excludes>
-                </configuration>
                 <executions>
                     <execution>
                         <id>jacoco-initializ</id>
