@@ -34,7 +34,6 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.exclusions>**/ee/openeid/siga/webapp/json/*, **/ee/openeid/siga/client/**/*, **/ee/openeid/siga/service/signature/configuration/*</sonar.exclusions>
-        <sonar.branch.name>develop</sonar.branch.name>
         <sonar.language>java</sonar.language>
     </properties>
     <dependencies>
