@@ -46,15 +46,20 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(1440));
+                .body(CONTAINER + ".length()", greaterThan(1400));
     }
 
     @Test
     public void retrieveHashcodeContainerTwice() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        getHashcodeContainer(flow);
         Response response = getHashcodeContainer(flow);
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER + ".length()", equalTo(1440));
+
+        response = getHashcodeContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -70,7 +75,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", greaterThan(19000));
     }
 
     @Test
@@ -83,7 +88,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(37208));
+                .body(CONTAINER + ".length()", greaterThan(37208));
     }
 
     @Test
@@ -123,7 +128,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", greaterThanOrEqualTo(35000));
+                .body(CONTAINER + ".length()", greaterThan(35000));
     }
 
     @Test
