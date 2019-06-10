@@ -27,7 +27,7 @@
     </modules>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logback-classic.version>1.2.3</logback-classic.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -71,16 +71,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
-                <configuration>
-                    <argLine>--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
-                        --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
-                        --add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
-                        --add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
-                        --add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
-                        --illegal-access=permit
-                        ${argLine}
-                    </argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
