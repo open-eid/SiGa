@@ -41,7 +41,7 @@ public class MainController {
     @Autowired
     private ContainerService containerService;
 
-    @RequestMapping("/")
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public String startPage(final Model model) {
         return START_PAGE_VIEW_NAME;
     }
