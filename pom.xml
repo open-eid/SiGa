@@ -83,19 +83,31 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
+                <version>0.8.4</version>
+                <configuration>
+                    <excludes>
+                        <exclude>ee/openeid/siga/webapp/json/*</exclude>
+                        <exclude>ee/openeid/siga/client/**/*</exclude>
+                        <exclude>ee/openeid/siga/service/signature/configuration/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>jacoco-initialize</id>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 
 
 </project>
