@@ -255,7 +255,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
                 .body(CHALLENGE_ID, notNullValue());
     }
 
-    @Ignore
+    @Ignore ("SIGARIA-94")
     @Test
     public void invalidCountryInRequest() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());

@@ -2,9 +2,6 @@ package ee.openeid.siga.test;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import ee.openeid.siga.webapp.json.GetHashcodeContainerValidationReportResponse;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -14,11 +11,8 @@ import org.junit.Test;
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class RemoteSigningHachcodeContainerT extends TestBase {
 
@@ -40,11 +34,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2))
                 .body("validationConclusion.signaturesCount", equalTo(2));
-    }
-
-    @Test
-    public void signContainerRemotelyWithMultipleSignature1s() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
     }
 
     @Test
