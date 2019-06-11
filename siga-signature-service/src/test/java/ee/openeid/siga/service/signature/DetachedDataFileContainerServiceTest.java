@@ -7,6 +7,7 @@ import ee.openeid.siga.session.SessionResult;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.Signature;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Configuration;
 import org.junit.Assert;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,7 +65,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulUploadContainer() throws IOException, URISyntaxException {
-        String container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(SIGNED_HASHCODE).readAllBytes()));
+        String container = new String(Base64.getEncoder().encode(toByteArray(TestUtil.getFileInputStream(SIGNED_HASHCODE))));
         String containerId = containerService.uploadContainer(container);
         Assert.assertFalse(StringUtils.isBlank(containerId));
     }

@@ -8,6 +8,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.OutputStream;
@@ -29,6 +30,7 @@ class HashcodesDataFilesWriter {
     @SneakyThrows
     public void generateHashcodeFile(List<HashcodeDataFile> dataFiles) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         dom = documentBuilder.newDocument();
         rootElement = dom.createElement("hashcodes");
