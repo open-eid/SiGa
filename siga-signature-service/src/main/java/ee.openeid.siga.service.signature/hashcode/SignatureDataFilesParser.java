@@ -47,10 +47,9 @@ public class SignatureDataFilesParser {
         }
     }
 
-    @SneakyThrows
     private void addFileEntry(Node child) {
         NamedNodeMap attributes = child.getAttributes();
-        String fileName = URLDecoder.decode(attributes.getNamedItem("URI").getTextContent(), StandardCharsets.UTF_8.name());
+        String fileName = URLDecoder.decode(attributes.getNamedItem("URI").getTextContent(), StandardCharsets.UTF_8);
         validateNotDuplicateFile(fileName);
         child = child.getFirstChild();
         String digestAlgorithm = "";

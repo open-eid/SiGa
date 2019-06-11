@@ -65,7 +65,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulUploadContainer() throws IOException, URISyntaxException {
-        String container = new String(Base64.getEncoder().encode(toByteArray(TestUtil.getFileInputStream(SIGNED_HASHCODE))));
+        String container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(SIGNED_HASHCODE).readAllBytes()));
         String containerId = containerService.uploadContainer(container);
         Assert.assertFalse(StringUtils.isBlank(containerId));
     }
