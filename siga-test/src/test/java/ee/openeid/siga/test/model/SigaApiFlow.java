@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.model;
 
+import io.restassured.response.Response;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class SigaApiFlow {
 
     private String signingTime;
     private Boolean forceSigningTime;
+    private Response midStatus;
 
     private String serviceUuid;
     private String serviceSecret;

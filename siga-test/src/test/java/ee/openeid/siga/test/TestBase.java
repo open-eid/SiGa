@@ -14,13 +14,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.EncoderConfig.encoderConfig;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.awaitility.Awaitility.with;
 
 public class TestBase {
 
@@ -77,7 +79,9 @@ public class TestBase {
 
     @Step ("Get MID signing status")
     protected Response getHashcodeMidSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
+        Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
+        flow.setMidStatus(response);
+        return response;
     }
 
     @Step ("Get signature list")
@@ -96,16 +100,20 @@ public class TestBase {
     }
 
     @Step ("Poll for MID signing response")
-    protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) throws InterruptedException, NoSuchAlgorithmException, InvalidKeyException {
-        Long endTime = Instant.now().getEpochSecond() + 15;
-        while (Instant.now().getEpochSecond() < endTime) {
-            Thread.sleep(3500);
-            Response response = getHashcodeMidSigningInSession(flow, signatureId);
-            if (!"OUTSTANDING_TRANSACTION".equals(response.getBody().path(MID_STATUS))) {
-                return response;
+    protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) throws NoSuchAlgorithmException, InvalidKeyException {
+        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(15000, MILLISECONDS)
+                .await("MID signing result")
+                .until(isMidFinished(flow, signatureId));
+
+        return flow.getMidStatus();
+    }
+
+    private Callable<Boolean> isMidFinished(SigaApiFlow flow, String signatureId) {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return !"OUTSTANDING_TRANSACTION".equals(getHashcodeMidSigningInSession(flow, signatureId).getBody().path(MID_STATUS));
             }
-        }
-        throw new RuntimeException("No MID response in: 15 seconds");
+        };
     }
 
     protected String createUrl(String endpoint) {
