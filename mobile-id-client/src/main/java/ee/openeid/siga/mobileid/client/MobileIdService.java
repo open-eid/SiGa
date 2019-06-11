@@ -7,7 +7,12 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
-import ee.openeid.siga.mobileid.model.mid.*;
+import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusRequest;
+import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
+import ee.openeid.siga.mobileid.model.mid.HashType;
+import ee.openeid.siga.mobileid.model.mid.LanguageType;
+import ee.openeid.siga.mobileid.model.mid.MobileSignHashRequest;
+import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
@@ -33,6 +38,8 @@ public class MobileIdService extends WebServiceGatewaySupport {
         MobileSignHashRequest request = new MobileSignHashRequest();
         request.setServiceName(mobileIdInformation.getRelyingPartyName());
         request.setLanguage(getLanguage(mobileIdInformation.getLanguage()));
+        if (mobileIdInformation.getMessageToDisplay() != null)
+            request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         request.setIDCode(mobileIdInformation.getPersonIdentifier());
         request.setPhoneNo(mobileIdInformation.getPhoneNo());
         request.setHash(hash);
