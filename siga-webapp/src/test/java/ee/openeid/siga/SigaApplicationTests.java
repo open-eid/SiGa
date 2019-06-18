@@ -5,6 +5,7 @@ import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
+import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DigestAlgorithm;
@@ -221,7 +222,7 @@ public class SigaApplicationTests {
 
         Assert.assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getValidationConclusion(containerId);
-        Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
+        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
@@ -273,7 +274,7 @@ public class SigaApplicationTests {
 
     private Container getContainer(String containerId) throws Exception {
         GetContainerResponse originalContainer = (GetContainerResponse) getRequest("/containers/" + containerId, GetContainerResponse.class);
-        return ContainerBuilder.aContainer().fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer().getBytes()))).build();
+        return ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer().getBytes()))).build();
     }
 
     private String getHashcodeMobileIdStatus(String containerId, String signatureId) throws Exception {

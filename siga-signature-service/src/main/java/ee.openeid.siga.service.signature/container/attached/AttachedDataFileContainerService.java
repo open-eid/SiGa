@@ -15,6 +15,7 @@ import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
 import eu.europa.esig.dss.MimeType;
+import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
+import static org.digidoc4j.Container.DocumentType.BDOC;
 
 @Service
 public class AttachedDataFileContainerService implements AttachedDataFileSessionHolder {
 
     private SessionService sessionService;
+    private Configuration configuration;
 
     public String createContainer(String containerName, List<DataFile> dataFiles) {
         ContainerBuilder containerBuilder = ContainerBuilder.
-                aContainer(ASICE);
+                aContainer(ASICE).withConfiguration(configuration);
 
         dataFiles.forEach(dataFile -> containerBuilder.withDataFile(
                 new ByteArrayInputStream(dataFile.getContent().getBytes()),
@@ -57,7 +60,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     public String uploadContainer(String containerName, String base64container) {
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
-        Container container = ContainerBuilder.aContainer().fromStream(inputStream).build();
+        Container container = ContainerBuilder.aContainer(BDOC).withConfiguration(configuration).fromStream(inputStream).build();
 
         String sessionId = SessionIdGenerator.generateSessionId();
         Session session = transformContainerToSession(containerName, sessionId, container);
@@ -163,7 +166,6 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     private AttachedDataFileContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         AttachedDataFileContainerSessionHolder sessionHolder = AttachedDataFileContainerSessionHolder.builder()
                 .containerName(containerName)
                 .sessionId(sessionId)
@@ -183,6 +185,10 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         return sessionService;
     }
 
+    @Autowired
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     @Autowired
     public void setSessionService(SessionService sessionService) {

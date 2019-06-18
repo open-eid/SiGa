@@ -154,7 +154,8 @@ public class AttachedDataFileContainerServiceTest {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container)).build();
+                .containerHolder(new ContainerHolder(container))
+                .build();
 
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
@@ -175,7 +176,8 @@ public class AttachedDataFileContainerServiceTest {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container)).build();
+                .containerHolder(new ContainerHolder(container))
+                .build();
 
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 

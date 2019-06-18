@@ -121,7 +121,8 @@ public class RequestUtil {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container)).build();
+                .containerHolder(new ContainerHolder(container))
+                .build();
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {
