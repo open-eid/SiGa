@@ -9,7 +9,6 @@ import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
 @Service
@@ -24,9 +23,8 @@ public class AttachedDataFileContainerValidationService implements AttachedDataF
 
     public ValidationConclusion validateExistingContainer(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        sessionHolder.getContainerHolder().getContainer().save(outputStream);
-        String container = new String(Base64.getEncoder().encode(outputStream.toByteArray()));
+
+        String container = new String(Base64.getEncoder().encode(sessionHolder.getContainer()));
         return sivaClient.validateAttachedDataFileContainer(sessionHolder.getContainerName(), container);
     }
 

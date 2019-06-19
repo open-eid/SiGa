@@ -8,7 +8,6 @@ import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
-import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -18,6 +17,7 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -58,6 +59,7 @@ public class AttachedDataFileContainerServiceTest {
 
     @Before
     public void setUp() {
+        containerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()
                 .clientName("client1")
@@ -131,10 +133,22 @@ public class AttachedDataFileContainerServiceTest {
     }
 
     @Test
-    public void successfulAddDataFile() throws IOException, URISyntaxException {
-        AttachedDataFileContainerSessionHolder session = createAttachedDataFileSessionHolder();
+    public void successfulAddDataFile() {
+        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain")).build();
+        Map<String, Integer> signatureIdHolder = new HashMap<>();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
+        AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
+                .signatureIdHolder(signatureIdHolder)
+                .containerName("test.asice")
+                .container(outputStream.toByteArray())
+                .build();
 
-        session.getContainerHolder().getContainer().getSignatures().clear();
+        container.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         List<DataFile> dataFiles = createDataFileListWithOneFile();
         dataFiles.get(0).setFileName("test.pdf");
@@ -143,10 +157,17 @@ public class AttachedDataFileContainerServiceTest {
     }
 
     @Test
+    @Ignore("DD4J-452")
     public void successfulRemoveDataFile() {
 
-        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain")).build();
+        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test1.xml", "text/plain"))
+                .withDataFile(new org.digidoc4j.DataFile("DxZzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZa".getBytes(), "test2.xml", "text/plain"))
+                .build();
+
         Map<String, Integer> signatureIdHolder = new HashMap<>();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
         AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
@@ -154,12 +175,12 @@ public class AttachedDataFileContainerServiceTest {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container))
+                .container(outputStream.toByteArray())
                 .build();
 
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
-        Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test1.xml");
         Assert.assertEquals(Result.OK, result);
     }
 
@@ -167,8 +188,12 @@ public class AttachedDataFileContainerServiceTest {
     public void removeDataFileNoDataFile() {
         exceptionRule.expect(ResourceNotFoundException.class);
         exceptionRule.expectMessage("Data file named test.xml not found");
-        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml1", "text/plain")).build();
+        Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml1", "text/plain"))
+                .build();
         Map<String, Integer> signatureIdHolder = new HashMap<>();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
         AttachedDataFileContainerSessionHolder session = AttachedDataFileContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
@@ -176,7 +201,7 @@ public class AttachedDataFileContainerServiceTest {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container))
+                .container(outputStream.toByteArray())
                 .build();
 
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);

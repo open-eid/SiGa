@@ -12,6 +12,7 @@ import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
+import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
@@ -53,6 +54,7 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
     public void setUp() throws IOException, URISyntaxException {
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
+        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createAttachedDataFileSessionHolder());
     }
 
@@ -70,9 +72,9 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
 
     @Test
     public void noContainerInSession() throws IOException, URISyntaxException {
-        exceptionRule.expectMessage("containerHolder is marked @NonNull but is null");
+        exceptionRule.expectMessage("container is marked @NonNull but is null");
         AttachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createAttachedDataFileSessionHolder();
-        sessionHolder.setContainerHolder(null);
+        sessionHolder.setContainer(null);
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
         signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));

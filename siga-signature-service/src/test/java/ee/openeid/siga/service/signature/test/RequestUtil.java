@@ -5,7 +5,6 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
-import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
@@ -121,7 +120,7 @@ public class RequestUtil {
                 .serviceUuid(SERVICE_UUID)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
-                .containerHolder(new ContainerHolder(container))
+                .container(Base64.getDecoder().decode(base64container.getBytes()))
                 .build();
     }
 

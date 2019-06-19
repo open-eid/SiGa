@@ -24,7 +24,7 @@ public class AttachedDataFileContainerSessionHolder implements Session {
     @NonNull
     private String sessionId;
     @NonNull
-    private ContainerHolder containerHolder;
+    private byte[] container;
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private Map<String, Integer> signatureIdHolder = new HashMap<>();

@@ -7,10 +7,10 @@ import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
-import ee.openeid.siga.common.session.ContainerHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.session.AttachedDataFileSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -33,7 +32,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
-import static org.digidoc4j.Container.DocumentType.BDOC;
 
 @Service
 public class AttachedDataFileContainerService implements AttachedDataFileSessionHolder {
@@ -59,8 +57,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public String uploadContainer(String containerName, String base64container) {
-        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
-        Container container = ContainerBuilder.aContainer(BDOC).withConfiguration(configuration).fromStream(inputStream).build();
+        Container container = ContainerUtil.createContainer(Base64.getDecoder().decode(base64container.getBytes()), configuration);
 
         String sessionId = SessionIdGenerator.generateSessionId();
         Session session = transformContainerToSession(containerName, sessionId, container);
@@ -70,7 +67,8 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     public String getContainer(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        Container container = sessionHolder.getContainerHolder().getContainer();
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
         return new String(Base64.getEncoder().encode(outputStream.toByteArray()));
@@ -78,8 +76,10 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     public List<Signature> getSignatures(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+
         List<Signature> signatures = new ArrayList<>();
-        sessionHolder.getContainerHolder().getContainer().getSignatures()
+        container.getSignatures()
                 .forEach(sessionSignature -> sessionHolder.getSignatureIdHolder()
                         .forEach((generatedSignatureId, hashcode) -> {
                             if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
@@ -92,8 +92,9 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get(signatureId);
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
-        Optional<org.digidoc4j.Signature> digidoc4jSignature = sessionHolder.getContainerHolder().getContainer().getSignatures().stream()
+        Optional<org.digidoc4j.Signature> digidoc4jSignature = container.getSignatures().stream()
                 .filter(signature -> signatureHashCode == Arrays.hashCode(signature.getAdESSignature()))
                 .findAny();
 
@@ -105,27 +106,34 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     public List<DataFile> getDataFiles(String containerId) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        List<org.digidoc4j.DataFile> dataFiles = sessionHolder.getContainerHolder().getContainer().getDataFiles();
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+
+        List<org.digidoc4j.DataFile> dataFiles = container.getDataFiles();
         return dataFiles.stream().map(this::transformDataFile).collect(Collectors.toList());
     }
 
     public Result addDataFile(String containerId, DataFile dataFile) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        validateIfSessionMutable(sessionHolder);
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        validateIfSessionMutable(container);
 
         org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
         DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
         digidoc4jDataFile.setDocument(dssDocument);
 
-        sessionHolder.getContainerHolder().getContainer().addDataFile(digidoc4jDataFile);
+        container.addDataFile(digidoc4jDataFile);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
+        sessionHolder.setContainer(outputStream.toByteArray());
         sessionService.update(containerId, sessionHolder);
         return Result.OK;
     }
 
     public Result removeDataFile(String containerId, String datafileName) {
         AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        validateIfSessionMutable(sessionHolder);
-        Container container = sessionHolder.getContainerHolder().getContainer();
+
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        validateIfSessionMutable(container);
         Optional<org.digidoc4j.DataFile> dataFile = container.getDataFiles().stream()
                 .filter(df -> df.getName().equals(datafileName))
                 .findAny();
@@ -142,8 +150,8 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         return Result.OK.name();
     }
 
-    private void validateIfSessionMutable(AttachedDataFileContainerSessionHolder session) {
-        if (session.getContainerHolder().getContainer().getSignatures().size() != 0) {
+    private void validateIfSessionMutable(Container container) {
+        if (container.getSignatures().size() != 0) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
         }
     }
@@ -166,13 +174,15 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
 
     private AttachedDataFileContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
         AttachedDataFileContainerSessionHolder sessionHolder = AttachedDataFileContainerSessionHolder.builder()
                 .containerName(containerName)
                 .sessionId(sessionId)
                 .clientName(authenticatedUser.getClientName())
                 .serviceName(authenticatedUser.getServiceName())
                 .serviceUuid(authenticatedUser.getServiceUuid())
-                .containerHolder(new ContainerHolder(container))
+                .container(outputStream.toByteArray())
                 .build();
         container.getSignatures().forEach(signature ->
                 sessionHolder.addSignatureId(SessionIdGenerator.generateSessionId(), Arrays.hashCode(signature.getAdESSignature()))

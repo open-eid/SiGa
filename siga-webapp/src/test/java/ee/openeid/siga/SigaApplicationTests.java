@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class SigaApplicationTests {
     }
 
     @Test
+    @Ignore("DD4J-452")
     public void dataFileModifyingContainerFlow() throws Exception {
         String containerId = createContainer();
         Container originalContainer = getContainer(containerId);
