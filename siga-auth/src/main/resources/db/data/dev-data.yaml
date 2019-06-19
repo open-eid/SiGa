@@ -39,6 +39,24 @@ databaseChangeLog:
                   name: contact_phone
                   value: '+37200000002'
             tableName: siga_client
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 3
+              - column:
+                  name: name
+                  value: client3
+              - column:
+                  name: contact_name
+                  value: Client3 Contact Person
+              - column:
+                  name: contact_email
+                  value: support@client3.ee
+              - column:
+                  name: contact_phone
+                  value: '+37200000003'
+            tableName: siga_client
   - changeSet:
       id: 1551795684113-2
       author: (generated)

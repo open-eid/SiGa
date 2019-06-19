@@ -134,8 +134,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         }
     }
 
-    private DetachedDataFileContainerSessionHolder transformContainerToSession(String
-                                                                                       sessionId, DetachedDataFileContainer container) {
+    private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return DetachedDataFileContainerSessionHolder.builder()

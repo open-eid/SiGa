@@ -22,7 +22,8 @@ import javax.net.ssl.SSLContext;
 @Configuration
 @EnableConfigurationProperties({
         SivaConfigurationProperties.class,
-        MobileServiceConfigurationProperties.class
+        MobileServiceConfigurationProperties.class,
+        SmartIdServiceConfigurationProperties.class
 })
 public class ClientConfiguration {
 
@@ -82,4 +83,5 @@ public class ClientConfiguration {
     public void setMobileServiceConfigurationProperties(MobileServiceConfigurationProperties mobileServiceConfigurationProperties) {
         this.mobileServiceConfigurationProperties = mobileServiceConfigurationProperties;
     }
+
 }

@@ -3,6 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
@@ -109,7 +110,7 @@ class RequestTransformer {
         return signatureParameters;
     }
 
-    static SignatureParameters transformMobileIdSignatureParameters(String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
+    static SignatureParameters transformSignatureParameters(String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
         SignatureParameters signatureParameters = new SignatureParameters();
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(requestSignatureProfile);
         signatureParameters.setSignatureProfile(signatureProfile);
@@ -132,6 +133,17 @@ class RequestTransformer {
                 .personIdentifier(personIdentifier)
                 .phoneNo(phoneNo)
                 .relyingPartyName(sigaUserDetails.getSkRelyingPartyName()).build();
+    }
+
+    static SmartIdInformation transformSmartIdInformation(String country, String messageToDisplay, String personIdentifier) {
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return SmartIdInformation.builder()
+                .country(country)
+                .messageToDisplay(messageToDisplay)
+                .personIdentifier(personIdentifier)
+                .relyingPartyName(sigaUserDetails.getSkRelyingPartyName())
+                .relyingPartyName(sigaUserDetails.getSkRelyingPartyUuid())
+                .build();
     }
 
     static GetContainerSignatureDetailsResponse transformSignatureToDetails(org.digidoc4j.Signature signature) {

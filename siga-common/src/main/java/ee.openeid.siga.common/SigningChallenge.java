@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MobileIdChallenge {
-
+public class SigningChallenge {
     private String challengeId;
     private String generatedSignatureId;
 }

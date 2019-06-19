@@ -1,10 +1,11 @@
 package ee.openeid.siga.service.signature.container;
 
 import ee.openeid.siga.common.DataToSignWrapper;
-import ee.openeid.siga.common.MobileIdChallenge;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.SigningChallenge;
 import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -18,9 +19,17 @@ import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
+import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.session.SessionService;
+import ee.sk.smartid.HashType;
+import ee.sk.smartid.SignableHash;
+import ee.sk.smartid.SmartIdCertificate;
+import ee.sk.smartid.SmartIdClient;
+import ee.sk.smartid.rest.dao.NationalIdentity;
+import ee.sk.smartid.rest.dao.SessionStatus;
 import eu.europa.esig.dss.DSSUtils;
+import eu.europa.esig.dss.DigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
@@ -44,12 +53,14 @@ import static ee.openeid.siga.common.util.CertificateUtil.createX509Certificate;
 
 @Slf4j
 public abstract class ContainerSigningService {
-
+    private static final String SMART_ID_CERTIFICATE_LEVEL = "QUALIFIED";
+    private static final String SMART_ID_FINISHED_STATE = "COMPLETE";
+    private static final String OK_RESPONSE = Result.OK.name();
     private SigaEventLogger sigaEventLogger;
     protected SessionService sessionService;
-    private static final String OK_RESPONSE = Result.OK.name();
     private DigiDocService digiDocService;
     private MobileIdService mobileIdService;
+    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
 
     public DataToSignWrapper createDataToSign(String containerId, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
@@ -75,7 +86,7 @@ public abstract class ContainerSigningService {
         return Result.OK;
     }
 
-    public MobileIdChallenge startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
+    public SigningChallenge startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
 
@@ -89,12 +100,12 @@ public abstract class ContainerSigningService {
         sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode(response.getSesscode()).build());
         sessionService.update(containerId, sessionHolder);
 
-        return MobileIdChallenge.builder().challengeId(response.getChallengeID()).generatedSignatureId(generatedSignatureId).build();
+        return SigningChallenge.builder().challengeId(response.getChallengeID()).generatedSignatureId(generatedSignatureId).build();
     }
 
     public String processMobileStatus(String containerId, String signatureId) {
         Session sessionHolder = getSession(containerId);
-        validateMobileIdSession(sessionHolder.getDataToSignHolder(signatureId), signatureId);
+        validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.MOBILE_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileIdService.getMobileSignHashStatus(dataToSignHolder.getSessionCode());
         ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
@@ -106,6 +117,52 @@ public abstract class ContainerSigningService {
             sessionService.update(containerId, sessionHolder);
         }
         return status.name();
+    }
+
+    public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {
+        Session sessionHolder = getSession(containerId);
+        verifySigningObjectExistence(sessionHolder);
+        NationalIdentity nationalIdentity = new NationalIdentity(smartIdInformation.getCountry(), smartIdInformation.getPersonIdentifier());
+        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
+        SmartIdCertificate certificateResponse = smartIdClient
+                .getCertificate()
+                .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
+                .withNationalIdentity(nationalIdentity)
+                .fetch();
+
+        signatureParameters.setSigningCertificate(certificateResponse.getCertificate());
+
+        String documentNumber = certificateResponse.getDocumentNumber();
+        DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
+
+        SignableHash signableHash = createSignableHash(dataToSign);
+        String challengeId = signableHash.calculateVerificationCode();
+
+        String sessionId = initSmartIdSign(smartIdClient, smartIdInformation, signableHash, documentNumber);
+
+        String generatedSignatureId = SessionIdGenerator.generateSessionId();
+        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(sessionId).build());
+        sessionService.update(containerId, sessionHolder);
+
+        return SigningChallenge.builder().challengeId(challengeId).generatedSignatureId(generatedSignatureId).build();
+
+    }
+
+    public String processSmartIdStatus(String containerId, String signatureId, SmartIdInformation smartIdInformation) {
+        Session sessionHolder = getSession(containerId);
+        validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
+        DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
+        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
+        SessionStatus sessionStatus = smartIdClient.getSmartIdConnector().getSessionStatus(dataToSignHolder.getSessionCode());
+        String signatureValue = sessionStatus.getSignature().getValue();
+        if (SMART_ID_FINISHED_STATE.equals(sessionStatus.getState())) {
+            DataToSign dataToSign = dataToSignHolder.getDataToSign();
+            Signature signature = finalizeSignature(dataToSign, Base64.getDecoder().decode(signatureValue.getBytes()));
+
+            addSignatureToSession(sessionHolder, signature, signatureId);
+            sessionService.update(containerId, sessionHolder);
+        }
+        return sessionStatus.getState();
     }
 
 
@@ -129,13 +186,39 @@ public abstract class ContainerSigningService {
         }
     }
 
-    private MobileSignHashResponse initMobileSign(DataToSign dataToSign, MobileIdInformation mobileIdInformation){
+    private MobileSignHashResponse initMobileSign(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
         MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
         if (!OK_RESPONSE.equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
         return response;
+    }
+
+    private SignableHash createSignableHash(DataToSign dataToSign) {
+        byte[] digest = DSSUtils.digest(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
+        SignableHash signableHash = new SignableHash();
+        signableHash.setHash(digest);
+        signableHash.setHashType(HashType.SHA512);
+        return signableHash;
+    }
+
+    private String initSmartIdSign(SmartIdClient smartIdClient, SmartIdInformation smartIdInformation, SignableHash signableHash, String documentNumber) {
+        return smartIdClient
+                .createSignature()
+                .withDocumentNumber(documentNumber)
+                .withSignableHash(signableHash)
+                .withDisplayText(smartIdInformation.getMessageToDisplay())
+                .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
+                .initiateSigning();
+    }
+
+    public SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
+        SmartIdClient client = new SmartIdClient();
+        client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
+        client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
+        client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUUID());
+        return client;
     }
 
     private void logEndEvent(SigaEvent startEvent, Signature signature) {
@@ -175,8 +258,8 @@ public abstract class ContainerSigningService {
         validateSession(dataToSignHolder, signatureId, SigningType.REMOTE);
     }
 
-    private void validateMobileIdSession(DataToSignHolder dataToSignHolder, String signatureId) {
-        validateSession(dataToSignHolder, signatureId, SigningType.MOBILE_ID);
+    private void validateMobileDeviceSession(DataToSignHolder dataToSignHolder, String signatureId, SigningType signingType) {
+        validateSession(dataToSignHolder, signatureId, signingType);
         if (StringUtils.isBlank(dataToSignHolder.getSessionCode())) {
             throw new InvalidSessionDataException("Unable to finalize signature. Session code not found");
         }
@@ -221,5 +304,10 @@ public abstract class ContainerSigningService {
     @Autowired
     public void setMobileIdService(MobileIdService mobileIdService) {
         this.mobileIdService = mobileIdService;
+    }
+
+    @Autowired
+    public void setSmartIdServiceConfigurationProperties(SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
+        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
     }
 }

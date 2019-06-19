@@ -66,6 +66,7 @@ public class SigaApplicationTests {
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
     }
 
+
     @Test
     public void hashcodeModifyingContainerFlow() throws Exception {
         String containerId = createHashcodeContainer();
@@ -123,6 +124,49 @@ public class SigaApplicationTests {
     }
 
     @Test
+    @Ignore
+    public void smartIdHashcodeSigningFlow() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
+        Assert.assertEquals(2, dataFiles.size());
+
+        String signatureId = startHashcodeSmartIdSigning(containerId);
+
+        String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("COMPLETE", smartIdStatus);
+        assertHashcodeSignedContainer(containerId, 1);
+    }
+
+    @Test
+    @Ignore
+    public void smartIdSigningFlow() throws Exception {
+        String containerId = uploadContainer();
+        List<Signature> signatures = getSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        Container originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        List<DataFile> dataFiles = getDataFiles(containerId);
+        Assert.assertEquals(2, dataFiles.size());
+
+        String signatureId = startSmartIdSigning(containerId);
+
+        String smartIdStatus = getSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("COMPLETE", smartIdStatus);
+        assertSignedContainer(containerId, 1);
+    }
+
+
+    @Test
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
@@ -139,7 +183,7 @@ public class SigaApplicationTests {
         Thread.sleep(8000);
         String mobileStatus = getMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("SIGNATURE", mobileStatus);
-        assertSignedContainer(containerId);
+        assertSignedContainer(containerId, 2);
     }
 
     @Test
@@ -158,7 +202,7 @@ public class SigaApplicationTests {
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
-        assertSignedContainer(containerId);
+        assertSignedContainer(containerId, 2);
     }
 
     @Test
@@ -180,7 +224,7 @@ public class SigaApplicationTests {
         Thread.sleep(8000);
         String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("SIGNATURE", mobileStatus);
-        assertHashcodeSignedContainer(containerId);
+        assertHashcodeSignedContainer(containerId, 2);
     }
 
     @Test
@@ -199,10 +243,10 @@ public class SigaApplicationTests {
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
-        assertHashcodeSignedContainer(containerId);
+        assertHashcodeSignedContainer(containerId, 2);
     }
 
-    private void assertHashcodeSignedContainer(String containerId) throws Exception {
+    private void assertHashcodeSignedContainer(String containerId, int validSignatureCount) throws Exception {
         DetachedDataFileContainer container = getHashcodeContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
@@ -211,20 +255,19 @@ public class SigaApplicationTests {
 
         Assert.assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
-        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
+        Assert.assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
-    private void assertSignedContainer(String containerId) throws Exception {
+    private void assertSignedContainer(String containerId, int validSignatureCount) throws Exception {
         Container container = getContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
-
         List<Signature> signatures = getSignatures(containerId);
 
         Assert.assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getValidationConclusion(containerId);
-        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getValidSignaturesCount());
+        Assert.assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
@@ -289,6 +332,16 @@ public class SigaApplicationTests {
         return response.getMidStatus();
     }
 
+    private String getHashcodeSmartIdStatus(String containerId, String signatureId) throws Exception {
+        GetHashcodeContainerSmartIdSigningStatusResponse response = (GetHashcodeContainerSmartIdSigningStatusResponse) getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/" + signatureId + "/status", GetHashcodeContainerSmartIdSigningStatusResponse.class);
+        return response.getSidStatus();
+    }
+
+    private String getSmartIdStatus(String containerId, String signatureId) throws Exception {
+        GetContainerSmartIdSigningStatusResponse response = (GetContainerSmartIdSigningStatusResponse) getRequest("/containers/" + containerId + "/smartidsigning/" + signatureId + "/status", GetContainerSmartIdSigningStatusResponse.class);
+        return response.getSidStatus();
+    }
+
     private Object startRemoteSigning(String url, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
@@ -323,6 +376,25 @@ public class SigaApplicationTests {
         request.put("signatureProfile", "LT");
         return postRequest(url, request, responseObject);
     }
+
+    private Object startSmartIdSigning(String url, Class responseObject) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("personIdentifier", "10101010005");
+        request.put("country", "EE");
+        request.put("signatureProfile", "LT");
+        return postRequest(url, request, responseObject);
+    }
+
+    private String startHashcodeSmartIdSigning(String containerId) throws Exception {
+        CreateHashcodeContainerSmartIdSigningResponse response = (CreateHashcodeContainerSmartIdSigningResponse) startSmartIdSigning("/hashcodecontainers/" + containerId + "/smartidsigning", CreateHashcodeContainerSmartIdSigningResponse.class);
+        return response.getGeneratedSignatureId();
+    }
+
+    private String startSmartIdSigning(String containerId) throws Exception {
+        CreateContainerSmartIdSigningResponse response = (CreateContainerSmartIdSigningResponse) startSmartIdSigning("/containers/" + containerId + "/smartidsigning", CreateContainerSmartIdSigningResponse.class);
+        return response.getGeneratedSignatureId();
+    }
+
 
     private String startHashcodeMobileSigning(String containerId) throws Exception {
         CreateHashcodeContainerMobileIdSigningResponse response = (CreateHashcodeContainerMobileIdSigningResponse) startMobileSigning("/hashcodecontainers/" + containerId + "/mobileidsigning", CreateHashcodeContainerMobileIdSigningResponse.class);

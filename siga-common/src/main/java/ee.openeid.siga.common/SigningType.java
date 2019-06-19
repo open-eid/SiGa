@@ -2,5 +2,6 @@ package ee.openeid.siga.common;
 
 public enum SigningType {
     REMOTE,
-    MOBILE_ID
+    MOBILE_ID,
+    SMART_ID
 }
