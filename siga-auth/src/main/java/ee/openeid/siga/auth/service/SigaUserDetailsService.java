@@ -24,6 +24,7 @@ public class SigaUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("SigaService UUID not found"));
         return SigaUserDetails.builder()
                 .clientName(service.getClient().getName())
+                .clientUuid(service.getClient().getUuid())
                 .serviceName(service.getName())
                 .serviceUuid(service.getUuid())
                 .signingSecret(service.getSigningSecret())

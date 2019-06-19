@@ -41,8 +41,7 @@ public class SessionConfiguration {
             BinaryObject sessionObject = (BinaryObject) event.oldValue();
             BinaryObjectBuilder bob = BinaryObjectBuilderImpl.wrap(sessionObject);
             SigaEvent sigaEvent = SigaEvent.builder()
-                    .clientName(bob.getField("clientName"))
-                    .serviceName(bob.getField("serviceName"))
+                    .clientUuid(bob.getField("clientUuid"))
                     .serviceUuid(bob.getField("serviceUuid"))
                     .eventType(SigaEvent.EventType.FINISH)
                     .eventName(SigaEventName.HC_DELETE_CONTAINER)

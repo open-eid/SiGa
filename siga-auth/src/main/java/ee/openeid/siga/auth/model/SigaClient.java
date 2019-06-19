@@ -17,6 +17,8 @@ public class SigaClient {
     @ToString.Exclude
     private int id;
     @NonNull
+    private String uuid;
+    @NonNull
     private String name;
     @NonNull
     private String contactName;

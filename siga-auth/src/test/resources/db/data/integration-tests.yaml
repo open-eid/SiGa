@@ -9,6 +9,9 @@ databaseChangeLog:
                   name: id
                   valueNumeric: 1
               - column:
+                  name: uuid
+                  value: 5f923dee-4e6f-4987-bce0-36ad9647ba58
+              - column:
                   name: name
                   value: client1
               - column:
@@ -27,6 +30,9 @@ databaseChangeLog:
                   name: id
                   valueNumeric: 2
               - column:
+                  name: uuid
+                  value: a393174b-5ca0-4eb9-9f86-c19c6ce5d244
+              - column:
                   name: name
                   value: client2
               - column:
@@ -38,6 +44,24 @@ databaseChangeLog:
               - column:
                   name: contact_phone
                   value: '+37200000002'
+            tableName: siga_client
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 3
+              - column:
+                  name: name
+                  value: client3
+              - column:
+                  name: contact_name
+                  value: Client3 Contact Person
+              - column:
+                  name: contact_email
+                  value: support@client3.ee
+              - column:
+                  name: contact_phone
+                  value: '+37200000003'
             tableName: siga_client
   - changeSet:
       id: 1551795684113-2
@@ -61,6 +85,12 @@ databaseChangeLog:
               - column:
                   name: name
                   value: test1.service.ee
+              - column:
+                  name: billing_email
+                  value: service1@a7fd7728a3ea4975bfabf240a67e894f.com
+              - column:
+                  name: detailed_billing
+                  value: true
               - column:
                   name: sk_relying_party_name
                   value: Testimine
@@ -87,6 +117,12 @@ databaseChangeLog:
                   name: name
                   value: test2.service.ee
               - column:
+                  name: billing_email
+                  value: service2@824dcfe95c264d76829ae6630f434746.com
+              - column:
+                  name: detailed_billing
+                  value: false
+              - column:
                   name: sk_relying_party_name
                   value: Testimine
               - column:
@@ -111,6 +147,12 @@ databaseChangeLog:
               - column:
                   name: name
                   value: test3.service.ee
+              - column:
+                  name: billing_email
+                  value: service3@400ff9a2b5fb4fdeb7649b519963f82e.com
+              - column:
+                  name: detailed_billing
+                  value: false
               - column:
                   name: sk_relying_party_name
                   value: Testimine

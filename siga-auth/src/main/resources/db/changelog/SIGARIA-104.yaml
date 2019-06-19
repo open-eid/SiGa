@@ -1,0 +1,37 @@
+databaseChangeLog:
+- changeSet:
+    id: 1560930098000-1
+    author: (generated)
+    changes:
+      - addColumn:
+          columns:
+            - column:
+                name: uuid
+                type: VARCHAR(36)
+          tableName: siga_client
+
+- changeSet:
+    id: 1560930098000-2
+    author: (generated)
+    changes:
+      - createIndex:
+          columns:
+            - column:
+                name: uuid
+          indexName: client_uuid_index
+          tableName: siga_client
+          unique: true
+
+- changeSet:
+    id: 1560930098000-3
+    author: (generated)
+    changes:
+      - addColumn:
+          columns:
+            - column:
+                name: billing_email
+                type: VARCHAR(128)
+            - column:
+                name: detailed_billing
+                type: BOOLEAN
+          tableName: siga_service

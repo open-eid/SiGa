@@ -44,4 +44,7 @@ public class SigaService {
     private String skRelyingPartyUuid;
     private String smartIdRelyingPartyName;
     private String smartIdRelyingPartyUuid;
+    @NonNull
+    private String billingEmail;
+    private Boolean detailedBilling;
 }

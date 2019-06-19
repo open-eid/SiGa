@@ -20,6 +20,7 @@ public class SigaEvent {
     private EventType eventType;
     private SigaEventName eventName;
     private String clientName;
+    private String clientUuid;
     private String serviceName;
     private String serviceUuid;
     private String errorCode;
@@ -70,6 +71,10 @@ public class SigaEvent {
         this.errorCode = errorCode.name();
     }
 
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
     @Override
     public String toString() {
         MoreObjects.ToStringHelper ts = MoreObjects.toStringHelper(this)
@@ -77,6 +82,7 @@ public class SigaEvent {
                 .add("event_type", eventType)
                 .add("event_name", eventName)
                 .add("client_name", escapeJava(clientName))
+                .add("client_uuid", clientUuid)
                 .add("service_name", escapeJava(serviceName))
                 .add("service_uuid", serviceUuid);
 
