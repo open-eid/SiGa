@@ -2,14 +2,19 @@ package ee.openeid.siga.service.signature.container;
 
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.SigningChallenge;
+import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
+import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
+import ee.openeid.siga.session.SessionService;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.digidoc4j.DataToSign;
@@ -34,6 +39,9 @@ public abstract class ContainerSigningServiceTest {
 
     @Mock
     private MobileIdService mobileIdService;
+
+    @Mock
+    private SmartIdServiceConfigurationProperties smartIdProperties;
 
     @Mock
     private DigiDocService digiDocService;
@@ -144,15 +152,45 @@ public abstract class ContainerSigningServiceTest {
 
         Mockito.when(mobileIdService.getMobileSignHashStatus(any())).thenReturn(getMobileSignHashStatusResponse);
         mockMobileIdSessionHolder(dataToSign);
-        getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
+        String status = getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
+        Assert.assertEquals("SIGNATURE", status);
     }
 
+    protected void successfulSmartIdSigning() {
+        Mockito.when(smartIdProperties.getUrl()).thenReturn("https://sid.demo.sk.ee/smart-id-rp/v1/");
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
+        SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
+        Assert.assertNotNull(signingChallenge.getChallengeId());
+        Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());
+    }
+
+    protected void successfulSmartIdSignatureProcessing(SessionService sessionService) throws IOException, URISyntaxException {
+        Session sessionHolder = getSessionHolder();
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        Mockito.when(smartIdProperties.getUrl()).thenReturn("https://sid.demo.sk.ee/smart-id-rp/v1/");
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
+
+        SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        String result = getSigningService().processSmartIdStatus(CONTAINER_ID, signingChallenge.getGeneratedSignatureId(), smartIdInformation);
+        Assert.assertEquals("COMPLETE", result);
+    }
+
+
     protected abstract ContainerSigningService getSigningService();
+
     protected abstract String getExpectedDataToSignPrefix();
+
     protected abstract void setSigningServiceParameters();
+
     protected abstract void mockRemoteSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
+
     protected abstract void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
 
+    protected abstract Session getSessionHolder() throws IOException, URISyntaxException;
 
     private MobileSignHashResponse createMobileSignHashResponse() {
         MobileSignHashResponse mobileSignHashResponse = new MobileSignHashResponse();

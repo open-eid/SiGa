@@ -8,6 +8,7 @@ import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.DataToSignHolder;
+import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -122,7 +123,7 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
     }
 
     @Test
-    public void successfulMobileIdSignatureTest() throws IOException, URISyntaxException {
+    public void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
         successfulMobileIdSignatureProcessing();
     }
 
@@ -132,6 +133,17 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
         exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
         signingService.processMobileStatus(CONTAINER_ID, "someUnknownSignatureId");
     }
+
+    @Test
+    public void successfulSmartIdSignatureTest() throws IOException {
+        successfulSmartIdSigning();
+    }
+
+    @Test
+    public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
+        successfulSmartIdSignatureProcessing(sessionService);
+    }
+
 
     @Override
     protected ContainerSigningService getSigningService() {
@@ -161,4 +173,10 @@ public class AttachedDataFileContainerSigningServiceTest extends ContainerSignin
         session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode("2342384932").build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
     }
+
+    @Override
+    protected Session getSessionHolder() throws IOException, URISyntaxException {
+        return RequestUtil.createAttachedDataFileSessionHolder();
+    }
+
 }

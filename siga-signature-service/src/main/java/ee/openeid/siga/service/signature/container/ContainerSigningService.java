@@ -213,7 +213,7 @@ public abstract class ContainerSigningService {
                 .initiateSigning();
     }
 
-    public SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
+    private SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
         SmartIdClient client = new SmartIdClient();
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
         client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
@@ -307,7 +307,7 @@ public abstract class ContainerSigningService {
     }
 
     @Autowired
-    public void setSmartIdServiceConfigurationProperties(SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
+    void setSmartIdServiceConfigurationProperties(SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
         this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
     }
 }

@@ -4,6 +4,7 @@ package ee.openeid.siga.service.signature.test;
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
@@ -148,5 +149,15 @@ public class RequestUtil {
                 .relyingPartyName("Testimiseks")
                 .messageToDisplay("Random display").build();
         return mobileIdInformation;
+    }
+
+    public static SmartIdInformation createSmartIdInformation() {
+        SmartIdInformation smartIdInformation = SmartIdInformation.builder()
+                .personIdentifier("10101010005")
+                .country("EE")
+                .relyingPartyUuid("00000000-0000-0000-0000-000000000000")
+                .relyingPartyName("DEMO")
+                .build();
+        return smartIdInformation;
     }
 }
