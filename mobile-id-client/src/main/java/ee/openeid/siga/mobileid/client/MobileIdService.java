@@ -38,6 +38,8 @@ public class MobileIdService extends WebServiceGatewaySupport {
         MobileSignHashRequest request = new MobileSignHashRequest();
         request.setServiceName(mobileIdInformation.getRelyingPartyName());
         request.setLanguage(getLanguage(mobileIdInformation.getLanguage()));
+        if (mobileIdInformation.getMessageToDisplay() != null)
+            request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         request.setIDCode(mobileIdInformation.getPersonIdentifier());
         request.setPhoneNo(mobileIdInformation.getPhoneNo());
         if (mobileIdInformation.getMessageToDisplay() != null)

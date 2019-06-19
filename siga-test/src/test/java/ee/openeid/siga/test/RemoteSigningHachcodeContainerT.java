@@ -39,11 +39,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
-    public void signContainerRemotelyWithMultipleSignature1s() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-    }
-
-    @Test
     public void signContainerRemotelyWithMultipleSignatures() throws Exception {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);

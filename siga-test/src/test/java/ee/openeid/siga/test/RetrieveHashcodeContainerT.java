@@ -3,8 +3,6 @@ package ee.openeid.siga.test;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,8 +11,6 @@ import org.junit.Test;
 import static ee.openeid.siga.test.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static io.restassured.RestAssured.given;
-import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 
@@ -46,15 +42,20 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(1440));
+                .body(CONTAINER + ".length()", greaterThan(1400));
     }
 
     @Test
     public void retrieveHashcodeContainerTwice() throws Exception {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        getHashcodeContainer(flow);
         Response response = getHashcodeContainer(flow);
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER + ".length()", equalTo(1440));
+
+        response = getHashcodeContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -70,7 +71,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", greaterThan(19000));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(37208));
+                .body(CONTAINER + ".length()", greaterThan(37000));
     }
 
     @Test
@@ -123,7 +124,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", greaterThanOrEqualTo(35000));
+                .body(CONTAINER + ".length()", greaterThan(35000));
     }
 
     @Test

@@ -11,7 +11,7 @@
 
     <groupId>ee.openeid.siga</groupId>
     <artifactId>siga-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>Signature Gateway</name>
 
@@ -34,6 +34,13 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.exclusions>
+            **/ee/openeid/siga/webapp/json/*,
+            **/ee/openeid/siga/client/**/*,
+            **/ee/openeid/siga/service/signature/configuration/*,
+            **/ee/openeid/siga/mobileid/model/mid/*,
+            **/ee/openeid/siga/mobileid/model/dds/*
+        </sonar.exclusions>
         <sonar.language>java</sonar.language>
     </properties>
     <dependencies>
@@ -91,7 +98,7 @@
                 <version>0.8.2</version>
                 <executions>
                     <execution>
-                        <id>jacoco-initialize</id>
+                        <id>jacoco-initializ</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -100,7 +107,6 @@
             </plugin>
         </plugins>
     </build>
-
 
 
 </project>
