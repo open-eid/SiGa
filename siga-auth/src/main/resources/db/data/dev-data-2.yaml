@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 155172390423904-1
+      author: (generated)
+      changes:
+        - update:
+            columns:
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+            tableName: siga_service
+

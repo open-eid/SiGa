@@ -29,6 +29,8 @@ public class SigaUserDetailsService implements UserDetailsService {
                 .signingSecret(service.getSigningSecret())
                 .skRelyingPartyName(service.getSkRelyingPartyName())
                 .skRelyingPartyUuid(service.getSkRelyingPartyUuid())
+                .smartIdRelyingPartyName(service.getSmartIdRelyingPartyName())
+                .smartIdRelyingPartyUuid(service.getSmartIdRelyingPartyUuid())
                 .build();
     }
 }

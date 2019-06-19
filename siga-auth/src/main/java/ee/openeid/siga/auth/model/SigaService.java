@@ -42,4 +42,6 @@ public class SigaService {
     private String skRelyingPartyName;
     @NonNull
     private String skRelyingPartyUuid;
+    private String smartIdRelyingPartyName;
+    private String smartIdRelyingPartyUuid;
 }

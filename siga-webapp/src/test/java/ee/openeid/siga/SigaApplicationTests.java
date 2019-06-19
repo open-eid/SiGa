@@ -124,7 +124,6 @@ public class SigaApplicationTests {
     }
 
     @Test
-    @Ignore
     public void smartIdHashcodeSigningFlow() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
@@ -145,7 +144,6 @@ public class SigaApplicationTests {
     }
 
     @Test
-    @Ignore
     public void smartIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);

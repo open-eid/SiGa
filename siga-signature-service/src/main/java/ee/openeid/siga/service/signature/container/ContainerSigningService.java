@@ -217,7 +217,7 @@ public abstract class ContainerSigningService {
         SmartIdClient client = new SmartIdClient();
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
         client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
-        client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUUID());
+        client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
         return client;
     }
 

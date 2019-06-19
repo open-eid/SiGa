@@ -141,8 +141,8 @@ class RequestTransformer {
                 .country(country)
                 .messageToDisplay(messageToDisplay)
                 .personIdentifier(personIdentifier)
-                .relyingPartyName(sigaUserDetails.getSkRelyingPartyName())
-                .relyingPartyName(sigaUserDetails.getSkRelyingPartyUuid())
+                .relyingPartyName(sigaUserDetails.getSmartIdRelyingPartyName())
+                .relyingPartyUuid(sigaUserDetails.getSmartIdRelyingPartyUuid())
                 .build();
     }
 
