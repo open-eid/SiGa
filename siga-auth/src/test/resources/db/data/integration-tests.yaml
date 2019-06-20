@@ -51,6 +51,9 @@ databaseChangeLog:
                   name: id
                   valueNumeric: 3
               - column:
+                  name: uuid
+                  value: 741141ad-5a63-47be-98c6-31e7873acf18
+              - column:
                   name: name
                   value: client3
               - column:

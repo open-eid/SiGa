@@ -6,6 +6,8 @@ databaseChangeLog:
       - addColumn:
           columns:
             - column:
+                constraints:
+                  nullable: false
                 name: uuid
                 type: VARCHAR(36)
           tableName: siga_client

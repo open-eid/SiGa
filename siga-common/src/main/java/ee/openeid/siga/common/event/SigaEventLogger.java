@@ -177,10 +177,12 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
         if (authentication != null && authentication.isAuthenticated()) {
             SigaUserDetails sud = (SigaUserDetails) authentication.getPrincipal();
             final String clientName = sud.getClientName();
+            final String clientUuid = sud.getClientUuid();
             final String serviceName = sud.getServiceName();
             final String serviceUuid = sud.getServiceUuid();
             events.stream().peek(e -> {
                 e.setClientName(clientName);
+                e.setClientUuid(clientUuid);
                 e.setServiceName(serviceName);
                 e.setServiceUuid(serviceUuid);
             }).forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
