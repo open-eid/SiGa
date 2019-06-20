@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
@@ -8,7 +9,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -158,10 +159,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);
         Response response = getHashcodeContainer(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -170,10 +168,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeContainer(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -181,10 +176,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
@@ -203,10 +195,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
@@ -214,9 +203,6 @@ public class RetrieveHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 }

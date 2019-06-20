@@ -1,6 +1,7 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.common.Result;
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
@@ -9,7 +10,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -114,10 +115,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
         JSONObject request = new JSONObject();
         Response response = postHashcodeRemoteSigningInSession(flow, request);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -127,10 +125,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         Response response = postHashcodeRemoteSigningInSession(flow, request);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -140,10 +135,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", SIGNER_CERT_PEM);
         Response response = postHashcodeRemoteSigningInSession(flow, request);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -151,10 +143,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("", "LT"));
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -162,10 +151,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -173,10 +159,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("-&32%", "LT"));
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -184,10 +167,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -195,10 +175,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -218,9 +195,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
         JSONObject request = new JSONObject();
         Response response = putHashcodeRemoteSigningInSession(flow, request, dataToSignResponse.getGeneratedSignatureId());
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -229,9 +204,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(""), dataToSignResponse.getGeneratedSignatureId());
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -240,9 +213,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
         Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse.getGeneratedSignatureId());
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(INVALID_SIGNATURE));
+        expectError(response, 400, INVALID_SIGNATURE);
     }
 
     @Test
@@ -250,10 +221,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
@@ -272,10 +240,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
@@ -283,9 +248,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 }

@@ -1,6 +1,7 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.common.Result;
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
@@ -8,7 +9,7 @@ import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -28,10 +29,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -40,10 +38,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -66,10 +61,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -81,10 +73,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -96,10 +85,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -110,10 +96,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         response = getHashcodeMidSigningInSession(flow, signatureId);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -126,10 +109,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         response = getHashcodeMidSigningInSession(flow, signatureId);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -142,10 +122,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -156,10 +133,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getValidationReportForContainerInSession(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -170,10 +144,7 @@ public class DeleteHashcodeContainerT extends TestBase {
         deleteHashcodeContainer(flow);
 
         Response response = getHashcodeSignatureList(flow);
-
-        response.then()
-                .statusCode(400)
-                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -199,9 +170,6 @@ public class DeleteHashcodeContainerT extends TestBase {
         postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
-
-        response.then()
-                .statusCode(405)
-                .body(ERROR_CODE, equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 }

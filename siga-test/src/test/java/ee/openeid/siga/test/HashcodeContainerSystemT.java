@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,8 +44,7 @@ public class HashcodeContainerSystemT extends TestBase {
 
         response = getHashcodeContainer(flow);
 
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -62,8 +62,7 @@ public class HashcodeContainerSystemT extends TestBase {
 
         Response response = getHashcodeSignatureList(flow);
 
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -78,8 +77,7 @@ public class HashcodeContainerSystemT extends TestBase {
 
         deleteHashcodeContainer(flow);
         Response response = getValidationReportForContainerInSession(flow);
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
+        expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test

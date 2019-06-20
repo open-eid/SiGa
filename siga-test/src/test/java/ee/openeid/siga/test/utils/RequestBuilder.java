@@ -13,7 +13,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.HmacSigner.generateHmacSignature;
 
 public class RequestBuilder {

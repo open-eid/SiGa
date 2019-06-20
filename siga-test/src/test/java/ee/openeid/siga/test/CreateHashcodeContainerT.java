@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
 import org.json.JSONArray;
@@ -12,7 +13,7 @@ import org.junit.Test;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -114,113 +115,97 @@ public class CreateHashcodeContainerT extends TestBase {
     @Test
     public void createHashcodeContainerEmptyFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerEmptySha256Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, " ", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerEmptySha512Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, "    ", DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerEmptyFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, ""));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerFileInFolder() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest("folder/test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerInvalidFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, "abc"));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerInvalidHash256() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, "+-KZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerInvalidHash512() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, "+-Vz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==", DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerTooLongHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE + "=", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerTooShortHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE.substring(1), DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerTooLongHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE + "=", DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void createHashcodeContainerTooShortHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE.substring(1), DEFAULT_FILESIZE));
-        assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void deleteToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = delete(HASHCODE_CONTAINERS, flow);
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
     public void putToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = put(HASHCODE_CONTAINERS, flow, hashcodeContainersDataRequestWithDefault().toString());
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
     public void getToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = get(HASHCODE_CONTAINERS, flow);
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 
 
@@ -240,7 +225,6 @@ public class CreateHashcodeContainerT extends TestBase {
     @Test
     public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = patch(HASHCODE_CONTAINERS, flow);
-        assertThat(response.statusCode(), equalTo(405));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_REQUEST));
+        expectError(response, 405, INVALID_REQUEST);
     }
 }

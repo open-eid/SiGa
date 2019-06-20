@@ -1,6 +1,7 @@
 package ee.openeid.siga.test;
 
 import ee.openeid.siga.common.Result;
+import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
@@ -8,7 +9,7 @@ import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.TestData.SIGNER_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;

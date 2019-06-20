@@ -18,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 import static ee.openeid.siga.common.event.SigaEventName.*;
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static java.util.concurrent.TimeUnit.SECONDS;

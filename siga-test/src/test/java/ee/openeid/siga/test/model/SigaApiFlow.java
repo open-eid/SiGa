@@ -4,7 +4,7 @@ import io.restassured.response.Response;
 import lombok.Builder;
 import lombok.Data;
 
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 
 @Data
 @Builder

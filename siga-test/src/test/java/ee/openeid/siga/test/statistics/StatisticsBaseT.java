@@ -2,7 +2,7 @@ package ee.openeid.siga.test.statistics;
 
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
-import ee.openeid.siga.test.TestBase;
+import ee.openeid.siga.test.helper.TestBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;

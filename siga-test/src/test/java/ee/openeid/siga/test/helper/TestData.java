@@ -1,4 +1,4 @@
-package ee.openeid.siga.test;
+package ee.openeid.siga.test.helper;
 
 public class TestData {
 

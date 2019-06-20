@@ -20,7 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import static ee.openeid.siga.common.event.SigaEvent.EventType.FINISH;
 import static ee.openeid.siga.common.event.SigaEvent.EventType.START;
 import static ee.openeid.siga.common.event.SigaEventName.*;
-import static ee.openeid.siga.test.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeMidSigningRequestWithDefault;
 import static java.util.concurrent.TimeUnit.SECONDS;
