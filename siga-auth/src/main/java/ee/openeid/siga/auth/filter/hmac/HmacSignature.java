@@ -42,10 +42,10 @@ public class HmacSignature {
         }
         Instant hmacTimestamp = ofEpochSecond(parseLong(timestamp));
         final Instant serverTimestamp = now();
-        if(isTokenNotInFuture(serverTimestamp, hmacTimestamp, clockSkew) == false) {
+        if(!isTokenNotInFuture(serverTimestamp, hmacTimestamp, clockSkew)) {
             throw new HmacAuthenticationException("HMAC token is expired. Token timestamp too far in future.");
         }
-        if(isTokenNotExpired(serverTimestamp, hmacTimestamp, expirationInSeconds, clockSkew) == false) {
+        if(!isTokenNotExpired(serverTimestamp, hmacTimestamp, expirationInSeconds, clockSkew)) {
             throw new HmacAuthenticationException("HMAC token is expired. Token timestamp too far in past.");
         }
     }
