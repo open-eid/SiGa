@@ -40,7 +40,6 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-02-22T11:04:25Z"));
     }
 
-    @Ignore ("SIGARIA-63")
     @Test
     public void validateHascodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));

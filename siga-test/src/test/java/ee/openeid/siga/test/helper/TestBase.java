@@ -90,6 +90,11 @@ public class TestBase {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES, flow);
     }
 
+    @Step("Get signature info")
+    protected Response getHashcodeSignatureInfo(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES + "/" + signatureId, flow);
+    }
+
     @Step("Get container")
     protected Response getHashcodeContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);

@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.DEFAULT_HASHCODE_CONTAINER;
-import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -95,5 +94,112 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
                 .body("signatures[0].signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
                 .body("signatures[0].signatureProfile", equalTo("LT"))
                 .body("signatures[0].generatedSignatureId", notNullValue());
+    }
+
+    @Test
+    public void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+
+        Response response = getHashcodeSignatureInfo(flow, getHashcodeSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT"))
+                .body("signingCertificate", equalTo(SIGNER_CERT_PEM))
+                .body("ocspCertificate", notNullValue())
+                .body("timeStampTokenCertificate", notNullValue())
+                .body("ocspResponseCreationTime", notNullValue())
+                .body("timeStampCreationTime", notNullValue())
+                .body("trustedSigningTime", notNullValue())
+                .body("claimedSigningTime", notNullValue())
+                .body("signatureMethod", equalTo("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512"));
+    }
+
+    @Test
+    public void createLtTmProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT_TM")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+
+        Response response = getHashcodeSignatureInfo(flow, getHashcodeSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT_TM"))
+                .body("signingCertificate", equalTo(SIGNER_CERT_PEM))
+                .body("ocspCertificate", notNullValue())
+                .body("ocspResponseCreationTime", notNullValue())
+                .body("trustedSigningTime", notNullValue())
+                .body("claimedSigningTime", notNullValue())
+                .body("signatureMethod", equalTo("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512"));
+    }
+
+    @Test
+    public void createSignatureWithSigningInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+
+        Response response = getHashcodeSignatureInfo(flow, getHashcodeSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", notNullValue())
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT"))
+                .body("signatureProductionPlace.countryName", equalTo("Estonia"))
+                .body("signatureProductionPlace.city", equalTo("Tallinn"))
+                .body("signatureProductionPlace.stateOrProvince", equalTo("Harju"))
+                .body("signatureProductionPlace.postalCode", equalTo("4953"))
+                .body("roles[0]", equalTo("Member of board"));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
+
+        Response response = getHashcodeSignatureInfo(flow, getHashcodeSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"))
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT"));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithHashMismatchAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeSha512HashMismatch.asice"));
+
+        Response response = getHashcodeSignatureInfo(flow, getHashcodeSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"))
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT"))
+                .body("signingCertificate", notNullValue())
+                .body("ocspCertificate", notNullValue())
+                .body("ocspResponseCreationTime", notNullValue())
+                .body("trustedSigningTime", notNullValue())
+                .body("claimedSigningTime", notNullValue())
+                .body("signatureMethod", equalTo("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512"));
+    }
+
+    @Test
+    public void uploadHashcodeAndRetrieveSignatureInfoWithWrongId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
+
+        Response response = getHashcodeSignatureInfo(flow, "randomSignatureId");
+
+        response.then()
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
     }
 }

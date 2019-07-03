@@ -32,7 +32,13 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadInvalidHashcodeContainer() throws Exception {
+    public void uploadHashcodeContainerWithoutSha256hashes() throws Exception {
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha256File.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithoutSha512hashes() throws Exception {
         Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
@@ -44,6 +50,18 @@ public class UploadHashcodeContainerT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithDatafilesInFolder() throws Exception {
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithoutDatafiles() throws Exception {
+        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutDataFiles.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
