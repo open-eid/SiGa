@@ -10,6 +10,7 @@ databaseChangeLog:
                   nullable: false
                 name: uuid
                 type: VARCHAR(36)
+                defaultValue: 00000000-0000-0000-0000-000000000000
           tableName: siga_client
 
 - changeSet:
@@ -22,7 +23,6 @@ databaseChangeLog:
                 name: uuid
           indexName: client_uuid_index
           tableName: siga_client
-          unique: true
 
 - changeSet:
     id: 1560930098000-3

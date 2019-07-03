@@ -12,4 +12,47 @@ databaseChangeLog:
                   name: smart_id_relying_party_uuid
                   value: 00000000-0000-0000-0000-000000000000
             tableName: siga_service
-
+        - update:
+            columns:
+              - column:
+                  name: uuid
+                  value: 5f923dee-4e6f-4987-bce0-36ad9647ba58
+            tableName: siga_client
+            where: id=1
+        - update:
+            columns:
+              - column:
+                  name: uuid
+                  value: a393174b-5ca0-4eb9-9f86-c19c6ce5d244
+            tableName: siga_client
+            where: id=2
+        - update:
+            columns:
+              - column:
+                  name: billing_email
+                  value: service1@a7fd7728a3ea4975bfabf240a67e894f.com
+              - column:
+                  name: detailed_billing
+                  value: true
+            tableName: siga_service
+            where: id=1
+        - update:
+            columns:
+              - column:
+                  name: billing_email
+                  value: service2@824dcfe95c264d76829ae6630f434746.com
+              - column:
+                  name: detailed_billing
+                  value: false
+            tableName: siga_service
+            where: id=2
+        - update:
+            columns:
+              - column:
+                  name: billing_email
+                  value: service3@400ff9a2b5fb4fdeb7649b519963f82e.com
+              - column:
+                  name: detailed_billing
+                  value: false
+            tableName: siga_service
+            where: id=3
