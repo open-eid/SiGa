@@ -1,4 +1,13 @@
 databaseChangeLog:
+- property:
+    name: uuid_function
+    value: uuid_generate_v4()
+    dbms: postgresql
+- property:
+    name: uuid_function
+    value: random_uuid()
+    dbms: h2
+
 - changeSet:
     id: 1560930098000-1
     author: (generated)
@@ -10,6 +19,7 @@ databaseChangeLog:
                   nullable: false
                 name: uuid
                 type: VARCHAR(36)
+                defaultValueComputed: ${uuid_function}
           tableName: siga_client
 
 - changeSet:
@@ -23,7 +33,6 @@ databaseChangeLog:
           indexName: client_uuid_index
           tableName: siga_client
           unique: true
-
 - changeSet:
     id: 1560930098000-3
     author: (generated)
