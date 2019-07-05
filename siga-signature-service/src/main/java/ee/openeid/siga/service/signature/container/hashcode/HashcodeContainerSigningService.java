@@ -1,14 +1,14 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.hashcode;
 
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
-import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
+import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,13 +29,13 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class DetachedDataFileContainerSigningService extends ContainerSigningService implements DetachedDataFileSessionHolder {
+public class HashcodeContainerSigningService extends ContainerSigningService implements HashcodeSessionHolder {
 
     private Configuration configuration;
 
     @Override
     public DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
-        DetachedDataFileContainerSessionHolder sessionHolder = (DetachedDataFileContainerSessionHolder) session;
+        HashcodeContainerSessionHolder sessionHolder = (HashcodeContainerSessionHolder) session;
         DetachedXadesSignatureBuilder signatureBuilder = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters);
         return signatureBuilder.buildDataToSign();
     }
@@ -48,14 +48,14 @@ public class DetachedDataFileContainerSigningService extends ContainerSigningSer
     @Override
     public void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
         HashcodeSignatureWrapper signatureWrapper = createSignatureWrapper(signatureId, signature.getAdESSignature());
-        DetachedDataFileContainerSessionHolder detachedDataFileContainerSessionHolder = (DetachedDataFileContainerSessionHolder) sessionHolder;
-        detachedDataFileContainerSessionHolder.getSignatures().add(signatureWrapper);
-        detachedDataFileContainerSessionHolder.clearSigning(signatureId);
+        HashcodeContainerSessionHolder hashcodeContainerSessionHolder = (HashcodeContainerSessionHolder) sessionHolder;
+        hashcodeContainerSessionHolder.getSignatures().add(signatureWrapper);
+        hashcodeContainerSessionHolder.clearSigning(signatureId);
     }
 
     @Override
     public void verifySigningObjectExistence(Session session) {
-        verifyDataFileExistence((DetachedDataFileContainerSessionHolder) session);
+        verifyDataFileExistence((HashcodeContainerSessionHolder) session);
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashcodeDataFile> dataFiles, SignatureParameters signatureParameters) {
@@ -98,7 +98,7 @@ public class DetachedDataFileContainerSigningService extends ContainerSigningSer
         return new DigestDataFile(fileName, digestAlgorithm, digest);
     }
 
-    private void verifyDataFileExistence(DetachedDataFileContainerSessionHolder sessionHolder) {
+    private void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {
         if (sessionHolder.getDataFiles().size() < 1) {
             throw new InvalidSessionDataException("Unable to create signature. Data files must be added to container");
         }

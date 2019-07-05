@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
@@ -7,9 +7,9 @@ import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
-import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
+import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
@@ -28,14 +28,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DetachedDataFileContainerService implements DetachedDataFileSessionHolder {
+public class HashcodeContainerService implements HashcodeSessionHolder {
 
     private SessionService sessionService;
     private Configuration configuration;
 
     public String createContainer(List<HashcodeDataFile> dataFiles) {
 
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         dataFiles.forEach(hashcodeContainer::addDataFile);
         OutputStream outputStream = new ByteArrayOutputStream();
         hashcodeContainer.save(outputStream);
@@ -47,7 +47,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
 
     public String uploadContainer(String container) {
         String sessionId = SessionIdGenerator.generateSessionId();
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
         hashcodeContainer.open(inputStream);
         sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
@@ -55,9 +55,9 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public String getContainer(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
 
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         sessionHolder.getSignatures().forEach(signatureWrapper -> hashcodeContainer.getSignatures().add(signatureWrapper));
         sessionHolder.getDataFiles().forEach(dataFile -> hashcodeContainer.getDataFiles().add(dataFile));
 
@@ -75,14 +75,14 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public List<Signature> getSignatures(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         List<Signature> signatures = new ArrayList<>();
         sessionHolder.getSignatures().forEach(signatureWrapper -> signatures.add(transformSignature(signatureWrapper)));
         return signatures;
     }
 
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Optional<HashcodeSignatureWrapper> signatureWrapper = sessionHolder.getSignatures().stream()
                 .filter(wrapper -> wrapper.getGeneratedSignatureId().equals(signatureId))
                 .findAny();
@@ -94,12 +94,12 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public List<HashcodeDataFile> getDataFiles(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         return sessionHolder.getDataFiles();
     }
 
     public Result addDataFile(String containerId, HashcodeDataFile dataFile) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
         sessionHolder.getDataFiles().add(dataFile);
         sessionService.update(containerId, sessionHolder);
@@ -107,7 +107,7 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
     }
 
     public Result removeDataFile(String containerId, String datafileName) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
         if (sessionHolder.getDataFiles().stream().noneMatch(dataFile -> dataFile.getFileName().equals(datafileName))) {
             throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
@@ -128,16 +128,16 @@ public class DetachedDataFileContainerService implements DetachedDataFileSession
         return signature;
     }
 
-    private void validateIfSessionMutable(DetachedDataFileContainerSessionHolder session) {
+    private void validateIfSessionMutable(HashcodeContainerSessionHolder session) {
         if (session.getSignatures().size() != 0) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
         }
     }
 
-    private DetachedDataFileContainerSessionHolder transformContainerToSession(String sessionId, DetachedDataFileContainer container) {
+    private HashcodeContainerSessionHolder transformContainerToSession(String sessionId, HashcodeContainer container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return DetachedDataFileContainerSessionHolder.builder()
+        return HashcodeContainerSessionHolder.builder()
                 .sessionId(sessionId)
                 .clientName(authenticatedUser.getClientName())
                 .serviceName(authenticatedUser.getServiceName())

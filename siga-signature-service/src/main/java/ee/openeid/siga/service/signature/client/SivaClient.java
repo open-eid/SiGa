@@ -7,7 +7,7 @@ import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
-import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
@@ -34,15 +34,15 @@ public class SivaClient {
 
     private RestTemplate restTemplate;
     private SivaConfigurationProperties configurationProperties;
-    private DetachedDataFileContainerService detachedDataFileContainerService;
+    private HashcodeContainerService hashcodeContainerService;
 
-    public ValidationConclusion validateDetachedDataFileContainer(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
+    public ValidationConclusion validateHashcodeContainer(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrapper, dataFiles);
         try {
             return validate(request, HASHCODE_VALIDATION_ENDPOINT);
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
-            Signature signature = detachedDataFileContainerService.transformSignature(signatureWrapper);
+            Signature signature = hashcodeContainerService.transformSignature(signatureWrapper);
             if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
                 throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
             } else {
@@ -51,7 +51,7 @@ public class SivaClient {
         }
     }
 
-    public ValidationConclusion validateAttachedDataFileContainer(String name, String container) {
+    public ValidationConclusion validateAsicContainer(String name, String container) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(name);
         request.setDocument(container);
@@ -129,8 +129,8 @@ public class SivaClient {
     }
 
     @Autowired
-    public void setDetachedDataFileContainerService(DetachedDataFileContainerService
-                                                            detachedDataFileContainerService) {
-        this.detachedDataFileContainerService = detachedDataFileContainerService;
+    public void setHashcodeContainerService(HashcodeContainerService
+                                                            hashcodeContainerService) {
+        this.hashcodeContainerService = hashcodeContainerService;
     }
 }

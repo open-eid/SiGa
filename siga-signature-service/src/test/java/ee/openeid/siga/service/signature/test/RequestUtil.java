@@ -5,11 +5,11 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SmartIdInformation;
-import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
-import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.digidoc4j.Configuration;
@@ -63,7 +63,7 @@ public class RequestUtil {
 
     public static HashcodeSignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
 
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
         return hashcodeContainer.getSignatures().get(0);
     }
@@ -96,10 +96,10 @@ public class RequestUtil {
         return hashcodeDataFiles;
     }
 
-    public static DetachedDataFileContainerSessionHolder createDetachedDataFileSessionHolder() throws IOException, URISyntaxException {
+    public static HashcodeContainerSessionHolder createHashcodeSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper());
-        return DetachedDataFileContainerSessionHolder.builder()
+        return HashcodeContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
@@ -108,13 +108,13 @@ public class RequestUtil {
                 .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
     }
 
-    public static AttachedDataFileContainerSessionHolder createAttachedDataFileSessionHolder() throws IOException, URISyntaxException {
+    public static AsicContainerSessionHolder createAsicSessionHolder() throws IOException, URISyntaxException {
         String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         signatureIdHolder.put(SessionIdGenerator.generateSessionId(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
-        return AttachedDataFileContainerSessionHolder.builder()
+        return AsicContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)

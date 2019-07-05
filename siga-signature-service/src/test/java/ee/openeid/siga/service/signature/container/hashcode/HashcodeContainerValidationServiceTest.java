@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -25,25 +25,25 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DetachedDataFileContainerValidationServiceTest {
+public class HashcodeContainerValidationServiceTest {
 
     @InjectMocks
-    private DetachedDataFileContainerValidationService validationService;
+    private HashcodeContainerValidationService validationService;
 
     @Mock
     private SivaClient sivaClient;
     @Mock
     private SessionService sessionService;
     @Mock
-    private DetachedDataFileContainerService detachedDataFileContainerService;
+    private HashcodeContainerService hashcodeContainerService;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
-        detachedDataFileContainerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-        sivaClient.setDetachedDataFileContainerService(detachedDataFileContainerService);
-        Mockito.when(sivaClient.validateDetachedDataFileContainer(any(), any())).thenReturn(validationConclusion);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        hashcodeContainerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        sivaClient.setHashcodeContainerService(hashcodeContainerService);
+        Mockito.when(sivaClient.validateHashcodeContainer(any(), any())).thenReturn(validationConclusion);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
     }
 
     @Test

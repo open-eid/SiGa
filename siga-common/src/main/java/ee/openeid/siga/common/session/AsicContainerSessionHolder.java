@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Data
 @Builder
-public class AttachedDataFileContainerSessionHolder implements Session {
+public class AsicContainerSessionHolder implements Session {
     @NonNull
     private String containerName;
     @NonNull

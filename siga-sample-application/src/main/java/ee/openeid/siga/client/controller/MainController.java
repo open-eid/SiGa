@@ -1,6 +1,6 @@
 package ee.openeid.siga.client.controller;
 
-import ee.openeid.siga.client.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.client.hashcode.HashcodeContainer;
 import ee.openeid.siga.client.model.Container;
 import ee.openeid.siga.client.model.MobileSigningRequest;
 import ee.openeid.siga.client.service.ContainerService;
@@ -54,7 +54,7 @@ public class MainController {
         MultipartFile file = fileMap.entrySet().iterator().next().getValue();
         log.info("Converting container: {}", file.getOriginalFilename());
         InputStream inputStream = new ByteArrayInputStream(file.getBytes());
-        DetachedDataFileContainer hashcodeContainer = DetachedDataFileContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
+        HashcodeContainer hashcodeContainer = HashcodeContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
         String id = UUID.randomUUID().toString();
         log.info("Generated file id: {}", id);
         return containerService.cache(id, file.getOriginalFilename(), hashcodeContainer);
@@ -85,14 +85,14 @@ public class MainController {
         Container cachedFile = containerService.get(id);
         log.info("Downloading regular container {} with id {}", cachedFile.getFileName(), cachedFile.getId());
 
-        DetachedDataFileContainer detachedDataFileContainer = DetachedDataFileContainer.fromHashcodeContainerBuilder()
+        HashcodeContainer hashcodeContainer = HashcodeContainer.fromHashcodeContainerBuilder()
                 .base64Container(Base64.getEncoder().encodeToString(cachedFile.getHashcodeContainer()))
                 .regularDataFiles(cachedFile.getOriginalDataFiles())
                 .build();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + cachedFile.getFileName() + "\"")
-                .body(detachedDataFileContainer.getRegularContainer());
+                .body(hashcodeContainer.getRegularContainer());
     }
 
     @RequestMapping(value = "/mobile-signing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)

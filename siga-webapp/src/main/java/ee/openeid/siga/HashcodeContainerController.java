@@ -9,9 +9,9 @@ import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
-import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerService;
-import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerSigningService;
-import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerValidationService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
 import org.digidoc4j.DataToSign;
@@ -29,11 +29,11 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-public class DetachedDataFileContainerController {
+public class HashcodeContainerController {
 
-    private DetachedDataFileContainerService containerService;
-    private DetachedDataFileContainerValidationService validationService;
-    private DetachedDataFileContainerSigningService signingService;
+    private HashcodeContainerService containerService;
+    private HashcodeContainerValidationService validationService;
+    private HashcodeContainerSigningService signingService;
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
@@ -283,17 +283,17 @@ public class DetachedDataFileContainerController {
     }
 
     @Autowired
-    protected void setContainerService(DetachedDataFileContainerService containerService) {
+    protected void setContainerService(HashcodeContainerService containerService) {
         this.containerService = containerService;
     }
 
     @Autowired
-    protected void setValidationService(DetachedDataFileContainerValidationService validationService) {
+    protected void setValidationService(HashcodeContainerValidationService validationService) {
         this.validationService = validationService;
     }
 
     @Autowired
-    public void setSigningService(DetachedDataFileContainerSigningService signingService) {
+    public void setSigningService(HashcodeContainerSigningService signingService) {
         this.signingService = signingService;
     }
 }

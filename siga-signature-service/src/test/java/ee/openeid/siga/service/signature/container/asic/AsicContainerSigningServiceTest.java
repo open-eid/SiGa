@@ -1,12 +1,13 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.asic;
+
 
 import ee.openeid.siga.common.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.DataToSignHolder;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
@@ -14,6 +15,7 @@ import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
+import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,30 +34,29 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.createSignature
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DetachedDataFileContainerSigningServiceTest extends ContainerSigningServiceTest {
-    private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference Id=\"r-id-1\" URI=\"test.txt\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"></ds:DigestMethod><ds:DigestValue>gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA==</ds:DigestValue></ds:Reference><ds:Reference Type=\"http://uri.etsi.org/01903#SignedProperties\"";
+public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
+    private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference Id=\"r-id-1\" URI=\"test.xml\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha512\"></ds:DigestMethod><ds:DigestValue>9kPh+QhVkCfN14i8eZwXMAnQG+0cDwUuUdL6T94/CtvIKFKWVyF8/sMxEn/KwAn7sftdKAvXiQ2N9FlRQ9itRA==</ds:DigestValue>";
+
+    private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
+
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @InjectMocks
-    private DetachedDataFileContainerSigningService signingService;
+    private AsicContainerSigningService signingService;
 
     @Mock
     private SessionService sessionService;
-
-    @Mock
-    private Configuration configuration;
 
     @Mock
     private SigaEventLogger sigaEventLogger;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
-        configuration = new Configuration(Configuration.Mode.TEST);
-        signingService.setConfiguration(configuration);
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
-        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createAsicSessionHolder());
     }
 
     @Test
@@ -71,11 +72,10 @@ public class DetachedDataFileContainerSigningServiceTest extends ContainerSignin
     }
 
     @Test
-    public void noDataFilesInSession() throws IOException, URISyntaxException {
-        exceptionRule.expect(InvalidSessionDataException.class);
-        exceptionRule.expectMessage("Unable to create signature. Data files must be added to container");
-        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createDetachedDataFileSessionHolder();
-        sessionHolder.getDataFiles().clear();
+    public void noContainerInSession() throws IOException, URISyntaxException {
+        exceptionRule.expectMessage("container is marked @NonNull but is null");
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
+        sessionHolder.setContainer(null);
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
         signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
@@ -135,7 +135,7 @@ public class DetachedDataFileContainerSigningServiceTest extends ContainerSignin
     }
 
     @Test
-    public void successfulSmartIdSignatureTest() throws IOException{
+    public void successfulSmartIdSignatureTest() throws IOException {
         successfulSmartIdSigning();
     }
 
@@ -143,6 +143,7 @@ public class DetachedDataFileContainerSigningServiceTest extends ContainerSignin
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
         successfulSmartIdSignatureProcessing(sessionService);
     }
+
 
     @Override
     protected ContainerSigningService getSigningService() {
@@ -156,26 +157,26 @@ public class DetachedDataFileContainerSigningServiceTest extends ContainerSignin
 
     @Override
     protected void setSigningServiceParameters() {
-        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        //Do nothing
     }
 
     @Override
     protected void mockRemoteSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
-        DetachedDataFileContainerSessionHolder sessionHolder = RequestUtil.createDetachedDataFileSessionHolder();
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
         sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
     }
 
     @Override
     protected void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
-        DetachedDataFileContainerSessionHolder session = RequestUtil.createDetachedDataFileSessionHolder();
+        AsicContainerSessionHolder session = RequestUtil.createAsicSessionHolder();
         session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode("2342384932").build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
     }
 
     @Override
     protected Session getSessionHolder() throws IOException, URISyntaxException {
-        return RequestUtil.createDetachedDataFileSessionHolder();
+        return RequestUtil.createAsicSessionHolder();
     }
 
 }

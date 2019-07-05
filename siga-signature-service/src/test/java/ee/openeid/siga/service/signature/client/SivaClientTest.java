@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
-import ee.openeid.siga.service.signature.container.detached.DetachedDataFileContainerService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -32,7 +32,7 @@ public class SivaClientTest {
     @Mock
     private SivaConfigurationProperties sivaConfigurationProperties;
     @Mock
-    private DetachedDataFileContainerService detachedDataFileContainerService;
+    private HashcodeContainerService hashcodeContainerService;
     private SivaClient sivaClient;
     private String requestUrl;
 
@@ -43,7 +43,7 @@ public class SivaClientTest {
         sivaClient = new SivaClient();
         sivaClient.setRestTemplate(new RestTemplate());
         sivaClient.setConfigurationProperties(sivaConfigurationProperties);
-        sivaClient.setDetachedDataFileContainerService(detachedDataFileContainerService);
+        sivaClient.setHashcodeContainerService(hashcodeContainerService);
     }
 
     @After
@@ -59,7 +59,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(body))
         );
-        ValidationConclusion response = sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+        ValidationConclusion response = sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
         Assert.assertEquals(Integer.valueOf(1), response.getSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
     }
@@ -73,7 +73,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(404))
         );
-        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class SivaClientTest {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(500))
         );
-        sivaClient.validateDetachedDataFileContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class SivaClientTest {
 
         HashcodeSignatureWrapper signatureWrapper = RequestUtil.createSignatureWrapper();
         signatureWrapper.getDataFiles().get(0).setHashAlgo("SHA386");
-        sivaClient.validateDetachedDataFileContainer(signatureWrapper, RequestUtil.createHashcodeDataFiles());
+        sivaClient.validateHashcodeContainer(signatureWrapper, RequestUtil.createHashcodeDataFiles());
     }
 
     protected String toJson(Object request) {

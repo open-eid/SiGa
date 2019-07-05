@@ -9,9 +9,9 @@ import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
-import ee.openeid.siga.service.signature.container.attached.AttachedDataFileContainerService;
-import ee.openeid.siga.service.signature.container.attached.AttachedDataFileContainerSigningService;
-import ee.openeid.siga.service.signature.container.attached.AttachedDataFileContainerValidationService;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerService;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
 import org.digidoc4j.DataToSign;
@@ -29,11 +29,11 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-public class AttachedDataFileContainerController {
+public class AsicContainerController {
 
-    private AttachedDataFileContainerService containerService;
-    private AttachedDataFileContainerValidationService validationService;
-    private AttachedDataFileContainerSigningService signingService;
+    private AsicContainerService containerService;
+    private AsicContainerValidationService validationService;
+    private AsicContainerSigningService signingService;
 
     @SigaEventLog(eventName = SigaEventName.CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @RequestMapping(value = "/containers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
@@ -286,17 +286,17 @@ public class AttachedDataFileContainerController {
     }
 
     @Autowired
-    public void setContainerService(AttachedDataFileContainerService containerService) {
+    public void setContainerService(AsicContainerService containerService) {
         this.containerService = containerService;
     }
 
     @Autowired
-    public void setValidationService(AttachedDataFileContainerValidationService validationService) {
+    public void setValidationService(AsicContainerValidationService validationService) {
         this.validationService = validationService;
     }
 
     @Autowired
-    public void setSigningService(AttachedDataFileContainerSigningService signingService) {
+    public void setSigningService(AsicContainerSigningService signingService) {
         this.signingService = signingService;
     }
 }

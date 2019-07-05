@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.container.attached;
+package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.Result;
@@ -6,9 +6,9 @@ import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
-import ee.openeid.siga.common.session.AttachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.service.signature.session.AttachedDataFileSessionHolder;
+import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 
 @Service
-public class AttachedDataFileContainerService implements AttachedDataFileSessionHolder {
+public class AsicContainerService implements AsicSessionHolder {
 
     private SessionService sessionService;
     private Configuration configuration;
@@ -66,7 +66,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public String getContainer(String containerId) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -75,7 +75,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public List<Signature> getSignatures(String containerId) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         List<Signature> signatures = new ArrayList<>();
@@ -90,7 +90,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get(signatureId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
@@ -105,7 +105,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public List<DataFile> getDataFiles(String containerId) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         List<org.digidoc4j.DataFile> dataFiles = container.getDataFiles();
@@ -113,7 +113,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public Result addDataFile(String containerId, DataFile dataFile) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
 
@@ -130,7 +130,7 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
     }
 
     public Result removeDataFile(String containerId, String datafileName) {
-        AttachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
 
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
@@ -172,11 +172,11 @@ public class AttachedDataFileContainerService implements AttachedDataFileSession
         return dataFile;
     }
 
-    private AttachedDataFileContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {
+    private AsicContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AttachedDataFileContainerSessionHolder sessionHolder = AttachedDataFileContainerSessionHolder.builder()
+        AsicContainerSessionHolder sessionHolder = AsicContainerSessionHolder.builder()
                 .containerName(containerName)
                 .sessionId(sessionId)
                 .clientName(authenticatedUser.getClientName())

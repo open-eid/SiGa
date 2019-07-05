@@ -1,6 +1,6 @@
 package ee.openeid.siga.client.service;
 
-import ee.openeid.siga.client.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.client.hashcode.HashcodeContainer;
 import ee.openeid.siga.client.model.Container;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
@@ -26,7 +26,7 @@ public class ContainerService {
     }
 
     @CachePut(key = "#id")
-    public Container cache(String id, String fileName, DetachedDataFileContainer hashcodeContainer) {
+    public Container cache(String id, String fileName, HashcodeContainer hashcodeContainer) {
         return Container.builder()
                 .id(id)
                 .fileName(fileName)

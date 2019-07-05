@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.container.attached;
+package ee.openeid.siga.service.signature.container.asic;
 
 
 import ee.openeid.siga.service.signature.client.SivaClient;
@@ -25,10 +25,10 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AttachedDataFileContainerValidationServiceTest {
+public class AsicContainerValidationServiceTest {
 
     @InjectMocks
-    private AttachedDataFileContainerValidationService validationService;
+    private AsicContainerValidationService validationService;
 
     @Mock
     private SivaClient sivaClient;
@@ -38,8 +38,8 @@ public class AttachedDataFileContainerValidationServiceTest {
     @Before
     public void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
-        Mockito.when(sivaClient.validateAttachedDataFileContainer(any(), any())).thenReturn(validationConclusion);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAttachedDataFileSessionHolder());
+        Mockito.when(sivaClient.validateAsicContainer(any(), any())).thenReturn(validationConclusion);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
     }
 
     @Test

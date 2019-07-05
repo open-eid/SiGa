@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.Result;
@@ -6,7 +6,7 @@ import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -35,14 +35,14 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DetachedDataFileContainerServiceTest {
+public class HashcodeContainerServiceTest {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
 
     @InjectMocks
-    DetachedDataFileContainerService containerService;
+    HashcodeContainerService containerService;
 
     @Mock
     private SessionService sessionService;
@@ -78,14 +78,14 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulGetContainer() throws IOException, URISyntaxException {
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         String container = containerService.getContainer(CONTAINER_ID);
         Assert.assertFalse(StringUtils.isBlank(container));
     }
 
     @Test
     public void successfulGetDataFiles() throws IOException, URISyntaxException {
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         List<HashcodeDataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
         Assert.assertEquals("test.txt", dataFiles.get(0).getFileName());
         Assert.assertEquals(Integer.valueOf(10), dataFiles.get(0).getFileSize());
@@ -95,7 +95,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulGetSignatures() throws IOException, URISyntaxException {
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatures.get(0).getId());
         Assert.assertEquals("LT", signatures.get(0).getSignatureProfile());
@@ -105,7 +105,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulGetSignature() throws IOException, URISyntaxException {
-        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, session.getSignatures().get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signature.getId());
@@ -115,13 +115,13 @@ public class DetachedDataFileContainerServiceTest {
     public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to add/remove data file. Container contains signatures");
-        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createDetachedDataFileSessionHolder());
+        Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         containerService.addDataFile(CONTAINER_ID, createHashcodeDataFileListWithOneFile().get(0));
     }
 
     @Test
     public void successfulAddDataFile() throws IOException, URISyntaxException {
-        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -132,7 +132,7 @@ public class DetachedDataFileContainerServiceTest {
 
     @Test
     public void successfulRemoveDataFile() throws IOException, URISyntaxException {
-        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -146,7 +146,7 @@ public class DetachedDataFileContainerServiceTest {
         exceptionRule.expect(ResourceNotFoundException.class);
         exceptionRule.expectMessage("Data file named test.xml not found");
 
-        DetachedDataFileContainerSessionHolder session = createDetachedDataFileSessionHolder();
+        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);

@@ -5,7 +5,7 @@ import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
-import ee.openeid.siga.service.signature.test.DetachedDataFileContainerFilesHolder;
+import ee.openeid.siga.service.signature.test.HashcodeContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -21,16 +21,16 @@ import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 
-public class DetachedDataFileContainerTest {
+public class HashcodeContainerTest {
 
     @Test
     public void validHashcodeContainerCreation() throws IOException {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeDataFiles.forEach(hashcodeContainer::addDataFile);
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
-            DetachedDataFileContainerFilesHolder hashcodeContainerFilesHolder = TestUtil.getContainerFiles(outputStream.toByteArray());
+            HashcodeContainerFilesHolder hashcodeContainerFilesHolder = TestUtil.getContainerFiles(outputStream.toByteArray());
             Assert.assertEquals(TestUtil.MIMETYPE, hashcodeContainerFilesHolder.getMimeTypeContent());
             Assert.assertEquals(TestUtil.MANIFEST_CONTENT, hashcodeContainerFilesHolder.getManifestContent());
             Assert.assertEquals(TestUtil.HASHCODES_SHA256_CONTENT, hashcodeContainerFilesHolder.getHashcodesSha256Content());
@@ -40,7 +40,7 @@ public class DetachedDataFileContainerTest {
 
     @Test
     public void validHashcodeContainerOpening() throws IOException, URISyntaxException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashcodeContainer.open(inputStream);
         Assert.assertEquals(1, hashcodeContainer.getSignatures().size());
@@ -58,7 +58,7 @@ public class DetachedDataFileContainerTest {
 
     @Test(expected = SignatureExistsException.class)
     public void couldNotAddDataFileWhenSignatureExists() throws IOException, URISyntaxException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashcodeContainer.open(inputStream);
         HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
@@ -69,10 +69,10 @@ public class DetachedDataFileContainerTest {
 
     @Test(expected = InvalidContainerException.class)
     public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
-            DetachedDataFileContainer newHashcodeContainer = new DetachedDataFileContainer();
+            HashcodeContainer newHashcodeContainer = new HashcodeContainer();
             ByteArrayOutputStream byteArrayOutputStream = outputStream;
             newHashcodeContainer.open(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
         }
@@ -80,19 +80,19 @@ public class DetachedDataFileContainerTest {
 
     @Test(expected = InvalidContainerException.class)
     public void hashcodeContainerMissingSha512() throws IOException, URISyntaxException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeMissingSha512File.asice"));
     }
 
     @Test(expected = InvalidContainerException.class)
     public void directoryNotAllowedForFileName() throws IOException, URISyntaxException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeShaFileIsDirectory.asice"));
     }
 
     @Test
     public void validHashcodeContainerAddedNewData() throws IOException, URISyntaxException {
-        DetachedDataFileContainer hashcodeContainer = new DetachedDataFileContainer();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashcodeContainer.open(inputStream);
         HashcodeSignatureWrapper signature = hashcodeContainer.getSignatures().get(0);
@@ -110,7 +110,7 @@ public class DetachedDataFileContainerTest {
         Assert.assertEquals(3, hashcodeContainer.getDataFiles().size());
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
-            DetachedDataFileContainer newContainer = new DetachedDataFileContainer();
+            HashcodeContainer newContainer = new HashcodeContainer();
             newContainer.open(new ByteArrayInputStream(outputStream.toByteArray()));
             Assert.assertEquals(1, newContainer.getSignatures().size());
             Assert.assertEquals(3, newContainer.getDataFiles().size());

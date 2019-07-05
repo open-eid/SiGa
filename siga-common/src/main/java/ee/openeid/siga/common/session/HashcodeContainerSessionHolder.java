@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Data
 @Builder
-public class DetachedDataFileContainerSessionHolder implements Session {
+public class HashcodeContainerSessionHolder implements Session {
     @NonNull
     private String clientName;
     @NonNull

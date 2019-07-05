@@ -19,12 +19,12 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static ee.openeid.siga.client.hashcode.DetachedDataFileContainerWriter.SIGNATURE_FILE_PREFIX;
+import static ee.openeid.siga.client.hashcode.HashcodeContainerWriter.SIGNATURE_FILE_PREFIX;
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.convertToHashcodeEntries;
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 
 
-public class DetachedDataFileContainer {
+public class HashcodeContainer {
 
     private final List<byte[]> signatures = new ArrayList<>();
     private final List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
@@ -33,13 +33,13 @@ public class DetachedDataFileContainer {
 
     @Builder(builderClassName = "FromRegularContainerBuilder", builderMethodName = "fromRegularContainerBuilder")
     @SneakyThrows
-    public DetachedDataFileContainer(InputStream containerInputStream) {
+    public HashcodeContainer(InputStream containerInputStream) {
         processContainer(containerInputStream);
     }
 
     @Builder(builderClassName = "FromHashcodeContainerBuilder", builderMethodName = "fromHashcodeContainerBuilder")
     @SneakyThrows
-    public DetachedDataFileContainer(String base64Container, Map<String, byte[]> regularDataFiles) {
+    public HashcodeContainer(String base64Container, Map<String, byte[]> regularDataFiles) {
         InputStream containerInputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64Container));
         processContainer(containerInputStream);
         this.regularDataFiles = regularDataFiles;
@@ -57,7 +57,7 @@ public class DetachedDataFileContainer {
     public byte[] getRegularContainer() {
         validateDataFileHashes(regularDataFiles);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DetachedDataFileContainerWriter cw = new DetachedDataFileContainerWriter(outputStream);
+        HashcodeContainerWriter cw = new HashcodeContainerWriter(outputStream);
         cw.writeMimeType();
         cw.writeManifest(hashcodeDataFiles);
         cw.writeRegularDataFiles(regularDataFiles);
@@ -90,7 +90,7 @@ public class DetachedDataFileContainer {
 
     public byte[] getHashcodeContainer() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DetachedDataFileContainerWriter cw = new DetachedDataFileContainerWriter(outputStream);
+        HashcodeContainerWriter cw = new HashcodeContainerWriter(outputStream);
         cw.writeMimeType();
         cw.writeManifest(hashcodeDataFiles);
         cw.writeHashcodeFiles(hashcodeDataFiles);

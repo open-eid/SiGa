@@ -1,13 +1,13 @@
-package ee.openeid.siga.service.signature.container.detached;
+package ee.openeid.siga.service.signature.container.hashcode;
 
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
-import ee.openeid.siga.common.session.DetachedDataFileContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
-import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
-import ee.openeid.siga.service.signature.session.DetachedDataFileSessionHolder;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
+import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +19,20 @@ import java.util.Base64;
 import java.util.List;
 
 @Service
-public class DetachedDataFileContainerValidationService implements DetachedDataFileSessionHolder {
+public class HashcodeContainerValidationService implements HashcodeSessionHolder {
 
     private SivaClient sivaClient;
     private SessionService sessionService;
 
     public ValidationConclusion validateContainer(String container) {
-        DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
-        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes())));
-        validateContainerSignatures(detachedDataFileContainer.getSignatures());
-        return createValidationConclusion(detachedDataFileContainer.getSignatures(), detachedDataFileContainer.getDataFiles());
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        hashcodeContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes())));
+        validateContainerSignatures(hashcodeContainer.getSignatures());
+        return createValidationConclusion(hashcodeContainer.getSignatures(), hashcodeContainer.getDataFiles());
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
-        DetachedDataFileContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateContainerSignatures(sessionHolder.getSignatures());
         return createValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
     }
@@ -45,7 +45,7 @@ public class DetachedDataFileContainerValidationService implements DetachedDataF
     private ValidationConclusion createValidationConclusion(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         List<ValidationConclusion> validationConclusions = new ArrayList<>();
         signatureWrappers.forEach(signatureWrapper ->
-                validationConclusions.add(sivaClient.validateDetachedDataFileContainer(signatureWrapper, dataFiles)));
+                validationConclusions.add(sivaClient.validateHashcodeContainer(signatureWrapper, dataFiles)));
         return mergeValidationConclusions(validationConclusions);
     }
 

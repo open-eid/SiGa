@@ -2,7 +2,7 @@ package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.service.signature.hashcode.DetachedDataFileContainer;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.*;
 import org.apache.commons.io.IOUtils;
 import org.digidoc4j.Configuration;
@@ -70,15 +70,15 @@ public class SigaApplicationTests {
     @Test
     public void hashcodeModifyingContainerFlow() throws Exception {
         String containerId = createHashcodeContainer();
-        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(0, originalContainer.getSignatures().size());
         Assert.assertEquals(1, originalContainer.getDataFiles().size());
         addHashcodeDataFile(containerId);
-        DetachedDataFileContainer updatedContainer = getHashcodeContainer(containerId);
+        HashcodeContainer updatedContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(0, updatedContainer.getSignatures().size());
         Assert.assertEquals(2, updatedContainer.getDataFiles().size());
         deleteHashcodeDataFile(containerId, updatedContainer.getDataFiles().get(0).getFileName());
-        DetachedDataFileContainer updatedContainer2 = getHashcodeContainer(containerId);
+        HashcodeContainer updatedContainer2 = getHashcodeContainer(containerId);
         Assert.assertEquals(0, updatedContainer2.getSignatures().size());
         Assert.assertEquals(1, updatedContainer2.getDataFiles().size());
     }
@@ -102,7 +102,7 @@ public class SigaApplicationTests {
     public void getAnotherUserContainer() throws Exception {
 
         String containerId = uploadHashcodeContainer();
-        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
 
@@ -129,7 +129,7 @@ public class SigaApplicationTests {
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
         Assert.assertEquals(1, signatures.size());
-        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
 
@@ -209,7 +209,7 @@ public class SigaApplicationTests {
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
         Assert.assertEquals(1, signatures.size());
-        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
 
@@ -233,7 +233,7 @@ public class SigaApplicationTests {
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
 
         Assert.assertEquals(1, signatures.size());
-        DetachedDataFileContainer originalContainer = getHashcodeContainer(containerId);
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
         CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId);
@@ -245,7 +245,7 @@ public class SigaApplicationTests {
     }
 
     private void assertHashcodeSignedContainer(String containerId, int validSignatureCount) throws Exception {
-        DetachedDataFileContainer container = getHashcodeContainer(containerId);
+        HashcodeContainer container = getHashcodeContainer(containerId);
         Assert.assertEquals(2, container.getSignatures().size());
         Assert.assertEquals(2, container.getDataFiles().size());
 
@@ -307,12 +307,12 @@ public class SigaApplicationTests {
         return response.getValidationConclusion();
     }
 
-    private DetachedDataFileContainer getHashcodeContainer(String containerId) throws Exception {
+    private HashcodeContainer getHashcodeContainer(String containerId) throws Exception {
         GetHashcodeContainerResponse originalContainer = (GetHashcodeContainerResponse) getRequest("/hashcodecontainers/" + containerId, GetHashcodeContainerResponse.class);
 
-        DetachedDataFileContainer detachedDataFileContainer = new DetachedDataFileContainer();
-        detachedDataFileContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer())));
-        return detachedDataFileContainer;
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        hashcodeContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer())));
+        return hashcodeContainer;
     }
 
     private Container getContainer(String containerId) throws Exception {
