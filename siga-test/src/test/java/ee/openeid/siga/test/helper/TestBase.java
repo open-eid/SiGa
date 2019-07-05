@@ -85,6 +85,18 @@ public class TestBase {
         return response;
     }
 
+    @Step("Start Smart-ID signing")
+    protected Response postHashcodeSmartIdSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SMARTID_SIGNING, flow, request.toString());
+    }
+
+    @Step("Get Smart-ID signing status")
+    protected Response getHashcodeSmartIdSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
+        flow.setSidStatus(response);
+        return response;
+    }
+
     @Step("Get signature list")
     protected Response getHashcodeSignatureList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES, flow);
@@ -118,6 +130,23 @@ public class TestBase {
         return new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 return !"OUTSTANDING_TRANSACTION".equals(getHashcodeMidSigningInSession(flow, signatureId).getBody().path(MID_STATUS));
+            }
+        };
+    }
+
+    @Step("Poll for Smart-ID signing response")
+    protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) throws NoSuchAlgorithmException, InvalidKeyException {
+        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(16000, MILLISECONDS)
+                .await("Smart-ID signing result")
+                .until(isSidFinished(flow, signatureId));
+
+        return flow.getSidStatus();
+    }
+
+    private Callable<Boolean> isSidFinished(SigaApiFlow flow, String signatureId) {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return !"RUNNING".equals(getHashcodeSmartIdSigningInSession(flow, signatureId).getBody().path(SMARTID_STATUS));
             }
         };
     }

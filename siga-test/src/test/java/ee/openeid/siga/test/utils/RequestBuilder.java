@@ -108,6 +108,32 @@ public class RequestBuilder {
         return request;
     }
 
+    public static JSONObject hashcodeSmartIdSigningRequestWithDefault(String personIdentifier, String signatureProfile) throws JSONException {
+        return hashcodeSmartIdSigningRequest(personIdentifier, "EE", signatureProfile, "something", null, null, null, null, null);
+    }
+
+    public static JSONObject hashcodeSmartIdSigningRequest(String personIdentifier, String originCountry, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+        JSONObject request = new JSONObject();
+        request.put("personIdentifier", personIdentifier);
+        request.put("country", originCountry);
+        request.put("signatureProfile", signatureProfile);
+
+        if (messageToDisplay != null) {
+            request.put("messageToDisplay", messageToDisplay);
+        }
+
+        if (roles != null) {
+            JSONArray rolesArray = new JSONArray();
+            rolesArray.put(roles);
+            request.put("roles", rolesArray);
+        }
+
+        if (city != null || stateOrProvince != null || postalCode != null || country != null) {
+            request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country));
+        }
+        return request;
+    }
+
     public static JSONObject buildSignatureProductionPlace(String city, String stateOrProvince, String postalCode, String country) throws JSONException {
         JSONObject signatureProductionPlace = new JSONObject();
         if (city != null) {

@@ -15,6 +15,7 @@ public class SigaApiFlow {
     private String signingTime;
     private Boolean forceSigningTime;
     private Response midStatus;
+    private Response sidStatus;
 
     private String serviceUuid;
     private String serviceSecret;

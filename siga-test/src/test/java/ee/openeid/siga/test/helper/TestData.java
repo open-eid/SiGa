@@ -8,6 +8,7 @@ public class TestData {
     public static final String UPLOAD = "/upload";
     public static final String REMOTE_SIGNING = "/remotesigning";
     public static final String MID_SIGNING = "/mobileidsigning";
+    public static final String SMARTID_SIGNING = "/smartidsigning";
     public static final String STATUS = "/status";
     public static final String SIGNATURES = "/signatures";
 
@@ -46,6 +47,7 @@ public class TestData {
     public static final String DATA_TO_SIGN = "dataToSign";
     public static final String DIGEST_ALGO = "digestAlgorithm";
     public static final String MID_STATUS = "midStatus";
+    public static final String SMARTID_STATUS = "sidStatus";
     public static final String GENERATED_SIGNATURE_ID = "generatedSignatureId";
     public static final String CHALLENGE_ID = "challengeId";
 
