@@ -107,7 +107,7 @@ public class TestBase {
 
     @Step("Poll for MID signing response")
     protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) throws NoSuchAlgorithmException, InvalidKeyException {
-        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(15000, MILLISECONDS)
+        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(16000, MILLISECONDS)
                 .await("MID signing result")
                 .until(isMidFinished(flow, signatureId));
 

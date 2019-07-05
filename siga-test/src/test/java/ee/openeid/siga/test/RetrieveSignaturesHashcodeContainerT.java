@@ -96,6 +96,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
                 .body("signatures[0].generatedSignatureId", notNullValue());
     }
 
+    @Ignore ("SIGARIA-116")
     @Test
     public void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -119,6 +120,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
                 .body("signatureMethod", equalTo("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512"));
     }
 
+    @Ignore ("SIGARIA-116")
     @Test
     public void createLtTmProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -160,6 +162,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
                 .body("roles[0]", equalTo("Member of board"));
     }
 
+    @Ignore ("SIGARIA-116")
     @Test
     public void uploadHashcodeContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
@@ -173,6 +176,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
                 .body("signatureProfile", equalTo("LT"));
     }
 
+    @Ignore ("SIGARIA-116")
     @Test
     public void uploadHashcodeContainerWithHashMismatchAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeSha512HashMismatch.asice"));
