@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
+import ee.openeid.siga.common.ContainerInfo;
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
@@ -90,8 +91,8 @@ public class AsicContainerServiceTest {
     @Test
     public void successfulGetContainer() throws Exception {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
-        String base64container = containerService.getContainer(CONTAINER_ID);
-        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
+        ContainerInfo containerInfo = containerService.getContainer(CONTAINER_ID);
+        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(containerInfo.getContainer().getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).fromStream(inputStream).build();
         Assert.assertEquals(1, container.getSignatures().size());
     }

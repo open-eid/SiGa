@@ -13,7 +13,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Container implements Serializable {
+public class HashcodeContainerWrapper implements Serializable {
     private String id;
     private String fileName;
     @JsonIgnore

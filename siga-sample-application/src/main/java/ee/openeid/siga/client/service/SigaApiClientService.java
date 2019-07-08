@@ -1,7 +1,9 @@
 package ee.openeid.siga.client.service;
 
 import ee.openeid.siga.client.hmac.HmacTokenAuthorizationHeaderInterceptor;
-import ee.openeid.siga.client.model.Container;
+import ee.openeid.siga.client.model.AsicContainerWrapper;
+import ee.openeid.siga.client.model.GetContainerMobileIdSigningStatusResponse;
+import ee.openeid.siga.client.model.HashcodeContainerWrapper;
 import ee.openeid.siga.client.model.MobileSigningRequest;
 import ee.openeid.siga.client.model.ProcessingStatus;
 import ee.openeid.siga.webapp.json.*;
@@ -38,7 +40,6 @@ import java.util.Map;
 
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 import static java.text.MessageFormat.format;
-import static java.util.Objects.requireNonNull;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
 import static org.springframework.http.HttpMethod.*;
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
@@ -54,7 +55,8 @@ public class SigaApiClientService {
     private final String sigaApiUri;
     private RestTemplate restTemplate;
     private String websocketChannelId;
-
+    private final static String ASIC_ENDPOINT = "containers";
+    private final static String HASHCODE_ENDPOINT = "hashcodecontainers";
     @Autowired
     private ContainerService containerService;
     @Autowired
@@ -96,20 +98,62 @@ public class SigaApiClientService {
 
         String containerId;
         if (mobileSigningRequest.isContainerCreated()) {
-            log.info("Container is already uploaded. Getting container {} from cache", fileId);
-            containerId = containerService.get(fileId).getId();
+            if (MobileSigningRequest.ContainerType.HASHCODE == mobileSigningRequest.getContainerType()) {
+                log.info("Container is already uploaded. Getting container {} from cacheHashcodeContainer", fileId);
+                containerId = containerService.getHashcodeContainer(fileId).getId();
+            } else {
+                log.info("Container is already uploaded. Getting container {} from cacheAsicContainer", fileId);
+                containerId = containerService.getAsicContainer(fileId).getId();
+            }
+
         } else {
             log.info("Uploading container file with id: {}", fileId);
             containerId = uploadContainer(fileId);
         }
 
-        getSignatureList(containerId);
-        String generatedSignatureId = prepareMobileIdSignatureSigning(mobileSigningRequest, containerId);
+        if (MobileSigningRequest.ContainerType.HASHCODE == mobileSigningRequest.getContainerType()) {
+            startHashcodeMobileIdSigningFlow(containerId, mobileSigningRequest);
+
+        } else {
+            startAsicMobileIdSigningFlow(containerId, mobileSigningRequest);
+        }
+
+    }
+
+    private void startAsicMobileIdSigningFlow(String containerId, MobileSigningRequest mobileSigningRequest) {
+        getSignatureList(ASIC_ENDPOINT, containerId, GetContainerSignaturesResponse.class);
+        CreateContainerMobileIdSigningRequest mobileIdRequest = createAsicMobileIdRequest(mobileSigningRequest);
+        CreateContainerMobileIdSigningResponse mobileIdResponse =
+                prepareMobileIdSignatureSigning(ASIC_ENDPOINT, containerId, CreateContainerMobileIdSigningResponse.class, mobileIdRequest);
+        String generatedSignatureId = mobileIdResponse.getGeneratedSignatureId();
         if (StringUtils.isNotBlank(generatedSignatureId)) {
-            if (getMobileSigningStatus(containerId, generatedSignatureId)) {
-                getContainerValidation(containerId);
-                getContainer(fileId, containerId);
-                deleteContainer(containerId);
+
+            if (getMobileSigningStatus(ASIC_ENDPOINT, containerId, generatedSignatureId)) {
+                getContainerValidation(ASIC_ENDPOINT, containerId, GetContainerValidationReportResponse.class);
+                GetContainerResponse getContainerResponse = getContainer(ASIC_ENDPOINT, containerId, GetContainerResponse.class);
+                AsicContainerWrapper container = containerService.getAsicContainer(mobileSigningRequest.getFileId());
+                containerService.cacheAsicContainer(mobileSigningRequest.getFileId(), container.getName(), Base64.getDecoder().decode(getContainerResponse.getContainer()));
+                deleteContainer(ASIC_ENDPOINT, containerId, DeleteContainerResponse.class);
+            }
+        }
+    }
+
+    private void startHashcodeMobileIdSigningFlow(String containerId, MobileSigningRequest mobileSigningRequest) {
+        getSignatureList(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerSignaturesResponse.class);
+        CreateHashcodeContainerMobileIdSigningRequest mobileIdRequest = createHashcodeMobileIdRequest(mobileSigningRequest);
+        CreateHashcodeContainerMobileIdSigningResponse mobileIdResponse =
+                prepareMobileIdSignatureSigning(HASHCODE_ENDPOINT, containerId, CreateHashcodeContainerMobileIdSigningResponse.class, mobileIdRequest);
+
+        String generatedSignatureId = mobileIdResponse.getGeneratedSignatureId();
+
+        if (StringUtils.isNotBlank(generatedSignatureId)) {
+
+            if (getMobileSigningStatus(HASHCODE_ENDPOINT, containerId, generatedSignatureId)) {
+                getContainerValidation(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerValidationReportResponse.class);
+                GetHashcodeContainerResponse getContainerResponse = getContainer(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerResponse.class);
+                HashcodeContainerWrapper container = containerService.getHashcodeContainer(mobileSigningRequest.getFileId());
+                containerService.cacheHashcodeContainer(mobileSigningRequest.getFileId(), container.getFileName(), Base64.getDecoder().decode(getContainerResponse.getContainer()), container.getOriginalDataFiles());
+                deleteContainer(HASHCODE_ENDPOINT, containerId, DeleteHashcodeContainerResponse.class);
             }
         }
     }
@@ -119,7 +163,24 @@ public class SigaApiClientService {
     }
 
     @SneakyThrows
-    public Container createContainer(Collection<MultipartFile> files) {
+    public AsicContainerWrapper createAsicContainer(Collection<MultipartFile> files) {
+        CreateContainerRequest request = new CreateContainerRequest();
+        for (MultipartFile file : files) {
+            log.info("Processing file: {}", file.getOriginalFilename());
+            ee.openeid.siga.webapp.json.DataFile dataFile = new ee.openeid.siga.webapp.json.DataFile();
+            dataFile.setFileContent(new String(Base64.getEncoder().encode(file.getBytes())));
+            dataFile.setFileName(file.getOriginalFilename());
+            request.getDataFiles().add(dataFile);
+        }
+        request.setContainerName("container.asice");
+        CreateContainerResponse createContainerResponse = restTemplate.postForObject(fromUriString(sigaApiUri).path("containers").build().toUriString(), request, CreateContainerResponse.class);
+        String containerId = createContainerResponse.getContainerId();
+        GetContainerResponse getContainerResponse = restTemplate.getForObject(getSigaApiUri(ASIC_ENDPOINT, containerId), GetContainerResponse.class);
+        return containerService.cacheAsicContainer(containerId, getContainerResponse.getContainerName(), getContainerResponse.getContainer().getBytes());
+    }
+
+    @SneakyThrows
+    public HashcodeContainerWrapper createHashcodeContainer(Collection<MultipartFile> files) {
         CreateHashcodeContainerRequest request = new CreateHashcodeContainerRequest();
         Map<String, byte[]> originalDataFiles = new HashMap<>();
         for (MultipartFile file : files) {
@@ -129,14 +190,14 @@ public class SigaApiClientService {
         }
         CreateHashcodeContainerResponse createContainerResponse = restTemplate.postForObject(fromUriString(sigaApiUri).path("hashcodecontainers").build().toUriString(), request, CreateHashcodeContainerResponse.class);
         String containerId = createContainerResponse.getContainerId();
-        GetHashcodeContainerResponse getContainerResponse = restTemplate.getForObject(getSigaApiUri(containerId), GetHashcodeContainerResponse.class);
+        GetHashcodeContainerResponse getContainerResponse = restTemplate.getForObject(getSigaApiUri(HASHCODE_ENDPOINT, containerId), GetHashcodeContainerResponse.class);
         log.info("Created container with id {}", containerId);
-        return containerService.cache(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()), originalDataFiles);
+        return containerService.cacheHashcodeContainer(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()), originalDataFiles);
     }
 
     private String uploadContainer(String fileId) {
         String endpoint = fromUriString(sigaApiUri).path("upload/hashcodecontainers").build().toUriString();
-        String encodedContainerContent = encodeBase64String(containerService.get(fileId).getHashcodeContainer());
+        String encodedContainerContent = encodeBase64String(containerService.getHashcodeContainer(fileId).getHashcodeContainer());
         UploadHashcodeContainerRequest request = new UploadHashcodeContainerRequest();
         request.setContainer(encodedContainerContent);
         UploadHashcodeContainerResponse response = restTemplate.postForObject(endpoint, request, UploadHashcodeContainerResponse.class);
@@ -145,31 +206,25 @@ public class SigaApiClientService {
         return response.getContainerId();
     }
 
-    private void getSignatureList(String containerId) {
-        String endpoint = getSigaApiUri(containerId, "signatures");
-        GetHashcodeContainerSignaturesResponse response = restTemplate.getForObject(endpoint, GetHashcodeContainerSignaturesResponse.class);
+    private <T> void getSignatureList(String containerEndpoint, String containerId, Class<T> clazz) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "signatures");
+        T response = restTemplate.getForObject(endpoint, clazz);
         sendStatus(GET, endpoint, response);
     }
 
-    private String prepareMobileIdSignatureSigning(MobileSigningRequest mobileSigningRequest, String containerId) {
-        String endpoint = getSigaApiUri(containerId, "mobileidsigning");
-        CreateHashcodeContainerMobileIdSigningRequest request = new CreateHashcodeContainerMobileIdSigningRequest();
-        request.setMessageToDisplay("SiGa DEMO app");
-        request.setSignatureProfile("LT");
-        request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
-        request.setLanguage("EST");
-        request.setPhoneNo(mobileSigningRequest.getPhoneNr());
-        CreateHashcodeContainerMobileIdSigningResponse response = restTemplate.postForObject(endpoint, request, CreateHashcodeContainerMobileIdSigningResponse.class);
+    private <T> T prepareMobileIdSignatureSigning(String containerEndpoint, String containerId, Class<T> clazz, Object request) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "mobileidsigning");
+        T response = restTemplate.postForObject(endpoint, request, clazz);
         sendStatus(POST, endpoint, request, response);
-        return response.getGeneratedSignatureId();
+        return response;
     }
 
     @SneakyThrows
-    private boolean getMobileSigningStatus(String containerId, String generatedSignatureId) {
-        String endpoint = getSigaApiUri(containerId, "mobileidsigning", generatedSignatureId, "status");
-        GetHashcodeContainerMobileIdSigningStatusResponse response;
+    private boolean getMobileSigningStatus(String containerEndpoint, String containerId, String generatedSignatureId) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "mobileidsigning", generatedSignatureId, "status");
+        GetContainerMobileIdSigningStatusResponse response;
         for (int i = 0; i < 6; i++) {
-            response = restTemplate.getForObject(endpoint, GetHashcodeContainerMobileIdSigningStatusResponse.class);
+            response = restTemplate.getForObject(endpoint, GetContainerMobileIdSigningStatusResponse.class);
             sendStatus(GET, endpoint, response);
             if (!"SIGNATURE".equals(response.getMidStatus())) {
                 Thread.sleep(5000);
@@ -180,18 +235,16 @@ public class SigaApiClientService {
         return false;
     }
 
-    private void getContainerValidation(String containerId) {
-        String endpoint = getSigaApiUri(containerId, "validationreport");
-        GetHashcodeContainerValidationReportResponse response = restTemplate.getForObject(endpoint, GetHashcodeContainerValidationReportResponse.class);
+    private <T> void getContainerValidation(String containerEndpoint, String containerId, Class<T> clazz) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "validationreport");
+        T response = restTemplate.getForObject(endpoint, clazz);
         sendStatus(GET, endpoint, response);
     }
 
-    private Container getContainer(String fileId, String containerId) {
-        String endpoint = getSigaApiUri(containerId);
-        GetHashcodeContainerResponse response = restTemplate.getForObject(endpoint, GetHashcodeContainerResponse.class);
-        Container container = containerService.get(fileId);
-        requireNonNull(container.getFileName());
-        log.info("Caching container file {} with id {}", container.getFileName(), container.getId());
+    private <T> T getContainer(String containerEndpoint, String containerId, Class<T> clazz) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId);
+        T response = restTemplate.getForObject(endpoint, clazz);
+
         ProcessingStatus processingStatus = ProcessingStatus.builder()
                 .containerReadyForDownload(true)
                 .requestMethod(GET.name())
@@ -199,13 +252,12 @@ public class SigaApiClientService {
                 .apiResponseObject(response).build();
         messagingTemplate.convertAndSend(websocketChannelId, processingStatus);
 
-        Container cachedContainer = containerService.get(fileId);
-        return containerService.cache(fileId, container.getFileName(), Base64.getDecoder().decode(response.getContainer()), cachedContainer.getOriginalDataFiles());
+        return response;
     }
 
-    private void deleteContainer(String containerId) {
-        String endpoint = getSigaApiUri(containerId);
-        ResponseEntity<DeleteHashcodeContainerResponse> response = restTemplate.exchange(endpoint, DELETE, null, DeleteHashcodeContainerResponse.class);
+    private <T> void deleteContainer(String containerEndpoint, String containerId, Class<T> clazz) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId);
+        ResponseEntity<T> response = restTemplate.exchange(endpoint, DELETE, null, clazz);
         sendStatus(DELETE, endpoint, response.getStatusCode());
     }
 
@@ -227,8 +279,28 @@ public class SigaApiClientService {
         messagingTemplate.convertAndSend(websocketChannelId, processingStatus);
     }
 
-    private String getSigaApiUri(String... pathSegments) {
-        return fromUriString(sigaApiUri).path("hashcodecontainers").pathSegment(pathSegments).build().toUriString();
+    private String getSigaApiUri(String containerPath, String... pathSegments) {
+        return fromUriString(sigaApiUri).path(containerPath).pathSegment(pathSegments).build().toUriString();
+    }
+
+    private CreateHashcodeContainerMobileIdSigningRequest createHashcodeMobileIdRequest(MobileSigningRequest mobileSigningRequest) {
+        CreateHashcodeContainerMobileIdSigningRequest request = new CreateHashcodeContainerMobileIdSigningRequest();
+        request.setMessageToDisplay("SiGa DEMO app");
+        request.setSignatureProfile("LT");
+        request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
+        request.setLanguage("EST");
+        request.setPhoneNo(mobileSigningRequest.getPhoneNr());
+        return request;
+    }
+
+    private CreateContainerMobileIdSigningRequest createAsicMobileIdRequest(MobileSigningRequest mobileSigningRequest) {
+        CreateContainerMobileIdSigningRequest request = new CreateContainerMobileIdSigningRequest();
+        request.setMessageToDisplay("SiGa DEMO app");
+        request.setSignatureProfile("LT");
+        request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
+        request.setLanguage("EST");
+        request.setPhoneNo(mobileSigningRequest.getPhoneNr());
+        return request;
     }
 
     class RestTemplateResponseErrorHandler implements ResponseErrorHandler {

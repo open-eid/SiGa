@@ -1,5 +1,6 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.ContainerInfo;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.Result;
@@ -253,9 +254,10 @@ public class AsicContainerController {
     public GetContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        String container = containerService.getContainer(containerId);
+        ContainerInfo containerInfo = containerService.getContainer(containerId);
         GetContainerResponse response = new GetContainerResponse();
-        response.setContainer(container);
+        response.setContainer(containerInfo.getContainer());
+        response.setContainerName(containerInfo.getContainerName());
         return response;
     }
 

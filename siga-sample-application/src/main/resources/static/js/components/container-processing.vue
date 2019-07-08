@@ -11,17 +11,19 @@
                     <h5 class="card-header">Container upload and conversion to hashcode format</h5>
                     <div class="card-body">
                         <b-form-group>
-                            <b-form-radio v-model="containerConversionType" value="convertContainer" v-on:input="onChangeConversionType">Convert container</b-form-radio>
-                            <b-form-radio v-model="containerConversionType" value="createContainer">Create container from files</b-form-radio>
+                            <b-form-radio v-model="containerConversionType" value="convertContainer">Convert ASIC container to HASHCODE container</b-form-radio>
+                            <b-form-radio v-model="containerConversionType" value="createContainer">Create ASIC container from files</b-form-radio>
+                            <b-form-radio v-model="containerConversionType" value="createHashcodeContainer" v-on:input="onChangeConversionType">Create HASHCODE container from files</b-form-radio>
                         </b-form-group>
                         <b-container>
                             <b-row>
                                 <b-col>
                                     <h6 v-if="!containerConverted && containerConversionType === 'convertContainer'">Upload container</h6>
-                                    <h6 v-if="!containerConverted && containerConversionType === 'createContainer'">Upload any type of files to create new hashcode container</h6>
+                                    <h6 v-if="!containerConverted && containerConversionType === 'createHashcodeContainer'">Upload any type of files to create new hashcode container</h6>
+                                    <h6 v-if="!containerConverted && containerConversionType === 'createContainer'">Upload any type of files to create new container</h6>
                                 </b-col>
                                 <b-col cols="auto" align-self="end">
-                                    <b-button v-if="!containerConverted && containerConversionType === 'createContainer'" v-b-toggle.collapse-ms variant="primary" size="sm" v-on:click="onCreateContainer">Upload files</b-button>
+                                    <b-button v-if="!containerConverted && containerConversionType != 'convertContainer'" v-b-toggle.collapse-ms variant="primary" size="sm" v-on:click="onCreateContainer">Upload files</b-button>
                                 </b-col>
                             </b-row>
                         </b-container>
@@ -29,7 +31,7 @@
                             {{ dropzoneError }}
                         </b-alert>
                         <vue-dropzone id="filedropzone" v-if="!containerConverted" ref="fileDropzone" :options="dropzoneOptions" v-on:vdropzone-success-multiple="onUploadContainerSuccess" v-on:vdropzone-error="onDropzoneError"></vue-dropzone>
-                        <b-button target="_blank" v-if="containerConverted" v-bind:href="downloadHashcodeUrl" size="sm">Download unsigned hashcode container</b-button>
+                        <b-button target="_blank" v-if="containerConverted && containerConversionType != 'createContainer'" v-bind:href="downloadHashcodeUrl" size="sm">Download unsigned hashcode container</b-button>
                     </div>
                 </div>
             </b-col>
@@ -70,7 +72,7 @@
                                 <b-row>
                                     <b-col>
                                         <b-alert v-if="item.errorMessage !== null" show variant="danger">{{item.errorMessage}}</b-alert>
-                                        <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadHashcodeUrl" size="sm" variant="link">Download signed hashcode container</b-button>
+                                        <b-button v-if="item.containerReadyForDownload && containerConversionType === 'createHashcodeContainer'" v-bind:href="downloadHashcodeUrl" size="sm" variant="link">Download signed hashcode container</b-button>
                                         <b-button v-if="item.containerReadyForDownload" v-bind:href="downloadRegularUrl" size="sm" variant="link">Download signed regular container</b-button>
                                     </b-col>
                                     <b-badge v-if="item.apiRequestObject !== null" v-b-toggle="'process-request-' + index" href="#" variant="success">Request</b-badge>
@@ -139,7 +141,7 @@
                     console.log('File upload id: ' + response.id);
                     this.$refs.fileDropzone.removeAllFiles();
                     this.$data.downloadHashcodeUrl = '/download/hashcode/' + response.id;
-                    this.$data.downloadRegularUrl = '/download/regular/' + response.id;
+                    this.$data.downloadRegularUrl = '/download/regular/' + this.$data.mobileSigningForm.containerType + '/' + response.id;
                     this.$data.mobileSigningForm.fileId = response.id;
                     this.$data.containerConverted = true;
                     let processingSteps = this.$data.processingSteps;
@@ -160,12 +162,21 @@
                     this.$refs.fileDropzone.removeAllFiles();
                     if (this.$data.containerConversionType === 'convertContainer') {
                         this.$data.mobileSigningForm.containerCreated = false;
+                        this.$data.mobileSigningForm.containerType = "HASHCODE";
                         this.$refs.fileDropzone.setOption('url', '/convert-container');
                         this.$refs.fileDropzone.setOption('maxFiles', '1');
                         this.$refs.fileDropzone.setOption('acceptedFiles', '.asice, .bdoc');
                         this.$refs.fileDropzone.setOption('autoProcessQueue', true);
+                    } else if(this.$data.containerConversionType === 'createHashcodeContainer'){
+                        this.$data.mobileSigningForm.containerCreated = true;
+                        this.$data.mobileSigningForm.containerType = "HASHCODE";
+                        this.$refs.fileDropzone.setOption('url', '/create-hashcode-container');
+                        this.$refs.fileDropzone.setOption('maxFiles', '10');
+                        this.$refs.fileDropzone.setOption('acceptedFiles', null);
+                        this.$refs.fileDropzone.setOption('autoProcessQueue', false);
                     } else {
                         this.$data.mobileSigningForm.containerCreated = true;
+                        this.$data.mobileSigningForm.containerType = "ASIC";
                         this.$refs.fileDropzone.setOption('url', '/create-container');
                         this.$refs.fileDropzone.setOption('maxFiles', '10');
                         this.$refs.fileDropzone.setOption('acceptedFiles', null);

@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.container.asic;
 
+import ee.openeid.siga.common.ContainerInfo;
 import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
@@ -65,13 +66,17 @@ public class AsicContainerService implements AsicSessionHolder {
         return sessionId;
     }
 
-    public String getContainer(String containerId) {
+    public ContainerInfo getContainer(String containerId) {
         AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        return new String(Base64.getEncoder().encode(outputStream.toByteArray()));
+
+        ContainerInfo containerInfo = new ContainerInfo();
+        containerInfo.setContainerName(sessionHolder.getContainerName());
+        containerInfo.setContainer(new String(Base64.getEncoder().encode(outputStream.toByteArray())));
+        return containerInfo;
     }
 
     public List<Signature> getSignatures(String containerId) {
