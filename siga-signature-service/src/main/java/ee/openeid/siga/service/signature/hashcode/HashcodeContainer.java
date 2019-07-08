@@ -8,8 +8,12 @@ import ee.openeid.siga.service.signature.session.SessionIdGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
+import eu.europa.esig.dss.InMemoryDocument;
 import eu.europa.esig.dss.MimeType;
 import org.apache.commons.lang3.StringUtils;
+import org.digidoc4j.impl.asic.manifest.AsicManifest;
+import org.digidoc4j.impl.asic.manifest.ManifestEntry;
+import org.digidoc4j.impl.asic.manifest.ManifestParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,6 +33,7 @@ public class HashcodeContainer {
 
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
+    private Map<String, ManifestEntry> manifest;
 
     public void save(OutputStream outputStream) {
         createHashcodeContainer(outputStream);
@@ -48,6 +53,7 @@ public class HashcodeContainer {
                 throw new InvalidContainerException("Invalid hashcode container");
             }
             validateDataFiles();
+            addMimeTypes();
         } catch (IOException e) {
             throw new InvalidContainerException("Unable to open hashcode container");
         }
@@ -113,7 +119,11 @@ public class HashcodeContainer {
             while ((bytesRead = zipStream.read(byteBuff)) != -1) {
                 out.write(byteBuff, 0, bytesRead);
             }
-            if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
+            if (AsicManifest.XML_PATH.equals(entryName)) {
+                InMemoryDocument manifestFile = new InMemoryDocument(out.toByteArray());
+                ManifestParser manifestParser = new ManifestParser(manifestFile);
+                manifest = manifestParser.getManifestFileItems();
+            } else if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
                 signatures.add(createSignatureWrapper(out.toByteArray()));
             } else if (entryName.startsWith(HashcodesDataFile.HASHCODES_PREFIX)) {
                 HashcodesDataFileParser parser = new HashcodesDataFileParser(out.toByteArray());
@@ -133,6 +143,19 @@ public class HashcodeContainer {
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
         return signatureWrapper;
+    }
+
+    private void addMimeTypes() {
+        if (manifest == null) {
+            return;
+        }
+        dataFiles.forEach(dataFile ->
+                manifest.forEach((s, manifestEntry) -> {
+                    if (dataFile.getFileName().equals(manifestEntry.getFileName())) {
+                        dataFile.setMimeType(manifestEntry.getMimeType());
+                    }
+                }));
+
     }
 
     private void addDataFileEntries(Map<String, HashcodesEntry> entries, String entryName) {
