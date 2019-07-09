@@ -1,7 +1,6 @@
 package ee.openeid.siga.common.event;
 
 import ch.qos.logback.classic.Level;
-import ee.openeid.siga.common.auth.SigaUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -54,10 +53,8 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
                 startSearch = true;
                 continue;
             }
-            if (startSearch) {
-                if (predicate.test(e)) {
-                    return Optional.of(e);
-                }
+            if (startSearch && predicate.test(e)) {
+                return Optional.of(e);
             }
             if (e.getEventName().equals(afterEvent.getEventName())) {
                 break;
@@ -175,17 +172,7 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
     public void logEvents() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            SigaUserDetails sud = (SigaUserDetails) authentication.getPrincipal();
-            final String clientName = sud.getClientName();
-            final String clientUuid = sud.getClientUuid();
-            final String serviceName = sud.getServiceName();
-            final String serviceUuid = sud.getServiceUuid();
-            events.stream().peek(e -> {
-                e.setClientName(clientName);
-                e.setClientUuid(clientUuid);
-                e.setServiceName(serviceName);
-                e.setServiceUuid(serviceUuid);
-            }).forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
+            events.forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
         } else {
             if (!events.isEmpty()) {
                 final String serviceUuid = events.get(0).getServiceUuid();

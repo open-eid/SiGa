@@ -16,6 +16,10 @@ import java.util.List;
 
 public class RequestValidator {
 
+    private RequestValidator() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private final static String INVALID_DATA_FILE_NAME = "Data file name is invalid";
 
     public static void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {

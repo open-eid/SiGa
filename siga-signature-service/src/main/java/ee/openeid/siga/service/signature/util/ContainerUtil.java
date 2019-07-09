@@ -12,6 +12,10 @@ import java.util.Map;
 
 public class ContainerUtil {
 
+    private ContainerUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static void addSignatureDataFilesEntries(HashcodeSignatureWrapper wrapper, Map<String, String> dataFiles) {
         dataFiles.forEach((fileName, fileHashAlgo) -> {
             SignatureHashcodeDataFile hashcodeDataFile = new SignatureHashcodeDataFile();

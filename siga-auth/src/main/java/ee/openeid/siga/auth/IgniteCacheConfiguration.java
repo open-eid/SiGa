@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class IgniteCacheConfiguration extends CachingConfigurerSupport {
 
     @Bean
+    @Override
     public CacheManager cacheManager() {
         final SpringCacheManager springCacheManager = new SpringCacheManager();
         springCacheManager.setIgniteInstanceName("siga-ignite");

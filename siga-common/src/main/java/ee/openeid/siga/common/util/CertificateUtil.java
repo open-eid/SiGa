@@ -8,6 +8,10 @@ import java.security.cert.X509Certificate;
 
 public class CertificateUtil {
 
+    private CertificateUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static X509Certificate createX509Certificate(byte[] certificate) {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X509");

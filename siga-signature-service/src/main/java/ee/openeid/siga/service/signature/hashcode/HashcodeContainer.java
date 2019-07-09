@@ -136,12 +136,12 @@ public class HashcodeContainer {
     private HashcodeSignatureWrapper createSignatureWrapper(byte[] signature) {
 
         SignatureDataFilesParser parser = new SignatureDataFilesParser(signature);
-        Map<String, String> dataFiles = parser.getEntries();
+        Map<String, String> dataFileEntries = parser.getEntries();
 
         HashcodeSignatureWrapper signatureWrapper = new HashcodeSignatureWrapper();
         signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());
         signatureWrapper.setSignature(signature);
-        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFiles);
+        ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFileEntries);
         return signatureWrapper;
     }
 

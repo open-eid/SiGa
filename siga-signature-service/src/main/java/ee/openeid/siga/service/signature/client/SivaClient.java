@@ -104,9 +104,7 @@ public class SivaClient {
         for (SignatureHashcodeDataFile signatureDataFile : signatureDataFiles) {
             if (signatureDataFile.getFileName().equals(dataFile.getFileName())) {
                 String hashAlgorithm = signatureDataFile.getHashAlgo();
-                if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {
-                    return hashAlgorithm;
-                } else if (DigestAlgorithm.SHA512.name().equals(hashAlgorithm)) {
+                if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm) || DigestAlgorithm.SHA512.name().equals(hashAlgorithm)) {
                     return hashAlgorithm;
                 }
             }
@@ -130,7 +128,7 @@ public class SivaClient {
 
     @Autowired
     public void setHashcodeContainerService(HashcodeContainerService
-                                                            hashcodeContainerService) {
+                                                    hashcodeContainerService) {
         this.hashcodeContainerService = hashcodeContainerService;
     }
 }

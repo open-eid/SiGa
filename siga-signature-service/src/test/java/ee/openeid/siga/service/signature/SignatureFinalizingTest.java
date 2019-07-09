@@ -92,7 +92,7 @@ public class SignatureFinalizingTest {
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
 
-    @Ignore
+
     @Test
     public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
@@ -103,7 +103,7 @@ public class SignatureFinalizingTest {
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
 
-    @Ignore
+
     @Test
     public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
@@ -248,7 +248,7 @@ public class SignatureFinalizingTest {
      *
      * @see <a href="https://jira.ria.ee/browse/DD4J-416">Jira task DD4J-416</a>
      */
-    @Ignore
+
     @Test
     public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);

@@ -34,21 +34,25 @@ public class SigaUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return active;
+        return isActive();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return active;
+        return isActive();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return active;
+        return isActive();
     }
 
     @Override
     public boolean isEnabled() {
+        return isActive();
+    }
+
+    private boolean isActive() {
         return active;
     }
 
