@@ -45,6 +45,11 @@
             <version>1.1</version>
         </dependency>
         <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.29</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
             <version>2.21.0</version>

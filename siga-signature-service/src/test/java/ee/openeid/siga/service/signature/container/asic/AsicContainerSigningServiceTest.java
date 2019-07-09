@@ -73,7 +73,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void noContainerInSession() throws IOException, URISyntaxException {
-        exceptionRule.expectMessage("container is marked @NonNull but is null");
+        exceptionRule.expectMessage("container is marked non-null but is null");
         AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
         sessionHolder.setContainer(null);
 
