@@ -212,7 +212,6 @@
             <xs:element minOccurs="0" name="ocspResponseCreationTime" type="xs:string"/>
             <xs:element minOccurs="0" name="timeStampCreationTime" type="xs:string"/>
             <xs:element minOccurs="0" name="trustedSigningTime" type="xs:string"/>
-            <xs:element name="signatureMethod" type="xs:string"/>
             <xs:element name="signingCertificate" type="xs:string"/>
             <xs:element name="claimedSigningTime" type="xs:string"/>
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
@@ -386,7 +385,6 @@
             <xs:element minOccurs="0" name="ocspResponseCreationTime" type="xs:string"/>
             <xs:element minOccurs="0" name="timeStampCreationTime" type="xs:string"/>
             <xs:element minOccurs="0" name="trustedSigningTime" type="xs:string"/>
-            <xs:element name="signatureMethod" type="xs:string"/>
             <xs:element name="signingCertificate" type="xs:string"/>
             <xs:element name="claimedSigningTime" type="xs:string"/>
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>

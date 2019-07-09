@@ -96,7 +96,8 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
         }
         byte[] digest = Base64.getDecoder().decode(hashcodeDataFile.getFileHashSha512().getBytes());
         DigestDataFile digestDataFile = new DigestDataFile(fileName, digestAlgorithm, digest);
-        digestDataFile.setMediaType(hashcodeDataFile.getMimeType());
+        if (hashcodeDataFile.getMimeType() != null)
+            digestDataFile.setMediaType(hashcodeDataFile.getMimeType());
         return digestDataFile;
     }
 
