@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HibernateStringEncryptorConfiguration {
-    public final static String HIBERNATE_STRING_ENCRYPTOR = "HIBERNATE_STRING_ENCRYPTOR";
+
+    public static final String HIBERNATE_STRING_ENCRYPTOR = "HIBERNATE_STRING_ENCRYPTOR";
 
     @Bean
     public HibernatePBEStringEncryptor hibernatePBEStringEncryptor(SecurityConfigurationProperties securityConfigurationProperties) {

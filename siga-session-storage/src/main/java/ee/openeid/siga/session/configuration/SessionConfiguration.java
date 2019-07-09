@@ -5,7 +5,6 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.session.CacheName;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.binary.BinaryObjectBuilder;
@@ -33,7 +32,7 @@ public class SessionConfiguration {
     private SessionConfigurationProperties sessionConfigurationProperties;
 
     @Bean(destroyMethod = "close")
-    public Ignite ignite() throws IgniteException {
+    public Ignite ignite() {
         Ignition.setClientMode(true);
         Ignite ignite = Ignition.start(sessionConfigurationProperties.getConfigurationLocation());
 

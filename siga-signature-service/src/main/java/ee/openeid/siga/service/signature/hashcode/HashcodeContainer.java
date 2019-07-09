@@ -72,7 +72,7 @@ public class HashcodeContainer {
     }
 
     public void addDataFile(HashcodeDataFile dataFile) {
-        if (signatures.size() > 0)
+        if (!signatures.isEmpty())
             throw new SignatureExistsException("Unable to add data file when signature exists");
         dataFiles.add(dataFile);
     }

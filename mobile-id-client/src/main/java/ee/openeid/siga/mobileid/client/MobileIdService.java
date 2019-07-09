@@ -47,8 +47,7 @@ public class MobileIdService extends WebServiceGatewaySupport {
         request.setHash(hash);
         request.setHashType(HashType.fromValue(hashType));
         try {
-            MobileSignHashResponse response = (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
-            return response;
+            return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (SoapFaultClientException e) {
             throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
         } catch (Exception e) {

@@ -19,7 +19,7 @@ public class SigaUserDetailsService implements UserDetailsService {
 
     @Cacheable(cacheNames = {"SIGA-AUTH-SERVICES"})
     @Override
-    public SigaUserDetails loadUserByUsername(String serviceUuid) throws UsernameNotFoundException {
+    public SigaUserDetails loadUserByUsername(String serviceUuid) {
         SigaService service = serviceRepository.findByUuid(serviceUuid)
                 .orElseThrow(() -> new UsernameNotFoundException("SigaService UUID not found"));
         return SigaUserDetails.builder()

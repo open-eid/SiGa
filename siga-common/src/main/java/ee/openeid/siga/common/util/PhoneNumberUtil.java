@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public class PhoneNumberUtil {
 
-    private PhoneNumberUtil phoneNumberUtil() {
+    private PhoneNumberUtil() {
         throw new IllegalStateException("Utility class");
     }
 

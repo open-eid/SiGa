@@ -192,6 +192,6 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() {
-        logObservers.forEach(p -> p.detatch());
+        logObservers.forEach(LogObserver::detatch);
     }
 }

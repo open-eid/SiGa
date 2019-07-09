@@ -224,15 +224,15 @@ public abstract class ContainerSigningService {
     private void logEndEvent(SigaEvent startEvent, Signature signature) {
         X509Cert tstCert = signature.getTimeStampTokenCertificate();
         if (tstCert != null) {
-            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.TSA_REQUEST.equals(e.getEventName())).ifPresent(e -> {
-                e.addEventParameter(ISSUING_CA, tstCert.issuerName());
-            });
+            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.TSA_REQUEST.equals(e.getEventName())).ifPresent(e ->
+                    e.addEventParameter(ISSUING_CA, tstCert.issuerName())
+            );
         }
         X509Cert ocspCert = signature.getOCSPCertificate();
         if (ocspCert != null) {
-            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.OCSP_REQUEST.equals(e.getEventName())).ifPresent(e -> {
-                e.addEventParameter(ISSUING_CA, ocspCert.issuerName());
-            });
+            sigaEventLogger.getLastMachingEvent(e -> SigaEventName.OCSP_REQUEST.equals(e.getEventName())).ifPresent(e ->
+                    e.addEventParameter(ISSUING_CA, ocspCert.issuerName())
+            );
         }
         SigaEvent endEvent = sigaEventLogger.logEndEventFor(startEvent);
         endEvent.addEventParameter(SIGNATURE_ID, signature.getId());

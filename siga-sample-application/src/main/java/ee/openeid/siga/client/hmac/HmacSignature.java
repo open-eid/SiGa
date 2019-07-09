@@ -23,7 +23,7 @@ import static java.time.Instant.ofEpochSecond;
 @Builder
 @ToString
 public class HmacSignature {
-    private final static String DELIMITER = ":";
+    private static final String DELIMITER = ":";
     @NonNull
     private final String macAlgorithm;
     private final String signature;

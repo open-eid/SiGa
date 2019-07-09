@@ -27,23 +27,20 @@ import java.time.Duration;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.AUTHENTICATION_ERROR;
-import static java.lang.Long.parseLong;
 import static java.time.Instant.ofEpochMilli;
-import static java.time.Instant.ofEpochSecond;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.io.IOUtils.toByteArray;
-import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    private final Long TOKEN_EXPIRATION_IN_SECONDS;
-    private final Long TOKEN_CLOCK_SKEW;
+    private final Long tokenExpirationInSeconds;
+    private final Long tokenClockSkew;
     private final SigaEventLogger sigaEventLogger;
 
     public HmacAuthenticationFilter(SigaEventLogger sigaEventLogger, RequestMatcher requestMatcher, SecurityConfigurationProperties securityConfigurationProperties) {
         super(requestMatcher);
-        TOKEN_EXPIRATION_IN_SECONDS = securityConfigurationProperties.getHmac().getExpiration();
-        TOKEN_CLOCK_SKEW = securityConfigurationProperties.getHmac().getClockSkew();
+        tokenExpirationInSeconds = securityConfigurationProperties.getHmac().getExpiration();
+        tokenClockSkew = securityConfigurationProperties.getHmac().getClockSkew();
         this.sigaEventLogger = sigaEventLogger;
         setAuthenticationSuccessHandler(noRedirectAuthenticationSuccessHandler());
     }
@@ -91,8 +88,8 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     private void checkIfTokenIsExpired(String timestamp) {
-        if (TOKEN_EXPIRATION_IN_SECONDS != -1) {
-            HmacSignature.validateTimestamp(timestamp, TOKEN_EXPIRATION_IN_SECONDS, TOKEN_CLOCK_SKEW);
+        if (tokenExpirationInSeconds != -1) {
+            HmacSignature.validateTimestamp(timestamp, tokenExpirationInSeconds, tokenClockSkew);
         }
     }
 

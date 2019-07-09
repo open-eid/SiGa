@@ -34,7 +34,7 @@ class LogObserver extends AppenderBase<ILoggingEvent> {
 
     @Builder(buildMethodName = "buildForSkDataLoader")
     public static LogObserver buildForSkDataLoader(final SigaEventLogger sigaEventLogger, Level level) {
-        Consumer<ILoggingEvent> eventConsumer = (loggingEvent) -> {
+        Consumer<ILoggingEvent> eventConsumer = loggingEvent -> {
             String message = loggingEvent.getFormattedMessage();
             String errorUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "<", ">");
             if (message.contains("Getting OCSP response from")) {

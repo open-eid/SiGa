@@ -129,7 +129,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     }
 
     private void validateIfSessionMutable(HashcodeContainerSessionHolder session) {
-        if (session.getSignatures().size() != 0) {
+        if (!session.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
         }
     }

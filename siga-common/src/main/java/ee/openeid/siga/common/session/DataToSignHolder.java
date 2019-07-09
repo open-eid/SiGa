@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;
 import org.apache.ignite.binary.Binarylizable;
@@ -21,7 +20,7 @@ public class DataToSignHolder implements Binarylizable {
 
     @Override
     @SneakyThrows
-    public void writeBinary(BinaryWriter writer) throws BinaryObjectException {
+    public void writeBinary(BinaryWriter writer) {
         writer.writeString("sessionCode", sessionCode);
         writer.writeByteArray("dataToSignSerialized", SerializationUtils.serialize(dataToSign));
         writer.writeObject("signingType", signingType);
@@ -29,7 +28,7 @@ public class DataToSignHolder implements Binarylizable {
 
     @Override
     @SneakyThrows
-    public void readBinary(BinaryReader reader) throws BinaryObjectException {
+    public void readBinary(BinaryReader reader) {
         sessionCode = reader.readString("sessionCode");
         dataToSign = SerializationUtils.deserialize(reader.readByteArray("dataToSignSerialized"));
         signingType = reader.readObject("signingType");

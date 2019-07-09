@@ -102,7 +102,7 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
     }
 
     private void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {
-        if (sessionHolder.getDataFiles().size() < 1) {
+        if (sessionHolder.getDataFiles().isEmpty()) {
             throw new InvalidSessionDataException("Unable to create signature. Data files must be added to container");
         }
     }

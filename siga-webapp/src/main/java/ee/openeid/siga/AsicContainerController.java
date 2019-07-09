@@ -223,10 +223,10 @@ public class AsicContainerController {
     @PostMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerDataFileResponse addContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerDataFileRequest containerDataFileRequest) {
         RequestValidator.validateContainerId(containerId);
-        DataFile DataFile = containerDataFileRequest.getDataFile();
-        RequestValidator.validateDataFile(DataFile);
+        DataFile dataFile = containerDataFileRequest.getDataFile();
+        RequestValidator.validateDataFile(dataFile);
 
-        ee.openeid.siga.common.DataFile dataFileForApplication = RequestTransformer.transformDataFilesForApplication(Collections.singletonList(DataFile)).get(0);
+        ee.openeid.siga.common.DataFile dataFileForApplication = RequestTransformer.transformDataFilesForApplication(Collections.singletonList(dataFile)).get(0);
         Result result = containerService.addDataFile(containerId, dataFileForApplication);
         CreateContainerDataFileResponse response = new CreateContainerDataFileResponse();
         response.setResult(result.name());

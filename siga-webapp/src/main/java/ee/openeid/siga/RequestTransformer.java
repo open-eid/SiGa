@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-class RequestTransformer {
+public class RequestTransformer {
+
+    private RequestTransformer() {
+        throw new IllegalStateException("Utility class");
+    }
 
     static List<ee.openeid.siga.common.HashcodeDataFile> transformHashcodeDataFilesForApplication(List<ee.openeid.siga.webapp.json.HashcodeDataFile> requestHashcodeDataFiles) {
         List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();

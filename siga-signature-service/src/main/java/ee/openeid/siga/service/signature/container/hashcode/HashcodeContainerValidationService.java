@@ -38,7 +38,7 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     }
 
     private void validateContainerSignatures(List<HashcodeSignatureWrapper> signatureWrappers) {
-        if (signatureWrappers == null || signatureWrappers.size() == 0)
+        if (signatureWrappers == null || signatureWrappers.isEmpty())
             throw new InvalidContainerException("Missing signatures");
     }
 

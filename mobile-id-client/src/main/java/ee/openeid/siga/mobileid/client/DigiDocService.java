@@ -35,8 +35,7 @@ public class DigiDocService extends WebServiceGatewaySupport {
         request.setPhoneNo(phoneNr);
         request.setReturnCertData(ReturnCertDataType.SIGN);
         try {
-            GetMobileCertificateResponse response = (GetMobileCertificateResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
-            return response;
+            return (GetMobileCertificateResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (SoapFaultClientException e) {
             throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
         } catch (Exception e) {
