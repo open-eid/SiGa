@@ -58,7 +58,7 @@ public abstract class ContainerSigningServiceTest {
         getSigningService().createDataToSign("random-container-id", createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
     }
 
-    protected void onlyRequiredSignatureParameters() {
+    protected void assertOnlyRequiredSignatureParameters() {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         signatureParameters.setCountry(null);
         signatureParameters.setRoles(null);
@@ -70,7 +70,7 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
     }
 
-    protected void signAndValidateSignature() {
+    protected void assertSignAndValidateSignature() {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         signatureParameters.setDigestAlgorithm(DigestAlgorithm.SHA512);
@@ -85,7 +85,7 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertTrue(signature.validateSignature().isValid());
     }
 
-    protected void finalizeAndValidateSignature() throws IOException, URISyntaxException {
+    protected void assertFinalizeAndValidateSignature() throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
@@ -119,7 +119,7 @@ public abstract class ContainerSigningServiceTest {
         }
     }
 
-    protected void successfulMobileIdSigning() throws IOException {
+    protected void assertSuccessfulMobileIdSigning() throws IOException {
         GetMobileCertificateResponse mobileCertificateResponse = createMobileCertificateResponse();
         Mockito.when(digiDocService.getMobileCertificate(any(), any())).thenReturn(mobileCertificateResponse);
         Mockito.when(mobileIdService.initMobileSignHash(any(), any(), any())).thenReturn(createMobileSignHashResponse());
@@ -139,7 +139,7 @@ public abstract class ContainerSigningServiceTest {
         getSigningService().startMobileIdSigning(CONTAINER_ID, mobileIdInformation, signatureParameters);
     }
 
-    protected void successfulMobileIdSignatureProcessing() throws IOException, URISyntaxException {
+    protected void assertSuccessfulMobileIdSignatureProcessing() throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
@@ -156,7 +156,7 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertEquals("SIGNATURE", status);
     }
 
-    protected void successfulSmartIdSigning() {
+    protected void assertSuccessfulSmartIdSigning() {
         Mockito.when(smartIdProperties.getUrl()).thenReturn("https://sid.demo.sk.ee/smart-id-rp/v1/");
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
@@ -165,7 +165,7 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());
     }
 
-    protected void successfulSmartIdSignatureProcessing(SessionService sessionService) throws IOException, URISyntaxException {
+    protected void assertSuccessfulSmartIdSignatureProcessing(SessionService sessionService) throws IOException, URISyntaxException {
         Session sessionHolder = getSessionHolder();
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 

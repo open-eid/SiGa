@@ -5,15 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SigaHealthIndicator implements HealthIndicator {
 
     private SessionService sessionService;
-
-    private JdbcTemplate template;
 
     @Override
     public Health health() {
@@ -55,8 +52,4 @@ public class SigaHealthIndicator implements HealthIndicator {
         this.sessionService = sessionService;
     }
 
-    @Autowired
-    public void setTemplate(JdbcTemplate template) {
-        this.template = template;
-    }
 }

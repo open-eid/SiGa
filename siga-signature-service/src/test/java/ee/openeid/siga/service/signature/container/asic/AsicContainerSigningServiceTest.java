@@ -83,17 +83,17 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void onlyRequiredSignatureParametersTest() {
-        onlyRequiredSignatureParameters();
+        assertOnlyRequiredSignatureParameters();
     }
 
     @Test
     public void signAndValidateSignatureTest() {
-        signAndValidateSignature();
+        assertSignAndValidateSignature();
     }
 
     @Test
     public void finalizeAndValidateSignatureTest() throws IOException, URISyntaxException {
-        finalizeAndValidateSignature();
+        assertFinalizeAndValidateSignature();
     }
 
     @Test
@@ -112,7 +112,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void successfulMobileIdSigningTest() throws IOException {
-        successfulMobileIdSigning();
+        assertSuccessfulMobileIdSigning();
     }
 
     @Test
@@ -124,7 +124,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
-        successfulMobileIdSignatureProcessing();
+        assertSuccessfulMobileIdSignatureProcessing();
     }
 
     @Test
@@ -136,12 +136,12 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void successfulSmartIdSignatureTest() throws IOException {
-        successfulSmartIdSigning();
+        assertSuccessfulSmartIdSigning();
     }
 
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
-        successfulSmartIdSignatureProcessing(sessionService);
+        assertSuccessfulSmartIdSignatureProcessing(sessionService);
     }
 
 

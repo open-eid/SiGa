@@ -16,6 +16,8 @@ import java.util.List;
 
 public class RequestValidator {
 
+    private final static String INVALID_DATA_FILE_NAME = "Data file name is invalid";
+
     public static void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
         if (CollectionUtils.isEmpty(dataFiles)) {
             throw new RequestValidationException("Must be at least one data file in request");
@@ -53,18 +55,18 @@ public class RequestValidator {
     }
 
     public static void validateFileName(String fileName) {
-        validateFileName(fileName, "Data file name is invalid");
+        validateFileName(fileName, INVALID_DATA_FILE_NAME);
     }
 
     public static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
-        validateFileName(dataFile.getFileName(), "Data file name is invalid");
+        validateFileName(dataFile.getFileName(), INVALID_DATA_FILE_NAME);
         validateFileSize(dataFile.getFileSize());
         validateHashSha256(dataFile.getFileHashSha256());
         validateHashSha512(dataFile.getFileHashSha512());
     }
 
     public static void validateDataFile(DataFile dataFile) {
-        validateFileName(dataFile.getFileName(), "Data file name is invalid");
+        validateFileName(dataFile.getFileName(), INVALID_DATA_FILE_NAME);
         validateHash(dataFile.getFileContent());
     }
 
