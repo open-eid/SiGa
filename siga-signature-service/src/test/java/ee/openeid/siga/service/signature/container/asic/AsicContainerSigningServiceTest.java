@@ -61,7 +61,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void createDataToSignSuccessfulTest() {
-        createDataToSignSuccessful();
+        assertCreateDataToSignSuccessful();
     }
 
     @Test

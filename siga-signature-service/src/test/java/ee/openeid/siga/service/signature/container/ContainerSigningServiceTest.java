@@ -48,7 +48,7 @@ public abstract class ContainerSigningServiceTest {
 
     protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
-    protected void createDataToSignSuccessful() {
+    protected void assertCreateDataToSignSuccessful() {
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate())).getDataToSign();
         Assert.assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
         Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));

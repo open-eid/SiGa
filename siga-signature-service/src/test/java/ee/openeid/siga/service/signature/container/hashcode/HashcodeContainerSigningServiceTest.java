@@ -60,7 +60,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Test
     public void createDataToSignSuccessfulTest() {
-        createDataToSignSuccessful();
+        assertCreateDataToSignSuccessful();
     }
 
     @Test
