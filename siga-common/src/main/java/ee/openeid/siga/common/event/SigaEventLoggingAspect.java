@@ -76,21 +76,21 @@ public class SigaEventLoggingAspect {
                 startEvent.addEventParameter(name, arg.toString());
                 endEvent.addEventParameter(name, arg.toString());
             });
-            actOnEventCreation(logMethodExecutionParameters, i, startEvent, endEvent, arg);
+            if (logMethodExecutionParameters.length != 0) {
+                actOnEventCreation(logMethodExecutionParameters, i, startEvent, endEvent, arg);
+            }
         }
     }
 
     private void actOnEventCreation(Param[] logMethodExecutionParameters, int i, SigaEvent startEvent, SigaEvent endEvent, Object arg) {
-        if (logMethodExecutionParameters.length != 0) {
-            for (Param param : logMethodExecutionParameters) {
-                if (param.index() == i) {
-                    boolean parameterIsPrimitiveType = param.fields().length == 0;
-                    if (parameterIsPrimitiveType) {
-                        String parameterName = isBlank(param.name()) ? "parameter_" + i : param.name();
-                        startEvent.addEventParameter(parameterName, arg.toString());
-                    } else {
-                        logObject(param.fields(), arg, startEvent, endEvent);
-                    }
+        for (Param param : logMethodExecutionParameters) {
+            if (param.index() == i) {
+                boolean parameterIsPrimitiveType = param.fields().length == 0;
+                if (parameterIsPrimitiveType) {
+                    String parameterName = isBlank(param.name()) ? "parameter_" + i : param.name();
+                    startEvent.addEventParameter(parameterName, arg.toString());
+                } else {
+                    logObject(param.fields(), arg, startEvent, endEvent);
                 }
             }
         }

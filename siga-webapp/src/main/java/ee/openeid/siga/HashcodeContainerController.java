@@ -18,11 +18,7 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Base64;
 import java.util.Collections;
@@ -36,7 +32,7 @@ public class HashcodeContainerController {
     private HashcodeContainerSigningService signingService;
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
-    @RequestMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerResponse createContainer(@RequestBody CreateHashcodeContainerRequest createContainerRequest) {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
         RequestValidator.validateHashcodeDataFiles(dataFiles);
@@ -48,7 +44,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_UPLOAD_CONTAINER, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
-    @RequestMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
     public UploadHashcodeContainerResponse uploadContainer(@RequestBody UploadHashcodeContainerRequest uploadContainerRequest) {
         String container = uploadContainerRequest.getContainer();
         RequestValidator.validateFileContent(container);
@@ -60,7 +56,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_VALIDATE_CONTAINER)
-    @RequestMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerValidationReportResponse validateContainer(@RequestBody CreateHashcodeContainerValidationReportRequest validationReportRequest) {
         String container = validationReportRequest.getContainer();
         RequestValidator.validateFileContent(container);
@@ -72,7 +68,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_VALIDATE_CONTAINER_BY_ID)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -83,7 +79,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_INIT, logParameters = {@Param(index = 1, fields = {@XPath(name = "signature_profile", xpath = "signatureProfile")})})
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
@@ -106,7 +102,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_FINISH)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
+    @PutMapping(value = "/hashcodecontainers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -118,7 +114,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_INIT)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
@@ -141,7 +137,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_STATUS)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -153,7 +149,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_INIT)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerSmartIdSigningResponse createHashcodeContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerSmartIdSigningRequest createSmartIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
@@ -175,7 +171,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_STATUS)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerSmartIdSigningStatusResponse getSmartSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -188,7 +184,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURES_LIST)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -199,7 +195,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURE)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -208,7 +204,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_DATAFILES_LIST)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -219,7 +215,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_ADD_DATAFILE)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerDataFileResponse addHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerDataFileRequest containerDataFileRequest) {
         RequestValidator.validateContainerId(containerId);
         HashcodeDataFile hashcodeDataFile = containerDataFileRequest.getDataFile();
@@ -233,7 +229,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_DELETE_DATAFILE)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/hashcodecontainers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteHashcodeContainerDataFileResponse deleteHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "datafileName") String datafileName) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateFileName(datafileName);
@@ -246,7 +242,7 @@ public class HashcodeContainerController {
 
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -257,7 +253,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_DELETE_CONTAINER)
-    @RequestMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);

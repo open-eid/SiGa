@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,7 +48,7 @@ public class MainController {
         return START_PAGE_VIEW_NAME;
     }
 
-    @RequestMapping(value = "/convert-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/convert-container", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public HashcodeContainerWrapper convertContainerToHashcodeContainer(MultipartHttpServletRequest request) throws IOException {
         Map<String, MultipartFile> fileMap = request.getFileMap();
@@ -61,7 +62,7 @@ public class MainController {
         return containerService.cacheHashcodeContainer(id, file.getOriginalFilename(), hashcodeContainer);
     }
 
-    @RequestMapping(value = "/create-hashcode-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create-hashcode-container", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     @SneakyThrows
     public HashcodeContainerWrapper createHashcodeContainerFromFiles(MultipartHttpServletRequest request) {
@@ -70,7 +71,7 @@ public class MainController {
         return sigaApiClientService.createHashcodeContainer(fileMap.values());
     }
 
-    @RequestMapping(value = "/create-container", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create-container", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     @SneakyThrows
     public AsicContainerWrapper createContainerFromFiles(MultipartHttpServletRequest request) {
@@ -114,7 +115,7 @@ public class MainController {
                 .body(container);
     }
 
-    @RequestMapping(value = "/mobile-signing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/mobile-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public MobileSigningRequest startMobileSigning(@RequestBody MobileSigningRequest request) {
         log.info("Mobile signing request: {}", request);

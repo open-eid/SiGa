@@ -19,11 +19,7 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Base64;
 import java.util.Collections;
@@ -37,7 +33,7 @@ public class AsicContainerController {
     private AsicContainerSigningService signingService;
 
     @SigaEventLog(eventName = SigaEventName.CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
-    @RequestMapping(value = "/containers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerResponse createContainer(@RequestBody CreateContainerRequest createContainerRequest) {
         List<DataFile> dataFiles = createContainerRequest.getDataFiles();
         String containerName = createContainerRequest.getContainerName();
@@ -51,7 +47,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.UPLOAD_CONTAINER, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
-    @RequestMapping(value = "/upload/containers", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/upload/containers", produces = MediaType.APPLICATION_JSON_VALUE)
     public UploadContainerResponse uploadContainer(@RequestBody UploadContainerRequest uploadContainerRequest) {
         String container = uploadContainerRequest.getContainer();
         String containerName = uploadContainerRequest.getContainerName();
@@ -64,7 +60,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.VALIDATE_CONTAINER)
-    @RequestMapping(value = "/containers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerValidationReportResponse validateContainer(@RequestBody CreateContainerValidationReportRequest validationReportRequest) {
         String container = validationReportRequest.getContainer();
         String containerName = validationReportRequest.getContainerName();
@@ -78,7 +74,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.VALIDATE_CONTAINER_BY_ID)
-    @RequestMapping(value = "/containers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -90,7 +86,7 @@ public class AsicContainerController {
 
 
     @SigaEventLog(eventName = SigaEventName.REMOTE_SIGNING_INIT, logParameters = {@Param(index = 1, fields = {@XPath(name = "signature_profile", xpath = "signatureProfile")})})
-    @RequestMapping(value = "/containers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerRemoteSigningRequest createRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
@@ -111,7 +107,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.REMOTE_SIGNING_FINISH)
-    @RequestMapping(value = "/containers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.PUT)
+    @PutMapping(value = "/containers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UpdateContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateContainerRemoteSigningRequest updateRemoteSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -124,7 +120,7 @@ public class AsicContainerController {
 
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
-    @RequestMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
@@ -146,7 +142,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_STATUS)
-    @RequestMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -158,7 +154,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_INIT)
-    @RequestMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerSmartIdSigningResponse createContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerSmartIdSigningRequest createSmartIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
@@ -180,7 +176,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_STATUS)
-    @RequestMapping(value = "/containers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSmartIdSigningStatusResponse getSmartSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -193,7 +189,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_SIGNATURES_LIST)
-    @RequestMapping(value = "/containers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -204,7 +200,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_SIGNATURE)
-    @RequestMapping(value = "/containers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
@@ -213,7 +209,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_DATAFILES_LIST)
-    @RequestMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -224,7 +220,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.ADD_DATAFILE)
-    @RequestMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @PostMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerDataFileResponse addContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerDataFileRequest containerDataFileRequest) {
         RequestValidator.validateContainerId(containerId);
         DataFile DataFile = containerDataFileRequest.getDataFile();
@@ -238,7 +234,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.DELETE_DATAFILE)
-    @RequestMapping(value = "/containers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/containers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteContainerDataFileResponse deleteContainerDataFile(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "datafileName") String datafileName) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateFileName(datafileName);
@@ -250,7 +246,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_CONTAINER)
-    @RequestMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @GetMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
@@ -262,7 +258,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.DELETE_CONTAINER)
-    @RequestMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
         String result = containerService.closeSession(containerId);
