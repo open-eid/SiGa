@@ -39,7 +39,7 @@ public class RequestBuilder {
         JSONObject request = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
 
-        File file = new File(classLoader.getResource(containerName).getFile());
+        File file = new File(classLoader.getResource("hashcode/" + containerName).getFile());
 
         String fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
         request.put("container", fileBase64);

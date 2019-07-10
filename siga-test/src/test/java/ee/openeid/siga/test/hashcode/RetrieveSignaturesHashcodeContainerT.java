@@ -1,4 +1,4 @@
-package ee.openeid.siga.test;
+package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
