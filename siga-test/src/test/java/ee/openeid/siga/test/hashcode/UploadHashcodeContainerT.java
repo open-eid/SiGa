@@ -10,8 +10,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class UploadHashcodeContainerT extends TestBase {
 
@@ -25,7 +26,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerShouldReturnContainerId() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response response = postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         response.then()
                 .statusCode(200)
                 .body(CONTAINER_ID + ".length()", equalTo(36));
@@ -33,19 +34,19 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerWithoutSha256hashes() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha256File.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha256File.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadHashcodeContainerWithoutSha512hashes() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadHashcodeContainerWithoutSignatures() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         response.then()
                 .statusCode(200)
@@ -54,20 +55,20 @@ public class UploadHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerWithDatafilesInFolder() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadHashcodeContainerWithoutDatafiles() throws Exception {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutDataFiles.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutDataFiles.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadHashcodeContainerEmptyBody() throws Exception {
         JSONObject request = new JSONObject();
-        Response response = postUploadHashcodeContainer(flow, request);
+        Response response = postUploadContainer(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -76,7 +77,7 @@ public class UploadHashcodeContainerT extends TestBase {
         JSONObject request = new JSONObject();
         request.put("container", "");
 
-        Response response = postUploadHashcodeContainer(flow, request);
+        Response response = postUploadContainer(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -85,7 +86,7 @@ public class UploadHashcodeContainerT extends TestBase {
         JSONObject request = new JSONObject();
         request.put("container", "-32/432+*");
 
-        Response response = postUploadHashcodeContainer(flow, request);
+        Response response = postUploadContainer(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -94,7 +95,7 @@ public class UploadHashcodeContainerT extends TestBase {
         JSONObject request = new JSONObject();
         request.put("container", Base64.encodeBase64String("random string".getBytes()));
 
-        Response response = postUploadHashcodeContainer(flow, request);
+        Response response = postUploadContainer(flow, request);
         expectError(response, 400, INVALID_CONTAINER);
     }
 
@@ -124,7 +125,7 @@ public class UploadHashcodeContainerT extends TestBase {
                 .statusCode(405);
     }
 
-    @Ignore ("SIGARIA-67")
+    @Ignore("SIGARIA-67")
     @Test
     public void optionsToUploadHashcodeContainer() throws Exception {
         Response response = options(UPLOAD + HASHCODE_CONTAINERS, flow);
@@ -135,5 +136,10 @@ public class UploadHashcodeContainerT extends TestBase {
     public void patchToUploadHashcodeContainer() throws Exception {
         Response response = patch(UPLOAD + HASHCODE_CONTAINERS, flow);
         expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

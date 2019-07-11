@@ -9,6 +9,7 @@ import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
 import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
@@ -26,11 +27,11 @@ public class SignatureCorrectnessT extends TestBase {
 
     @Test
     public void signatureValuesAreCorrectForRemoteSigning() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(getHashcodeContainer(flow).getBody().path("container")));
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequest(getContainer(flow).getBody().path("container")));
 
         response.then()
                 .statusCode(200)
@@ -46,12 +47,12 @@ public class SignatureCorrectnessT extends TestBase {
 
     @Test
     public void signatureValuesAreCorrectForMidSigning() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT_TM"));
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT_TM"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
 
-        response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(getHashcodeContainer(flow).getBody().path("container")));
+        response = postContainerValidationReport(flow, hashcodeContainerRequest(getContainer(flow).getBody().path("container")));
 
         response.then()
                 .statusCode(200)
@@ -67,12 +68,17 @@ public class SignatureCorrectnessT extends TestBase {
 
     @Test
     public void signatureWithLtaProfileSucceeds() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LTA")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LTA")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         response.then()
                 .statusCode(200)
                 .body("result", equalTo(Result.OK.name()));
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

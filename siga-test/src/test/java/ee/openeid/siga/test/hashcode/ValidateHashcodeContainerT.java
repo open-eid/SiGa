@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -28,8 +27,8 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHascodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void validateHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
@@ -40,16 +39,16 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHascodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));
+    public void validateHashcodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo("CLIENT_EXCEPTION"));
         assertThat(response.getBody().path(ERROR_MESSAGE), equalTo("Unable to validate container! Container contains signature with unsupported signature profile: LTA"));
     }
 
     @Test
-    public void uploadHashcodeContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void uploadHashcodeContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
@@ -61,10 +60,10 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerSignRemotlyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+    public void createHashcodeContainerSignRemotelyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
         assertThat(validationResponse.statusCode(), equalTo(200));
@@ -79,15 +78,19 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndValidateContainerStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
-        Response containerResponse = getHashcodeContainer(flow);
+    public void createHashcodeContainerAndValidateContainerStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        Response containerResponse = getContainer(flow);
 
-        Response validationResponse = postHashcodeContainerValidationReport(flow, hashcodeContainerRequest(containerResponse.getBody().path("container")));
+        Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequest(containerResponse.getBody().path("container")));
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
     }
 
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
+    }
 }

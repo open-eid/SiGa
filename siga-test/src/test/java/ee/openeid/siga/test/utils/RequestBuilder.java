@@ -22,6 +22,25 @@ public class RequestBuilder {
         return hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
     }
 
+    public static JSONObject asicContainersDataRequestWithDefault() throws JSONException {
+        return asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, DEFAULT_CONTAINER_NAME);
+    }
+
+    public static JSONObject asicContainersDataRequest(String fileName, String fileContent, String containerName) throws JSONException {
+        JSONArray datafiles = new JSONArray();
+        JSONObject dataFileObject = new JSONObject();
+        JSONObject request = new JSONObject();
+        if (fileName != null)
+            dataFileObject.put("fileName", fileName);
+        if (fileContent != null)
+            dataFileObject.put("fileContent", fileContent);
+        datafiles.put(dataFileObject);
+        if (containerName != null)
+            request.put("containerName", containerName);
+        request.put("dataFiles", datafiles);
+        return request;
+    }
+
     public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
@@ -46,17 +65,35 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeContainerRequest(String containerBase64) throws JSONException, IOException {
+    public static JSONObject asicContainerRequestFromFile(String containerName) throws JSONException, IOException {
+        JSONObject request = new JSONObject();
+        ClassLoader classLoader = RequestBuilder.class.getClassLoader();
+
+        File file = new File(classLoader.getResource("asic/" + containerName).getFile());
+        String fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
+        request.put("container", fileBase64);
+        request.put("containerName", containerName);
+        return request;
+    }
+
+    public static JSONObject hashcodeContainerRequest(String containerBase64) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("container", containerBase64);
         return request;
     }
 
-    public static JSONObject hashcodeRemoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
-        return hashcodeRemoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
+    public static JSONObject asicContainerRequest(String containerBase64, String containerName) throws JSONException {
+        JSONObject request = new JSONObject();
+        request.put("container", containerBase64);
+        request.put("containerName",containerName);
+        return request;
     }
 
-    public static JSONObject hashcodeRemoteSigningRequest(String signingCertificate, String signatureProfile, String roles, String city, String stateOrProvince, String postalCode, String country) throws JSONException {
+    public static JSONObject remoteSigningRequestWithDefault(String signingCertificate, String signatureProfile) throws JSONException {
+        return remoteSigningRequest(signingCertificate, signatureProfile, null, null, null, null, null);
+    }
+
+    public static JSONObject remoteSigningRequest(String signingCertificate, String signatureProfile, String roles, String city, String stateOrProvince, String postalCode, String country) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signingCertificate", signingCertificate);
         request.put("signatureProfile", signatureProfile);
@@ -74,17 +111,17 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeRemoteSigningSignatureValueRequest(String signatureValue) throws JSONException {
+    public static JSONObject remoteSigningSignatureValueRequest(String signatureValue) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("signatureValue", signatureValue);
         return request;
     }
 
-    public static JSONObject hashcodeMidSigningRequestWithDefault(String personIdentifier, String phoneNo, String signatureProfile) throws JSONException {
-        return hashcodeMidSigningRequest(personIdentifier, phoneNo, "EE", "EST", signatureProfile, "something", null, null, null, null, null);
+    public static JSONObject midSigningRequestWithDefault(String personIdentifier, String phoneNo, String signatureProfile) throws JSONException {
+        return midSigningRequest(personIdentifier, phoneNo, "EE", "EST", signatureProfile, "something", null, null, null, null, null);
     }
 
-    public static JSONObject hashcodeMidSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject midSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", personIdentifier);
         request.put("phoneNo", phoneNo);
@@ -108,11 +145,11 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeSmartIdSigningRequestWithDefault(String personIdentifier, String signatureProfile) throws JSONException {
-        return hashcodeSmartIdSigningRequest(personIdentifier, "EE", signatureProfile, "something", null, null, null, null, null);
+    public static JSONObject smartIdSigningRequestWithDefault(String personIdentifier, String signatureProfile) throws JSONException {
+        return smartIdSigningRequest(personIdentifier, "EE", signatureProfile, "something", null, null, null, null, null);
     }
 
-    public static JSONObject hashcodeSmartIdSigningRequest(String personIdentifier, String originCountry, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject smartIdSigningRequest(String personIdentifier, String originCountry, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", personIdentifier);
         request.put("country", originCountry);

@@ -25,7 +25,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.awaitility.Awaitility.with;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class TestBase {
+public abstract class TestBase {
 
     protected static Properties properties;
 
@@ -43,82 +43,82 @@ public class TestBase {
         RestAssured.filters(new AllureRestAssured());
     }
 
-    @Step("Create hashcode container")
-    protected Response postCreateHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS, flow, request.toString());
+    @Step("Create container")
+    protected Response postCreateContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint(), flow, request.toString());
     }
 
-    @Step("Upload hashcode container")
-    protected Response postUploadHashcodeContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(UPLOAD + HASHCODE_CONTAINERS, flow, request.toString());
+    @Step("Upload container")
+    protected Response postUploadContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(UPLOAD + getContainerEndpoint(), flow, request.toString());
     }
 
-    @Step("Validate hashcode container")
-    protected Response postHashcodeContainerValidationReport(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS + VALIDATIONREPORT, flow, request.toString());
+    @Step("Validate container")
+    protected Response postContainerValidationReport(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + VALIDATIONREPORT, flow, request.toString());
     }
 
-    @Step("Validate hashcode container in session")
+    @Step("Validate container in session")
     protected Response getValidationReportForContainerInSession(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
+        return get(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
     }
 
     @Step("Start remote signing")
-    protected Response postHashcodeRemoteSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, request.toString());
+    protected Response postRemoteSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, request.toString());
     }
 
     @Step("Finalize remote signing")
-    protected Response putHashcodeRemoteSigningInSession(SigaApiFlow flow, JSONObject request, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
-        return put(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + signatureId, flow, request.toString());
+    protected Response putRemoteSigningInSession(SigaApiFlow flow, JSONObject request, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        return put(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + signatureId, flow, request.toString());
     }
 
     @Step("Start MID signing")
-    protected Response postHashcodeMidSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING, flow, request.toString());
+    protected Response postMidSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow, request.toString());
     }
 
     @Step("Get MID signing status")
-    protected Response getHashcodeMidSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
-        Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
+    protected Response getMidSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
         flow.setMidStatus(response);
         return response;
     }
 
     @Step("Start Smart-ID signing")
-    protected Response postHashcodeSmartIdSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return post(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SMARTID_SIGNING, flow, request.toString());
+    protected Response postSmartIdSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING, flow, request.toString());
     }
 
     @Step("Get Smart-ID signing status")
-    protected Response getHashcodeSmartIdSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
-        Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
+    protected Response getSmartIdSigningInSession(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
         flow.setSidStatus(response);
         return response;
     }
 
     @Step("Get signature list")
-    protected Response getHashcodeSignatureList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES, flow);
+    protected Response getSignatureList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
     }
 
     @Step("Get signature info")
-    protected Response getHashcodeSignatureInfo(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + SIGNATURES + "/" + signatureId, flow);
+    protected Response getSignatureInfo(SigaApiFlow flow, String signatureId) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + signatureId, flow);
     }
 
     @Step("Get container")
-    protected Response getHashcodeContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
-        return get(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+    protected Response getContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
     }
 
     @Step("Delete container")
-    protected Response deleteHashcodeContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
-        return delete(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+    protected Response deleteContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return delete(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
     }
 
     @Step("Poll for MID signing response")
-    protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) throws NoSuchAlgorithmException, InvalidKeyException {
+    protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) {
         with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(16000, MILLISECONDS)
                 .await("MID signing result")
                 .until(isMidFinished(flow, signatureId));
@@ -129,13 +129,13 @@ public class TestBase {
     private Callable<Boolean> isMidFinished(SigaApiFlow flow, String signatureId) {
         return new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                return !"OUTSTANDING_TRANSACTION".equals(getHashcodeMidSigningInSession(flow, signatureId).getBody().path(MID_STATUS));
+                return !"OUTSTANDING_TRANSACTION".equals(getMidSigningInSession(flow, signatureId).getBody().path(MID_STATUS));
             }
         };
     }
 
     @Step("Poll for Smart-ID signing response")
-    protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) throws NoSuchAlgorithmException, InvalidKeyException {
+    protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) {
         with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(16000, MILLISECONDS)
                 .await("Smart-ID signing result")
                 .until(isSidFinished(flow, signatureId));
@@ -146,7 +146,7 @@ public class TestBase {
     private Callable<Boolean> isSidFinished(SigaApiFlow flow, String signatureId) {
         return new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                return !"RUNNING".equals(getHashcodeSmartIdSigningInSession(flow, signatureId).getBody().path(SMARTID_STATUS));
+                return !"RUNNING".equals(getSmartIdSigningInSession(flow, signatureId).getBody().path(SMARTID_STATUS));
             }
         };
     }
@@ -290,6 +290,8 @@ public class TestBase {
                 .extract()
                 .response();
     }
+
+    public abstract String getContainerEndpoint();
 
     protected void expectError(Response response, int code, String message) {
         response.then()

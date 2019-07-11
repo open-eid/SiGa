@@ -49,18 +49,18 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
     }
 
     private void remoteSigningFlowFor(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException, JSONException, IOException {
-        Response response = postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response response = postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         assertThat(response.statusCode(), equalTo(200));
         String containerId = response.getBody().path(CONTAINER_ID).toString();
         flow.setContainerId(containerId);
         assertThat(containerId.length(), equalTo(36));
         containerIds.add(containerId);
 
-        response = getHashcodeSignatureList(flow);
+        response = getSignatureList(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", response.getBody().path("signatures[0].id"));
 
-        Response dataToSign = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response dataToSign = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
         assertThat(dataToSign.statusCode(), equalTo(200));
         assertThat(dataToSign.getBody().path(DATA_TO_SIGN).toString().length(), greaterThanOrEqualTo(1500));
         assertThat(dataToSign.getBody().path(DIGEST_ALGO), equalTo("SHA512"));
@@ -68,7 +68,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
 
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = dataToSignResponses.get(flow.getContainerId()).as(CreateHashcodeContainerRemoteSigningResponse.class);
         assertNotNull(dataToSignResponse);
-        response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
 
@@ -76,7 +76,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(2));
 
-        response = deleteHashcodeContainer(flow);
+        response = deleteContainer(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
@@ -150,5 +150,10 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         QueryBuilder query = createQueryForSuccessEvent(HC_DELETE_CONTAINER);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
         checkSearchResponse(response);
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

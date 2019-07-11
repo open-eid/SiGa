@@ -26,9 +26,9 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerAndRetrieveIt() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -37,9 +37,9 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void createHashcodeContainerAndRetrieve() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -48,15 +48,15 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerTwice() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
                 .body(CONTAINER + ".length()", equalTo(1440));
 
-        response = getHashcodeContainer(flow);
+        response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -65,10 +65,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerBeforeSigning() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -77,11 +77,11 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerAfterSigning() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -90,10 +90,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerBeforeFinishingMidSigning() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -102,12 +102,12 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerDuringMidSigning() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-        getHashcodeMidSigningInSession(flow, signatureId);
+        getMidSigningInSession(flow, signatureId);
 
-        response = getHashcodeContainer(flow);
+        response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -116,12 +116,12 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerAfterMidSigning() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
 
-        response = getHashcodeContainer(flow);
+        response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -130,10 +130,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerAfterValidation() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getValidationReportForContainerInSession(flow);
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -142,10 +142,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerAfterRetrievingSignatures() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        getHashcodeSignatureList(flow);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        getSignatureList(flow);
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
@@ -154,26 +154,26 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void retrieveHashcodeContainerForOtherClientNotPossible() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
     public void deleteHashcodeContainerAndRetrieveIt() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        deleteHashcodeContainer(flow);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        deleteContainer(flow);
 
-        Response response = getHashcodeContainer(flow);
+        Response response = getContainer(flow);
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
     public void postToGetHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
         expectError(response, 405, INVALID_REQUEST);
@@ -181,7 +181,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void headToGetHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
 
@@ -192,7 +192,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     @Ignore ("SIGARIA-67")
     @Test
     public void optionsToGetHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
         expectError(response, 405, INVALID_REQUEST);
@@ -200,9 +200,14 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void patchToGetHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
         expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

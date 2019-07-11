@@ -28,9 +28,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void signContainerRemotely() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getValidationReportForContainerInSession(flow);
         response.then()
@@ -41,15 +41,15 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void signContainerRemotelyWithMultipleSignatures() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse2 = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse2 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
+        Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
 
         response.then().statusCode(200).body("result", equalTo(Result.OK.name()));
 
-        response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse2.getDataToSign(), dataToSignResponse2.getDigestAlgorithm())), dataToSignResponse2.getGeneratedSignatureId());
+        response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse2.getDataToSign(), dataToSignResponse2.getDigestAlgorithm())), dataToSignResponse2.getGeneratedSignatureId());
 
         response.then().statusCode(200).body("result", equalTo(Result.OK.name()));
 
@@ -63,9 +63,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerReturnsDigestToSign() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
         response.then()
                 .statusCode(200)
@@ -75,9 +75,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerWithAllParamsReturnsDigestToSign() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia"));
 
         response.then()
                 .statusCode(200)
@@ -87,9 +87,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerWithRoleReturnsDigestToSign() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
 
         response.then()
                 .statusCode(200)
@@ -99,9 +99,9 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerWithLocationReturnsDigestToSign() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn", null, null, null));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn", null, null, null));
 
         response.then()
                 .statusCode(200)
@@ -111,114 +111,114 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptyBody() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         JSONObject request = new JSONObject();
-        Response response = postHashcodeRemoteSigningInSession(flow, request);
+        Response response = postRemoteSigningInSession(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerMissingSigningCertificate() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
-        Response response = postHashcodeRemoteSigningInSession(flow, request);
+        Response response = postRemoteSigningInSession(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerMissingProfile() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         JSONObject request = new JSONObject();
         request.put("signingCertificate", SIGNER_CERT_PEM);
-        Response response = postHashcodeRemoteSigningInSession(flow, request);
+        Response response = postRemoteSigningInSession(flow, request);
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptySigningCertificate() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("", "LT"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("", "LT"));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerEmptyProfile() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerInvalidSigningCertificate() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault("-&32%", "LT"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("-&32%", "LT"));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerInvalidProfileFormat() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void startRemoteSigningHashcodeContainerInvalidProfile() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerReturnsOk() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+        Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptyBody() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
         JSONObject request = new JSONObject();
-        Response response = putHashcodeRemoteSigningInSession(flow, request, dataToSignResponse.getGeneratedSignatureId());
+        Response response = putRemoteSigningInSession(flow, request, dataToSignResponse.getGeneratedSignatureId());
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithEmptySignatureValue() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(""), dataToSignResponse.getGeneratedSignatureId());
+        Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(""), dataToSignResponse.getGeneratedSignatureId());
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningHashcodeContainerWithInvalidSignatureValue() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
 
-        Response response = putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse.getGeneratedSignatureId());
+        Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse.getGeneratedSignatureId());
         expectError(response, 400, INVALID_SIGNATURE);
     }
 
     @Test
     public void getRemoteSigningHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
         expectError(response, 405, INVALID_REQUEST);
@@ -226,7 +226,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void headToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
 
@@ -237,7 +237,7 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     @Ignore("SIGARIA-67")
     @Test
     public void optionsToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
         expectError(response, 405, INVALID_REQUEST);
@@ -245,9 +245,14 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
 
     @Test
     public void patchToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
         expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

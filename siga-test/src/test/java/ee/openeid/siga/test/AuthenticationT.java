@@ -31,7 +31,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void uuidAndSecretMismatch() throws Exception {
         flow.setServiceUuid(SERVICE_UUID_2);
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
@@ -56,7 +56,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void algoHmacSHA256ExplicitlySet() throws Exception {
         flow.setHmacAlgorithm("HmacSHA256");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
                 .statusCode(200)
@@ -66,7 +66,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void algoHmacSHA384ExplicitlySet() throws Exception {
         flow.setHmacAlgorithm("HmacSHA384");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
                 .statusCode(200)
@@ -76,7 +76,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void algoHmacSHA512ExplicitlySet() throws Exception {
         flow.setHmacAlgorithm("HmacSHA512");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
                 .statusCode(200)
@@ -107,7 +107,7 @@ public class AuthenticationT extends TestBase {
     @Test
     public void algoHmacSHA3224ExplicitlySet() throws Exception {
         flow.setHmacAlgorithm("HmacSHA3-224");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
                 .statusCode(200)
@@ -117,14 +117,14 @@ public class AuthenticationT extends TestBase {
     @Test
     public void algoHmacSHA224ExplicitlySetShouldNotBeAllowed() throws Exception {
         flow.setHmacAlgorithm("HmacSHA224");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test
     public void algoHmacSHA1ExplicitlySetShouldNotBeAllowed() throws Exception {
         flow.setHmacAlgorithm("HmacSHA1");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
@@ -209,14 +209,14 @@ public class AuthenticationT extends TestBase {
     @Test
     public void nonExistingUuid() throws Exception {
         flow.setServiceUuid("a3a2a728-a3ea-4975-bfab-f240a67e894f");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test
     public void wrongSigningSecret() throws Exception {
         flow.setServiceSecret("746573715365637265724b6579304031");
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
@@ -323,7 +323,7 @@ public class AuthenticationT extends TestBase {
 
         flow.setSigningTime(signingTime.toString());
         flow.setForceSigningTime(true);
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
@@ -333,7 +333,12 @@ public class AuthenticationT extends TestBase {
 
         flow.setSigningTime(signingTime.toString());
         flow.setForceSigningTime(true);
-        Response response = postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 }

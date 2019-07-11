@@ -2,20 +2,16 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
-import ee.openeid.siga.webapp.json.GetHashcodeContainerMobileIdSigningStatusResponse;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class SmartIdSigningHashcodeContainerT extends TestBase {
 
@@ -29,8 +25,8 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Ignore ("Test TSL needs to be updated")
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeSmartIdSigningInSession(flow, hashcodeSmartIdSigningRequestWithDefault("10101010005", "LT_TM"));
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT_TM"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId);
 
@@ -42,5 +38,8 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     }
 
 
-
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
+    }
 }

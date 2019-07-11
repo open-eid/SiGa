@@ -31,62 +31,66 @@ public class HashcodeContainerSystemT extends TestBase {
 
     @Test
     public void createNewHashcodeContainerAndSignWithMid() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postHashcodeMidSigningInSession(flow, hashcodeMidSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
-        Response containerResponse = getHashcodeContainer(flow);
+        Response containerResponse = getContainer(flow);
 
         assertThat(containerResponse.statusCode(), equalTo(200));
         assertThat(containerResponse.getBody().path("container").toString().length(), notNullValue());
 
-        deleteHashcodeContainer(flow);
+        deleteContainer(flow);
 
-        response = getHashcodeContainer(flow);
+        response = getContainer(flow);
 
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
-    public void uploadHashcodeContainerAndSignRemotly() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+    public void uploadHashcodeContainerAndSignRemotely() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
-        Response containerResponse = getHashcodeContainer(flow);
+        Response containerResponse = getContainer(flow);
 
         assertThat(containerResponse.statusCode(), equalTo(200));
         assertThat(containerResponse.getBody().path("container").toString().length(), notNullValue());
 
-        deleteHashcodeContainer(flow);
+        deleteContainer(flow);
 
-        Response response = getHashcodeSignatureList(flow);
+        Response response = getSignatureList(flow);
 
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
-    public void createHashcodeContainerSignRemotlyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postCreateHashcodeContainer(flow, hashcodeContainersDataRequestWithDefault());
-        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
-        putHashcodeRemoteSigningInSession(flow, hashcodeRemoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+    public void createHashcodeContainerSignRemotelyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
 
-        deleteHashcodeContainer(flow);
+        deleteContainer(flow);
         Response response = getValidationReportForContainerInSession(flow);
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
     @Test
     public void getSignaturesShouldReturnListOfSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadHashcodeContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-        Response response = getHashcodeSignatureList(flow);
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        Response response = getSignatureList(flow);
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path("signatures[0].id"), equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"));
     }
 
 
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
+    }
 }

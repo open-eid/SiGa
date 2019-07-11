@@ -5,6 +5,7 @@ import ee.openeid.siga.common.DataFile;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
@@ -16,6 +17,7 @@ import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
 import eu.europa.esig.dss.MimeType;
+import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
 
+@Slf4j
 @Service
 public class AsicContainerService implements AsicSessionHolder {
 
@@ -58,8 +61,13 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public String uploadContainer(String containerName, String base64container) {
-        Container container = ContainerUtil.createContainer(Base64.getDecoder().decode(base64container.getBytes()), configuration);
-
+        Container container;
+        try {
+            container = ContainerUtil.createContainer(Base64.getDecoder().decode(base64container.getBytes()), configuration);
+        } catch (Exception e) {
+            log.error("Invalid container:", e);
+            throw new InvalidContainerException("Invalid container");
+        }
         String sessionId = SessionIdGenerator.generateSessionId();
         Session session = transformContainerToSession(containerName, sessionId, container);
         sessionService.update(sessionId, session);
