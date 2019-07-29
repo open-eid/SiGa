@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1558240328449-1
+      author: (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: connection_count
+                  type: NUMBER
+                  defaultValue: -1
+              - column:
+                  constraints:
+                    nullable: false
+                  name: connections_max_size
+                  type: NUMBER
+                  defaultValue: -1
+            tableName: siga_service
