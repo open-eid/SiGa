@@ -7,7 +7,6 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -234,7 +233,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
                 .statusCode(405);
     }
 
-    @Ignore("SIGARIA-67")
     @Test
     public void optionsToRemoteSigningHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));

@@ -6,14 +6,13 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRespons
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
 
 public class RetrieveHashcodeContainerT extends TestBase {
 
@@ -189,7 +188,6 @@ public class RetrieveHashcodeContainerT extends TestBase {
                 .statusCode(200);
     }
 
-    @Ignore ("SIGARIA-67")
     @Test
     public void optionsToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));

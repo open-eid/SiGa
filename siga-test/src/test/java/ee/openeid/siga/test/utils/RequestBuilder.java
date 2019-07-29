@@ -85,7 +85,7 @@ public class RequestBuilder {
     public static JSONObject asicContainerRequest(String containerBase64, String containerName) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("container", containerBase64);
-        request.put("containerName",containerName);
+        request.put("containerName", containerName);
         return request;
     }
 
@@ -118,14 +118,13 @@ public class RequestBuilder {
     }
 
     public static JSONObject midSigningRequestWithDefault(String personIdentifier, String phoneNo, String signatureProfile) throws JSONException {
-        return midSigningRequest(personIdentifier, phoneNo, "EE", "EST", signatureProfile, "something", null, null, null, null, null);
+        return midSigningRequest(personIdentifier, phoneNo, "EST", signatureProfile, "something", null, null, null, null, null);
     }
 
-    public static JSONObject midSigningRequest(String personIdentifier, String phoneNo, String originCountry, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject midSigningRequest(String personIdentifier, String phoneNo, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", personIdentifier);
         request.put("phoneNo", phoneNo);
-        request.put("country", originCountry);
         request.put("language", language);
         request.put("signatureProfile", signatureProfile);
 

@@ -14,7 +14,6 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class MobileSigningHashcodeContainerT extends TestBase {
 
@@ -211,57 +210,37 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void missingCountryInRequest() throws Exception {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "", "EST", "LT", null, null, null, null, null, null));
-
-        response.then()
-                .statusCode(200)
-                .body(GENERATED_SIGNATURE_ID, notNullValue())
-                .body(CHALLENGE_ID, notNullValue());
-    }
-
-    @Ignore("SIGARIA-94")
-    @Test
-    public void invalidCountryInRequest() throws Exception {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "QE", "EST", "LT", null, null, null, null, null, null));
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-
-    @Test
     public void missingLanguageInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EE", "", "LT", null, null, null, null, null, null));
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "", "LT", null, null, null, null, null, null));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void invalidLanguageInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EE", "SOM", "LT", null, null, null, null, null, null));
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "SOM", "LT", null, null, null, null, null, null));
         expectError(response, 400, INVALID_LANGUAGE);
     }
 
     @Test
     public void missingProfileInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EE", "EST", "", null, null, null, null, null, null));
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "", null, null, null, null, null, null));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void invalidProfileInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EE", "EST", "T", null, null, null, null, null, null));
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "T", null, null, null, null, null, null));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void maximumDataInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EE", "EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", "I hava a role"));
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", "I hava a role"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
 

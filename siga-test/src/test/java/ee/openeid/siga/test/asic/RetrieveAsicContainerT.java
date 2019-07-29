@@ -7,7 +7,6 @@ import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -188,7 +187,6 @@ public class RetrieveAsicContainerT extends TestBase {
                 .statusCode(200);
     }
 
-    @Ignore("SIGARIA-67")
     @Test
     public void optionsToGetAsicContainer() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));

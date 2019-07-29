@@ -1,5 +1,6 @@
 package ee.openeid.siga.auth;
 
+import ee.openeid.siga.auth.filter.MethodFilter;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
@@ -13,13 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
@@ -68,13 +69,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                 .and()
+                .addFilterAfter(new MethodFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(authenticationFilter(configurationProperties, sigaEventLogger), AnonymousAuthenticationFilter.class)
                 .addFilterBefore((servletRequest, servletResponse, filterChain) -> {
                     ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
-                .authorizeRequests().antMatchers(HttpMethod.OPTIONS).denyAll()
+                .authorizeRequests()
                 .requestMatchers(PUBLIC_URLS).permitAll()
                 .requestMatchers(PROTECTED_URLS).authenticated()
                 .and()

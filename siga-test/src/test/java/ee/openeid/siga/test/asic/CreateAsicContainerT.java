@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -148,7 +147,6 @@ public class CreateAsicContainerT extends TestBase {
         assertThat(response.statusCode(), equalTo(405));
     }
 
-    @Ignore("SIGARIA-67")
     @Test
     public void optionsToCreateAsicContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = options(getContainerEndpoint(), flow);
