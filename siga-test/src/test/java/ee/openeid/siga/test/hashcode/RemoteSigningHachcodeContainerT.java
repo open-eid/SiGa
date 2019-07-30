@@ -3,11 +3,16 @@ package ee.openeid.siga.test.hashcode;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
@@ -216,36 +221,116 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
-    public void getRemoteSigningHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void deleteToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = get(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void headToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void putToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, "request");
 
-        response.then()
-                .statusCode(405);
-    }
-
-    @Test
-    public void optionsToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void patchToRemoteSigningHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void getToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void optionsToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToStartHashcodeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void deleteToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void getToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void optionsToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToHashcodeFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 

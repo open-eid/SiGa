@@ -22,7 +22,8 @@ public class UploadAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerShouldReturnContainerId() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
         response.then()
                 .statusCode(200)
                 .body(CONTAINER_ID + ".length()", equalTo(36));
@@ -40,12 +41,14 @@ public class UploadAsicContainerT extends TestBase {
     @Test
     public void uploadAsicContainerWithoutDatafiles() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("bdoc21_TM_no_datafile.bdoc"));
+
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadAsicContainerWithDdoc() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("ddoc-valid.ddoc"));
+
         expectError(response, 400, INVALID_CONTAINER);
     }
 
@@ -53,6 +56,7 @@ public class UploadAsicContainerT extends TestBase {
     public void uploadAsicContainerEmptyBody() throws Exception {
         JSONObject request = new JSONObject();
         Response response = postUploadContainer(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -62,6 +66,7 @@ public class UploadAsicContainerT extends TestBase {
         request.put("container", "");
         request.put("containerName", "container.asice");
         Response response = postUploadContainer(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -71,6 +76,7 @@ public class UploadAsicContainerT extends TestBase {
         request.put("containerName", "");
         request.put("container", "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=");
         Response response = postUploadContainer(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -80,6 +86,7 @@ public class UploadAsicContainerT extends TestBase {
         request.put("container", "-32/432+*");
         request.put("containerName", "container.asice");
         Response response = postUploadContainer(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -89,12 +96,14 @@ public class UploadAsicContainerT extends TestBase {
         request.put("container", Base64.encodeBase64String("random string".getBytes()));
         request.put("containerName", "container.asice");
         Response response = postUploadContainer(flow, request);
+
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void deleteToUploadAsicContainer() throws Exception {
         Response response = delete(UPLOAD + getContainerEndpoint(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
@@ -105,18 +114,21 @@ public class UploadAsicContainerT extends TestBase {
         request.put("container", "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=");
 
         Response response = put(UPLOAD + getContainerEndpoint(), flow, request.toString());
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
     public void getToUploadAsicContainer() throws Exception {
         Response response = get(UPLOAD + getContainerEndpoint(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
     public void headToUploadAsicContainer() throws Exception {
         Response response = head(UPLOAD + getContainerEndpoint(), flow);
+
         response.then()
                 .statusCode(405);
     }
@@ -124,12 +136,14 @@ public class UploadAsicContainerT extends TestBase {
     @Test
     public void optionsToUploadAsicContainer() throws Exception {
         Response response = options(UPLOAD + getContainerEndpoint(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
     public void patchToUploadAsicContainer() throws Exception {
         Response response = patch(UPLOAD + getContainerEndpoint(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 

@@ -300,7 +300,7 @@ public class AuthenticationT extends TestBase {
     public void signatureFromDifferentRequest() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         String signature = signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS);
-        JSONObject request2 = hashcodeContainerRequestFromFile("hashcode.asice");
+        JSONObject request2 = hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME);
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signature)
                 .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())

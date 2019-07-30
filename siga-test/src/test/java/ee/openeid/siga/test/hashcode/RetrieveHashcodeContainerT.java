@@ -158,6 +158,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         flow.setServiceUuid(SERVICE_UUID_2);
         flow.setServiceSecret(SERVICE_SECRET_2);
         Response response = getContainer(flow);
+
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
@@ -167,6 +168,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
         deleteContainer(flow);
 
         Response response = getContainer(flow);
+
         expectError(response, 400, RESOURCE_NOT_FOUND);
     }
 
@@ -174,7 +176,8 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void postToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId(), flow, "");
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
@@ -182,7 +185,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void headToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = head(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
 
         response.then()
                 .statusCode(200);
@@ -192,7 +195,8 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void optionsToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = options(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
@@ -200,7 +204,8 @@ public class RetrieveHashcodeContainerT extends TestBase {
     public void patchToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = patch(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow);
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 

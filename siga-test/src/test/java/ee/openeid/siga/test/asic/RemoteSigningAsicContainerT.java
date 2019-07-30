@@ -5,9 +5,13 @@ import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
@@ -26,12 +30,13 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void signContainerRemotely() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void signAsicContainerRemotely() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getValidationReportForContainerInSession(flow);
+
         response.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2))
@@ -39,8 +44,8 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void signContainerRemotelyWithMultipleSignatures() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void signAsicContainerRemotelyWithMultipleSignatures() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         CreateContainerRemoteSigningResponse dataToSignResponse2 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
@@ -61,8 +66,8 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningContainerReturnsDigestToSign() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
 
@@ -73,8 +78,8 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningContainerWithAllParamsReturnsDigestToSign() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerWithAllParamsReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia"));
 
@@ -85,8 +90,8 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
 
@@ -97,8 +102,8 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningContainerWithLocationReturnsDigestToSign() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerWithLocationReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn", null, null, null));
 
@@ -109,146 +114,237 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void startRemoteSigningContainerEmptyBody() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerEmptyBody() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
         Response response = postRemoteSigningInSession(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerMissingSigningCertificate() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerMissingSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         Response response = postRemoteSigningInSession(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerMissingProfile() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerMissingProfile() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
         request.put("signingCertificate", SIGNER_CERT_PEM);
         Response response = postRemoteSigningInSession(flow, request);
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerEmptySigningCertificate() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerEmptySigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("", "LT"));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerEmptyProfile() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerEmptyProfile() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerInvalidSigningCertificate() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerInvalidSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("-&32%", "LT"));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerInvalidProfileFormat() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerInvalidProfileFormat() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void startRemoteSigningContainerInvalidProfile() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void StartAsicRemoteSigningContainerInvalidProfile() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningContainerReturnsOk() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
         Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
 
     @Test
     public void finalizeRemoteSigningContainerWithEmptyBody() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
         JSONObject request = new JSONObject();
         Response response = putRemoteSigningInSession(flow, request, dataToSignResponse.getGeneratedSignatureId());
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningContainerWithEmptySignatureValue() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
         Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(""), dataToSignResponse.getGeneratedSignatureId());
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
     public void finalizeRemoteSigningContainerWithInvalidSignatureValue() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
         Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse.getGeneratedSignatureId());
+
         expectError(response, 400, INVALID_SIGNATURE);
     }
 
     @Test
-    public void getRemoteSigningContainer() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void deleteToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
-        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void headToRemoteSigningContainer() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void putToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void getToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
 
-        response.then()
-                .statusCode(405);
+        assertThat(response.statusCode(), equalTo(405));
     }
 
     @Test
-    public void optionsToRemoteSigningContainer() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void optionsToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void patchToRemoteSigningContainer() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void deleteToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
 
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING, flow);
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
         expectError(response, 405, INVALID_REQUEST);
     }
 
+    @Test
+    public void getToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void optionsToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToAsicFinalizeRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
 
     @Override
     public String getContainerEndpoint() {

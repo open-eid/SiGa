@@ -23,7 +23,7 @@ public class RequestBuilder {
     }
 
     public static JSONObject asicContainersDataRequestWithDefault() throws JSONException {
-        return asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, DEFAULT_CONTAINER_NAME);
+        return asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME);
     }
 
     public static JSONObject asicContainersDataRequest(String fileName, String fileContent, String containerName) throws JSONException {

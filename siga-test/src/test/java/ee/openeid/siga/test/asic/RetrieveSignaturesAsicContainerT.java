@@ -17,6 +17,7 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RetrieveSignaturesAsicContainerT extends TestBase {
     private SigaApiFlow flow;
@@ -27,8 +28,8 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_CONTAINER_NAME));
+    public void uploadAsicContainerAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = getSignatureList(flow);
 
@@ -41,7 +42,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void uploadAsicContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
 
         Response response = getSignatureList(flow);
@@ -52,7 +53,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithInvalidSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void uploadAsicContainerWithInvalidSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("unknown_ocsp.asice"));
 
         Response response = getSignatureList(flow);
@@ -143,7 +144,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void uploadAsicContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("unknown_ocsp.asice"));
 
         Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
@@ -153,6 +154,114 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
                 .body("id", equalTo("S0"))
                 .body("signerInfo", equalTo("SERIALNUMBER=37101010021, GIVENNAME=IGOR, SURNAME=ŽAIKOVSKI, CN=\"ŽAIKOVSKI,IGOR,37101010021\", OU=digital signature, O=ESTEID (DIGI-ID), C=EE"))
                 .body("signatureProfile", equalTo("B_EPES"));
+    }
+
+    @Test
+    public void deleteToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Test
+    public void optionsToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToRetrieveAsicSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void deleteToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Test
+    public void optionsToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToRetrieveAsicSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override

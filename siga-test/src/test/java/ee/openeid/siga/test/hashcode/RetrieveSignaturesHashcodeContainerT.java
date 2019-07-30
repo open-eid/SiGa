@@ -18,6 +18,7 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     private SigaApiFlow flow;
@@ -191,13 +192,121 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeAndRetrieveSignatureInfoWithWrongId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = getSignatureInfo(flow, "randomSignatureId");
 
         response.then()
                 .statusCode(400)
                 .body(ERROR_CODE, equalTo(RESOURCE_NOT_FOUND));
+    }
+
+    @Test
+    public void deleteToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Test
+    public void optionsToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void deleteToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        assertThat(response.statusCode(), equalTo(200));
+    }
+
+    @Test
+    public void optionsToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);
+
+        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override

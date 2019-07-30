@@ -165,14 +165,6 @@ public class DeleteHashcodeContainerT extends TestBase {
                 .body("signatures[0].signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"));
     }
 
-    @Test
-    public void postToDeleteHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = post(HASHCODE_CONTAINERS + "/" + flow.getContainerId(), flow, "");
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;
