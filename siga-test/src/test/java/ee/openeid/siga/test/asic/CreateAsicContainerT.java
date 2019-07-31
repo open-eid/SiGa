@@ -91,7 +91,6 @@ public class CreateAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
-
     @Test
     public void createAsicContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, asicContainersDataRequest("?%*", DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME));
@@ -117,8 +116,8 @@ public class CreateAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerContainerInFolder() throws JSONException, NoSuchAlgorithmException, InvalidKeyException{
-        Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, "folder/test.txt"));
+    public void createAsicContainerPathInContainerName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException{
+        Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, "C://folder/test.asice"));
         expectError(response, 400, INVALID_REQUEST);
     }
 

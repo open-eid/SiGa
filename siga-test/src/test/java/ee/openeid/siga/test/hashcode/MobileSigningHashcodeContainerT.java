@@ -31,8 +31,8 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void signWithMidSuccessfully() throws Exception {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+    public void addSignatureToHashcodeContainerWithMidSuccessfully() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
@@ -42,6 +42,20 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         validationResponse.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void signHashcodeContainerWithMidSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
     }
 
     @Test
