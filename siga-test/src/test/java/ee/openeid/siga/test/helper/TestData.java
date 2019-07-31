@@ -12,6 +12,7 @@ public class TestData {
     public static final String SMARTID_SIGNING = "/smartidsigning";
     public static final String STATUS = "/status";
     public static final String SIGNATURES = "/signatures";
+    public static final String DATAFILES = "/datafiles";
 
 
     // Headers for HMAC authentication

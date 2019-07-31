@@ -107,6 +107,11 @@ public abstract class TestBase {
         return get(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + signatureId, flow);
     }
 
+    @Step("Get data file list")
+    protected Response getDataFileList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
+        return get(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
+    }
+
     @Step("Get container")
     protected Response getContainer(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return get(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
