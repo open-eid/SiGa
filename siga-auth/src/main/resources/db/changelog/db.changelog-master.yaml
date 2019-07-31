@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/SIGARIA-76-smartid-relying-party.yaml
   - include:
       file: db/changelog/SIGARIA-104.yaml
+  - include:
+      file: db/changelog/SIGARIA-69.yaml

@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/SIGARIA-104.yaml
   - include:
       file: db/data/dev-data-2.yaml
+  - include:
+      file: db/changelog/SIGARIA-69.yaml

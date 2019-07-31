@@ -1,5 +1,7 @@
 package ee.openeid.siga.session.configuration;
 
+import ee.openeid.siga.auth.model.SigaConnection;
+import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.session.CacheName;
@@ -17,6 +19,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.CONTAINER_ID;
@@ -30,6 +33,7 @@ import static org.slf4j.MarkerFactory.getMarker;
 public class SessionConfiguration {
 
     private SessionConfigurationProperties sessionConfigurationProperties;
+    private ConnectionRepository connectionRepository;
 
     @Bean(destroyMethod = "close")
     public Ignite ignite() {
@@ -43,11 +47,13 @@ public class SessionConfiguration {
                     .clientUuid(bob.getField("clientUuid"))
                     .serviceUuid(bob.getField("serviceUuid"))
                     .eventType(SigaEvent.EventType.FINISH)
-                    .eventName(SigaEventName.HC_DELETE_CONTAINER)
+                    .eventName(chooseEventName(bob))
                     .timestamp(now().toEpochMilli())
                     .resultType(SigaEvent.EventResultType.SUCCESS)
                     .build();
-            sigaEvent.addEventParameter(CONTAINER_ID, bob.getField("sessionId"));
+            String containerId = bob.getField("sessionId");
+            sigaEvent.addEventParameter(CONTAINER_ID, containerId);
+            removeConnectionData(containerId);
             log.info(getMarker("SIGA_EVENT"), sigaEvent.toString());
             return true;
         }, null, EventType.EVT_CACHE_OBJECT_EXPIRED);
@@ -55,8 +61,26 @@ public class SessionConfiguration {
         return ignite;
     }
 
+    private void removeConnectionData(String containerId) {
+        Optional<SigaConnection> connection = connectionRepository.findAllByContainerId(containerId);
+        connection.ifPresent(sigaConnection -> connectionRepository.delete(sigaConnection));
+    }
+
+    private SigaEventName chooseEventName(BinaryObjectBuilder bob) {
+        if (bob.getField("containerName") == null) {
+            return SigaEventName.HC_DELETE_CONTAINER;
+        } else {
+            return SigaEventName.DELETE_CONTAINER;
+        }
+    }
+
     @Autowired
     protected void setSessionConfigurationProperties(SessionConfigurationProperties sessionConfigurationProperties) {
         this.sessionConfigurationProperties = sessionConfigurationProperties;
+    }
+
+    @Autowired
+    public void setConnectionRepository(ConnectionRepository connectionRepository) {
+        this.connectionRepository = connectionRepository;
     }
 }

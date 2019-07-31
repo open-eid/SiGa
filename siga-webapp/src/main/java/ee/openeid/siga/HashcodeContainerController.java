@@ -1,5 +1,7 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.auth.model.SigaConnection;
+import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.Result;
@@ -18,11 +20,18 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class HashcodeContainerController {
@@ -30,6 +39,7 @@ public class HashcodeContainerController {
     private HashcodeContainerService containerService;
     private HashcodeContainerValidationService validationService;
     private HashcodeContainerSigningService signingService;
+    private ConnectionRepository connectionRepository;
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @PostMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -257,6 +267,10 @@ public class HashcodeContainerController {
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);
+
+        Optional<SigaConnection> connection = connectionRepository.findAllByContainerId(containerId);
+        connection.ifPresent(sigaConnection -> connectionRepository.delete(sigaConnection));
+
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
         response.setResult(result.name());
         return response;
@@ -291,5 +305,10 @@ public class HashcodeContainerController {
     @Autowired
     public void setSigningService(HashcodeContainerSigningService signingService) {
         this.signingService = signingService;
+    }
+
+    @Autowired
+    public void setConnectionRepository(ConnectionRepository connectionRepository) {
+        this.connectionRepository = connectionRepository;
     }
 }
