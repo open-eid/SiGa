@@ -31,16 +31,30 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
-    public void signContainerRemotely() throws Exception {
+    public void addSignatureToHashcodeContainerRemotely() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         Response response = getValidationReportForContainerInSession(flow);
+
         response.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2))
                 .body("validationConclusion.signaturesCount", equalTo(2));
+    }
+
+    @Test
+    public void signNewHashcodeContainerRemotely() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
+getContainer(flow);
+        Response response = getValidationReportForContainerInSession(flow);
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1))
+                .body("validationConclusion.signaturesCount", equalTo(1));
     }
 
     @Test

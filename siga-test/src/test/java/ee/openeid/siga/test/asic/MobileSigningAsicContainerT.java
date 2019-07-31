@@ -30,8 +30,8 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void signWithMidSuccessfully() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+    public void addSignatureToAsicContainerWithMidSuccessfully() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
@@ -40,7 +40,21 @@ public class MobileSigningAsicContainerT extends TestBase {
 
         validationResponse.then()
                 .statusCode(200)
-                .body("validationConclusion.validSignaturesCount", equalTo(1));
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
+    }
+
+    @Test
+    public void signAsicContainerWithMidSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
     }
 
     @Test
