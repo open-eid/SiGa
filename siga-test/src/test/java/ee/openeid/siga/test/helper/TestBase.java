@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
@@ -110,6 +111,11 @@ public abstract class TestBase {
     @Step("Get data file list")
     protected Response getDataFileList(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException {
         return get(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
+    }
+
+    @Step("Delete data file")
+    protected Response deleteDataFile(SigaApiFlow flow, String dataFileName) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        return delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + dataFileName, flow);
     }
 
     @Step("Get container")
