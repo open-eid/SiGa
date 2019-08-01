@@ -40,7 +40,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(800))
+                .body(CONTAINER + ".length()", equalTo(792))
                 .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
     }
 
@@ -52,13 +52,13 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(800));
+                .body(CONTAINER + ".length()", equalTo(792));
 
         response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(800));
+                .body(CONTAINER + ".length()", equalTo(792));
     }
 
     @Test
