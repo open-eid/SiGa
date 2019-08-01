@@ -41,7 +41,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
 
         validationResponse.then()
                 .statusCode(200)
-                .body("validationConclusion.validSignaturesCount", equalTo(1));
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
 
         validationResponse.then()
                 .statusCode(200)
-                .body("validationConclusion.validSignaturesCount", equalTo(2));
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
     @Test
