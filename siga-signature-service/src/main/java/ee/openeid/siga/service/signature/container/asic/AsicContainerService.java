@@ -165,7 +165,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
     private void validateIfSessionMutable(Container container) {
         if (!container.getSignatures().isEmpty()) {
-            throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signatures");
+            throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signature(s)");
         }
     }
 

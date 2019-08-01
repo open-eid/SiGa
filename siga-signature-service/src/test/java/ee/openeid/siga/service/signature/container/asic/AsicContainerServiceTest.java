@@ -128,7 +128,7 @@ public class AsicContainerServiceTest {
     @Test
     public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
-        exceptionRule.expectMessage("Unable to add/remove data file. Container contains signatures");
+        exceptionRule.expectMessage("Unable to add/remove data file. Container contains signature(s)");
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
         containerService.addDataFile(CONTAINER_ID, createDataFileListWithOneFile().get(0));
     }

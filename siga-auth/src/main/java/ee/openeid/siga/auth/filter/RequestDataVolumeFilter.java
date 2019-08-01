@@ -87,13 +87,17 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     }
 
     private void validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength) throws IOException {
-        validateConnectionCount(wrapperResponse, sigaService, connections.size());
+        if (!validateConnectionCount(wrapperResponse, sigaService, connections.size()))
+            return;
         long existingSize = calculateSize(connections);
         validationConnectionsSize(wrapperResponse, sigaService, existingSize, requestLength);
     }
 
     private String getContainerIdFromResponse(HttpServletFilterResponseWrapper wrapperResponse) {
-        JSONObject jsonObject = new JSONObject(wrapperResponse.getContent());
+        String content = wrapperResponse.getContent();
+        if (content == null || !content.contains("containerId"))
+            return null;
+        JSONObject jsonObject = new JSONObject(content);
         return jsonObject.getString("containerId");
     }
 
@@ -144,12 +148,14 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         }
     }
 
-    private void validateConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {
+    private boolean validateConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {
         if (sigaService.getMaxConnectionCount() == LIMITLESS)
-            return;
+            return true;
         if (currentCount + 1 >= sigaService.getMaxConnectionCount()) {
             throwError(wrapperResponse, "Number of max connections exceeded");
+            return false;
         }
+        return true;
     }
 
     @Autowired

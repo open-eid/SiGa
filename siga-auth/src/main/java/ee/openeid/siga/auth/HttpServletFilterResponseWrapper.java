@@ -25,7 +25,9 @@ public class HttpServletFilterResponseWrapper extends HttpServletResponseWrapper
     }
 
     public String getContent() {
-        return bos.toString();
+        if (bos != null)
+            return bos.toString();
+        return null;
     }
 
     @Override

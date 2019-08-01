@@ -114,7 +114,7 @@ public class HashcodeContainerServiceTest {
     @Test
     public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
-        exceptionRule.expectMessage("Unable to add/remove data file. Container contains signatures");
+        exceptionRule.expectMessage("Unable to add/remove data file. Container contains signature(s)");
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         containerService.addDataFile(CONTAINER_ID, createHashcodeDataFileListWithOneFile().get(0));
     }
