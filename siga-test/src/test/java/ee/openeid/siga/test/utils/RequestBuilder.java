@@ -5,9 +5,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.web.util.UriUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -192,7 +194,10 @@ public class RequestBuilder {
             flow.setSigningTime(getSigningTimeInSeconds().toString());
         }
 
-        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url + ":" + request;
+        String urlEncodeString = UriUtils.encode(url.substring(url.lastIndexOf("/") + 1), StandardCharsets.UTF_8.toString());
+
+        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url.substring(0 , url.lastIndexOf("/") + 1) + urlEncodeString + ":" + request;
+
         return generateHmacSignature(flow.getServiceSecret(), signableString, flow.getHmacAlgorithm());
     }
 
