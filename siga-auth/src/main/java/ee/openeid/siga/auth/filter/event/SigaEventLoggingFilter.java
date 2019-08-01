@@ -24,6 +24,7 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
         SigaEvent event = sigaEventLogger.logStartEvent(SigaEventName.REQUEST);
         String xAuthorizationServiceUuid = request.getHeader(HmacHeader.X_AUTHORIZATION_SERVICE_UUID.getValue());
         event.setServiceUuid(xAuthorizationServiceUuid);
+        event.addEventParameter("request_length", Integer.toString(getContentLength(request)));
         event.addEventParameter("request_uri", request.getRequestURI());
     }
 
@@ -34,5 +35,13 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
         long executionTimeInMilli = Duration.between(ofEpochMilli(startRequest.getTimestamp()), ofEpochMilli(endRequest.getTimestamp())).toMillis();
         endRequest.setDuration(executionTimeInMilli);
         sigaEventLogger.logEvents();
+    }
+
+    private int getContentLength(HttpServletRequest request) {
+        if (request.getContentLength() != -1) {
+            return request.getContentLength();
+        } else {
+            return 0;
+        }
     }
 }

@@ -3,18 +3,60 @@ databaseChangeLog:
       id: 1558240328449-1
       author: (generated)
       changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: connection_pk
+                  name: id
+                  type: SERIAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: container_id
+                  type: VARCHAR(36)
+              - column:
+                  name: service_id
+                  type: SERIAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: size
+                  type: BIGINT
+            tableName: siga_connection
+  - changeSet:
+      id: 1558240328449-2
+      author: (generated)
+      changes:
         - addColumn:
             columns:
               - column:
                   constraints:
                     nullable: false
-                  name: connection_count
-                  type: NUMBER
+                  name: max_connection_count
+                  type: INT
                   defaultValue: -1
               - column:
                   constraints:
                     nullable: false
-                  name: connections_max_size
-                  type: NUMBER
+                  name: max_connections_size
+                  type: BIGINT
                   defaultValue: -1
             tableName: siga_service
+  - changeSet:
+      id: 1558240328449-3
+      author: (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: service_id
+            baseTableName: siga_connection
+            constraintName: connection_service_id_fk
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: siga_service
+            validate: true

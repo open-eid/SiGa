@@ -1,12 +1,23 @@
 package ee.openeid.siga.auth.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jasypt.hibernate5.type.EncryptedStringType;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import static ee.openeid.siga.auth.HibernateStringEncryptorConfiguration.HIBERNATE_STRING_ENCRYPTOR;
 
@@ -24,8 +35,8 @@ import static ee.openeid.siga.auth.HibernateStringEncryptorConfiguration.HIBERNA
 @AllArgsConstructor
 @ToString
 public class SigaService {
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "CLIENT_ID", unique = true, nullable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CLIENT_ID", nullable = false, updatable = false)
     SigaClient client;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,4 +58,6 @@ public class SigaService {
     @NonNull
     private String billingEmail;
     private Boolean detailedBilling;
+    private long maxConnectionCount;
+    private long maxConnectionsSize;
 }
