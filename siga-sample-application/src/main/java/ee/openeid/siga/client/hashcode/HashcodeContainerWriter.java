@@ -95,7 +95,7 @@ class HashcodeContainerWriter {
     private List<DataFile> convertDataFiles(List<HashcodeDataFile> hashcodeDataFiles) {
         return hashcodeDataFiles.stream().map(d -> {
             DSSDocument dssDocument = new DigestDocument();
-            dssDocument.setMimeType(MimeType.BINARY);
+            dssDocument.setMimeType(MimeType.fromMimeTypeString(d.getMimeType()));
             dssDocument.setName(d.getFileName());
             DataFile dataFile = new DataFile();
             dataFile.setDocument(dssDocument);

@@ -1,9 +1,13 @@
 package ee.openeid.siga.client.hashcode;
 
+import eu.europa.esig.dss.InMemoryDocument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.digidoc4j.impl.asic.manifest.AsicManifest;
+import org.digidoc4j.impl.asic.manifest.ManifestEntry;
+import org.digidoc4j.impl.asic.manifest.ManifestParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +34,7 @@ public class HashcodeContainer {
     private final List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
     @Getter
     private Map<String, byte[]> regularDataFiles = new HashMap<>();
+    private Map<String, ManifestEntry> manifest;
 
     @Builder(builderClassName = "FromRegularContainerBuilder", builderMethodName = "fromRegularContainerBuilder")
     @SneakyThrows
@@ -52,6 +57,7 @@ public class HashcodeContainer {
             operateWithEntry(entry, zipStream);
         }
         zipStream.close();
+        addMimeTypes();
     }
 
     public byte[] getRegularContainer() {
@@ -117,6 +123,10 @@ public class HashcodeContainer {
                 byte[] dataFile = baos.toByteArray();
                 regularDataFiles.put(entryName, dataFile);
                 hashcodeDataFiles.add(createHashcodeDataFile(entry, dataFile));
+            } else if (isManifestEntry(entryName)) {
+                InMemoryDocument manifestFile = new InMemoryDocument(baos.toByteArray());
+                ManifestParser manifestParser = new ManifestParser(manifestFile);
+                manifest = manifestParser.getManifestFileItems();
             } else if (isHashcodeDatafileEntry(entryName)) {
                 addDataFilesFromHashcodeEntries(convertToHashcodeEntries(baos.toByteArray()), entryName);
             }
@@ -132,8 +142,24 @@ public class HashcodeContainer {
         return !entryName.startsWith("META-INF/") && !isMimeType(entryName);
     }
 
+    private void addMimeTypes() {
+        if (manifest == null) {
+            return;
+        }
+        hashcodeDataFiles.forEach(dataFile ->
+                manifest.forEach((s, manifestEntry) -> {
+                    if (dataFile.getFileName().equals(manifestEntry.getFileName())) {
+                        dataFile.setMimeType(manifestEntry.getMimeType());
+                    }
+                }));
+    }
+
     private boolean isSignatureEntry(String entryName) {
         return entryName.startsWith(SIGNATURE_FILE_PREFIX);
+    }
+
+    private boolean isManifestEntry(String entryName) {
+        return AsicManifest.XML_PATH.equals(entryName);
     }
 
     private boolean isHashcodeDatafileEntry(String entryName) {

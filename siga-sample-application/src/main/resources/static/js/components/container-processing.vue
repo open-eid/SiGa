@@ -112,7 +112,8 @@
                         fileId: null,
                         personIdentifier: '60001019906',
                         phoneNr: '+37200000766',
-                        country: 'EE'
+                        country: 'EE',
+                        containerType: 'HASHCODE'
                     },
                     countryOptions: [
                         {value: 'EE', text: 'EE'},
