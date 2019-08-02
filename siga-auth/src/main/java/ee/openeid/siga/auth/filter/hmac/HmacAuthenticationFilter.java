@@ -16,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.time.Duration;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
@@ -84,6 +86,9 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
         if (request.getQueryString() != null) {
             uri += "?" + request.getQueryString();
         }
+        if ("DELETE".equals(request.getMethod())) {
+            uri = encodeUrlWithFileName(uri);
+        }
         return uri;
     }
 
@@ -124,6 +129,13 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
             mapper.writeValue(out, errorResponse);
             out.flush();
         }
+    }
+
+    private String encodeUrlWithFileName(String uri) {
+        int startingFileNameIndex = uri.lastIndexOf("/") + 1;
+        String fileName = uri.substring(startingFileNameIndex);
+        String encodedFileName = UriUtils.encode(UriUtils.decode(fileName, Charset.defaultCharset()), Charset.defaultCharset());
+        return uri.replace(fileName, encodedFileName);
     }
 
     private SimpleUrlAuthenticationSuccessHandler noRedirectAuthenticationSuccessHandler() {

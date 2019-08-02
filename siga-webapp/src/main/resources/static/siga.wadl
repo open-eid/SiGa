@@ -1097,7 +1097,7 @@
                 <method id="deleteContainerDataFile" name="DELETE">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteHContainerDataFileResponse"
+                                            element="tns:deleteContainerDataFileResponse"
                                             mediaType="application/json" xmlns=""/>
                     </response>
                     <response status="400">
