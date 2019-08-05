@@ -38,26 +38,25 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (OBSERVABLE_HTTP_METHOD.equals(request.getMethod())) {
+        String requestUrl = request.getRequestURI();
+        if (OBSERVABLE_HTTP_METHOD.equals(request.getMethod()) && !isValidationReportUrl(requestUrl)) {
             long requestSize = request.getContentLengthLong();
             Optional<SigaService> user = serviceRepository.findByUuid(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue()));
             if (user.isPresent()) {
                 HttpServletFilterResponseWrapper wrapperResponse = new HttpServletFilterResponseWrapper(response);
                 SigaService sigaService = user.get();
-                String requestUrl = request.getRequestURI();
 
                 Optional<List<SigaConnection>> optionalSigaConnections = connectionRepository.findAllByServiceId(sigaService.getId());
                 List<SigaConnection> connections = optionalSigaConnections.orElseGet(ArrayList::new);
-                validate(wrapperResponse, sigaService, connections, requestSize);
-
-                filterChain.doFilter(request, wrapperResponse);
+                boolean isRequestValid = validate(wrapperResponse, sigaService, connections, requestSize);
+                if (isRequestValid)
+                    filterChain.doFilter(request, wrapperResponse);
 
                 refreshConnectionData(sigaService, requestSize, wrapperResponse, requestUrl);
                 return;
             }
         }
         filterChain.doFilter(request, response);
-
     }
 
     private void throwError(HttpServletFilterResponseWrapper response, String message) throws IOException {
@@ -86,11 +85,11 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         return suffix.substring(0, suffix.indexOf("/"));
     }
 
-    private void validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength) throws IOException {
+    private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength) throws IOException {
         if (!validateConnectionCount(wrapperResponse, sigaService, connections.size()))
-            return;
+            return false;
         long existingSize = calculateSize(connections);
-        validationConnectionsSize(wrapperResponse, sigaService, existingSize, requestLength);
+        return validationConnectionsSize(wrapperResponse, sigaService, existingSize, requestLength);
     }
 
     private String getContainerIdFromResponse(HttpServletFilterResponseWrapper wrapperResponse) {
@@ -107,6 +106,10 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             size += connection.getSize();
         }
         return size;
+    }
+
+    private boolean isValidationReportUrl(String url) {
+        return url.endsWith("containers/validationreport") || url.endsWith("hashcodecontainers/validationreport");
     }
 
     private boolean isNewContainerUrl(String url) {
@@ -139,13 +142,15 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         connectionRepository.saveAndFlush(sigaConnection);
     }
 
-    private void validationConnectionsSize(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, double currentSize, double newSize) throws IOException {
+    private boolean validationConnectionsSize(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, double currentSize, double newSize) throws IOException {
         if (sigaService.getMaxConnectionsSize() == LIMITLESS)
-            return;
+            return true;
         double currentSizeInMb = (currentSize + newSize) / 1024 / 1024;
         if (currentSizeInMb >= sigaService.getMaxConnectionsSize()) {
             throwError(wrapperResponse, "Size of total connections exceeded");
+            return false;
         }
+        return true;
     }
 
     private boolean validateConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {

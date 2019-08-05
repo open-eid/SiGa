@@ -1,6 +1,7 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.MethodFilter;
+import ee.openeid.siga.auth.filter.RequestDataVolumeFilter;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
@@ -47,6 +48,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private HmacAuthenticationProvider hmacAuthenticationProvider;
 
     @Autowired
+    private MethodFilter methodFilter;
+
+    @Autowired
+    private RequestDataVolumeFilter requestDataVolumeFilter;
+
+    @Autowired
     private SigaEventLoggingFilter eventsLoggingFilter;
 
     @Autowired
@@ -69,16 +76,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling()
                 .and()
-                .addFilterAfter((servletRequest, servletResponse, filterChain) -> {
-                    ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
-                    filterChain.doFilter(cachingRequestWrapper, servletResponse);
-                }, BasicAuthenticationFilter.class)
-                .addFilterAfter(new MethodFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(authenticationFilter(configurationProperties, sigaEventLogger), AnonymousAuthenticationFilter.class)
                 .addFilterBefore((servletRequest, servletResponse, filterChain) -> {
                     ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
+                .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PUBLIC_URLS).permitAll()
