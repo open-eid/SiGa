@@ -138,7 +138,7 @@ public class RequestValidatorTest {
     @Test
     public void createHashcodeContainer_DataFileHashIsNotBase64() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("File hash is invalid");
+        exceptionRule.expectMessage("Base64 content is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
         RequestValidator.validateHashcodeDataFiles(request.getDataFiles());
@@ -147,7 +147,7 @@ public class RequestValidatorTest {
     @Test
     public void createContainer_DataFileHashIsNotBase64() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("File hash is invalid");
+        exceptionRule.expectMessage("Base64 content is invalid");
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().get(0).setFileContent(StringUtils.repeat("a", 101));
         RequestValidator.validateDataFiles(request.getDataFiles());
@@ -156,7 +156,7 @@ public class RequestValidatorTest {
     @Test
     public void createContainer_DataFileHashTooLong() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("File hash is invalid");
+        exceptionRule.expectMessage("Base64 content is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
         RequestValidator.validateHashcodeDataFiles(request.getDataFiles());

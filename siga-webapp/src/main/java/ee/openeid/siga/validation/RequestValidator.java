@@ -71,7 +71,7 @@ public class RequestValidator {
 
     public static void validateDataFile(DataFile dataFile) {
         validateFileName(dataFile.getFileName(), INVALID_DATA_FILE_NAME);
-        validateHash(dataFile.getFileContent());
+        validateBase64(dataFile.getFileContent());
     }
 
     public static void validateRemoteSigning(String signingCertificate, String signatureProfile) {
@@ -144,22 +144,22 @@ public class RequestValidator {
     }
 
     private static void validateHashSha256(String hash) {
-        validateHash(hash);
+        validateBase64(hash);
         if (hash.length() != 44) {
             throw new RequestValidationException("File hash SHA256 length is invalid");
         }
     }
 
     private static void validateHashSha512(String hash) {
-        validateHash(hash);
+        validateBase64(hash);
         if (hash.length() != 88) {
             throw new RequestValidationException("File hash SHA512 length is invalid");
         }
     }
 
-    private static void validateHash(String hash) {
+    private static void validateBase64(String hash) {
         if (StringUtils.isBlank(hash) || isNotBase64StringEncoded(hash)) {
-            throw new RequestValidationException("File hash is invalid");
+            throw new RequestValidationException("Base64 content is invalid");
         }
     }
 

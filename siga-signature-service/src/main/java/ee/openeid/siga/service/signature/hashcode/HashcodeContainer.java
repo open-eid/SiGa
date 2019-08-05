@@ -4,7 +4,7 @@ import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
-import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.session.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestDocument;
@@ -139,7 +139,7 @@ public class HashcodeContainer {
         Map<String, String> dataFileEntries = parser.getEntries();
 
         HashcodeSignatureWrapper signatureWrapper = new HashcodeSignatureWrapper();
-        signatureWrapper.setGeneratedSignatureId(SessionIdGenerator.generateSessionId());
+        signatureWrapper.setGeneratedSignatureId(UUIDGenerator.generateUUID());
         signatureWrapper.setSignature(signature);
         ContainerUtil.addSignatureDataFilesEntries(signatureWrapper, dataFileEntries);
         return signatureWrapper;

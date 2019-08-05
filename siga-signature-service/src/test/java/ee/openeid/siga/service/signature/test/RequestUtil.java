@@ -10,7 +10,7 @@ import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
-import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.session.UUIDGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
@@ -113,7 +113,7 @@ public class RequestUtil {
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
         Map<String, Integer> signatureIdHolder = new HashMap<>();
-        signatureIdHolder.put(SessionIdGenerator.generateSessionId(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
+        signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
         return AsicContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)

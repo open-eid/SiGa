@@ -20,7 +20,7 @@ import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
-import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.session.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
@@ -66,7 +66,7 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
-        String generatedSignatureId = SessionIdGenerator.generateSessionId();
+        String generatedSignatureId = UUIDGenerator.generateUUID();
         sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
         sessionService.update(containerId, sessionHolder);
         return DataToSignWrapper.builder().dataToSign(dataToSign).generatedSignatureId(generatedSignatureId).build();
@@ -96,7 +96,7 @@ public abstract class ContainerSigningService {
 
         MobileSignHashResponse response = initMobileSign(dataToSign, mobileIdInformation);
 
-        String generatedSignatureId = SessionIdGenerator.generateSessionId();
+        String generatedSignatureId = UUIDGenerator.generateUUID();
         sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode(response.getSesscode()).build());
         sessionService.update(containerId, sessionHolder);
 
@@ -140,7 +140,7 @@ public abstract class ContainerSigningService {
 
         String sessionId = initSmartIdSign(smartIdClient, smartIdInformation, signableHash, documentNumber);
 
-        String generatedSignatureId = SessionIdGenerator.generateSessionId();
+        String generatedSignatureId = UUIDGenerator.generateUUID();
         sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(sessionId).build());
         sessionService.update(containerId, sessionHolder);
 

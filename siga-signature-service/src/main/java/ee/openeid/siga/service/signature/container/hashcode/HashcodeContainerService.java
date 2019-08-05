@@ -10,7 +10,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
-import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.session.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
@@ -40,13 +40,13 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
         OutputStream outputStream = new ByteArrayOutputStream();
         hashcodeContainer.save(outputStream);
 
-        String sessionId = SessionIdGenerator.generateSessionId();
+        String sessionId = UUIDGenerator.generateUUID();
         sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
         return sessionId;
     }
 
     public String uploadContainer(String container) {
-        String sessionId = SessionIdGenerator.generateSessionId();
+        String sessionId = UUIDGenerator.generateUUID();
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
         hashcodeContainer.open(inputStream);

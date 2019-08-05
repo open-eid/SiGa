@@ -11,7 +11,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
-import ee.openeid.siga.service.signature.session.SessionIdGenerator;
+import ee.openeid.siga.service.signature.session.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSDocument;
@@ -54,7 +54,7 @@ public class AsicContainerService implements AsicSessionHolder {
         ));
 
         Container container = containerBuilder.build();
-        String sessionId = SessionIdGenerator.generateSessionId();
+        String sessionId = UUIDGenerator.generateUUID();
         Session session = transformContainerToSession(containerName, sessionId, container);
         sessionService.update(sessionId, session);
         return sessionId;
@@ -68,7 +68,7 @@ public class AsicContainerService implements AsicSessionHolder {
             log.error("Invalid container:", e);
             throw new InvalidContainerException("Invalid container");
         }
-        String sessionId = SessionIdGenerator.generateSessionId();
+        String sessionId = UUIDGenerator.generateUUID();
         Session session = transformContainerToSession(containerName, sessionId, container);
         sessionService.update(sessionId, session);
         return sessionId;
@@ -163,7 +163,7 @@ public class AsicContainerService implements AsicSessionHolder {
     private void addDataFilesToContainer(Container container, List<DataFile> dataFiles) {
         dataFiles.forEach(dataFile -> {
             org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
-            DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
+            DSSDocument dssDocument = new InMemoryDocument(Base64.getDecoder().decode(dataFile.getContent().getBytes()), dataFile.getFileName());
             digidoc4jDataFile.setDocument(dssDocument);
             container.addDataFile(digidoc4jDataFile);
         });
@@ -204,7 +204,7 @@ public class AsicContainerService implements AsicSessionHolder {
                 .container(outputStream.toByteArray())
                 .build();
         container.getSignatures().forEach(signature ->
-                sessionHolder.addSignatureId(SessionIdGenerator.generateSessionId(), Arrays.hashCode(signature.getAdESSignature()))
+                sessionHolder.addSignatureId(UUIDGenerator.generateUUID(), Arrays.hashCode(signature.getAdESSignature()))
         );
         return sessionHolder;
     }
