@@ -110,7 +110,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     }
 
     private boolean isNewContainerUrl(String url) {
-        return url.endsWith("/upload/containers") || url.endsWith("/upload/containers") || url.endsWith("/containers") || url.endsWith("/hashcodecontainers");
+        return url.endsWith("/containers") || url.endsWith("/hashcodecontainers");
     }
 
     private void refreshConnectionData(SigaService sigaService, long requestSize, HttpServletFilterResponseWrapper response, String requestUrl) {

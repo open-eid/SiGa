@@ -6,13 +6,17 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
-import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -66,7 +70,7 @@ public class SivaClientTest {
 
     @Test
     public void siva404NotFound() throws Exception {
-        exceptionRule.expect(ClientException.class);
+        exceptionRule.expect(TechnicalException.class);
         exceptionRule.expectMessage("Unable to get valid response from client");
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
@@ -78,7 +82,7 @@ public class SivaClientTest {
 
     @Test
     public void siva500InternalServerError() throws Exception {
-        exceptionRule.expect(ClientException.class);
+        exceptionRule.expect(TechnicalException.class);
         exceptionRule.expectMessage("Unable to get valid response from client");
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()

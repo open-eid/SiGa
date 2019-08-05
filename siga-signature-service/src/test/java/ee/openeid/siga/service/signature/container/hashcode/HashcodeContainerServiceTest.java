@@ -116,7 +116,7 @@ public class HashcodeContainerServiceTest {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to add/remove data file. Container contains signature(s)");
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
-        containerService.addDataFile(CONTAINER_ID, createHashcodeDataFileListWithOneFile().get(0));
+        containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile());
     }
 
     @Test
@@ -126,7 +126,7 @@ public class HashcodeContainerServiceTest {
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
-        Result result = containerService.addDataFile(CONTAINER_ID, createHashcodeDataFileListWithOneFile().get(0));
+        Result result = containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile());
         Assert.assertEquals(Result.OK, result);
     }
 

@@ -130,7 +130,7 @@ public class AsicContainerServiceTest {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to add/remove data file. Container contains signature(s)");
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
-        containerService.addDataFile(CONTAINER_ID, createDataFileListWithOneFile().get(0));
+        containerService.addDataFiles(CONTAINER_ID, createDataFileListWithOneFile());
     }
 
     @Test
@@ -153,7 +153,7 @@ public class AsicContainerServiceTest {
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         List<DataFile> dataFiles = createDataFileListWithOneFile();
         dataFiles.get(0).setFileName("test.pdf");
-        Result result = containerService.addDataFile(CONTAINER_ID, dataFiles.get(0));
+        Result result = containerService.addDataFiles(CONTAINER_ID, dataFiles);
         Assert.assertEquals(Result.OK, result);
     }
 

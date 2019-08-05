@@ -62,7 +62,7 @@ public class RequestValidator {
         validateFileName(fileName, INVALID_DATA_FILE_NAME);
     }
 
-    public static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
+    private static void validateHashcodeDataFile(HashcodeDataFile dataFile) {
         validateFileName(dataFile.getFileName(), INVALID_DATA_FILE_NAME);
         validateFileSize(dataFile.getFileSize());
         validateHashSha256(dataFile.getFileHashSha256());

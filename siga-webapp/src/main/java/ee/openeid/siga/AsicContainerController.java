@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -233,11 +232,11 @@ public class AsicContainerController {
     @PostMapping(value = "/containers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerDataFileResponse addContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerDataFileRequest containerDataFileRequest) {
         RequestValidator.validateContainerId(containerId);
-        DataFile dataFile = containerDataFileRequest.getDataFile();
-        RequestValidator.validateDataFile(dataFile);
+        List<DataFile> dataFiles = containerDataFileRequest.getDataFiles();
+        RequestValidator.validateDataFiles(dataFiles);
 
-        ee.openeid.siga.common.DataFile dataFileForApplication = RequestTransformer.transformDataFilesForApplication(Collections.singletonList(dataFile)).get(0);
-        Result result = containerService.addDataFile(containerId, dataFileForApplication);
+        List<ee.openeid.siga.common.DataFile> dataFilesForApplication = RequestTransformer.transformDataFilesForApplication(dataFiles);
+        Result result = containerService.addDataFiles(containerId, dataFilesForApplication);
         CreateContainerDataFileResponse response = new CreateContainerDataFileResponse();
         response.setResult(result.name());
         return response;

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -228,11 +227,11 @@ public class HashcodeContainerController {
     @PostMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerDataFileResponse addHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerDataFileRequest containerDataFileRequest) {
         RequestValidator.validateContainerId(containerId);
-        HashcodeDataFile hashcodeDataFile = containerDataFileRequest.getDataFile();
-        RequestValidator.validateHashcodeDataFile(hashcodeDataFile);
+        List<HashcodeDataFile> hashcodeDataFiles = containerDataFileRequest.getDataFiles();
+        RequestValidator.validateHashcodeDataFiles(hashcodeDataFiles);
 
-        ee.openeid.siga.common.HashcodeDataFile dataFileForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(Collections.singletonList(hashcodeDataFile)).get(0);
-        Result result = containerService.addDataFile(containerId, dataFileForApplication);
+        List<ee.openeid.siga.common.HashcodeDataFile> dataFilesForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(hashcodeDataFiles);
+        Result result = containerService.addDataFiles(containerId, dataFilesForApplication);
         CreateHashcodeContainerDataFileResponse response = new CreateHashcodeContainerDataFileResponse();
         response.setResult(result.name());
         return response;

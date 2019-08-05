@@ -465,11 +465,13 @@ public class SigaApplicationTests {
     private void addHashcodeDataFile(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
         dataFile.put("fileName", "test1.txt");
         dataFile.put("fileHashSha256", "WxFhjC5EAnh30M0JIe0Wa58Xb1BYf8kedTTdKUbbd9Y=");
         dataFile.put("fileHashSha512", "HD6Xh+Y6oIZnXv4XqbKxrb6t3RkoPYv+NkqOBE8MwkssuATRE2aFBp8Nm9kp/Xn5a4l2Ki8QkX5qIUlbXQgO4Q==");
         dataFile.put("fileSize", 10);
-        request.put("dataFile", dataFile);
+        dataFiles.put(dataFile);
+        request.put("dataFiles", dataFiles);
         postRequest("/hashcodecontainers/" + containerId + "/datafiles", request, CreateHashcodeContainerDataFileResponse.class);
     }
 

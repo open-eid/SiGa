@@ -6,6 +6,7 @@ import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -46,7 +47,7 @@ public class SivaClient {
             if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
                 throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
             } else {
-                throw new ClientException("Unable to get valid response from client");
+                throw new TechnicalException("Unable to get valid response from client");
             }
         }
     }
@@ -59,7 +60,7 @@ public class SivaClient {
             return validate(request, VALIDATION_ENDPOINT);
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
-            throw new ClientException("Unable to get valid response from client");
+            throw new TechnicalException("Unable to get valid response from client");
         }
     }
 
@@ -68,7 +69,7 @@ public class SivaClient {
         responseEntity = restTemplate.exchange(configurationProperties.getUrl() + validationEndpoint,
                 HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
         if (responseEntity.getBody() == null) {
-            throw new ClientException("Unable to parse client empty response");
+            throw new TechnicalException("Unable to parse client empty response");
         }
         log.info("Container validation details received successfully");
         return responseEntity.getBody().getValidationReport().getValidationConclusion();

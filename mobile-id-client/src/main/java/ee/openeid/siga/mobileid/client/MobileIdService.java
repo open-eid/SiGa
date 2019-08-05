@@ -7,6 +7,7 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusRequest;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.HashType;
@@ -52,7 +53,7 @@ public class MobileIdService extends WebServiceGatewaySupport {
             throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
         } catch (Exception e) {
             log.error("Invalid DigiDocService response:", e);
-            throw new ClientException("Unable to receive valid response from DigiDocService");
+            throw new TechnicalException("Unable to receive valid response from DigiDocService");
         }
     }
 
@@ -67,7 +68,7 @@ public class MobileIdService extends WebServiceGatewaySupport {
             throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
         } catch (Exception e) {
             log.error("Invalid DigiDocService response:", e);
-            throw new ClientException("Unable to receive valid response from DigiDocService");
+            throw new TechnicalException("Unable to receive valid response from DigiDocService");
         }
     }
 

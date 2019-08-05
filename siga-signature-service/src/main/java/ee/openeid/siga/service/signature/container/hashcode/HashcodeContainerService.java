@@ -98,10 +98,10 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
         return sessionHolder.getDataFiles();
     }
 
-    public Result addDataFile(String containerId, HashcodeDataFile dataFile) {
+    public Result addDataFiles(String containerId, List<HashcodeDataFile> dataFiles) {
         HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
-        sessionHolder.getDataFiles().add(dataFile);
+        sessionHolder.getDataFiles().addAll(dataFiles);
         sessionService.update(containerId, sessionHolder);
         return Result.OK;
     }

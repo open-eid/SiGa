@@ -5,6 +5,7 @@ import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.model.dds.GetMobileCertificate;
 import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.dds.ReturnCertDataType;
@@ -40,7 +41,7 @@ public class DigiDocService extends WebServiceGatewaySupport {
             throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
         } catch (Exception e) {
             log.error("Invalid DigiDocService response:", e);
-            throw new ClientException("Unable to receive valid response from DigiDocService");
+            throw new TechnicalException("Unable to receive valid response from DigiDocService");
         }
     }
 

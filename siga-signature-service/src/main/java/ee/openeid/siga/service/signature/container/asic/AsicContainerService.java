@@ -125,16 +125,13 @@ public class AsicContainerService implements AsicSessionHolder {
         return dataFiles.stream().map(this::transformDataFile).collect(Collectors.toList());
     }
 
-    public Result addDataFile(String containerId, DataFile dataFile) {
+    public Result addDataFiles(String containerId, List<DataFile> dataFiles) {
         AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
 
-        org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
-        DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
-        digidoc4jDataFile.setDocument(dssDocument);
+        addDataFilesToContainer(container, dataFiles);
 
-        container.addDataFile(digidoc4jDataFile);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
         sessionHolder.setContainer(outputStream.toByteArray());
@@ -161,6 +158,15 @@ public class AsicContainerService implements AsicSessionHolder {
     public String closeSession(String containerId) {
         sessionService.remove(containerId);
         return Result.OK.name();
+    }
+
+    private void addDataFilesToContainer(Container container, List<DataFile> dataFiles) {
+        dataFiles.forEach(dataFile -> {
+            org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
+            DSSDocument dssDocument = new InMemoryDocument(dataFile.getContent().getBytes(), dataFile.getFileName());
+            digidoc4jDataFile.setDocument(dssDocument);
+            container.addDataFile(digidoc4jDataFile);
+        });
     }
 
     private void validateIfSessionMutable(Container container) {

@@ -27,13 +27,14 @@ public class SigaHealthIndicatorTest {
     }
 
     @Test
-    public void unknownStatus() {
+    public void igniteDownStatus() {
+        Mockito.when(sessionService.getCacheSize()).thenThrow(new RuntimeException("Invalid ignite session"));
         Health health = sigaHealthIndicator.health();
-        Assert.assertEquals(Status.UNKNOWN, health.getStatus());
+        Assert.assertEquals(Status.DOWN, health.getStatus());
     }
 
     @Test
-    public void upStatus() {
+    public void igniteUpStatus() {
         Mockito.when(sessionService.getCacheSize()).thenReturn(2);
         Health health = sigaHealthIndicator.health();
         Assert.assertEquals(Status.UP, health.getStatus());

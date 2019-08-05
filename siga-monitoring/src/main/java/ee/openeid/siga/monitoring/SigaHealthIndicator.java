@@ -23,28 +23,19 @@ public class SigaHealthIndicator implements HealthIndicator {
     private Health.Builder getHealthBuilder(Health igniteHealth) {
         if (Status.DOWN == igniteHealth.getStatus()) {
             return Health.down();
-        } else if (Status.UNKNOWN == igniteHealth.getStatus()) {
-            return Health.unknown();
         }
         return Health.up();
     }
 
     private Health.Builder getIgniteHealthBuilder() {
         Health.Builder dbBuilder = new Health.Builder();
-        int igniteCacheSize = sessionService.getCacheSize();
-        if (Status.UP == getIgniteStatus(igniteCacheSize)) {
+        try {
+            int igniteCacheSize = sessionService.getCacheSize();
             dbBuilder.up().withDetail("igniteActiveContainers", igniteCacheSize);
-        } else {
-            dbBuilder.unknown().withDetail("igniteActiveContainers", igniteCacheSize);
+        } catch (Exception e) {
+            dbBuilder.down().withDetail("igniteActiveContainers", 0);
         }
         return dbBuilder;
-    }
-
-    private Status getIgniteStatus(int size) {
-        if (size > 0) {
-            return Status.UP;
-        }
-        return Status.UNKNOWN;
     }
 
     @Autowired

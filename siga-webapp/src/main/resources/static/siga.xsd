@@ -220,7 +220,7 @@
     </xs:complexType>
     <xs:complexType name="createHashcodeContainerDataFileRequest">
         <xs:sequence>
-            <xs:element name="dataFile" type="tns:hashcodeDataFile"/>
+            <xs:element name="dataFiles" type="tns:hashcodeDataFile" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createHashcodeContainerDataFileResponse">
@@ -393,7 +393,7 @@
     </xs:complexType>
     <xs:complexType name="createContainerDataFileRequest">
         <xs:sequence>
-            <xs:element name="dataFile" type="tns:dataFile"/>
+            <xs:element name="dataFiles" type="tns:dataFile" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createContainerDataFileResponse">
