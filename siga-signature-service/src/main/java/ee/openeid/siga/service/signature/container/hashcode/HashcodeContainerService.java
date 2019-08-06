@@ -10,7 +10,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
-import ee.openeid.siga.service.signature.session.UUIDGenerator;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;

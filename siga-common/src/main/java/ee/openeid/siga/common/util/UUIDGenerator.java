@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.session;
+package ee.openeid.siga.common.util;
 
 import java.util.UUID;
 

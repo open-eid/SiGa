@@ -10,7 +10,7 @@ import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
-import ee.openeid.siga.service.signature.session.UUIDGenerator;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;

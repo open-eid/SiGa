@@ -18,7 +18,7 @@ import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurati
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
-import ee.openeid.siga.service.signature.session.UUIDGenerator;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;

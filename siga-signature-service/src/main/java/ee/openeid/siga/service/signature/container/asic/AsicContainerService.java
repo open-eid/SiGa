@@ -11,7 +11,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
-import ee.openeid.siga.service.signature.session.UUIDGenerator;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.DSSDocument;
