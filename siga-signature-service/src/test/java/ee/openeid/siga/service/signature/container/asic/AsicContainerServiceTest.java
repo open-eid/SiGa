@@ -18,7 +18,6 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -158,7 +157,6 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    @Ignore("DD4J-452")
     public void successfulRemoveDataFile() {
 
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST))

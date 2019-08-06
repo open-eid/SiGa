@@ -76,14 +76,10 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public ContainerInfo getContainer(String containerId) {
         AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        container.save(outputStream);
 
         ContainerInfo containerInfo = new ContainerInfo();
         containerInfo.setContainerName(sessionHolder.getContainerName());
-        containerInfo.setContainer(new String(Base64.getEncoder().encode(outputStream.toByteArray())));
+        containerInfo.setContainer(new String(Base64.getEncoder().encode(sessionHolder.getContainer())));
         return containerInfo;
     }
 
@@ -151,7 +147,12 @@ public class AsicContainerService implements AsicSessionHolder {
             throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
         }
         container.removeDataFile(dataFile.get());
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
+        sessionHolder.setContainer(outputStream.toByteArray());
         sessionService.update(containerId, sessionHolder);
+
         return Result.OK;
     }
 

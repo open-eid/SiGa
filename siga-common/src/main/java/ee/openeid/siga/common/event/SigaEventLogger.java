@@ -187,7 +187,6 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
     @Override
     public void afterPropertiesSet() {
         logObservers.add(LogObserver.buildForSkDataLoader(this, Level.DEBUG));
-        logObservers.add(LogObserver.buildForOCSPCertificateVerifier(this, Level.ERROR));
     }
 
     @Override

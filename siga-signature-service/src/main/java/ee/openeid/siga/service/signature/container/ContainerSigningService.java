@@ -37,6 +37,7 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.X509Cert;
+import org.digidoc4j.exceptions.NetworkException;
 import org.digidoc4j.exceptions.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -240,8 +241,10 @@ public abstract class ContainerSigningService {
 
     private void logExceptionEvent(SigaEvent ocspStartEvent, TechnicalException e) {
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-        if (StringUtils.contains(errorMessage, "Unable to process GET call for url")) {
-            String errorUrl = StringUtils.substringBetween(e.getCause().getMessage(), "'", "'");
+
+        if (e instanceof NetworkException) {
+            NetworkException networkException = (NetworkException) e;
+            String errorUrl = networkException.getServiceUrl();
             sigaEventLogger.logExceptionEventFor(ocspStartEvent, SIGNATURE_FINALIZING_REQUEST_ERROR, errorMessage);
             Predicate<SigaEvent> predicate = event -> event.containsParameterWithValue(errorUrl);
             sigaEventLogger.getFirstMachingEventAfter(ocspStartEvent, predicate).ifPresent(requestEventFromDigidoc -> {

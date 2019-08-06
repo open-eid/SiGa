@@ -84,7 +84,7 @@ public class SigaApplicationTests {
     }
 
     @Test
-    @Ignore("DD4J-452")
+    @Ignore("DD4J-461")
     public void dataFileModifyingContainerFlow() throws Exception {
         String containerId = createContainer();
         Container originalContainer = getContainer(containerId);
@@ -92,6 +92,9 @@ public class SigaApplicationTests {
         Assert.assertEquals(1, originalContainer.getDataFiles().size());
         addDataFile(containerId);
         Container updatedContainer = getContainer(containerId);
+        Assert.assertEquals("random text", new String(updatedContainer.getDataFiles().get(0).getBytes()));
+        Assert.assertEquals("random text", new String(updatedContainer.getDataFiles().get(1).getBytes()));
+
         Assert.assertEquals(2, updatedContainer.getDataFiles().size());
         deleteDataFile(containerId, updatedContainer.getDataFiles().get(0).getName());
         Container updatedContainer2 = getContainer(containerId);
@@ -445,7 +448,7 @@ public class SigaApplicationTests {
         JSONArray dataFiles = new JSONArray();
         request.put("containerName", "test.asice");
         dataFile.put("fileName", "test.txt");
-        dataFile.put("fileContent", "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=");
+        dataFile.put("fileContent", "cmFuZG9tIHRleHQ=");
         dataFiles.put(dataFile);
         request.put("dataFiles", dataFiles);
         CreateContainerResponse response = (CreateContainerResponse) postRequest("/containers", request, CreateContainerResponse.class);
@@ -456,9 +459,11 @@ public class SigaApplicationTests {
     private void addDataFile(String containerId) throws Exception {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
         dataFile.put("fileName", "test1.txt");
-        dataFile.put("fileContent", "WxFhjC5EAnh30M0JIe0Wa58Xb1BYf8kedTTdKUbbd9Y=");
-        request.put("dataFile", dataFile);
+        dataFile.put("fileContent", "cmFuZG9tIHRleHQ=");
+        dataFiles.put(dataFile);
+        request.put("dataFiles", dataFiles);
         postRequest("/containers/" + containerId + "/datafiles", request, CreateContainerDataFileResponse.class);
     }
 

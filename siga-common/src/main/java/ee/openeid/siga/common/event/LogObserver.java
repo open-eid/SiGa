@@ -5,16 +5,13 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import eu.europa.esig.dss.validation.OCSPCertificateVerifier;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
-import org.digidoc4j.impl.asic.SkDataLoader;
+import org.digidoc4j.impl.SkDataLoader;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
-import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
-import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 
 class LogObserver extends AppenderBase<ILoggingEvent> {
@@ -37,29 +34,13 @@ class LogObserver extends AppenderBase<ILoggingEvent> {
         Consumer<ILoggingEvent> eventConsumer = loggingEvent -> {
             String message = loggingEvent.getFormattedMessage();
             String errorUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "<", ">");
-            if (message.contains("Getting OCSP response from")) {
+            if (message.contains("Getting OCSP response from") || message.contains("Getting AIA_OCSP response from")) {
                 sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, REQUEST_URL, errorUrl));
-            } else if (message.contains("Getting Timestamp response from")) {
+            } else if (message.contains("Getting TSP response from")) {
                 sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, REQUEST_URL, errorUrl));
             }
         };
         return new LogObserver(SkDataLoader.class, eventConsumer, level);
-    }
-
-    @Builder(buildMethodName = "buildForOCSPCertificateVerifier")
-    public static LogObserver buildForOCSPCertificateVerifier(final SigaEventLogger sigaEventLogger, Level level) {
-        Consumer<ILoggingEvent> eventConsumer = loggingEvent -> {
-            final String message = loggingEvent.getFormattedMessage();
-            final String errorUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "'", "'");
-            if (message.contains("OCSP DSS Exception: Unable to process GET call for url")) {
-                sigaEventLogger.getLastMachingEvent(event -> SigaEventName.OCSP_REQUEST.equals(event.getEventName()) && event.containsParameterWithValue(errorUrl)).ifPresent(e -> {
-                    e.setErrorCode(SIGNATURE_FINALIZING_REQUEST_ERROR);
-                    e.setErrorMessage(message);
-                    e.setResultType(EXCEPTION);
-                });
-            }
-        };
-        return new LogObserver(OCSPCertificateVerifier.class, eventConsumer, level);
     }
 
     @Override

@@ -176,35 +176,39 @@ public class SignatureFinalizingTest {
             assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspEvent.getErrorCode());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), tsaRequestEvent.getErrorCode());
-            assertEquals("Unable to process GET call for url 'http://demo.invalid.url.sk.ee/tsa'", ocspEvent.getErrorMessage());
-            assertEquals("Unable to process GET call for url 'http://demo.invalid.url.sk.ee/tsa'", tsaRequestEvent.getErrorMessage());
+            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>", ocspEvent.getErrorMessage());
+            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>", tsaRequestEvent.getErrorMessage());
             throw e;
         }
     }
 
-    @Test
+    @Test(expected = SignatureCreationException.class)
     public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         when(configuration.getOcspSource()).thenReturn("http://aia.invalid.url.sk.ee/esteid2018");
-        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        sigaEventLogger.logEvents();
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
-        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
-        SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
+        try {
+            Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
+            Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+        } catch (SignatureCreationException e) {
+            assertThat(e.getMessage(), containsString("Unable to finalize signature"));
+            sigaEventLogger.logEvents();
+            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+            SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+            SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
 
-        assertNotNull(ocspEvent);
-        assertNotNull(tsaRequestEvent);
-        assertNotNull(ocspRequestEvent);
-        assertEquals(SUCCESS, tsaRequestEvent.getResultType());
-        assertNull(tsaRequestEvent.getErrorCode());
-        assertNull(tsaRequestEvent.getErrorMessage());
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-        assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
-        assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
-        assertEquals("OCSP DSS Exception: Unable to process GET call for url 'http://aia.invalid.url.sk.ee/esteid2018'", ocspRequestEvent.getErrorMessage());
-        assertEquals(SUCCESS, ocspEvent.getResultType());
-        assertEquals(Result.OK, result);
+            assertNotNull(ocspEvent);
+            assertNotNull(tsaRequestEvent);
+            assertNotNull(ocspRequestEvent);
+            assertEquals(SUCCESS, tsaRequestEvent.getResultType());
+            assertNull(tsaRequestEvent.getErrorCode());
+            assertNull(tsaRequestEvent.getErrorMessage());
+            assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+            assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
+            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
+            assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>", ocspRequestEvent.getErrorMessage());
+            throw e;
+        }
+
     }
 
     /**
