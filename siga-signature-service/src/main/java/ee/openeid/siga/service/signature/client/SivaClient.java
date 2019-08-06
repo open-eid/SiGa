@@ -29,7 +29,6 @@ import java.util.List;
 @Slf4j
 @Component
 public class SivaClient {
-    private static final String SIGNATURE_FILE_NAME = "signatures0.xml";
     private static final String HASHCODE_VALIDATION_ENDPOINT = "/validateHashcode";
     private static final String VALIDATION_ENDPOINT = "/validate";
 
@@ -37,18 +36,20 @@ public class SivaClient {
     private SivaConfigurationProperties configurationProperties;
     private HashcodeContainerService hashcodeContainerService;
 
-    public ValidationConclusion validateHashcodeContainer(HashcodeSignatureWrapper signatureWrapper, List<HashcodeDataFile> dataFiles) {
-        SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrapper, dataFiles);
+    public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
+        SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
         try {
             return validate(request, HASHCODE_VALIDATION_ENDPOINT);
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
-            Signature signature = hashcodeContainerService.transformSignature(signatureWrapper);
-            if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
-                throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
-            } else {
-                throw new TechnicalException("Unable to get valid response from client");
-            }
+            signatureWrappers.forEach(signatureWrapper -> {
+                Signature signature = hashcodeContainerService.transformSignature(signatureWrapper);
+                if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
+                    throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
+                }
+            });
+            throw new TechnicalException("Unable to get valid response from client");
+
         }
     }
 
@@ -75,28 +76,31 @@ public class SivaClient {
         return responseEntity.getBody().getValidationReport().getValidationConclusion();
     }
 
-    private SivaHashcodeValidationRequest createHashcodeRequest(HashcodeSignatureWrapper
-                                                                        signatureWrapper, List<HashcodeDataFile> dataFiles) {
+    private SivaHashcodeValidationRequest createHashcodeRequest(List<HashcodeSignatureWrapper>
+                                                                        signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = new SivaHashcodeValidationRequest();
-        request.setFilename(SIGNATURE_FILE_NAME);
-        request.setSignatureFile(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));
+        signatureWrappers.forEach(signatureWrapper -> {
+            SignatureFile signatureFile = new SignatureFile();
+            signatureFile.setSignature(new String(Base64.getEncoder().encode(signatureWrapper.getSignature())));
 
-        List<SivaDataFile> sivaDataFiles = new ArrayList<>();
-        dataFiles.forEach(dataFile -> {
-            String hash;
-            String hashAlgorithm = getDataFileHashAlgorithm(signatureWrapper.getDataFiles(), dataFile);
-            if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {
-                hash = dataFile.getFileHashSha256();
-            } else {
-                hash = dataFile.getFileHashSha512();
-            }
-            SivaDataFile sivaDataFile = new SivaDataFile();
-            sivaDataFile.setFilename(dataFile.getFileName());
-            sivaDataFile.setHash(hash);
-            sivaDataFile.setHashAlgo(hashAlgorithm);
-            sivaDataFiles.add(sivaDataFile);
+            List<SivaDataFile> sivaDataFiles = new ArrayList<>();
+            dataFiles.forEach(dataFile -> {
+                String hash;
+                String hashAlgorithm = getDataFileHashAlgorithm(signatureWrapper.getDataFiles(), dataFile);
+                if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm)) {
+                    hash = dataFile.getFileHashSha256();
+                } else {
+                    hash = dataFile.getFileHashSha512();
+                }
+                SivaDataFile sivaDataFile = new SivaDataFile();
+                sivaDataFile.setFilename(dataFile.getFileName());
+                sivaDataFile.setHash(hash);
+                sivaDataFile.setHashAlgo(hashAlgorithm);
+                sivaDataFiles.add(sivaDataFile);
+            });
+            signatureFile.setDatafiles(sivaDataFiles);
+            request.getSignatureFiles().add(signatureFile);
         });
-        request.setDatafiles(sivaDataFiles);
         return request;
     }
 

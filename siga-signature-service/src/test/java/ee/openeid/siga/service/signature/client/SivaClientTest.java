@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 import static org.mockito.Mockito.when;
 
 
@@ -97,9 +99,9 @@ public class SivaClientTest {
         exceptionRule.expect(InvalidHashAlgorithmException.class);
         exceptionRule.expectMessage("Container contains invalid hash algorithms");
 
-        HashcodeSignatureWrapper signatureWrapper = RequestUtil.createSignatureWrapper();
-        signatureWrapper.getDataFiles().get(0).setHashAlgo("SHA386");
-        sivaClient.validateHashcodeContainer(signatureWrapper, RequestUtil.createHashcodeDataFiles());
+        List<HashcodeSignatureWrapper> signatureWrappers = RequestUtil.createSignatureWrapper();
+        signatureWrappers.get(0).getDataFiles().get(0).setHashAlgo("SHA386");
+        sivaClient.validateHashcodeContainer(signatureWrappers, RequestUtil.createHashcodeDataFiles());
     }
 
     protected String toJson(Object request) {

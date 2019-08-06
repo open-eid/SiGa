@@ -61,11 +61,11 @@ public class RequestUtil {
         return dataFiles;
     }
 
-    public static HashcodeSignatureWrapper createSignatureWrapper() throws IOException, URISyntaxException {
+    public static List<HashcodeSignatureWrapper> createSignatureWrapper() throws IOException, URISyntaxException {
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
-        return hashcodeContainer.getSignatures().get(0);
+        return hashcodeContainer.getSignatures();
     }
 
     public static ValidationResponse createValidationResponse() {
@@ -98,7 +98,7 @@ public class RequestUtil {
 
     public static HashcodeContainerSessionHolder createHashcodeSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
-        signatureWrappers.add(RequestUtil.createSignatureWrapper());
+        signatureWrappers.add(RequestUtil.createSignatureWrapper().get(0));
         return HashcodeContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)

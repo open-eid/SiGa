@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -43,34 +42,7 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     }
 
     private ValidationConclusion createValidationConclusion(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
-        List<ValidationConclusion> validationConclusions = new ArrayList<>();
-        signatureWrappers.forEach(signatureWrapper ->
-                validationConclusions.add(sivaClient.validateHashcodeContainer(signatureWrapper, dataFiles)));
-        return mergeValidationConclusions(validationConclusions);
-    }
-
-    private ValidationConclusion mergeValidationConclusions(List<ValidationConclusion> validationConclusions) {
-        int signaturesCount = 0;
-        int validSignaturesCount = 0;
-        ValidationConclusion response = null;
-
-        for (ValidationConclusion validationConclusion : validationConclusions) {
-            if (signaturesCount == 0) {
-                response = validationConclusion;
-                validSignaturesCount = validationConclusion.getValidSignaturesCount();
-            } else {
-                response.getSignatures().addAll(validationConclusion.getSignatures());
-                validSignaturesCount = validSignaturesCount + validationConclusion.getValidSignaturesCount();
-            }
-            signaturesCount = signaturesCount + validationConclusion.getSignaturesCount();
-        }
-
-        if (response != null) {
-            response.setSignaturesCount(signaturesCount);
-            response.setValidSignaturesCount(validSignaturesCount);
-        }
-
-        return response;
+        return sivaClient.validateHashcodeContainer(signatureWrappers, dataFiles);
     }
 
     @Autowired
