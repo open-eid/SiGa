@@ -116,13 +116,6 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void invalidMobileSignHashStatusTest() throws IOException {
-        exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage("Invalid DigiDocService response");
-        invalidMobileSignHashStatus();
-    }
-
-    @Test
     public void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
         assertSuccessfulMobileIdSignatureProcessing();
     }
