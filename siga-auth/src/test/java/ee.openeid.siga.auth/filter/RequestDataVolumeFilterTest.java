@@ -127,6 +127,17 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
+    public void connectionSizeLimitless() throws ServletException, IOException {
+        Optional<SigaService> sigaService = mockSigaService();
+        sigaService.get().setMaxConnectionSize(-1);
+        when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
+        filter.doFilter(request, response, filterChain);
+        verify(connectionRepository).findAllByServiceId(SERVICE_ID);
+        verify(connectionRepository, never()).findAllByContainerId(any());
+        verify(connectionRepository).saveAndFlush(any(SigaConnection.class));
+    }
+
+    @Test
     public void connectionCountExceeded() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionCount(0);
@@ -146,12 +157,24 @@ public class RequestDataVolumeFilterTest {
         Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of total connections exceeded\"}", response.getContentAsString());
     }
 
+    @Test
+    public void connectionSizeExceeded() throws ServletException, IOException {
+        Optional<SigaService> sigaService = mockSigaService();
+        sigaService.get().setMaxConnectionSize(0);
+        when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
+        filterChain = new MockFilterChain();
+        filter.doFilter(request, response, filterChain);
+        Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of connection exceeded\"}", response.getContentAsString());
+
+    }
+
     private Optional<SigaService> mockSigaService() {
         SigaService sigaService = new SigaService();
         sigaService.setName("service");
         sigaService.setId(SERVICE_ID);
         sigaService.setMaxConnectionCount(2);
         sigaService.setMaxConnectionsSize(500);
+        sigaService.setMaxConnectionSize(2);
         return Optional.of(sigaService);
     }
 

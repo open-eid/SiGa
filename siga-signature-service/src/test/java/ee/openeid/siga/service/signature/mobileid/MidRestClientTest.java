@@ -39,6 +39,7 @@ public class MidRestClientTest {
     public void invalidPhoneNo() {
         MobileIdInformation mobileIdInformation = MobileIdInformation.builder()
                 .relyingPartyName("DEMO")
+                .relyingPartyUUID("00000000-0000-0000-0000-000000000000")
                 .phoneNo("+37292382239")
                 .personIdentifier("60001019906")
                 .build();
@@ -48,11 +49,7 @@ public class MidRestClientTest {
 
     @Test
     public void successfulGetCertificateRequest() {
-        MobileIdInformation mobileIdInformation = MobileIdInformation.builder()
-                .relyingPartyName("DEMO")
-                .phoneNo("+37200000766")
-                .personIdentifier("60001019906")
-                .build();
+        MobileIdInformation mobileIdInformation = createMobileIdInformation();
 
         X509Certificate certificate = midRestClient.getCertificate(mobileIdInformation);
         Assert.assertEquals("CN=TEST of ESTEID-SK 2015, OID.2.5.4.97=NTREE-10747013, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
@@ -104,6 +101,7 @@ public class MidRestClientTest {
     private MobileIdInformation createMobileIdInformation() {
         return MobileIdInformation.builder()
                 .relyingPartyName("DEMO")
+                .relyingPartyUUID("00000000-0000-0000-0000-000000000000")
                 .phoneNo("+37200000766")
                 .personIdentifier("60001019906")
                 .build();

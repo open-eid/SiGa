@@ -48,7 +48,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
 
                 Optional<List<SigaConnection>> optionalSigaConnections = connectionRepository.findAllByServiceId(sigaService.getId());
                 List<SigaConnection> connections = optionalSigaConnections.orElseGet(ArrayList::new);
-                boolean isRequestValid = validate(wrapperResponse, sigaService, connections, requestSize);
+                boolean isRequestValid = validate(wrapperResponse, sigaService, connections, requestSize, requestUrl);
                 if (isRequestValid)
                     filterChain.doFilter(request, wrapperResponse);
 
@@ -85,8 +85,10 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         return suffix.substring(0, suffix.indexOf("/"));
     }
 
-    private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength) throws IOException {
-        if (!validateConnectionCount(wrapperResponse, sigaService, connections.size()))
+    private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength, String requestUrl) throws IOException {
+        if (!validateConnectionsCount(wrapperResponse, sigaService, connections.size()))
+            return false;
+        if (!validateCurrentConnectionCount(wrapperResponse, sigaService, requestUrl, connections, requestLength))
             return false;
         long existingSize = calculateSize(connections);
         return validationConnectionsSize(wrapperResponse, sigaService, existingSize, requestLength);
@@ -153,11 +155,32 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         return true;
     }
 
-    private boolean validateConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {
+    private boolean validateConnectionsCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {
         if (sigaService.getMaxConnectionCount() == LIMITLESS)
             return true;
         if (currentCount + 1 >= sigaService.getMaxConnectionCount()) {
             throwError(wrapperResponse, "Number of max connections exceeded");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateCurrentConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, String requestUrl, List<SigaConnection> connections, double newSize) throws IOException {
+        if (sigaService.getMaxConnectionSize() == LIMITLESS) {
+            return true;
+        }
+        long currentSize = 0;
+        boolean isNewContainer = isNewContainerUrl(requestUrl);
+        if (!isNewContainer) {
+            String containerId = getContainerIdFromUrl(requestUrl);
+            currentSize = connections.stream()
+                    .filter(connection -> connection.getContainerId() != null && connection.getContainerId().equals(containerId))
+                    .mapToLong(SigaConnection::getSize)
+                    .sum();
+        }
+        double currentSizeInMb = (currentSize + newSize) / 1024 / 1024;
+        if (currentSizeInMb >= sigaService.getMaxConnectionSize()) {
+            throwError(wrapperResponse, "Size of connection exceeded");
             return false;
         }
         return true;

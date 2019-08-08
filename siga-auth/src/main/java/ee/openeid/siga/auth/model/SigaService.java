@@ -60,4 +60,5 @@ public class SigaService {
     private Boolean detailedBilling;
     private long maxConnectionCount;
     private long maxConnectionsSize;
+    private long maxConnectionSize;
 }
