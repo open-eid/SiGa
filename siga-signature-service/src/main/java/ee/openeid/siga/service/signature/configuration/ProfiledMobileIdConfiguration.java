@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.configuration;
 
 import ee.openeid.siga.service.signature.mobileid.DigiDocServiceClient;
+import ee.openeid.siga.service.signature.mobileid.MidRestClient;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,13 +11,13 @@ import org.springframework.context.annotation.Profile;
 public class ProfiledMobileIdConfiguration {
 
     @Bean
-    @Profile("mid-rest")
+    @Profile("midRest")
     public MobileIdClient midrestClient() {
-        return null;
+        return new MidRestClient();
     }
 
     @Bean
-    @Profile("!mid-rest")
+    @Profile("!midRest")
     public MobileIdClient digidocServiceClient() {
         return new DigiDocServiceClient();
     }

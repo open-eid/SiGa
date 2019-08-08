@@ -45,9 +45,19 @@
             <version>1.1</version>
         </dependency>
         <dependency>
+            <groupId>ee.sk.mid</groupId>
+            <artifactId>mid-rest-java-client</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <version>2.29</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.62</version>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>

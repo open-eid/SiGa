@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 public class DigiDoc4jConfigurationProperties {
-    @NotBlank(message = "siga.dd4j.configuration-location propery must be set")
+    @NotBlank(message = "siga.dd4j.configuration-location property must be set")
     private String configurationLocation;
     private String tspSource;
 }

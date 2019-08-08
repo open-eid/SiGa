@@ -23,7 +23,8 @@ import javax.net.ssl.SSLContext;
 @EnableConfigurationProperties({
         SivaConfigurationProperties.class,
         MobileServiceConfigurationProperties.class,
-        SmartIdServiceConfigurationProperties.class
+        SmartIdServiceConfigurationProperties.class,
+        MidRestConfigurationProperties.class
 })
 public class ClientConfiguration {
 

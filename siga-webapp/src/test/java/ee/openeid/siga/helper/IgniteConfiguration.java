@@ -1,4 +1,4 @@
-package ee.openeid.siga;
+package ee.openeid.siga.helper;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -13,6 +13,10 @@ public class IgniteConfiguration {
 
     @Bean(destroyMethod = "close")
     public Ignite ignite() throws IgniteException {
-        return Ignition.start("ignite-test-configuration.xml");
+        try {
+            return Ignition.start("ignite-test-configuration.xml");
+        } catch (Exception e) {
+            return Ignition.start();
+        }
     }
 }

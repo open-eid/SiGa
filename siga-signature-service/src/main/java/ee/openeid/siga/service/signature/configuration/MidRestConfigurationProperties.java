@@ -5,13 +5,11 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotBlank;
-
-@ConfigurationProperties(prefix = "siga.siva")
+@ConfigurationProperties(prefix = "siga.midrest")
 @Validated
 @Getter
 @Setter
-public class SivaConfigurationProperties {
-    @NotBlank(message = "siga.siva.url property must be set")
+public class MidRestConfigurationProperties {
+
     private String url;
 }

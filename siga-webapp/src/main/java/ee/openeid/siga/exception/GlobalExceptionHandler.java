@@ -3,6 +3,7 @@ package ee.openeid.siga.exception;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
+import ee.sk.mid.exception.MidException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -32,6 +33,16 @@ public class GlobalExceptionHandler {
         log.error("Siga request exception - {}", exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
+        errorResponse.setErrorMessage(exception.getMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(MidException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponse midException(Exception exception) {
+        log.error("Siga request exception - {}", exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorCode(ErrorResponseCode.MID_EXCEPTION.name());
         errorResponse.setErrorMessage(exception.getMessage());
         return errorResponse;
     }
