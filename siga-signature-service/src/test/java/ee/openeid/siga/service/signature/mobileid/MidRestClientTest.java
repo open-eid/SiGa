@@ -81,7 +81,7 @@ public class MidRestClientTest {
 
         InitMidSignatureResponse response = midRestClient.initMobileSigning(dataToSign, mobileIdInformation);
 
-        GetStatusResponse statusResponse = midRestClient.getStatus(response.getSessionCode());
+        GetStatusResponse statusResponse = midRestClient.getStatus(response.getSessionCode(), createMobileIdInformation());
         Assert.assertEquals("OK", statusResponse.getStatus());
         Assert.assertTrue(statusResponse.getSignature().length > 1);
     }

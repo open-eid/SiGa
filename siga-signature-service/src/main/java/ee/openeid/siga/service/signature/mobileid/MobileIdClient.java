@@ -14,5 +14,5 @@ public interface MobileIdClient {
 
     InitMidSignatureResponse initMobileSigning(DataToSign dataToSign, MobileIdInformation mobileIdInformation);
 
-    GetStatusResponse getStatus(String sessionCode);
+    GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation);
 }

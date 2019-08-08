@@ -13,4 +13,5 @@ public class MobileIdInformation {
     private String messageToDisplay;
     @NonNull
     private String relyingPartyName;
+    private String relyingPartyUUID;
 }

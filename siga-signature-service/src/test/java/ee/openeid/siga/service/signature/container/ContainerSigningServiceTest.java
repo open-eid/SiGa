@@ -134,10 +134,10 @@ public abstract class ContainerSigningServiceTest {
         response.setSignature(signatureRaw);
         response.setStatus(ProcessStatusType.SIGNATURE.name());
 
-        Mockito.when(mobileIdClient.getStatus(any())).thenReturn(response);
+        Mockito.when(mobileIdClient.getStatus(any(), any())).thenReturn(response);
 
         mockMobileIdSessionHolder(dataToSign);
-        String status = getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
+        String status = getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), RequestUtil.createMobileInformation());
         Assert.assertEquals("SIGNATURE", status);
     }
 

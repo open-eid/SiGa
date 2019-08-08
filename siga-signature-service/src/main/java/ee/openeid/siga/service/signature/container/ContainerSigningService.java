@@ -99,11 +99,11 @@ public abstract class ContainerSigningService {
         return SigningChallenge.builder().challengeId(initMidSignatureResponse.getChallengeId()).generatedSignatureId(generatedSignatureId).build();
     }
 
-    public String processMobileStatus(String containerId, String signatureId) {
+    public String processMobileStatus(String containerId, String signatureId, MobileIdInformation mobileIdInformation) {
         Session sessionHolder = getSession(containerId);
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.MOBILE_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
-        GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode());
+        GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode(), mobileIdInformation);
         String status = getStatusResponse.getStatus();
         if (ProcessStatusType.SIGNATURE.name().equals(status) || MobileIdClient.OK_RESPONSE.equals(status)) {
             DataToSign dataToSign = dataToSignHolder.getDataToSign();

@@ -155,7 +155,8 @@ public class AsicContainerController {
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
-        String status = signingService.processMobileStatus(containerId, signatureId);
+        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation();
+        String status = signingService.processMobileStatus(containerId, signatureId, mobileIdInformation);
 
         GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

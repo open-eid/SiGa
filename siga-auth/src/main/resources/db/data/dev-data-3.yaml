@@ -23,8 +23,8 @@ databaseChangeLog:
                   value: test4.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: Testimine
+                  value: DEMO
               - column:
                   name: sk_relying_party_uuid
-                  value: 439ffac4-39b1-11e9-b210-d663bd873d93
+                  value: 00000000-0000-0000-0000-000000000000
             tableName: siga_service

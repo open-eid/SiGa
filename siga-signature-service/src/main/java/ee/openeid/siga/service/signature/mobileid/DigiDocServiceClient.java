@@ -7,6 +7,7 @@ import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
+import ee.openeid.siga.service.signature.configuration.MobileServiceConfigurationProperties;
 import eu.europa.esig.dss.DSSUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.DataToSign;
@@ -18,6 +19,7 @@ import static ee.openeid.siga.common.util.CertificateUtil.createX509Certificate;
 
 public class DigiDocServiceClient implements MobileIdClient {
 
+    private MobileServiceConfigurationProperties mobileServiceConfigurationProperties;
     private DigiDocService digiDocService;
     private MobileIdService mobileIdService;
 
@@ -37,7 +39,7 @@ public class DigiDocServiceClient implements MobileIdClient {
     }
 
     @Override
-    public GetStatusResponse getStatus(String sessionCode) {
+    public GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation) {
         GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileIdService.getMobileSignHashStatus(sessionCode);
         ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
         GetStatusResponse response = new GetStatusResponse();
@@ -50,7 +52,8 @@ public class DigiDocServiceClient implements MobileIdClient {
 
     private MobileSignHashResponse initMobileSign(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
-        MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
+        String relyingPartyName = mobileServiceConfigurationProperties.getRelyingPartyName();
+        MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest), relyingPartyName);
         if (!OK_RESPONSE.equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
@@ -65,5 +68,10 @@ public class DigiDocServiceClient implements MobileIdClient {
     @Autowired
     public void setMobileIdService(MobileIdService mobileIdService) {
         this.mobileIdService = mobileIdService;
+    }
+
+    @Autowired
+    public void setMobileServiceConfigurationProperties(MobileServiceConfigurationProperties mobileServiceConfigurationProperties) {
+        this.mobileServiceConfigurationProperties = mobileServiceConfigurationProperties;
     }
 }

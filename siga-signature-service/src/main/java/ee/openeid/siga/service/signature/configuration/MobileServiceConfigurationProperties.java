@@ -20,4 +20,6 @@ public class MobileServiceConfigurationProperties {
     private String trustStore;
     @NotBlank(message = "siga.dds.trust-store-password property must be set")
     private String trustStorePassword;
+    @NotBlank(message = "siga.dds.relying-party-name property must be set")
+    private String relyingPartyName;
 }

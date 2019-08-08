@@ -30,7 +30,7 @@ public class MidRestClient implements MobileIdClient {
                 .withPhoneNumber(mobileIdInformation.getPhoneNo())
                 .withNationalIdentityNumber(mobileIdInformation.getPersonIdentifier())
                 .build();
-        MidClient midClient = createMidRestClient();
+        MidClient midClient = createMidRestClient(mobileIdInformation);
         MidCertificateChoiceResponse response = midClient.getMobileIdConnector().getCertificate(request);
 
         return midClient.createMobileIdCertificate(response);
@@ -55,7 +55,7 @@ public class MidRestClient implements MobileIdClient {
                 .withLanguage(midLanguage)
                 .withDisplayText(mobileIdInformation.getMessageToDisplay())
                 .build();
-        MidClient midClient = createMidRestClient();
+        MidClient midClient = createMidRestClient(mobileIdInformation);
 
         MidSignatureResponse midSignatureResponse = midClient.getMobileIdConnector().sign(request);
 
@@ -66,8 +66,8 @@ public class MidRestClient implements MobileIdClient {
     }
 
     @Override
-    public GetStatusResponse getStatus(String sessionCode) {
-        MidClient midClient = createMidRestClient();
+    public GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation) {
+        MidClient midClient = createMidRestClient(mobileIdInformation);
         MidSessionStatusRequest request = new MidSessionStatusRequest(sessionCode);
         MidSessionStatus sessionStatus = midClient.getMobileIdConnector().getSignatureSessionStatus(request);
         GetStatusResponse response = new GetStatusResponse();
@@ -99,11 +99,11 @@ public class MidRestClient implements MobileIdClient {
         throw new IllegalArgumentException("Invalid mid hash type");
     }
 
-    private MidClient createMidRestClient() {
+    private MidClient createMidRestClient(MobileIdInformation mobileIdInformation) {
         return MidClient.newBuilder().withHostUrl(configurationProperties.getUrl())
                 .withPollingSleepTimeoutSeconds(2)
-                .withRelyingPartyName("DEMO")//TODO: change it
-                .withRelyingPartyUUID("00000000-0000-0000-0000-000000000000")//TODO: change it
+                .withRelyingPartyName(mobileIdInformation.getRelyingPartyName())
+                .withRelyingPartyUUID(mobileIdInformation.getRelyingPartyUUID())
                 .build();
     }
 
