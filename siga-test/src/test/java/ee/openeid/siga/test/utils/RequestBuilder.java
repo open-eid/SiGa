@@ -43,7 +43,7 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
+    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
