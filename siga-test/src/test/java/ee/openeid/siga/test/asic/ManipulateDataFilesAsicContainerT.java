@@ -147,9 +147,13 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     public void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("Nonconventional_characters_in_data_file.asice"));
 
-        Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
+        deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
 
-        expectError(response, 400, INVALID_DATA);
+        Response response = getDataFileList(flow);
+
+        response.then()
+                .statusCode(200)
+                .body("dataFiles[0]", nullValue());
     }
 
     @Test
@@ -204,7 +208,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
                 .body("dataFiles[0].fileContent", startsWith(DEFAULT_DATAFILE_CONTENT))
                 .body("dataFiles[1].fileName", equalTo("testFile.txt"))
                 .body("dataFiles[1].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"))
-                .body("dataFiles[2].fileName", equalTo("testFile2.txt"))
+                .body("dataFiles[2].fileName", equalTo("testFile2.xml"))
                 .body("dataFiles[2].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQgdG8gaGFuZGxlLg=="));
     }
 
