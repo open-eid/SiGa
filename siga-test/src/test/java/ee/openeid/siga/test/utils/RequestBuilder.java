@@ -172,6 +172,20 @@ public class RequestBuilder {
         return request;
     }
 
+    public static JSONObject addDataFileToAsicRequest(String fileName, String fileContent) throws JSONException {
+        JSONObject request = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
+        JSONObject dataFile = new JSONObject();
+
+        dataFile.put("fileName", fileName);
+        dataFile.put("fileContent", fileContent);
+        dataFiles.put(dataFile);
+
+        request.put("dataFiles", dataFiles);
+
+        return request;
+    }
+
     public static JSONObject buildSignatureProductionPlace(String city, String stateOrProvince, String postalCode, String country) throws JSONException {
         JSONObject signatureProductionPlace = new JSONObject();
         if (city != null) {

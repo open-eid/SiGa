@@ -114,8 +114,13 @@ public abstract class TestBase {
     }
 
     @Step("Delete data file")
-    protected Response deleteDataFile(SigaApiFlow flow, String dataFileName) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    protected Response deleteDataFile(SigaApiFlow flow, String dataFileName) throws InvalidKeyException, NoSuchAlgorithmException {
         return delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + dataFileName, flow);
+    }
+
+    @Step("add data file")
+    protected Response addDataFile(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/", flow, request.toString());
     }
 
     @Step("Get container")
