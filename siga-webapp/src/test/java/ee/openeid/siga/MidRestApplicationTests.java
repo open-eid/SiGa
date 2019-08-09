@@ -81,6 +81,7 @@ public class MidRestApplicationTests extends TestBase {
 
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
+        Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
 
         String signatureId = startHashcodeMobileSigning(containerId);
         String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);

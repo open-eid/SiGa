@@ -74,9 +74,9 @@ public class RequestTransformer {
                 requestHashcodeDataFile -> {
                     ee.openeid.siga.webapp.json.HashcodeDataFile hashcodeDataFile = new ee.openeid.siga.webapp.json.HashcodeDataFile();
                     hashcodeDataFile.setFileName(requestHashcodeDataFile.getFileName());
-                    hashcodeDataFile.setFileSize(hashcodeDataFile.getFileSize());
-                    hashcodeDataFile.setFileHashSha256(hashcodeDataFile.getFileHashSha256());
-                    hashcodeDataFile.setFileHashSha512(hashcodeDataFile.getFileHashSha512());
+                    hashcodeDataFile.setFileSize(requestHashcodeDataFile.getFileSize());
+                    hashcodeDataFile.setFileHashSha256(requestHashcodeDataFile.getFileHashSha256());
+                    hashcodeDataFile.setFileHashSha512(requestHashcodeDataFile.getFileHashSha512());
                     hashcodeDataFiles.add(hashcodeDataFile);
                 }
         );
