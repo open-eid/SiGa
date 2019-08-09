@@ -116,7 +116,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
     public void test5_queryResultShouldEqual_FinalizeSignatureRequestsMade() {
         QueryBuilder query = createQueryForSuccessEvent(FINALIZE_SIGNATURE);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
-        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
+        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.SIGNATURE_ID));
     }
 
@@ -126,7 +126,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.REQUEST_URL, "http://demo.sk.ee/tsa"));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.ISSUING_CA, "C=EE,O=AS Sertifitseerimiskeskus,CN=TEST of EE Certification Centre Root CA,E=pki@sk.ee"));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
+        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class RemoteSigningEventsT extends StatisticsBaseT {
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.REQUEST_URL, "http://aia.demo.sk.ee/esteid2018"));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.ISSUING_CA, "C=EE,O=SK ID Solutions AS,2.5.4.97=NTREE-10747013,CN=TEST of ESTEID2018"));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
+        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
     }
 
     @Test
