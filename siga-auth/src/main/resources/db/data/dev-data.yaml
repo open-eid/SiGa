@@ -63,10 +63,10 @@ databaseChangeLog:
                   value: test1.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: DEMO
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
-                  value: 00000000-0000-0000-0000-000000000000
+                  value: 439ffac4-39b1-11e9-b210-d663bd873d93
             tableName: siga_service
         # Signing secret 746573745365637265744b6579303032 (testSecretKey002)
         - insert:
@@ -88,10 +88,10 @@ databaseChangeLog:
                   value: test2.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: DEMO
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
-                  value: 00000000-0000-0000-0000-000000000000
+                  value: 439ffac4-39b1-11e9-b210-d663bd873d93
             tableName: siga_service
         # Signing secret 746573745365637265744b6579303033 (testSecretKey003)
         - insert:
@@ -113,8 +113,8 @@ databaseChangeLog:
                   value: test3.service.ee
               - column:
                   name: sk_relying_party_name
-                  value: DEMO
+                  value: Testimine
               - column:
                   name: sk_relying_party_uuid
-                  value: 00000000-0000-0000-0000-000000000000
+                  value: 439fff10-39b1-11e9-b210-d663bd873d93
             tableName: siga_service

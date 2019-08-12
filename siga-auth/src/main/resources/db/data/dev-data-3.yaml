@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  valueNumeric: 1
+                  valueNumeric: 4
               - column:
                   name: uuid
                   value: 1975daf1-4e8a-46b4-8cd9-442291da2108

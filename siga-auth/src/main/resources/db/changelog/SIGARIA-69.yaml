@@ -44,12 +44,6 @@ databaseChangeLog:
                   name: max_connections_size
                   type: BIGINT
                   defaultValue: -1
-              - column:
-                  constraints:
-                    nullable: false
-                  name: max_connection_size
-                  type: BIGINT
-                  defaultValue: -1
             tableName: siga_service
   - changeSet:
       id: 1558240328449-3

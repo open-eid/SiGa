@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1509324834425-1
+      author: (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: max_connection_size
+                  type: BIGINT
+                  defaultValue: -1
+            tableName: siga_service

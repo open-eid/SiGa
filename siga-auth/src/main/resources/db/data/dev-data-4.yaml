@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1584394839483-1
+      author: (generated)
+      changes:
+        - update:
+            columns:
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+            tableName: siga_service
