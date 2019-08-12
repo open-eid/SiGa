@@ -58,14 +58,14 @@ public abstract class StatisticsBaseT extends TestBase {
     }
 
     protected boolean checkSearchResponse(SearchResponse response) {
-        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().totalHits);
+        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingContainerIds(response));
         return true;
     }
 
     protected long countMatchingContainerIds(SearchResponse response) {
         return stream(response.getHits().getHits())
-                .map(h -> ((HashMap<String, String>) h.getSourceAsMap().get("stats")).get("container_id"))
+                .map(h -> h.getSourceAsMap().get("container_id"))
                 .filter(h -> containerIds.contains(h)).count();
     }
 
@@ -74,7 +74,7 @@ public abstract class StatisticsBaseT extends TestBase {
     }
 
     protected long countMatchingParameters(SearchResponse response, SigaEventName.EventParam eventParam, String value) {
-        Stream s = stream(response.getHits().getHits()).map(h -> ((HashMap<String, String>) h.getSourceAsMap().get("stats")).get(eventParam.name().toLowerCase()));
+        Stream s = stream(response.getHits().getHits()).map(h -> h.getSourceAsMap().get(eventParam.name().toLowerCase()));
         if (value != null) {
             return s.filter(h -> value.equals(h)).count();
         } else {
@@ -86,7 +86,7 @@ public abstract class StatisticsBaseT extends TestBase {
         return elasticClient.prepareSearch()
                 .setSearchType(QUERY_THEN_FETCH)
                 .setPostFilter(query)
-                .addSort("stats.timestamp", SortOrder.ASC);
+                .addSort("timestamp", SortOrder.ASC);
     }
 
     protected QueryBuilder createQueryForSuccessEvent(SigaEventName eventName, ImmutablePair<String, String>... matchProperty) {
@@ -95,13 +95,13 @@ public abstract class StatisticsBaseT extends TestBase {
 
     protected QueryBuilder createQueryForSuccessEvent(SigaEventName eventName, SigaEvent.EventType eventType, ImmutablePair<String, String>... matchProperty) {
         BoolQueryBuilder bqb = QueryBuilders.boolQuery()
-                .must(termsQuery("tags", "siga", "stats"))
-                .must(matchQuery("stats.event_name", eventName.name()))
-                .must(matchQuery("stats.event_type", eventType.name()))
-                .must(rangeQuery("stats.timestamp").from(statisticsStartingFromTimestamp));
+                .must(termsQuery("tags", "siga", "event"))
+                .must(matchQuery("event_name", eventName.name()))
+                .must(matchQuery("event_type", eventType.name()))
+                .must(rangeQuery("timestamp").from(statisticsStartingFromTimestamp));
 
         if (FINISH.equals(eventType)) {
-            bqb.must(matchQuery("stats.result", SUCCESS.name()));
+            bqb.must(matchQuery("result", SUCCESS.name()));
         }
         for (ImmutablePair<String, String> p : matchProperty) {
             bqb.must(matchQuery(p.getKey(), p.getValue()));
