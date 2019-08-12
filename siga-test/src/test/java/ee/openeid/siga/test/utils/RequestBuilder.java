@@ -43,7 +43,7 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, String fileSize) throws JSONException {
+    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -169,6 +169,20 @@ public class RequestBuilder {
         if (city != null || stateOrProvince != null || postalCode != null || country != null) {
             request.put("signatureProductionPlace", buildSignatureProductionPlace(city, stateOrProvince, postalCode, country));
         }
+        return request;
+    }
+
+    public static JSONObject addDataFileToHashcodeRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
+        JSONArray datafiles = new JSONArray();
+        JSONObject dataFileObject = new JSONObject();
+        JSONObject request = new JSONObject();
+        dataFileObject.put("fileName", fileName);
+        dataFileObject.put("fileHashSha256", fileHashSha256);
+        dataFileObject.put("fileHashSha512", fileHashSha512);
+        dataFileObject.put("fileSize", fileSize);
+        datafiles.put(dataFileObject);
+        request.put("dataFiles", datafiles);
+
         return request;
     }
 

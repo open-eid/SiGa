@@ -81,7 +81,6 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
         Response response = getDataFileList(flow);
 
-        getContainer(flow);
         response.then()
                 .statusCode(200)
                 .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
