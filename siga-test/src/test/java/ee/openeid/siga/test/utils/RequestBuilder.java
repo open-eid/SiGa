@@ -172,6 +172,20 @@ public class RequestBuilder {
         return request;
     }
 
+    public static JSONObject addDataFileToHashcodeRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
+        JSONArray datafiles = new JSONArray();
+        JSONObject dataFileObject = new JSONObject();
+        JSONObject request = new JSONObject();
+        dataFileObject.put("fileName", fileName);
+        dataFileObject.put("fileHashSha256", fileHashSha256);
+        dataFileObject.put("fileHashSha512", fileHashSha512);
+        dataFileObject.put("fileSize", fileSize);
+        datafiles.put(dataFileObject);
+        request.put("dataFiles", datafiles);
+
+        return request;
+    }
+
     public static JSONObject addDataFileToAsicRequest(String fileName, String fileContent) throws JSONException {
         JSONObject request = new JSONObject();
         JSONArray dataFiles = new JSONArray();

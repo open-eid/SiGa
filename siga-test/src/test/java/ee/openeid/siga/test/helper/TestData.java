@@ -35,7 +35,7 @@ public class TestData {
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=";
     public static final String DEFAULT_SHA512_DATAFILE = "hQVz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==";
     public static final String DEFAULT_FILENAME = "test.txt";
-    public static final Integer DEFAULT_FILESIZE = 745;
+    public static final Integer DEFAULT_FILESIZE = 189;
     public static final String DEFAULT_DATAFILE_CONTENT = "cmFuZG9tdGV4dA==";
     public static final String DEFAULT_ASICE_CONTAINER_NAME = "valid.asice";
     public static final String DEFAULT_HASHCODE_CONTAINER_NAME = "hashcode.asice";
