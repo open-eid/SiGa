@@ -13,8 +13,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.security.cert.X509Certificate;
-
 import static ee.openeid.siga.common.util.CertificateUtil.createX509Certificate;
 
 public class DigiDocServiceClient implements MobileIdClient {
@@ -24,9 +22,12 @@ public class DigiDocServiceClient implements MobileIdClient {
     private MobileIdService mobileIdService;
 
     @Override
-    public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
+    public GetCertificateResponse getCertificate(MobileIdInformation mobileIdInformation) {
         GetMobileCertificateResponse signingCertificate = digiDocService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getPhoneNo());
-        return createX509Certificate(signingCertificate.getSignCertData().getBytes());
+        GetCertificateResponse response = new GetCertificateResponse();
+        response.setCertificate(createX509Certificate(signingCertificate.getSignCertData().getBytes()));
+        response.setStatus(signingCertificate.getSignCertStatus());
+        return response;
     }
 
     @Override
@@ -53,7 +54,8 @@ public class DigiDocServiceClient implements MobileIdClient {
     private MobileSignHashResponse initMobileSign(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         byte[] digest = DSSUtils.digest(dataToSign.getDigestAlgorithm().getDssDigestAlgorithm(), dataToSign.getDataToSign());
         String relyingPartyName = mobileServiceConfigurationProperties.getRelyingPartyName();
-        MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest), relyingPartyName);
+        mobileIdInformation.setRelyingPartyName(relyingPartyName);
+        MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
         if (!OK_RESPONSE.equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }

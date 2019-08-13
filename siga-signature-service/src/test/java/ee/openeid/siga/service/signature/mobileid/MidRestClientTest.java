@@ -51,14 +51,14 @@ public class MidRestClientTest {
     public void successfulGetCertificateRequest() {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
 
-        X509Certificate certificate = midRestClient.getCertificate(mobileIdInformation);
+        X509Certificate certificate = midRestClient.getCertificate(mobileIdInformation).getCertificate();
         Assert.assertEquals("CN=TEST of ESTEID-SK 2015, OID.2.5.4.97=NTREE-10747013, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 
     @Test
     public void successfulInitMobileSigning() {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
-        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation);
+        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation).getCertificate();
         Container container = createContainer();
 
         DataToSign dataToSign = createDataToSign(container, signingCert);
@@ -71,7 +71,7 @@ public class MidRestClientTest {
     @Test
     public void successfulGetStatusRequest() {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
-        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation);
+        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation).getCertificate();
         Container container = createContainer();
 
         DataToSign dataToSign = createDataToSign(container, signingCert);

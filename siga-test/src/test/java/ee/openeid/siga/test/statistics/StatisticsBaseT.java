@@ -1,8 +1,12 @@
 package ee.openeid.siga.test.statistics;
 
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.test.helper.TestBase;
+import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
+import io.restassured.response.Response;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -14,22 +18,30 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.json.JSONException;
 import org.junit.BeforeClass;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
 import static ee.openeid.siga.common.event.SigaEvent.EventType.FINISH;
+import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
 import static java.lang.Long.parseLong;
 import static java.util.Arrays.stream;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public abstract class StatisticsBaseT extends TestBase {
@@ -107,5 +119,31 @@ public abstract class StatisticsBaseT extends TestBase {
             bqb.must(matchQuery(p.getKey(), p.getValue()));
         }
         return bqb;
+    }
+
+    protected void mobileSigningFlowFor(SigaApiFlow flow) throws InvalidKeyException, NoSuchAlgorithmException, JSONException, IOException, InterruptedException {
+        Response response = postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        assertThat(response.statusCode(), equalTo(200));
+        String containerId = response.getBody().path(CONTAINER_ID).toString();
+        flow.setContainerId(containerId);
+        assertThat(containerId.length(), equalTo(36));
+        containerIds.add(containerId);
+
+        response = getSignatureList(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", response.getBody().path("signatures[0].id"));
+
+        response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        response = pollForMidSigning(flow, signatureId);
+        assertThat(response.statusCode(), equalTo(200));
+
+        response = getValidationReportForContainerInSession(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(2));
+
+        response = deleteContainer(flow);
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(RESULT), equalTo(Result.OK.name()));
     }
 }

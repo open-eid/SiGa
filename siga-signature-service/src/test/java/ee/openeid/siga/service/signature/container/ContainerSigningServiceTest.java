@@ -8,6 +8,7 @@ import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
+import ee.openeid.siga.service.signature.mobileid.GetCertificateResponse;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
@@ -116,7 +117,9 @@ public abstract class ContainerSigningServiceTest {
         initMidSignatureResponse.setSessionCode("sessionCode");
         initMidSignatureResponse.setChallengeId("1234");
         Mockito.when(mobileIdClient.initMobileSigning(any(), any())).thenReturn(initMidSignatureResponse);
-        Mockito.when(mobileIdClient.getCertificate(any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        GetCertificateResponse getCertificateResponse = new GetCertificateResponse();
+        getCertificateResponse.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileIdClient.getCertificate(any())).thenReturn(getCertificateResponse);
 
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();

@@ -129,7 +129,7 @@ public class SigaApplicationTests extends TestBase {
 
         String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
         Assert.assertEquals("COMPLETE", smartIdStatus);
-        assertHashcodeSignedContainer(containerId, 1);
+        assertHashcodeSignedContainer(containerId, 2);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class SigaApplicationTests extends TestBase {
 
         String smartIdStatus = getSmartIdStatus(containerId, signatureId);
         Assert.assertEquals("COMPLETE", smartIdStatus);
-        assertSignedContainer(containerId, 1);
+        assertSignedContainer(containerId, 2);
     }
 
 

@@ -35,9 +35,9 @@ public class MobileIdService extends WebServiceGatewaySupport {
     }
 
     @SigaEventLog(eventName = SigaEventName.DDS_MOBILE_SIGN_HASH, logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})}, logReturnObject = {@XPath(name = "dds_session_id", xpath = "sesscode"), @XPath(name = "dds_response_code", xpath = "status")})
-    public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash, String relyingPartyName) {
+    public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();
-        request.setServiceName(relyingPartyName);
+        request.setServiceName(mobileIdInformation.getRelyingPartyName());
         request.setLanguage(getLanguage(mobileIdInformation.getLanguage()));
         if (mobileIdInformation.getMessageToDisplay() != null)
             request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());

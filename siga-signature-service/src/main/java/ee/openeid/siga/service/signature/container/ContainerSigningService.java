@@ -86,7 +86,7 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
 
-        X509Certificate certificate = mobileIdClient.getCertificate(mobileIdInformation);
+        X509Certificate certificate = mobileIdClient.getCertificate(mobileIdInformation).getCertificate();
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 

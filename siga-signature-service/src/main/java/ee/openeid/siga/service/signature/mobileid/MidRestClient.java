@@ -1,6 +1,10 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.event.Param;
+import ee.openeid.siga.common.event.SigaEventLog;
+import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
 import ee.openeid.siga.service.signature.configuration.MidRestConfigurationProperties;
 import ee.sk.mid.MidClient;
@@ -16,7 +20,6 @@ import ee.sk.mid.rest.dao.response.MidSignatureResponse;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 public class MidRestClient implements MobileIdClient {
@@ -25,18 +28,26 @@ public class MidRestClient implements MobileIdClient {
     private static final String SIGNATURE_COMPLETED_STATE = "COMPLETE";
 
     @Override
-    public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
+    @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "phone_nr", xpath = "phoneNo")})},
+            logReturnObject = {@XPath(name = "mid_rest_result", xpath = "status")})
+    public GetCertificateResponse getCertificate(MobileIdInformation mobileIdInformation) {
+        MidClient midClient = createMidRestClient(mobileIdInformation);
         MidCertificateRequest request = MidCertificateRequest.newBuilder()
                 .withPhoneNumber(mobileIdInformation.getPhoneNo())
                 .withNationalIdentityNumber(mobileIdInformation.getPersonIdentifier())
                 .build();
-        MidClient midClient = createMidRestClient(mobileIdInformation);
-        MidCertificateChoiceResponse response = midClient.getMobileIdConnector().getCertificate(request);
-
-        return midClient.createMobileIdCertificate(response);
+        GetCertificateResponse response = new GetCertificateResponse();
+        MidCertificateChoiceResponse midCertificateChoiceResponse = midClient.getMobileIdConnector().getCertificate(request);
+        response.setCertificate(midClient.createMobileIdCertificate(midCertificateChoiceResponse));
+        response.setStatus(midCertificateChoiceResponse.getResult());
+        return response;
     }
 
     @Override
+    @SigaEventLog(eventName = SigaEventName.MID_MOBILE_SIGN_HASH,
+            logParameters = {@Param(index = 1, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logReturnObject = {@XPath(name = "session_code", xpath = "sessionCode")})
     public InitMidSignatureResponse initMobileSigning(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         MidHashType midHashType = getMidHashType(dataToSign);
 
@@ -66,6 +77,9 @@ public class MidRestClient implements MobileIdClient {
     }
 
     @Override
+    @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_SIGN_HASH_STATUS,
+            logParameters = {@Param(name = "session_code", index = 0)},
+            logReturnObject = {@XPath(name = "mid_rest_result", xpath = "status")})
     public GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation) {
         MidClient midClient = createMidRestClient(mobileIdInformation);
         MidSessionStatusRequest request = new MidSessionStatusRequest(sessionCode);

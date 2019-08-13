@@ -2,7 +2,6 @@ package ee.openeid.siga.test.statistics;
 
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.json.JSONException;
@@ -24,11 +23,17 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//'midRest' Spring profile must be active
 @Ignore
-public class MobileIdSigningEventsT extends StatisticsBaseT {
+public class MidRestSigningEventsT extends StatisticsBaseT {
 
     static {
         NR_OF_CONTAINERS_GENERATED = 3;
+    }
+
+    @Override
+    public String getContainerEndpoint() {
+        return HASHCODE_CONTAINERS;
     }
 
     @Test
@@ -67,35 +72,33 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
     }
 
     @Test
-    public void test4_queryResultShouldEqual_DdsGetMobileCertificatesRequestsMade() {
-        QueryBuilder query = createQueryForSuccessEvent(DDS_GET_MOBILE_CERTIFICATE, START);
+    public void test4_queryResultShouldEqual_MidRestGetMobileCertificatesRequestsMade() {
+        QueryBuilder query = createQueryForSuccessEvent(MID_GET_MOBILE_CERTIFICATE, START);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.PERSON_IDENTIFIER, "60001019906"));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.PHONE_NR, "+37200000766"));
 
-        query = createQueryForSuccessEvent(DDS_GET_MOBILE_CERTIFICATE, FINISH);
+        query = createQueryForSuccessEvent(MID_GET_MOBILE_CERTIFICATE, FINISH);
         response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, Result.OK.name()));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.SIGN_CERT_STATUS, Result.OK.name()));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.MID_REST_RESULT, Result.OK.name()));
     }
 
     @Test
-    public void test5_queryResultShouldEqual_DdsMobileSignHashRequestsMade() {
-        QueryBuilder query = createQueryForSuccessEvent(DDS_MOBILE_SIGN_HASH, START);
+    public void test5_queryResultShouldEqual_MidRestMobileSignHashRequestsMade() {
+        QueryBuilder query = createQueryForSuccessEvent(MID_MOBILE_SIGN_HASH, START);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.PERSON_IDENTIFIER, "60001019906"));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.RELYING_PARTY_NAME, "Testimine"));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.RELYING_PARTY_NAME, "DEMO"));
 
-        query = createQueryForSuccessEvent(DDS_MOBILE_SIGN_HASH, FINISH);
+        query = createQueryForSuccessEvent(MID_MOBILE_SIGN_HASH, FINISH);
         response = prepareSearchRequestFor(query).execute().actionGet();
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.DDS_RESPONSE_CODE, Result.OK.name()));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.DDS_SESSION_ID));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.SESSION_CODE));
         assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.PERSON_IDENTIFIER, "60001019906"));
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.RELYING_PARTY_NAME, "Testimine"));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParameters(response, EventParam.RELYING_PARTY_NAME, "DEMO"));
 
     }
 
@@ -103,20 +106,16 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
     public void test6_queryResultShouldEqual_HcMobileIdSigningStatusRequestsMade() {
         QueryBuilder query = createQueryForSuccessEvent(HC_MOBILE_ID_SIGNING_STATUS);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
-        assertEquals(NR_OF_CONTAINERS_GENERATED * 3, response.getHits().getTotalHits().value);
-        assertEquals(NR_OF_CONTAINERS_GENERATED * 3, countMatchingContainerIds(response));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingContainerIds(response));
     }
 
     @Test
-    public void test7_queryResultShouldEqual_DdsGetMobileSignHashStatusRequestsMade() {
-        QueryBuilder query = createQueryForSuccessEvent(DDS_GET_MOBILE_SIGN_HASH_STATUS, new ImmutablePair<>("dds_response_code", "OUTSTANDING_TRANSACTION"));
+    public void test7_queryResultShouldEqual_midRestGetMobileSignHashStatusRequestsMade() {
+        QueryBuilder query = createQueryForSuccessEvent(MID_GET_MOBILE_SIGN_HASH_STATUS);
         SearchResponse response = prepareSearchRequestFor(query).execute().actionGet();
-        assertEquals(NR_OF_CONTAINERS_GENERATED * 2, countMatchingParametersWithAnyValue(response, EventParam.DDS_SESSION_ID));
-        assertEquals(NR_OF_CONTAINERS_GENERATED * 2, response.getHits().getTotalHits().value);
-
-        query = createQueryForSuccessEvent(DDS_GET_MOBILE_SIGN_HASH_STATUS, new ImmutablePair<>("dds_response_code", "SIGNATURE"));
-        response = prepareSearchRequestFor(query).execute().actionGet();
-        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.DDS_SESSION_ID));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.SESSION_CODE));
+        assertEquals(NR_OF_CONTAINERS_GENERATED, countMatchingParametersWithAnyValue(response, EventParam.MID_REST_RESULT));
         assertEquals(NR_OF_CONTAINERS_GENERATED, response.getHits().getTotalHits().value);
     }
 
@@ -160,9 +159,4 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
         checkSearchResponse(response);
     }
 
-
-    @Override
-    public String getContainerEndpoint() {
-        return HASHCODE_CONTAINERS;
-    }
 }
