@@ -2,7 +2,6 @@ package ee.openeid.siga.service.signature.client;
 
 import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.Signature;
 import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
@@ -39,15 +38,11 @@ public class SivaClient {
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
         try {
-            return validate(request, HASHCODE_VALIDATION_ENDPOINT);
+            ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
+            validateLTASignatureProfile(validationResponse);
+            return validationResponse;
         } catch (HttpServerErrorException | HttpClientErrorException e) {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
-            signatureWrappers.forEach(signatureWrapper -> {
-                Signature signature = hashcodeContainerService.transformSignature(signatureWrapper);
-                if (signature != null && SignatureProfile.LTA.name().equals(signature.getSignatureProfile())) {
-                    throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
-                }
-            });
             throw new TechnicalException("Unable to get valid response from client");
 
         }
@@ -63,6 +58,16 @@ public class SivaClient {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
             throw new TechnicalException("Unable to get valid response from client");
         }
+    }
+
+
+    private void validateLTASignatureProfile(ValidationConclusion validationConclusion) {
+        validationConclusion.getSignatures().forEach(
+                signature -> {
+                    if (("XAdES_BASELINE_" + SignatureProfile.LTA.name()).equals(signature.getSignatureFormat())) {
+                        throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
+                    }
+                });
     }
 
     private ValidationConclusion validate(Object request, String validationEndpoint) {
