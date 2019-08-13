@@ -113,47 +113,6 @@ public class SigaApplicationTests extends TestBase {
     }
 
     @Test
-    public void smartIdHashcodeSigningFlow() throws Exception {
-        String containerId = uploadHashcodeContainer();
-        List<Signature> signatures = getHashcodeSignatures(containerId);
-
-        Assert.assertEquals(1, signatures.size());
-        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
-        List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
-
-        String signatureId = startHashcodeSmartIdSigning(containerId);
-
-        String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdStatus);
-        assertHashcodeSignedContainer(containerId, 2);
-    }
-
-    @Test
-    public void smartIdSigningFlow() throws Exception {
-        String containerId = uploadContainer();
-        List<Signature> signatures = getSignatures(containerId);
-
-        Assert.assertEquals(1, signatures.size());
-        Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
-        List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
-
-        String signatureId = startSmartIdSigning(containerId);
-
-        String smartIdStatus = getSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdStatus);
-        assertSignedContainer(containerId, 2);
-    }
-
-
-    @Test
     public void mobileIdSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);

@@ -16,7 +16,11 @@ public class IgniteConfiguration {
         try {
             return Ignition.start("ignite-test-configuration.xml");
         } catch (Exception e) {
-            return Ignition.start();
+            try {
+                return Ignition.start();
+            } catch (Exception ex) {
+                return Ignition.ignite();
+            }
         }
     }
 }

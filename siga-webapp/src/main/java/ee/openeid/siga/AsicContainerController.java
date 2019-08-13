@@ -7,7 +7,6 @@ import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.SigningChallenge;
-import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -163,41 +162,6 @@ public class AsicContainerController {
         return response;
     }
 
-    @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_INIT)
-    @PostMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreateContainerSmartIdSigningResponse createContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerSmartIdSigningRequest createSmartIdSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
-
-        List<String> roles = createSmartIdSigningRequest.getRoles();
-        String signatureProfile = createSmartIdSigningRequest.getSignatureProfile();
-        SignatureProductionPlace signatureProductionPlace = createSmartIdSigningRequest.getSignatureProductionPlace();
-
-        SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
-        SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
-        RequestValidator.validateSmartIdInformation(smartIdInformation);
-
-        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, getSmartIdInformation(createSmartIdSigningRequest), signatureParameters);
-
-        CreateContainerSmartIdSigningResponse response = new CreateContainerSmartIdSigningResponse();
-        response.setChallengeId(signingChallenge.getChallengeId());
-        response.setGeneratedSignatureId(signingChallenge.getGeneratedSignatureId());
-        return response;
-    }
-
-    @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_STATUS)
-    @GetMapping(value = "/containers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetContainerSmartIdSigningStatusResponse getSmartSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation(null, null, null);
-        String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
-
-        GetContainerSmartIdSigningStatusResponse response = new GetContainerSmartIdSigningStatusResponse();
-        response.setSidStatus(status);
-        return response;
-    }
-
     @SigaEventLog(eventName = SigaEventName.GET_SIGNATURES_LIST)
     @GetMapping(value = "/containers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
@@ -287,14 +251,6 @@ public class AsicContainerController {
         String phoneNo = createMobileIdSigningRequest.getPhoneNo();
         String personIdentifier = createMobileIdSigningRequest.getPersonIdentifier();
         return RequestTransformer.transformMobileIdInformation(language, messageToDisplay, personIdentifier, phoneNo);
-    }
-
-    private SmartIdInformation getSmartIdInformation(CreateContainerSmartIdSigningRequest containerSmartIdSigningRequest) {
-        String country = containerSmartIdSigningRequest.getCountry();
-        String messageToDisplay = containerSmartIdSigningRequest.getMessageToDisplay();
-        String personIdentifier = containerSmartIdSigningRequest.getPersonIdentifier();
-        return RequestTransformer.transformSmartIdInformation(country, messageToDisplay, personIdentifier);
-
     }
 
     @Autowired
