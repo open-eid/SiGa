@@ -19,6 +19,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDef
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Ignore ("SmartID needs to be enabled in pipeline")
 public class SmartIdSigningAsicContainerT extends TestBase {
     private SigaApiFlow flow;
 
@@ -28,7 +29,6 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
 
-    @Ignore("Test TSL needs to be updated")
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());

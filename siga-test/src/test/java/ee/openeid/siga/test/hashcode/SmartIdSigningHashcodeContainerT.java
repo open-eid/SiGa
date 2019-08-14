@@ -19,6 +19,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataReques
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Ignore ("SmartID needs to be enabled in pipeline")
 public class SmartIdSigningHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
@@ -28,11 +29,10 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
-    @Ignore ("Test TSL needs to be updated")
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT_TM"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId);
 
