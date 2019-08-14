@@ -13,6 +13,7 @@ public class TestData {
     public static final String STATUS = "/status";
     public static final String SIGNATURES = "/signatures";
     public static final String DATAFILES = "/datafiles";
+    public static final String MONITORING = "/actuator/health";
 
 
     // Headers for HMAC authentication
