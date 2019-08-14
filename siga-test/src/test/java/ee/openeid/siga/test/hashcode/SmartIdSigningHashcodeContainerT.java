@@ -19,7 +19,6 @@ import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataReques
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Ignore ("SmartID needs to be enabled in pipeline")
 public class SmartIdSigningHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
