@@ -43,6 +43,22 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void signWithSmartIdNonExistingPersonalNo() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("11111111111", "LT"));
+
+        expectError(response, 404, INVALID_REQUEST);
+    }
+
+    @Test
+    public void signWithSmartIdNonExistingSignatureProfile() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "QES"));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void deleteToStartAsicSmartIdSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 

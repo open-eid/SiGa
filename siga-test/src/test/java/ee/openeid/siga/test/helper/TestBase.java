@@ -150,9 +150,14 @@ public abstract class TestBase {
         };
     }
 
-    @Step("Poll for Smart-ID signing response")
+
     protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) {
-        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(16000, MILLISECONDS)
+           return pollForSidSigningWithPollParameters(3500,16000, flow, signatureId);
+    }
+
+    @Step("Poll for Smart-ID signing response")
+    protected Response pollForSidSigningWithPollParameters(Integer pollTimeInMillis, Integer pollLengthInMillis, SigaApiFlow flow, String signatureId) {
+        with().pollInterval(pollTimeInMillis, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(pollLengthInMillis, MILLISECONDS)
                 .await("Smart-ID signing result")
                 .until(isSidFinished(flow, signatureId));
 
