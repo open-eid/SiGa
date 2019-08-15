@@ -24,6 +24,7 @@ import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;
 import ee.sk.smartid.SmartIdClient;
+import ee.sk.smartid.rest.SmartIdConnector;
 import ee.sk.smartid.rest.dao.NationalIdentity;
 import ee.sk.smartid.rest.dao.SessionStatus;
 import eu.europa.esig.dss.DSSUtils;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
@@ -149,9 +151,11 @@ public abstract class ContainerSigningService {
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
-        SessionStatus sessionStatus = smartIdClient.getSmartIdConnector().getSessionStatus(dataToSignHolder.getSessionCode());
-        String signatureValue = sessionStatus.getSignature().getValue();
+        SmartIdConnector connector = smartIdClient.getSmartIdConnector();
+        connector.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
+        SessionStatus sessionStatus = connector.getSessionStatus(dataToSignHolder.getSessionCode());
         if (SMART_ID_FINISHED_STATE.equals(sessionStatus.getState())) {
+            String signatureValue = sessionStatus.getSignature().getValue();
             DataToSign dataToSign = dataToSignHolder.getDataToSign();
             Signature signature = finalizeSignature(dataToSign, Base64.getDecoder().decode(signatureValue.getBytes()));
 
@@ -204,6 +208,7 @@ public abstract class ContainerSigningService {
     private SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
         SmartIdClient client = new SmartIdClient();
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
+        client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
         client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
         client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
         return client;

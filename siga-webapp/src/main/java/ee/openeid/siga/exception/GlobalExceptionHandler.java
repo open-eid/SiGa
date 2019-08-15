@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import ee.sk.mid.exception.MidException;
+import ee.sk.smartid.exception.SmartIdException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,6 +45,17 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorResponseCode.MID_EXCEPTION.name());
         errorResponse.setErrorMessage(exception.getMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(SmartIdException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponse smartIdException(Exception exception) {
+        log.error("Siga request exception - {}", exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorCode(ErrorResponseCode.SMARTID_EXCEPTION.name());
+        String smartIdExceptionString = exception.getClass().getSimpleName();
+        errorResponse.setErrorMessage(smartIdExceptionString);
         return errorResponse;
     }
 

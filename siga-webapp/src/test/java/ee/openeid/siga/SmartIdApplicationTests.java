@@ -65,8 +65,11 @@ public class SmartIdApplicationTests extends TestBase {
 
         String signatureId = startHashcodeSmartIdSigning(containerId);
 
-        String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdStatus);
+        String smartIdFirstStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("RUNNING", smartIdFirstStatus);
+        Thread.sleep(8000);
+        String smartIdSecondStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("COMPLETE", smartIdSecondStatus);
         assertHashcodeSignedContainer(containerId, 2);
     }
 
@@ -85,8 +88,11 @@ public class SmartIdApplicationTests extends TestBase {
 
         String signatureId = startSmartIdSigning(containerId);
 
-        String smartIdStatus = getSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdStatus);
+        String smartIdFirstStatus = getSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("RUNNING", smartIdFirstStatus);
+        Thread.sleep(8000);
+        String smartIdSecondStatus = getSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("COMPLETE", smartIdSecondStatus);
         assertSignedContainer(containerId, 2);
     }
 }
