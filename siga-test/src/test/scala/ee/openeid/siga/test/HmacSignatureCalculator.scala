@@ -19,7 +19,7 @@ class HmacSignatureCalculator(val session: Session) extends SignatureCalculator 
     val hmac = Mac.getInstance("HmacSHA256")
     val timestamp = String.valueOf(Instant.now.getEpochSecond)
     val requestMethod = request.getMethod.name
-    val uri = request.getUri.getPath
+    val uri = request.getUri.getPath.replaceAll("/siga", "")
     hmac.init(new SecretKeySpec(signingSecret.getBytes("UTF-8"), "HmacSHA256"))
     hmac.update((serviceUuid + DELIMITER + timestamp + DELIMITER + requestMethod + DELIMITER + uri + DELIMITER).getBytes("UTF-8"))
     if (request.getBody != null) {
