@@ -184,8 +184,13 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulRemoteSigning() {
+    public void successfulRemoteSigningWithBase64Certificate() {
         RequestValidator.validateRemoteSigning("dGVzdCBoYXNo", "LT");
+    }
+
+    @Test
+    public void successfulRemoteSigningWithHexCertificate() {
+        RequestValidator.validateRemoteSigning("1237ABCDEF", "LT");
     }
 
     @Test

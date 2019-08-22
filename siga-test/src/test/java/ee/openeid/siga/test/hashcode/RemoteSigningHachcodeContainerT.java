@@ -92,6 +92,18 @@ getContainer(flow);
     }
 
     @Test
+    public void startRemoteSigningHashcodeContainerWithHexEncodedCertificateReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM_HEX, "LT"));
+
+        response.then()
+                .statusCode(200)
+                .body(DATA_TO_SIGN, notNullValue())
+                .body(DIGEST_ALGO, equalTo("SHA512"));
+    }
+
+    @Test
     public void startRemoteSigningHashcodeContainerWithAllParamsReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
@@ -178,6 +190,22 @@ getContainer(flow);
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("-&32%", "LT"));
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerInvalidBase64EncodedSigningCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("Y2VydA==", "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerInvalidHexEncodedSigningCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("435254", "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
     }
 
     @Test
