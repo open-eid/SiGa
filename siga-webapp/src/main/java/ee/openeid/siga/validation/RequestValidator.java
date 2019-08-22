@@ -6,6 +6,7 @@ import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.util.Base64Util;
 import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
+import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class RequestValidator {
 
@@ -75,7 +77,7 @@ public class RequestValidator {
     }
 
     public static void validateRemoteSigning(String signingCertificate, String signatureProfile) {
-        if (StringUtils.isBlank(signingCertificate) || isNotBase64StringEncoded(signingCertificate)) {
+        if (StringUtils.isBlank(signingCertificate) || Stream.of(SupportedCertificateEncoding.values()).noneMatch(e -> e.isDecodable(signingCertificate))) {
             throw new RequestValidationException("Invalid signing certificate");
         }
         validateSignatureProfile(signatureProfile);

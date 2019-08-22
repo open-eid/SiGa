@@ -11,6 +11,7 @@ import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.GetHashcodeContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
+import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
 import org.json.JSONObject;
@@ -133,7 +134,7 @@ public class SigaApplicationTests extends TestBase {
     }
 
     @Test
-    public void remoteSigningFlow() throws Exception {
+    public void remoteSigningFlowWithBase64EncodedCertificate() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
@@ -143,7 +144,28 @@ public class SigaApplicationTests extends TestBase {
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
 
-        CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId);
+        String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+        CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
+        byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
+        byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
+        String signatureValue = new String(Base64.getEncoder().encode(signedData));
+        finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+        assertSignedContainer(containerId, 2);
+    }
+
+    @Test
+    public void remoteSigningFlowWithHexEncodedCertificate() throws Exception {
+        String containerId = uploadContainer();
+        List<Signature> signatures = getSignatures(containerId);
+        GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        Assert.assertEquals("S0", signatureResponse.getId());
+        Assert.assertEquals(1, signatures.size());
+        Container originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+        CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
@@ -174,7 +196,7 @@ public class SigaApplicationTests extends TestBase {
     }
 
     @Test
-    public void remoteHashcodeSigningFlow() throws Exception {
+    public void remoteHashcodeSigningFlowWithBase64EncodedCertificate() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
         GetHashcodeContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
@@ -184,7 +206,28 @@ public class SigaApplicationTests extends TestBase {
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId);
+        String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
+        byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
+        byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
+        String signatureValue = new String(Base64.getEncoder().encode(signedData));
+        finalizeRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+        assertHashcodeSignedContainer(containerId, 2);
+    }
+
+    @Test
+    public void remoteHashcodeSigningFlowWithHexEncodedCertificate() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
+        GetHashcodeContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
+
+        Assert.assertEquals(1, signatures.size());
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+        CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));

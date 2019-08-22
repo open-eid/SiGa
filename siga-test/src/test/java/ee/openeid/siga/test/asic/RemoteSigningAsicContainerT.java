@@ -92,6 +92,18 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void StartAsicRemoteSigningContainerWithHexEncodedCertificateReturnsDigestToSign() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM_HEX, "LT"));
+
+        response.then()
+                .statusCode(200)
+                .body(DATA_TO_SIGN, notNullValue())
+                .body(DIGEST_ALGO, equalTo("SHA512"));
+    }
+
+    @Test
     public void StartAsicRemoteSigningContainerWithAllParamsReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
@@ -184,6 +196,24 @@ public class RemoteSigningAsicContainerT extends TestBase {
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("-&32%", "LT"));
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void StartAsicRemoteSigningContainerInvalidBase64EncodedSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("Y2VydA==", "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void StartAsicRemoteSigningContainerInvalidHexEncodedSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("435254", "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
     }
 
     @Test
