@@ -167,6 +167,7 @@
                     <configFolder>${project.basedir}/src/test/resources</configFolder>
                     <resultsFolder>${project.basedir}/target/gatling/results</resultsFolder>
                     <simulationsFolder>${project.basedir}/src/test/scala</simulationsFolder>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
         </plugins>
