@@ -64,12 +64,17 @@ public class SmartIdApplicationTests extends TestBase {
         Assert.assertEquals(2, dataFiles.size());
 
         String signatureId = startHashcodeSmartIdSigning(containerId);
+        String finalStatus = "";
+        for (int i = 0; i < 5; i++) {
+            String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+            if (!"RUNNING".equals(smartIdStatus)) {
+                finalStatus = smartIdStatus;
+                break;
+            }
+            Thread.sleep(5000);
+        }
 
-        String smartIdFirstStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("RUNNING", smartIdFirstStatus);
-        Thread.sleep(8000);
-        String smartIdSecondStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdSecondStatus);
+        Assert.assertEquals("COMPLETE", finalStatus);
         assertHashcodeSignedContainer(containerId, 2);
     }
 
@@ -88,11 +93,17 @@ public class SmartIdApplicationTests extends TestBase {
 
         String signatureId = startSmartIdSigning(containerId);
 
-        String smartIdFirstStatus = getSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("RUNNING", smartIdFirstStatus);
-        Thread.sleep(8000);
-        String smartIdSecondStatus = getSmartIdStatus(containerId, signatureId);
-        Assert.assertEquals("COMPLETE", smartIdSecondStatus);
+        String finalStatus = "";
+        for (int i = 0; i < 5; i++) {
+            String smartIdStatus = getSmartIdStatus(containerId, signatureId);
+            if (!"RUNNING".equals(smartIdStatus)) {
+                finalStatus = smartIdStatus;
+                break;
+            }
+            Thread.sleep(5000);
+        }
+
+        Assert.assertEquals("COMPLETE", finalStatus);
         assertSignedContainer(containerId, 2);
     }
 }
