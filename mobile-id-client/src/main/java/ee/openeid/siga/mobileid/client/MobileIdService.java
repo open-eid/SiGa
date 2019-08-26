@@ -5,7 +5,6 @@ import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
-import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusRequest;
@@ -39,21 +38,18 @@ public class MobileIdService extends WebServiceGatewaySupport {
         MobileSignHashRequest request = new MobileSignHashRequest();
         request.setServiceName(mobileIdInformation.getRelyingPartyName());
         request.setLanguage(getLanguage(mobileIdInformation.getLanguage()));
-        if (mobileIdInformation.getMessageToDisplay() != null)
-            request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());
+        request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         request.setIDCode(mobileIdInformation.getPersonIdentifier());
         request.setPhoneNo(mobileIdInformation.getPhoneNo());
-        if (mobileIdInformation.getMessageToDisplay() != null)
-            request.setMessageToDisplay(mobileIdInformation.getMessageToDisplay());
         request.setHash(hash);
         request.setHashType(HashType.fromValue(hashType));
         try {
             return (MobileSignHashResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (SoapFaultClientException e) {
-            throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
+            throw SoapFaultHandlingUtil.handleSoapFaultClientException(e);
         } catch (Exception e) {
             log.error("Invalid DigiDocService response:", e);
-            throw new TechnicalException("Unable to receive valid response from DigiDocService");
+            throw new TechnicalException("Unable to receive valid response from DigiDocService", e);
         }
     }
 
@@ -65,10 +61,10 @@ public class MobileIdService extends WebServiceGatewaySupport {
         try {
             return (GetMobileSignHashStatusResponse) getWebServiceTemplate().marshalSendAndReceive(serviceUrl, request);
         } catch (SoapFaultClientException e) {
-            throw new ClientException("DigiDocService error. SOAP fault code: " + e.getFaultStringOrReason());
+            throw SoapFaultHandlingUtil.handleSoapFaultClientException(e);
         } catch (Exception e) {
             log.error("Invalid DigiDocService response:", e);
-            throw new TechnicalException("Unable to receive valid response from DigiDocService");
+            throw new TechnicalException("Unable to receive valid response from DigiDocService", e);
         }
     }
 

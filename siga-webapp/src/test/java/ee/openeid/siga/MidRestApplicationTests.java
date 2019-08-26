@@ -64,8 +64,15 @@ public class MidRestApplicationTests extends TestBase {
 
         String signatureId = startMobileSigning(containerId);
 
-        String mobileStatus = getMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OK", mobileStatus);
+        String mobileStatus = "";
+        for (int i = 0; i < 5; ++i) {
+            mobileStatus = getMobileIdStatus(containerId, signatureId);
+            if (!"OUTSTANDING_TRANSACTION".equals(mobileStatus)) {
+                break;
+            }
+            Thread.sleep(5000);
+        }
+        Assert.assertEquals("SIGNATURE", mobileStatus);
         assertSignedContainer(containerId, 2);
     }
 
@@ -84,8 +91,16 @@ public class MidRestApplicationTests extends TestBase {
         Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
 
         String signatureId = startHashcodeMobileSigning(containerId);
-        String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OK", mobileStatus);
+
+        String mobileStatus = "";
+        for (int i = 0; i < 5; ++i) {
+            mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
+            if (!"OUTSTANDING_TRANSACTION".equals(mobileStatus)) {
+                break;
+            }
+            Thread.sleep(5000);
+        }
+        Assert.assertEquals("SIGNATURE", mobileStatus);
         assertHashcodeSignedContainer(containerId, 2);
     }
 }

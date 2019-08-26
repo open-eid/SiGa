@@ -3,7 +3,6 @@ package ee.openeid.siga.exception;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
-import ee.sk.mid.exception.MidException;
 import ee.sk.smartid.exception.SmartIdException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +11,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.ws.soap.client.SoapFaultClientException;
 
 @Slf4j
 @RestControllerAdvice
@@ -38,16 +36,6 @@ public class GlobalExceptionHandler {
         return errorResponse;
     }
 
-    @ExceptionHandler(MidException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse midException(Exception exception) {
-        log.error("Siga request exception - {}", exception);
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setErrorCode(ErrorResponseCode.MID_EXCEPTION.name());
-        errorResponse.setErrorMessage(exception.getMessage());
-        return errorResponse;
-    }
-
     @ExceptionHandler(SmartIdException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse smartIdException(Exception exception) {
@@ -66,16 +54,6 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
-        return errorResponse;
-    }
-
-    @ExceptionHandler(SoapFaultClientException.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse soapFaultClientException(Exception exception) {
-        log.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setErrorMessage("Unable to connect to client");
-        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
 

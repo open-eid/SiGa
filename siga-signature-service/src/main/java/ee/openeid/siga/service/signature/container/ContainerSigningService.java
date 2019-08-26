@@ -14,10 +14,10 @@ import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.util.UUIDGenerator;
-import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
+import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.HashType;
@@ -88,7 +88,7 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
 
-        X509Certificate certificate = mobileIdClient.getCertificate(mobileIdInformation).getCertificate();
+        X509Certificate certificate = mobileIdClient.getCertificate(mobileIdInformation);
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
@@ -106,15 +106,14 @@ public abstract class ContainerSigningService {
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.MOBILE_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode(), mobileIdInformation);
-        String status = getStatusResponse.getStatus();
-        if (ProcessStatusType.SIGNATURE.name().equals(status) || MobileIdClient.OK_RESPONSE.equals(status)) {
+        if (getStatusResponse.getStatus() == MidStatus.SIGNATURE) {
             DataToSign dataToSign = dataToSignHolder.getDataToSign();
             Signature signature = finalizeSignature(dataToSign, getStatusResponse.getSignature());
 
             addSignatureToSession(sessionHolder, signature, signatureId);
             sessionService.update(containerId, sessionHolder);
         }
-        return status;
+        return getStatusResponse.getStatus().name();
     }
 
     public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {

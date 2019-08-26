@@ -1,0 +1,10 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:dig="http://www.sk.ee/DigiDocService/DigiDocService_2_3.wsdl" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+        <dig:GetMobileCertificateResponse>
+            <AuthCertStatus xsi:type="xsd:string">OK</AuthCertStatus>
+            <SignCertStatus xsi:type="xsd:string">OK</SignCertStatus>
+            <SignCertData xsi:type="xsd:string">certificate-data</SignCertData>
+        </dig:GetMobileCertificateResponse>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

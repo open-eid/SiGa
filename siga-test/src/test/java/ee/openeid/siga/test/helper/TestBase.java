@@ -314,10 +314,17 @@ public abstract class TestBase {
 
     public abstract String getContainerEndpoint();
 
-    protected void expectError(Response response, int code, String message) {
+    protected void expectError(Response response, int status, String code) {
         response.then()
-                .statusCode(code)
-                .body(ERROR_CODE, equalTo(message));
+                .statusCode(status)
+                .body(ERROR_CODE, equalTo(code));
+    }
+
+    protected void expectError(Response response, int status, String code, String message) {
+        response.then()
+                .statusCode(status)
+                .body(ERROR_CODE, equalTo(code))
+                .body(ERROR_MESSAGE, equalTo(message));
     }
 
     protected void expectMidStatus(Response response, String message) {
