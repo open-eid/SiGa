@@ -1,10 +1,17 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.utils.RequestBuilder;
 import io.qameta.allure.Step;
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static io.restassured.RestAssured.given;
@@ -13,6 +20,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class MonitoringT {
+
+    protected static Properties properties;
+
+    static {
+        properties = new Properties();
+        try {
+            ClassLoader classLoader = RequestBuilder.class.getClassLoader();
+            String path = classLoader.getResource("application-test.properties").getPath();
+            properties.load(new FileInputStream(new File(path)));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        RestAssured.useRelaxedHTTPSValidation();
+        RestAssured.filters(new AllureRestAssured());
+    }
 
     @Test
     public void getMonitoringStatusAndCheckComponentStatus() throws Exception {
@@ -48,10 +71,14 @@ public class MonitoringT {
                 .log().all()
                 .contentType(ContentType.JSON)
                 .when()
-                .get(MONITORING)
+                .get(getMonitoringUrl())
                 .then()
                 .log().all()
                 .extract()
                 .response();
+    }
+
+    protected String getMonitoringUrl() {
+        return properties.get("siga.protocol") + "://" + properties.get("siga.hostname") + ":" + properties.get("siga.port") + properties.get("siga.application-context-path") + MONITORING;
     }
 }
