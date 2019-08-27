@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class GetStatusResponse {
-    private String status;
+    private MidStatus status;
     private byte[] signature;
 }

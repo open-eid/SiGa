@@ -1,5 +1,8 @@
 package ee.openeid.siga.test
 
+import java.io.FileInputStream
+import java.util.Properties
+
 import ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM
 import ee.openeid.siga.test.utils.RequestBuilder.{hashcodeContainersDataRequestWithDefault, remoteSigningRequestWithDefault}
 import ee.openeid.siga.test.utils.{DigestSigner, RequestBuilder}
@@ -11,7 +14,6 @@ import io.gatling.http.protocol.HttpProtocolBuilder
 import scala.concurrent.duration._
 
 class RemoteSigningLoadSimulation extends Simulation {
-  private final val BASE_URL: String = "http://localhost:8080"
   private final val HC_CREATE_CONTAINER_ENDPOINT: String = "/hashcodecontainers"
   private final val HC_REMOTE_SIGNING_INIT: String = "/hashcodecontainers/${containerId}/remotesigning"
   private final val HC_REMOTE_SIGNING_FINISH: String = "/hashcodecontainers/${containerId}/remotesigning/${generatedSignatureId}"
@@ -20,11 +22,21 @@ class RemoteSigningLoadSimulation extends Simulation {
   private final val HC_GET_CONTAINER: String = "/hashcodecontainers/${containerId}"
   private final val HC_DELETE_CONTAINER: String = "/hashcodecontainers/${containerId}"
 
-  private final val httpProtocol: HttpProtocolBuilder = http.baseUrl(BASE_URL).contentTypeHeader("application/json")
   private val randomUuidFeeder = Iterator.continually(Map("serviceUuid" -> java.util.UUID.randomUUID.toString()))
   private val uuidFeeder = Array(Map("serviceUuid" -> "a7fd7728-a3ea-4975-bfab-f240a67e894f", "signingSecret" -> "746573745365637265744b6579303031"),
     Map("serviceUuid" -> "824dcfe9-5c26-4d76-829a-e6630f434746", "signingSecret" -> "746573745365637265744b6579303032"),
     Map("serviceUuid" -> "400ff9a2-b5fb-4fde-b764-9b519963f82e", "signingSecret" -> "746573745365637265744b6579303033")).circular
+
+  private val httpProtocol: HttpProtocolBuilder = {
+    val prop = new Properties()
+    prop.load(new FileInputStream("src/test/resources/application-test.properties"))
+    val host = prop.getProperty("siga.hostname")
+    val protocol = prop.getProperty("siga.protocol")
+    val port = prop.getProperty("siga.port")
+    val applicationContextPath = prop.getProperty("siga.application-context-path")
+    val url = protocol + "://" + host + ":" + port + applicationContextPath
+    http.baseUrl(url).contentTypeHeader("application/json")
+  }
 
   private val loadTestScenario: ScenarioBuilder = scenario("SiGa remote siging flow load test")
     .feed(uuidFeeder)
@@ -124,11 +136,11 @@ class RemoteSigningLoadSimulation extends Simulation {
 
   setUp(loadTestScenario.inject(
     //atOnceUsers(3),
-        incrementConcurrentUsers(20)
-          .times(5)
-          .eachLevelLasting(30 seconds)
-          .separatedByRampsLasting(10 seconds)
-          .startingFrom(10)
+    incrementConcurrentUsers(20)
+      .times(5)
+      .eachLevelLasting(30 seconds)
+      .separatedByRampsLasting(10 seconds)
+      .startingFrom(10)
   ))
     .protocols(httpProtocol)
     .assertions(

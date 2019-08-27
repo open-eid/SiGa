@@ -136,10 +136,10 @@ public abstract class TestBase {
         return response.getSidStatus();
     }
 
-    private Object startRemoteSigning(String url, Class responseObject) throws Exception {
+    private Object startRemoteSigning(String url, String encodedSigningCertificate, Class responseObject) throws Exception {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
-        request.put("signingCertificate", new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())));
+        request.put("signingCertificate", encodedSigningCertificate);
         JSONArray roles = new JSONArray();
         roles.put("Manager");
         roles.put("Developer");
@@ -147,12 +147,24 @@ public abstract class TestBase {
         return postRequest(url, request, responseObject);
     }
 
+    private Object startRemoteSigning(String url, Class responseObject) throws Exception {
+        return startRemoteSigning(url, new String(Base64.getEncoder().encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())), responseObject);
+    }
+
     protected CreateHashcodeContainerRemoteSigningResponse startHashcodeRemoteSigning(String containerId) throws Exception {
         return (CreateHashcodeContainerRemoteSigningResponse) startRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning", CreateHashcodeContainerRemoteSigningResponse.class);
     }
 
+    protected CreateHashcodeContainerRemoteSigningResponse startHashcodeRemoteSigning(String containerId, String encodedSigningCertificate) throws Exception {
+        return (CreateHashcodeContainerRemoteSigningResponse) startRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning", encodedSigningCertificate, CreateHashcodeContainerRemoteSigningResponse.class);
+    }
+
     protected CreateContainerRemoteSigningResponse startRemoteSigning(String containerId) throws Exception {
         return (CreateContainerRemoteSigningResponse) startRemoteSigning("/containers/" + containerId + "/remotesigning", CreateContainerRemoteSigningResponse.class);
+    }
+
+    protected CreateContainerRemoteSigningResponse startRemoteSigning(String containerId, String encodedSigningCertificate) throws Exception {
+        return (CreateContainerRemoteSigningResponse) startRemoteSigning("/containers/" + containerId + "/remotesigning", encodedSigningCertificate, CreateContainerRemoteSigningResponse.class);
     }
 
     protected void finalizeRemoteSigning(String url, String signatureValue) throws Exception {

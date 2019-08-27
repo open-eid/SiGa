@@ -84,7 +84,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019928", "+37200000366", "LT"));
 
-        expectError(response, 400, CLIENT_EXCEPTION);
+        expectError(response, 400, MID_EXCEPTION, NOT_ACTIVE);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019939", "+37200000266", "LT"));
 
-        expectError(response, 400, CLIENT_EXCEPTION);
+        expectError(response, 400, MID_EXCEPTION, NOT_ACTIVE);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("P!NO-23a.31,23", "+37200000766", "LT"));
 
-        expectError(response, 400, CLIENT_EXCEPTION);
+        expectError(response, 400, MID_EXCEPTION, NOT_FOUND);
     }
 
     @Test

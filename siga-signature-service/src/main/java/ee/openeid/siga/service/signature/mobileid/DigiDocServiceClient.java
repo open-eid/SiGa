@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
@@ -13,6 +14,9 @@ import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.security.cert.X509Certificate;
+import java.util.stream.Stream;
+
 import static ee.openeid.siga.common.util.CertificateUtil.createX509Certificate;
 
 public class DigiDocServiceClient implements MobileIdClient {
@@ -22,12 +26,9 @@ public class DigiDocServiceClient implements MobileIdClient {
     private MobileIdService mobileIdService;
 
     @Override
-    public GetCertificateResponse getCertificate(MobileIdInformation mobileIdInformation) {
+    public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
         GetMobileCertificateResponse signingCertificate = digiDocService.getMobileCertificate(mobileIdInformation.getPersonIdentifier(), mobileIdInformation.getPhoneNo());
-        GetCertificateResponse response = new GetCertificateResponse();
-        response.setCertificate(createX509Certificate(signingCertificate.getSignCertData().getBytes()));
-        response.setStatus(signingCertificate.getSignCertStatus());
-        return response;
+        return createX509Certificate(signingCertificate.getSignCertData().getBytes());
     }
 
     @Override
@@ -44,7 +45,7 @@ public class DigiDocServiceClient implements MobileIdClient {
         GetMobileSignHashStatusResponse getMobileSignHashStatusResponse = mobileIdService.getMobileSignHashStatus(sessionCode);
         ProcessStatusType status = getMobileSignHashStatusResponse.getStatus();
         GetStatusResponse response = new GetStatusResponse();
-        response.setStatus(status.name());
+        response.setStatus(mapToMidStatus(status.name()));
         if (ProcessStatusType.SIGNATURE == status) {
             response.setSignature(getMobileSignHashStatusResponse.getSignature());
         }
@@ -60,6 +61,14 @@ public class DigiDocServiceClient implements MobileIdClient {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
         return response;
+    }
+
+    private static MidStatus mapToMidStatus(String processStatusType) {
+        return Stream.of(MidStatus.values())
+                .filter(s -> s.name().equals(processStatusType))
+                .findFirst()
+                .orElseThrow(() -> new ClientException("Mobile-ID service returned unexpected response",
+                        new IllegalStateException("DigiDocService responded with status: " + processStatusType)));
     }
 
     @Autowired

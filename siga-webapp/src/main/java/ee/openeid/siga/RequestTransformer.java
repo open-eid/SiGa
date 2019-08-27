@@ -5,7 +5,9 @@ import ee.openeid.siga.common.HashcodeDataFile;
 import ee.openeid.siga.common.MobileIdInformation;
 import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.util.CertificateUtil;
+import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.GetHashcodeContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.Signature;
@@ -20,6 +22,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class RequestTransformer {
 
@@ -98,8 +102,15 @@ public class RequestTransformer {
 
     static SignatureParameters transformRemoteRequest(String signingCertificate, String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
         SignatureParameters signatureParameters = new SignatureParameters();
-        byte[] base64DecodedCertificate = Base64.getDecoder().decode(signingCertificate.getBytes());
-        X509Certificate x509Certificate = CertificateUtil.createX509Certificate(base64DecodedCertificate);
+
+        X509Certificate x509Certificate = Stream
+                .of(SupportedCertificateEncoding.values())
+                .filter(e -> e.isDecodable(signingCertificate))
+                .map(e -> tryToCreateX509Certificate(e.decode(signingCertificate)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseThrow(() -> new InvalidCertificateException("Invalid signing certificate"));
 
         signatureParameters.setSigningCertificate(x509Certificate);
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(requestSignatureProfile);
@@ -223,5 +234,13 @@ public class RequestTransformer {
             throw new InvalidSignatureException();
         }
         return response;
+    }
+
+    private static Optional<X509Certificate> tryToCreateX509Certificate(byte[] rawBytes) {
+        try {
+            return Optional.of(CertificateUtil.createX509Certificate(rawBytes));
+        } catch (InvalidCertificateException e) {
+            return Optional.empty();
+        }
     }
 }

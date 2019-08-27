@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.exception.MidException;
 import ee.openeid.siga.service.signature.configuration.MidRestConfigurationProperties;
-import ee.sk.mid.exception.MidNotMidClientException;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DataFile;
@@ -35,7 +35,7 @@ public class MidRestClientTest {
         when(configurationProperties.getUrl()).thenReturn("https://tsp.demo.sk.ee/mid-api");
     }
 
-    @Test(expected = MidNotMidClientException.class)
+    @Test(expected = MidException.class)
     public void invalidPhoneNo() {
         MobileIdInformation mobileIdInformation = MobileIdInformation.builder()
                 .relyingPartyName("DEMO")
@@ -51,14 +51,14 @@ public class MidRestClientTest {
     public void successfulGetCertificateRequest() {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
 
-        X509Certificate certificate = midRestClient.getCertificate(mobileIdInformation).getCertificate();
+        X509Certificate certificate = midRestClient.getCertificate(mobileIdInformation);
         Assert.assertEquals("CN=TEST of ESTEID-SK 2015, OID.2.5.4.97=NTREE-10747013, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 
     @Test
     public void successfulInitMobileSigning() {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
-        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation).getCertificate();
+        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation);
         Container container = createContainer();
 
         DataToSign dataToSign = createDataToSign(container, signingCert);
@@ -69,17 +69,24 @@ public class MidRestClientTest {
     }
 
     @Test
-    public void successfulGetStatusRequest() {
+    public void successfulGetStatusRequest() throws Exception {
         MobileIdInformation mobileIdInformation = createMobileIdInformation();
-        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation).getCertificate();
+        X509Certificate signingCert = midRestClient.getCertificate(mobileIdInformation);
         Container container = createContainer();
 
         DataToSign dataToSign = createDataToSign(container, signingCert);
 
         InitMidSignatureResponse response = midRestClient.initMobileSigning(dataToSign, mobileIdInformation);
 
-        GetStatusResponse statusResponse = midRestClient.getStatus(response.getSessionCode(), createMobileIdInformation());
-        Assert.assertEquals("OK", statusResponse.getStatus());
+        GetStatusResponse statusResponse = null;
+        for (int i = 0; i < 5; ++i) {
+            statusResponse = midRestClient.getStatus(response.getSessionCode(), createMobileIdInformation());
+            if (statusResponse.getStatus() != MidStatus.OUTSTANDING_TRANSACTION) {
+                break;
+            }
+            Thread.sleep(5000);
+        }
+        Assert.assertEquals(MidStatus.SIGNATURE, statusResponse.getStatus());
         Assert.assertTrue(statusResponse.getSignature().length > 1);
     }
 

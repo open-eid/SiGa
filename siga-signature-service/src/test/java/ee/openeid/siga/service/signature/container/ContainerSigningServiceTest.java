@@ -6,11 +6,10 @@ import ee.openeid.siga.common.SigningChallenge;
 import ee.openeid.siga.common.SmartIdInformation;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
-import ee.openeid.siga.service.signature.mobileid.GetCertificateResponse;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
+import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -117,9 +116,7 @@ public abstract class ContainerSigningServiceTest {
         initMidSignatureResponse.setSessionCode("sessionCode");
         initMidSignatureResponse.setChallengeId("1234");
         Mockito.when(mobileIdClient.initMobileSigning(any(), any())).thenReturn(initMidSignatureResponse);
-        GetCertificateResponse getCertificateResponse = new GetCertificateResponse();
-        getCertificateResponse.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
-        Mockito.when(mobileIdClient.getCertificate(any())).thenReturn(getCertificateResponse);
+        Mockito.when(mobileIdClient.getCertificate(any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
 
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
@@ -135,7 +132,7 @@ public abstract class ContainerSigningServiceTest {
 
         GetStatusResponse response = new GetStatusResponse();
         response.setSignature(signatureRaw);
-        response.setStatus(ProcessStatusType.SIGNATURE.name());
+        response.setStatus(MidStatus.SIGNATURE);
 
         Mockito.when(mobileIdClient.getStatus(any(), any())).thenReturn(response);
 
