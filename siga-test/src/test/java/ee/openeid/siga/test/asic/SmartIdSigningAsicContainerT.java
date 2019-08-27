@@ -47,7 +47,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("11111111111", "LT"));
 
-        expectError(response, 404, INVALID_REQUEST);
+        expectError(response, 400, SMARTID_EXCEPTION);
     }
 
     @Test

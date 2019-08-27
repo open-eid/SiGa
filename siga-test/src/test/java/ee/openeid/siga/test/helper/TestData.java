@@ -87,4 +87,5 @@ public class TestData {
     public static final String INVALID_LANGUAGE = "INVALID_LANGUAGE_EXCEPTION";
     public static final String INVALID_DATA = "INVALID_SESSION_DATA_EXCEPTION";
     public static final String INVALID_CERTIFICATE_EXCEPTION = "INVALID_CERTIFICATE_EXCEPTION";
+    public static final String SMARTID_EXCEPTION = "SMARTID_EXCEPTION";
 }
