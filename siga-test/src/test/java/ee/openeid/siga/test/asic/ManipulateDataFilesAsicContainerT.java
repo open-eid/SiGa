@@ -2,18 +2,22 @@ package ee.openeid.siga.test.asic;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import eu.europa.esig.dss.MimeType;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.stream.Collectors;
 
 import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -87,7 +91,6 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
                 .body("dataFiles[0].fileContent", equalTo(DEFAULT_DATAFILE_CONTENT));
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void createAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -105,7 +108,6 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
                 .body("dataFiles[0]", nullValue());
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void uploadAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
@@ -141,7 +143,6 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_DATA);
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("NonconventionalCharactersInDataFile.asice"));
@@ -188,7 +189,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void createAsicContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         JSONObject dataFiles = addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu");
@@ -209,6 +210,20 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
                 .body("dataFiles[1].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"))
                 .body("dataFiles[2].fileName", equalTo("testFile2.xml"))
                 .body("dataFiles[2].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQgdG8gaGFuZGxlLg=="));
+    }
+
+    @Test
+    public void createAsicContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        addDataFile(flow, addDataFilesToAsicRequest(TEST_FILE_EXTENSIONS.stream()
+                .map(ext -> addDataFileToAsicRequestDataFile("filename." + ext, DEFAULT_DATAFILE_CONTENT))
+                .collect(Collectors.toList())));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, getContainer(flow).getBody().path(CONTAINER).toString()));
+        for (int i = 0; i < TEST_FILE_EXTENSIONS.size(); ++i) {
+            String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
+            Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (2 + i) + "].@manifest:media-type"));
+        }
     }
 
     @Test

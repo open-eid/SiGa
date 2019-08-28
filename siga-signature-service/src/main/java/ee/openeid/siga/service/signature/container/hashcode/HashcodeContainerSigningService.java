@@ -95,10 +95,8 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
             throw new TechnicalException("Unable to create signature. Unable to read file hash");
         }
         byte[] digest = Base64.getDecoder().decode(hashcodeDataFile.getFileHashSha512().getBytes());
-        DigestDataFile digestDataFile = new DigestDataFile(fileName, digestAlgorithm, digest);
-        if (hashcodeDataFile.getMimeType() != null)
-            digestDataFile.setMediaType(hashcodeDataFile.getMimeType());
-        return digestDataFile;
+        String mimeType = hashcodeDataFile.getMimeType();
+        return new DigestDataFile(fileName, digestAlgorithm, digest, mimeType);
     }
 
     private void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {

@@ -12,6 +12,7 @@ import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -48,6 +49,7 @@ public class RequestUtil {
         dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
         dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");
+        dataFile.setMimeType(MimeType.TEXT.getMimeTypeString());
         hashcodeDataFiles.add(dataFile);
         return hashcodeDataFiles;
     }

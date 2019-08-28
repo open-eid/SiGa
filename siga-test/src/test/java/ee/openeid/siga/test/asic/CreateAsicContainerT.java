@@ -2,19 +2,23 @@ package ee.openeid.siga.test.asic;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import eu.europa.esig.dss.MimeType;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.stream.Collectors;
 
 import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequest;
-import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.ContainerUtil.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -31,6 +35,19 @@ public class CreateAsicContainerT extends TestBase {
         Response response = postCreateContainer(flow, asicContainersDataRequestWithDefault());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
+    }
+
+    @Test
+    public void createAsicContainerMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, asicContainersDataRequest(TEST_FILE_EXTENSIONS.stream()
+                .map(ext -> asicContainersDataRequestDataFile("filename." + ext, DEFAULT_DATAFILE_CONTENT))
+                .collect(Collectors.toList()), DEFAULT_ASICE_CONTAINER_NAME));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, getContainer(flow).getBody().path(CONTAINER).toString()));
+        for (int i = 0; i < TEST_FILE_EXTENSIONS.size(); ++i) {
+            String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
+            Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (1 + i) + "].@manifest:media-type"));
+        }
     }
 
     @Test

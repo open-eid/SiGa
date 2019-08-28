@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.List;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.HmacSigner.generateHmacSignature;
@@ -28,30 +29,56 @@ public class RequestBuilder {
         return asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME);
     }
 
-    public static JSONObject asicContainersDataRequest(String fileName, String fileContent, String containerName) throws JSONException {
-        JSONArray datafiles = new JSONArray();
+    public static JSONObject asicContainersDataRequestDataFile(String fileName, String fileContent) {
         JSONObject dataFileObject = new JSONObject();
+        try {
+            if (fileName != null)
+                dataFileObject.put("fileName", fileName);
+            if (fileContent != null)
+                dataFileObject.put("fileContent", fileContent);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Failed to add a field into JSONObject", e);
+        }
+        return dataFileObject;
+    }
+
+    public static JSONObject asicContainersDataRequest(String fileName, String fileContent, String containerName) throws JSONException {
+        return asicContainersDataRequest(List.of(asicContainersDataRequestDataFile(fileName, fileContent)), containerName);
+    }
+
+    public static JSONObject asicContainersDataRequest(List<JSONObject> dataFiles, String containerName) throws JSONException {
+        JSONArray datafiles = new JSONArray();
         JSONObject request = new JSONObject();
-        if (fileName != null)
-            dataFileObject.put("fileName", fileName);
-        if (fileContent != null)
-            dataFileObject.put("fileContent", fileContent);
-        datafiles.put(dataFileObject);
+        dataFiles.forEach(datafiles::put);
         if (containerName != null)
             request.put("containerName", containerName);
         request.put("dataFiles", datafiles);
         return request;
     }
 
-    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
-        JSONArray datafiles = new JSONArray();
+    public static JSONObject hashcodeContainersDataRequestDataFile(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) {
         JSONObject dataFileObject = new JSONObject();
+        try {
+            dataFileObject.put("fileName", fileName);
+            dataFileObject.put("fileHashSha256", fileHashSha256);
+            dataFileObject.put("fileHashSha512", fileHashSha512);
+            dataFileObject.put("fileSize", fileSize);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Failed to add a field into JSONObject", e);
+        }
+        return dataFileObject;
+    }
+
+    public static JSONObject hashcodeContainersDataRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
+        return hashcodeContainersDataRequest(List.of(
+                hashcodeContainersDataRequestDataFile(fileName, fileHashSha256, fileHashSha512, fileSize)
+        ));
+    }
+
+    public static JSONObject hashcodeContainersDataRequest(List<JSONObject> dataFiles) throws JSONException {
+        JSONArray datafiles = new JSONArray();
         JSONObject request = new JSONObject();
-        dataFileObject.put("fileName", fileName);
-        dataFileObject.put("fileHashSha256", fileHashSha256);
-        dataFileObject.put("fileHashSha512", fileHashSha512);
-        dataFileObject.put("fileSize", fileSize);
-        datafiles.put(dataFileObject);
+        dataFiles.forEach(datafiles::put);
         request.put("dataFiles", datafiles);
         return request;
     }
@@ -172,31 +199,53 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject addDataFileToHashcodeRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
-        JSONArray datafiles = new JSONArray();
+    public static JSONObject addDataFileToHashcodeRequestDataFile(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) {
         JSONObject dataFileObject = new JSONObject();
-        JSONObject request = new JSONObject();
-        dataFileObject.put("fileName", fileName);
-        dataFileObject.put("fileHashSha256", fileHashSha256);
-        dataFileObject.put("fileHashSha512", fileHashSha512);
-        dataFileObject.put("fileSize", fileSize);
-        datafiles.put(dataFileObject);
-        request.put("dataFiles", datafiles);
+        try {
+            dataFileObject.put("fileName", fileName);
+            dataFileObject.put("fileHashSha256", fileHashSha256);
+            dataFileObject.put("fileHashSha512", fileHashSha512);
+            dataFileObject.put("fileSize", fileSize);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Failed to add a field into JSONObject", e);
+        }
+        return dataFileObject;
+    }
 
+    public static JSONObject addDataFileToHashcodeRequest(String fileName, String fileHashSha256, String fileHashSha512, Integer fileSize) throws JSONException {
+        return addDataFilesToHashcodeRequest(List.of(
+                addDataFileToHashcodeRequestDataFile(fileName, fileHashSha256, fileHashSha512, fileSize)
+        ));
+    }
+
+    public static JSONObject addDataFilesToHashcodeRequest(List<JSONObject> dataFiles) throws JSONException {
+        JSONArray datafiles = new JSONArray();
+        JSONObject request = new JSONObject();
+        dataFiles.forEach(datafiles::put);
+        request.put("dataFiles", datafiles);
         return request;
     }
 
-    public static JSONObject addDataFileToAsicRequest(String fileName, String fileContent) throws JSONException {
-        JSONObject request = new JSONObject();
-        JSONArray dataFiles = new JSONArray();
+    public static JSONObject addDataFileToAsicRequestDataFile(String fileName, String fileContent) {
         JSONObject dataFile = new JSONObject();
+        try {
+            dataFile.put("fileName", fileName);
+            dataFile.put("fileContent", fileContent);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Failed to add a field into JSONObject", e);
+        }
+        return dataFile;
+    }
 
-        dataFile.put("fileName", fileName);
-        dataFile.put("fileContent", fileContent);
-        dataFiles.put(dataFile);
+    public static JSONObject addDataFileToAsicRequest(String fileName, String fileContent) throws JSONException {
+        return addDataFilesToAsicRequest(List.of(addDataFileToAsicRequestDataFile(fileName, fileContent)));
+    }
 
-        request.put("dataFiles", dataFiles);
-
+    public static JSONObject addDataFilesToAsicRequest(List<JSONObject> dataFiles) throws JSONException {
+        JSONObject request = new JSONObject();
+        JSONArray datafiles = new JSONArray();
+        dataFiles.forEach(datafiles::put);
+        request.put("dataFiles", datafiles);
         return request;
     }
 
