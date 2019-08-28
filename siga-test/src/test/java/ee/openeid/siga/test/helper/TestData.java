@@ -1,5 +1,7 @@
 package ee.openeid.siga.test.helper;
 
+import java.util.List;
+
 public class TestData {
 
     // Endpoints
@@ -88,4 +90,12 @@ public class TestData {
     public static final String INVALID_DATA = "INVALID_SESSION_DATA_EXCEPTION";
     public static final String INVALID_CERTIFICATE_EXCEPTION = "INVALID_CERTIFICATE_EXCEPTION";
     public static final String SMARTID_EXCEPTION = "SMARTID_EXCEPTION";
+
+    // Container paths
+    public static final String META_INF = "META-INF";
+    public static final String MANIFEST = META_INF + "/manifest.xml";
+
+    public static final List<String> TEST_FILE_EXTENSIONS = List.of(
+            "xml", "html", "pkcs7", "p7s", "pdf", "asics", "scs", "asice", "sce", "bdoc", "odt", "ods", "txt", "png", "jpg", "jpeg", "tst", "unknown"
+    );
 }

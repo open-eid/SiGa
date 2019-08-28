@@ -12,6 +12,7 @@ import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -36,9 +36,10 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     public String createContainer(List<HashcodeDataFile> dataFiles) {
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        dataFiles.forEach(hashcodeContainer::addDataFile);
-        OutputStream outputStream = new ByteArrayOutputStream();
-        hashcodeContainer.save(outputStream);
+        dataFiles.forEach(dataFile -> {
+            updateMimeTypeIfNotSet(dataFile);
+            hashcodeContainer.addDataFile(dataFile);
+        });
 
         String sessionId = UUIDGenerator.generateUUID();
         sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
@@ -101,6 +102,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     public Result addDataFiles(String containerId, List<HashcodeDataFile> dataFiles) {
         HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
+        dataFiles.forEach(HashcodeContainerService::updateMimeTypeIfNotSet);
         sessionHolder.getDataFiles().addAll(dataFiles);
         sessionService.update(containerId, sessionHolder);
         return Result.OK;
@@ -145,6 +147,13 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
                 .dataFiles(container.getDataFiles())
                 .signatures(container.getSignatures())
                 .build();
+    }
+
+    private static void updateMimeTypeIfNotSet(HashcodeDataFile dataFile) {
+        if (dataFile.getMimeType() == null) {
+            MimeType mimeType = MimeType.fromFileName(dataFile.getFileName());
+            dataFile.setMimeType(mimeType.getMimeTypeString());
+        }
     }
 
     @Override

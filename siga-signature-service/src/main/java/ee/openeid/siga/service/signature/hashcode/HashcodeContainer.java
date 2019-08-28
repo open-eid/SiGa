@@ -184,7 +184,7 @@ public class HashcodeContainer {
     private List<org.digidoc4j.DataFile> convertDataFiles() {
         return dataFiles.stream().map(d -> {
             DSSDocument dssDocument = new DigestDocument();
-            dssDocument.setMimeType(MimeType.BINARY);
+            dssDocument.setMimeType(d.getMimeType() != null ? MimeType.fromMimeTypeString(d.getMimeType()) : MimeType.BINARY);
             dssDocument.setName(d.getFileName());
             org.digidoc4j.DataFile dataFile = new org.digidoc4j.DataFile();
             dataFile.setDocument(dssDocument);

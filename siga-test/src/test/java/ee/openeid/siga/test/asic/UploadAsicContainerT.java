@@ -6,6 +6,7 @@ import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -27,6 +28,14 @@ public class UploadAsicContainerT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
+    @Ignore("Should manifest be required?")
+    public void uploadAsicContainerMissingManifest() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("missing_manifest.asice"));
+
+        expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test

@@ -53,13 +53,13 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(1440));
+                .body(CONTAINER + ".length()", greaterThan(1400));
 
         response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(1440));
+                .body(CONTAINER + ".length()", greaterThan(1400));
     }
 
     @Test

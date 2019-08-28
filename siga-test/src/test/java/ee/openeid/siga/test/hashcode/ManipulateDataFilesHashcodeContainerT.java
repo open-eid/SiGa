@@ -2,19 +2,22 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import eu.europa.esig.dss.MimeType;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.stream.Collectors;
 
 import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -83,7 +86,6 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE));
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void createHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -101,7 +103,6 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[0]", nullValue());
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void uploadHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
@@ -116,7 +117,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0]", nullValue());
+                .body("dataFiles.size()", equalTo(1));
     }
 
     @Test
@@ -137,7 +138,6 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_DATA);
     }
 
-    @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void uploadHashcodeContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("Nonconventional_characters_in_data_file.asice"));
@@ -188,11 +188,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         JSONObject dataFiles = addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
-        JSONObject dataFile = new JSONObject();
-        dataFile.put("fileName", "testFile2.xml");
-        dataFile.put("fileHashSha256", DEFAULT_SHA256_DATAFILE);
-        dataFile.put("fileHashSha512", DEFAULT_SHA512_DATAFILE);
-        dataFile.put("fileSize", DEFAULT_FILESIZE);
+        JSONObject dataFile = addDataFileToHashcodeRequestDataFile("testFile2.xml", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
         dataFiles.getJSONArray("dataFiles").put(dataFile);
 
         addDataFile(flow, dataFiles);
@@ -213,6 +209,20 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[2].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
                 .body("dataFiles[2].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
                 .body("dataFiles[2].fileSize", equalTo(DEFAULT_FILESIZE));
+    }
+
+    @Test
+    public void createHashcodeContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        addDataFile(flow, addDataFilesToHashcodeRequest(TEST_FILE_EXTENSIONS.stream()
+                .map(ext -> addDataFileToHashcodeRequestDataFile("filename." + ext, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE))
+                .collect(Collectors.toList())));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, getContainer(flow).getBody().path(CONTAINER).toString()));
+        for (int i = 0; i < TEST_FILE_EXTENSIONS.size(); ++i) {
+            String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
+            Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (2 + i) + "].@manifest:media-type"));
+        }
     }
 
     @Test

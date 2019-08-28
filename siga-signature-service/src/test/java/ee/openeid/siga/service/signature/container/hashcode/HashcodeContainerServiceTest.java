@@ -10,6 +10,7 @@ import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.MimeType;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Configuration;
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -30,6 +32,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,9 +68,28 @@ public class HashcodeContainerServiceTest {
     @Test
     public void successfulCreateContainer() {
         List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
-        containerService.setSessionService(sessionService);
         String containerId = containerService.createContainer(hashcodeDataFiles);
         Assert.assertFalse(StringUtils.isBlank(containerId));
+
+        verifySessionServiceUpdateCalled(containerId, session -> {
+            Assert.assertNotNull(session.getDataFiles());
+            Assert.assertEquals(hashcodeDataFiles.size(), session.getDataFiles().size());
+            for (int i = 0; i < hashcodeDataFiles.size(); ++i) {
+                Assert.assertEquals(MimeType.fromFileName(hashcodeDataFiles.get(i).getFileName()).getMimeTypeString(), session.getDataFiles().get(i).getMimeType());
+            }
+        });
+    }
+
+    @Test
+    public void successfulCreateContainerFromDataFileWithUnknownExtension() {
+        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles().stream().limit(1)
+                .peek(dataFile -> dataFile.setFileName("filename.unknown")).collect(Collectors.toList());
+        String containerId = containerService.createContainer(hashcodeDataFiles);
+        Assert.assertFalse(StringUtils.isBlank(containerId));
+
+        verifySessionServiceUpdateCalled(containerId, session -> {
+            Assert.assertEquals(MimeType.BINARY.getMimeTypeString(), session.getDataFiles().get(0).getMimeType());
+        });
     }
 
     @Test
@@ -159,6 +182,14 @@ public class HashcodeContainerServiceTest {
     public void successfulCloseSession() {
         Result result = containerService.closeSession(CONTAINER_ID);
         Assert.assertEquals(Result.OK, result);
+    }
+
+    private void verifySessionServiceUpdateCalled(String expectedSessionId, Consumer<HashcodeContainerSessionHolder> sessionValidator) {
+        ArgumentCaptor<HashcodeContainerSessionHolder> sessionCaptor = ArgumentCaptor.forClass(HashcodeContainerSessionHolder.class);
+        Mockito.verify(sessionService, Mockito.times(1)).update(Mockito.eq(expectedSessionId), sessionCaptor.capture());
+        Mockito.verifyNoMoreInteractions(sessionService);
+
+        sessionValidator.accept(sessionCaptor.getValue());
     }
 
 }

@@ -50,7 +50,7 @@ public class AsicContainerService implements AsicSessionHolder {
         dataFiles.forEach(dataFile -> containerBuilder.withDataFile(
                 new ByteArrayInputStream(Base64.getDecoder().decode(dataFile.getContent().getBytes())),
                 dataFile.getFileName(),
-                MimeType.BINARY.getMimeTypeString()
+                MimeType.fromFileName(dataFile.getFileName()).getMimeTypeString()
         ));
 
         Container container = containerBuilder.build();

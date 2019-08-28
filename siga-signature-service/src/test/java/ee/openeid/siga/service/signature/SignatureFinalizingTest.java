@@ -176,8 +176,8 @@ public class SignatureFinalizingTest {
             assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspEvent.getErrorCode());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), tsaRequestEvent.getErrorCode());
-            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>", ocspEvent.getErrorMessage());
-            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>", tsaRequestEvent.getErrorMessage());
+            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", ocspEvent.getErrorMessage());
+            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", tsaRequestEvent.getErrorMessage());
             throw e;
         }
     }
@@ -205,7 +205,7 @@ public class SignatureFinalizingTest {
             assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
             assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
-            assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>", ocspRequestEvent.getErrorMessage());
+            assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>. Service is down or URL is invalid.", ocspRequestEvent.getErrorMessage());
             throw e;
         }
 
