@@ -43,7 +43,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         Response response = getSignatureList(flow);
 
@@ -54,7 +54,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithInvalidSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("unknown_ocsp.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile("unknownOcspResponder.asice"));
 
         Response response = getSignatureList(flow);
 
@@ -145,7 +145,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("unknown_ocsp.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile("unknownOcspResponder.asice"));
 
         Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
 

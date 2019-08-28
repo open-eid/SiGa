@@ -29,7 +29,7 @@ public class ValidateAsicContainerT extends TestBase {
 
     @Test
     public void validateAsicContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile("valid.asice"));
+        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
@@ -41,13 +41,13 @@ public class ValidateAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithMultipleSignatures.asice"));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
         assertThat(validationResponse.statusCode(), equalTo(200));
-        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
-        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(3));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(3));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865"));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2014-11-17T14:11:46Z"));
     }

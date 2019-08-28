@@ -28,12 +28,12 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        Response response = postContainerValidationReport(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+    public void validateHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeMultipleSignatures.asice"));
 
         assertThat(response.statusCode(), equalTo(200));
-        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
-        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(3));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(3));
         assertThat(response.getBody().path("validationConclusion.policy.policyName"), equalTo("POLv4"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-02-22T11:04:25Z"));

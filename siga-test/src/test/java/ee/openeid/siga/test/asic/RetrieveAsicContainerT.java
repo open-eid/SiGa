@@ -30,7 +30,7 @@ public class RetrieveAsicContainerT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body(CONTAINER + ".length()", equalTo(11832))
-                .body(CONTAINER_NAME, equalTo("valid.asice"));
+                .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
     }
 
     @Test

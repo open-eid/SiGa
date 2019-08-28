@@ -42,7 +42,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         Response response = getDataFileList(flow);
 
@@ -54,7 +54,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutDataFilesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_data_files.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutDataFiles.asice"));
 
         Response response = getDataFileList(flow);
 
@@ -65,7 +65,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithInvalidSignatureAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("unknown_ocsp.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile("unknownOcspResponder.asice"));
 
         Response response = getDataFileList(flow);
 
@@ -125,7 +125,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         Response response = deleteDataFile(flow, "random.txt");
 
@@ -144,7 +144,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     @Ignore ("Requires DD4J 3.2.1")
     @Test
     public void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("Nonconventional_characters_in_data_file.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile("NonconventionalCharactersInDataFile.asice"));
 
         deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
 
@@ -157,7 +157,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
 
@@ -213,7 +213,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadSignedAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("valid.asice"));
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
 
@@ -222,7 +222,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void deleteToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
 

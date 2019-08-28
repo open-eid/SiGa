@@ -31,7 +31,7 @@ public class UploadAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignatures() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile("container_without_signatures.bdoc"));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
 
         response.then()
                 .statusCode(200)
@@ -40,14 +40,14 @@ public class UploadAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutDatafiles() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile("bdoc21_TM_no_datafile.bdoc"));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerNoDataFile.bdoc"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
     public void uploadAsicContainerWithDdoc() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile("ddoc-valid.ddoc"));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("ddocSingleSignature.ddoc"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
