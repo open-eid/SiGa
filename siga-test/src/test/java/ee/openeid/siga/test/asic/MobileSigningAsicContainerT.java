@@ -198,7 +198,7 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void invalidPersonIdentifierFormatReturnsSoapErrorFromDds() throws Exception {
+    public void invalidPersonIdentifierFormat() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("P!NO-23a.31,23", "+37200000766", "LT"));
 
