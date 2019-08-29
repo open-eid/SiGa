@@ -33,7 +33,7 @@ public class UploadAsicContainerT extends TestBase {
     @Test
     @Ignore("Should manifest be required?")
     public void uploadAsicContainerMissingManifest() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile("missing_manifest.asice"));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerMissingManifest.asice"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
