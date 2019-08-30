@@ -4,11 +4,15 @@ import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
+import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -25,13 +29,17 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     public void uploadHashcodeContainerAndRetrieveIt() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19656));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
+
+        Assert.assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (2) + "].@manifest:media-type"));
     }
 
     @Test
@@ -43,6 +51,10 @@ public class RetrieveHashcodeContainerT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body(CONTAINER + ".length()", greaterThan(1400));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
+
+        Assert.assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test

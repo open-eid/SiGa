@@ -69,4 +69,12 @@ public final class ContainerUtil {
         return xmlPath.using(XmlPathConfig.xmlPathConfig().declaredNamespace(MANIFEST_NAMESPACE_PREFIX, MANIFEST_NAMESPACE_URL));
     }
 
+    public static XmlPath hashcodeDataFileAsXmlPath(String entryPath, String containerBase64String) {
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(extractEntryFromContainer(entryPath, containerBase64String))) {
+            return XmlPath.from(byteArrayInputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read hashcode file", e);
+        }
+    }
+
 }

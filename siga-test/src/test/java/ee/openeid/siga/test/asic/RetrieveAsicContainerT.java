@@ -5,11 +5,15 @@ import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
+import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -31,6 +35,10 @@ public class RetrieveAsicContainerT extends TestBase {
                 .statusCode(200)
                 .body(CONTAINER + ".length()", equalTo(11832))
                 .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
+
+        Assert.assertEquals("text/xml", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test
@@ -42,6 +50,10 @@ public class RetrieveAsicContainerT extends TestBase {
                 .statusCode(200)
                 .body(CONTAINER + ".length()", greaterThan(1800))
                 .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
+
+        XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
+
+        Assert.assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test

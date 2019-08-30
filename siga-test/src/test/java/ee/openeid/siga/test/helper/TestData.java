@@ -94,6 +94,9 @@ public class TestData {
     // Container paths
     public static final String META_INF = "META-INF";
     public static final String MANIFEST = META_INF + "/manifest.xml";
+    public static final String HASHCODE_SHA256 = META_INF + "/hashcodes-sha256.xml";
+    public static final String HASHCODE_SHA512 = META_INF + "/hashcodes-sha512.xml";
+    public static final String MIMETYPE = "mimetype";
 
     public static final List<String> TEST_FILE_EXTENSIONS = List.of(
             "xml", "html", "pkcs7", "p7s", "pdf", "asics", "scs", "asice", "sce", "bdoc", "odt", "ods", "txt", "png", "jpg", "jpeg", "tst", "unknown"
