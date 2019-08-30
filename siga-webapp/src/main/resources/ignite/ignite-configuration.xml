@@ -48,7 +48,7 @@
                 <bean class="org.apache.ignite.configuration.CacheConfiguration">
                     <property name="name" value="SIGA-AUTH-SERVICES"/>
                     <property name="expiryPolicyFactory">
-                        <bean class="javax.cache.expiry.TouchedExpiryPolicy" factory-method="factoryOf">
+                        <bean class="javax.cache.expiry.CreatedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
                                 <bean class="javax.cache.expiry.Duration">
                                     <constructor-arg value="SECONDS"/>
