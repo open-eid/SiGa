@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
 @SpringBootConfiguration
-@Profile("digidoc4jTest")
+@Profile({"digidoc4jTest"})
 @EnableConfigurationProperties({
         DigiDoc4jConfigurationProperties.class
 })
