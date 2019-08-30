@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 
 
 @SpringBootConfiguration
-@Profile("!digidoc4jTest")
+@Profile({"!digidoc4jTest", "!digidoc4jPerf"})
 @EnableConfigurationProperties({
         DigiDoc4jConfigurationProperties.class
 })

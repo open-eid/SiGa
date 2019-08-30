@@ -8,19 +8,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
 @SpringBootConfiguration
-@Profile({"digidoc4jTest", "!digidoc4jPerf"})
+@Profile("digidoc4jPerf")
 @EnableConfigurationProperties({
         DigiDoc4jConfigurationProperties.class
 })
-public class DigiDoc4jTestConfiguration {
+public class DigiDoc4jPerformanceConfiguration {
 
     private DigiDoc4jConfigurationProperties dd4jConfigurationProperties;
 
     @Bean
     public Configuration configuration() {
-        Configuration configuration = new Configuration(Configuration.Mode.TEST);
+        Configuration configuration = new Configuration(Configuration.Mode.PROD);
         configuration.loadConfiguration(dd4jConfigurationProperties.getConfigurationLocation());
-        configuration.setPreferAiaOcsp(true);
         return configuration;
     }
 
