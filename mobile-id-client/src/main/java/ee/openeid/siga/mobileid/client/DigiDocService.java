@@ -1,5 +1,6 @@
 package ee.openeid.siga.mobileid.client;
 
+import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -28,7 +29,10 @@ public class DigiDocService extends WebServiceGatewaySupport {
         this.serviceUrl = serviceUrl;
     }
 
-    @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_CERTIFICATE, logParameters = {@Param(name = "person_identifier", index = 0), @Param(name = "phone_nr", index = 1)}, logReturnObject = {@XPath(name = "sign_cert_status", xpath = "signCertStatus"), @XPath(name = "dds_response_code", xpath = "authCertStatus")})
+    @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_CERTIFICATE,
+            logParameters = {@Param(name = "person_identifier", index = 0), @Param(name = "phone_nr", index = 1)},
+            logReturnObject = {@XPath(name = "sign_cert_status", xpath = "signCertStatus"), @XPath(name = "dds_response_code", xpath = "authCertStatus")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.dds.url-v1}")})
     public GetMobileCertificateResponse getMobileCertificate(String idCode, String phoneNr) {
         GetMobileCertificate request = new GetMobileCertificate();
         request.setIDCode(idCode);

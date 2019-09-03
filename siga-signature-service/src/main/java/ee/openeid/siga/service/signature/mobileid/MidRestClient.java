@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -44,7 +45,8 @@ public class MidRestClient implements MobileIdClient {
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
-            logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "phone_nr", xpath = "phoneNo")})})
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "phone_nr", xpath = "phoneNo")})},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
     public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
         MidClient midClient = createMidRestClient(mobileIdInformation);
         MidCertificateRequest request = MidCertificateRequest.newBuilder()
@@ -67,7 +69,8 @@ public class MidRestClient implements MobileIdClient {
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_MOBILE_SIGN_HASH,
             logParameters = {@Param(index = 1, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
-            logReturnObject = {@XPath(name = "session_code", xpath = "sessionCode")})
+            logReturnObject = {@XPath(name = "mid_session_id", xpath = "sessionCode")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
     public InitMidSignatureResponse initMobileSigning(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         MidHashType midHashType = getMidHashType(dataToSign);
 
@@ -101,8 +104,9 @@ public class MidRestClient implements MobileIdClient {
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_SIGN_HASH_STATUS,
-            logParameters = {@Param(name = "session_code", index = 0)},
-            logReturnObject = {@XPath(name = "mid_rest_result", xpath = "status")})
+            logParameters = {@Param(name = "mid_session_id", index = 0)},
+            logReturnObject = {@XPath(name = "mid_status", xpath = "status")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
     public GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation) {
         MidClient midClient = createMidRestClient(mobileIdInformation);
         MidSessionStatusRequest request = new MidSessionStatusRequest(sessionCode, 1);

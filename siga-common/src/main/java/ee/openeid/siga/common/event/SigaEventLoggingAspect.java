@@ -11,6 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -32,6 +33,9 @@ public class SigaEventLoggingAspect {
     @Autowired
     private SigaEventLogger sigaEventLogger;
 
+    @Autowired
+    private ConfigurableBeanFactory configurableBeanFactory;
+
     @Pointcut("@annotation(sigaEventLog)")
     public void callAt(SigaEventLog sigaEventLog) {
     }
@@ -46,6 +50,7 @@ public class SigaEventLoggingAspect {
             long executionTimeInMilli = Duration.between(start, finish).toMillis();
             SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventName(), executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
+            logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
             if (eventLog.logReturnObject().length != 0) {
                 // FIXME: Possible parameter name collision, when method parameters are logged.
                 logObject(eventLog.logReturnObject(), proceed, endEvent);
@@ -55,11 +60,13 @@ public class SigaEventLoggingAspect {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
             SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getErrorCode(), e.getMessage(), executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
+            logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
             throw e;
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
             SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), "INTERNAL_SERVER_ERROR", "Internal server error", executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
+            logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
             throw e;
         }
     }
@@ -118,6 +125,15 @@ public class SigaEventLoggingAspect {
             }
         }
         return Optional.empty();
+    }
+
+    private void logStaticParameters(LogParam[] parameters, SigaEvent... events) {
+        for (LogParam parameter : parameters) {
+            String value = configurableBeanFactory.resolveEmbeddedValue(parameter.value());
+            for (SigaEvent event : events) {
+                event.addEventParameter(parameter.name(), value);
+            }
+        }
     }
 }
 

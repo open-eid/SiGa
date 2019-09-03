@@ -1,6 +1,7 @@
 package ee.openeid.siga.mobileid.client;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -33,7 +34,10 @@ public class MobileIdService extends WebServiceGatewaySupport {
         this.serviceUrl = serviceUrl;
     }
 
-    @SigaEventLog(eventName = SigaEventName.DDS_MOBILE_SIGN_HASH, logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})}, logReturnObject = {@XPath(name = "dds_session_id", xpath = "sesscode"), @XPath(name = "dds_response_code", xpath = "status")})
+    @SigaEventLog(eventName = SigaEventName.DDS_MOBILE_SIGN_HASH,
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logReturnObject = {@XPath(name = "mid_session_id", xpath = "sesscode"), @XPath(name = "dds_response_code", xpath = "status")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.dds.url-v2}")})
     public MobileSignHashResponse initMobileSignHash(MobileIdInformation mobileIdInformation, String hashType, String hash) {
         MobileSignHashRequest request = new MobileSignHashRequest();
         request.setServiceName(mobileIdInformation.getRelyingPartyName());
@@ -53,7 +57,10 @@ public class MobileIdService extends WebServiceGatewaySupport {
         }
     }
 
-    @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_SIGN_HASH_STATUS, logParameters = {@Param(name = "dds_session_id", index = 0)}, logReturnObject = {@XPath(name = "dds_session_id", xpath = "sesscode"), @XPath(name = "dds_response_code", xpath = "status")})
+    @SigaEventLog(eventName = SigaEventName.DDS_GET_MOBILE_SIGN_HASH_STATUS,
+            logParameters = {@Param(name = "mid_session_id", index = 0)},
+            logReturnObject = {@XPath(name = "mid_session_id", xpath = "sesscode"), @XPath(name = "mid_status", xpath = "status")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.dds.url-v2}")})
     public GetMobileSignHashStatusResponse getMobileSignHashStatus(String sessCode) {
         GetMobileSignHashStatusRequest request = new GetMobileSignHashStatusRequest();
         request.setSesscode(sessCode);

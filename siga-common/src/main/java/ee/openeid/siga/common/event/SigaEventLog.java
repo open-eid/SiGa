@@ -15,4 +15,6 @@ public @interface SigaEventLog {
 
     XPath[] logReturnObject() default {};
 
+    LogParam[] logStaticParameters() default {};
+
 }
