@@ -18,7 +18,7 @@ public class DigiDoc4jPerformanceConfiguration {
 
     @Bean
     public Configuration configuration() {
-        Configuration configuration = new Configuration(Configuration.Mode.PROD);
+        Configuration configuration = new Configuration(Configuration.Mode.TEST);
         configuration.loadConfiguration(dd4jConfigurationProperties.getConfigurationLocation());
         return configuration;
     }
