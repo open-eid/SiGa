@@ -45,7 +45,6 @@ public class MidRestClient implements MobileIdClient {
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
-            logParameters = {@Param(index = 0, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 0, fields = {@XPath(name = "phone_nr", xpath = "phoneNo")})},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
     public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
         MidClient midClient = createMidRestClient(mobileIdInformation);
@@ -68,7 +67,7 @@ public class MidRestClient implements MobileIdClient {
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_MOBILE_SIGN_HASH,
-            logParameters = {@Param(index = 1, fields = {@XPath(name = "person_identifier", xpath = "personIdentifier")}), @Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logParameters = {@Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
             logReturnObject = {@XPath(name = "mid_session_id", xpath = "sessionCode")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
     public InitMidSignatureResponse initMobileSigning(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
