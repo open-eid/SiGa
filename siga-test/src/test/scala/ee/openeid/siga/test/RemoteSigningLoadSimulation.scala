@@ -41,23 +41,17 @@ class RemoteSigningLoadSimulation extends Simulation {
   private val loadTestScenario: ScenarioBuilder = scenario("SiGa remote siging flow load test")
     .feed(uuidFeeder)
     .repeat(1) {
-      pause(1, 3).
+      pause(1, 2).
         exec(hcCreateContainer)
         .doIf("${containerId.exists()}") {
           exec(hcRemoteSigningInit)
             .doIf("${generatedSignatureId.exists()}") {
               exec(session => hcRemoteSigningFinishRequest(session)).
-                exec(hcRemoteSigningFinish).doIf(session => session("hcRemoteSigningFinishStatus").as[String].equals("OK")) {
-                exec(hcGetSignaturesList).doIf("${signatures.exists()}") {
-                  exec(hcValidateContainerById).doIf("${validationConclusion.exists()}") {
-                    exec(hcGetContainer).
-                      exec(hcDeleteContainer)
-                  }
-                }
+                exec(hcRemoteSigningFinish).
+                exec(hcGetContainer)
               }
             }
         }
-    }
 
   def hcRemoteSigningFinishRequest(session: Session) = {
     val dataToSign = session("dataToSign").as[String]
@@ -135,7 +129,7 @@ class RemoteSigningLoadSimulation extends Simulation {
   }
 
   setUp(loadTestScenario.inject(
-    constantUsersPerSec(100) during (5 minutes)))
+    constantUsersPerSec(15) during (5 minutes)))
     .protocols(httpProtocol)
     .assertions(
       details("HC_CREATE_CONTAINER").responseTime.mean.lt(150),
