@@ -129,7 +129,7 @@ class RemoteSigningLoadSimulation extends Simulation {
   }
 
   setUp(loadTestScenario.inject(
-    constantUsersPerSec(15) during (5 minutes)))
+    constantUsersPerSec(10) during (5 minutes)))
     .protocols(httpProtocol)
     .assertions(
       details("HC_CREATE_CONTAINER").responseTime.mean.lt(150),
@@ -138,13 +138,7 @@ class RemoteSigningLoadSimulation extends Simulation {
       details("HC_REMOTE_SIGNING_INIT").successfulRequests.percent.gte(99.9),
       details("HC_REMOTE_SIGNING_FINISH").responseTime.mean.lt(1000),
       details("HC_REMOTE_SIGNING_FINISH").successfulRequests.percent.gte(99.9),
-      details("HC_GET_SIGNATURES_LIST").responseTime.mean.lt(150),
-      details("HC_GET_SIGNATURES_LIST").successfulRequests.percent.gte(99.9),
-      details("HC_VALIDATE_CONTAINER_BY_ID").responseTime.mean.lt(400),
-      details("HC_VALIDATE_CONTAINER_BY_ID").successfulRequests.percent.gte(99.9),
       details("HC_GET_CONTAINER").responseTime.mean.lt(150),
       details("HC_GET_CONTAINER").successfulRequests.percent.gte(99.9),
-      details("HC_DELETE_CONTAINER").responseTime.mean.lt(150),
-      details("HC_DELETE_CONTAINER").successfulRequests.percent.gte(99.9)
     )
 }
