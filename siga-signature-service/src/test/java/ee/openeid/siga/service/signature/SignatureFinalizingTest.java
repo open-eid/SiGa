@@ -257,7 +257,12 @@ public class SignatureFinalizingTest {
     public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+        try {
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+            fail("Should not reach here!");
+        } catch (SignatureCreationException e) {
+            assertEquals("Unable to finalize signature", e.getMessage());
+        }
         sigaEventLogger.logEvents();
         SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
@@ -265,7 +270,6 @@ public class SignatureFinalizingTest {
         assertNotNull(tsaRequestEvent);
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
         assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-        assertEquals(Result.OK, result);
     }
 
     private Pair<String, String> createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) throws IOException, URISyntaxException {

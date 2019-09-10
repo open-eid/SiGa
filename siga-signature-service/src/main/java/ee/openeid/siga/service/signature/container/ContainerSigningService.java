@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.ValidationResult;
 import org.digidoc4j.X509Cert;
 import org.digidoc4j.exceptions.NetworkException;
 import org.digidoc4j.exceptions.TechnicalException;
@@ -176,11 +177,23 @@ public abstract class ContainerSigningService {
         SigaEvent startEvent = sigaEventLogger.logStartEvent(FINALIZE_SIGNATURE).addEventParameter(SIGNATURE_ID, dataToSign.getSignatureParameters().getSignatureId());
         try {
             Signature signature = dataToSign.finalize(base64Decoded);
+            validateFinalizedSignature(signature, startEvent);
             logEndEvent(startEvent, signature);
             return signature;
         } catch (TechnicalException e) {
             log.error("Unable to finalize signature", e);
             logExceptionEvent(startEvent, e);
+            throw new SignatureCreationException("Unable to finalize signature");
+        }
+    }
+
+    private void validateFinalizedSignature(Signature signature, SigaEvent finalizationStartEvent) {
+        ValidationResult validationResult = signature.validateSignature();
+        if (!validationResult.isValid()) {
+            IllegalStateException exception = new IllegalStateException("Signature validation failed");
+            validationResult.getErrors().forEach(exception::addSuppressed);
+            log.error("Unable to finalize signature", exception);
+            sigaEventLogger.logExceptionEventForIntermediateEvents(finalizationStartEvent, SIGNATURE_FINALIZING_ERROR, exception.getMessage());
             throw new SignatureCreationException("Unable to finalize signature");
         }
     }
