@@ -31,13 +31,17 @@ class LogObserver extends AppenderBase<ILoggingEvent> {
 
     @Builder(buildMethodName = "buildForSkDataLoader")
     public static LogObserver buildForSkDataLoader(final SigaEventLogger sigaEventLogger, Level level) {
+        final Thread initialThread = Thread.currentThread();
         Consumer<ILoggingEvent> eventConsumer = loggingEvent -> {
+            if (Thread.currentThread() != initialThread) {
+                return;
+            }
             String message = loggingEvent.getFormattedMessage();
-            String errorUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "<", ">");
+            String requestUrl = StringUtils.substringBetween(loggingEvent.getFormattedMessage(), "<", ">");
             if (message.contains("Getting OCSP response from") || message.contains("Getting AIA_OCSP response from")) {
-                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, REQUEST_URL, errorUrl));
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, REQUEST_URL, requestUrl));
             } else if (message.contains("Getting TSP response from")) {
-                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, REQUEST_URL, errorUrl));
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, REQUEST_URL, requestUrl));
             }
         };
         return new LogObserver(SkDataLoader.class, eventConsumer, level);
