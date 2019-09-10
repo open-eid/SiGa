@@ -193,7 +193,7 @@ public abstract class ContainerSigningService {
             IllegalStateException exception = new IllegalStateException("Signature validation failed");
             validationResult.getErrors().forEach(exception::addSuppressed);
             log.error("Unable to finalize signature", exception);
-            sigaEventLogger.logExceptionEventForIntermediateEvents(finalizationStartEvent, SIGNATURE_FINALIZING_ERROR, exception.getMessage());
+            sigaEventLogger.logExceptionEventFor(finalizationStartEvent, SIGNATURE_FINALIZING_ERROR, exception.getMessage());
             throw new SignatureCreationException("Unable to finalize signature");
         }
     }
