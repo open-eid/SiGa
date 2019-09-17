@@ -232,8 +232,7 @@ public class HashcodeContainerController {
         RequestValidator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);
 
-        Optional<SigaConnection> connection = connectionRepository.findAllByContainerId(containerId);
-        connection.ifPresent(sigaConnection -> connectionRepository.delete(sigaConnection));
+        connectionRepository.deleteByContainerId(containerId);
 
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
         response.setResult(result.name());

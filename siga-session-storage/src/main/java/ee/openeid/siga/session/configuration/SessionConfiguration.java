@@ -1,6 +1,5 @@
 package ee.openeid.siga.session.configuration;
 
-import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.session.CacheName;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootConfiguration
@@ -47,8 +45,8 @@ public class SessionConfiguration {
     private void removeContainerConnectionData(BinaryObject sessionObject) {
         String containerId = BinaryObjectBuilderImpl.wrap(sessionObject).getField("sessionId");
         if (containerId != null) {
-            Optional<SigaConnection> connection = connectionRepository.findAllByContainerId(containerId);
-            connection.ifPresent(sigaConnection -> connectionRepository.delete(sigaConnection));
+            int count = connectionRepository.deleteByContainerId(containerId);
+            log.debug("Deleted " + count + " connection(s) by container id " + containerId);
         }
     }
 

@@ -237,8 +237,7 @@ public class AsicContainerController {
         RequestValidator.validateContainerId(containerId);
         String result = containerService.closeSession(containerId);
 
-        Optional<SigaConnection> connection = connectionRepository.findAllByContainerId(containerId);
-        connection.ifPresent(sigaConnection -> connectionRepository.delete(sigaConnection));
+        connectionRepository.deleteByContainerId(containerId);
 
         DeleteContainerResponse response = new DeleteContainerResponse();
         response.setResult(result);

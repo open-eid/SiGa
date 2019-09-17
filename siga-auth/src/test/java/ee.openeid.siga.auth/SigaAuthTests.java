@@ -1,15 +1,12 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteException;
-import org.apache.ignite.Ignition;
+import ee.openeid.siga.auth.helper.TestConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringBootTest(classes = {SigaAuthTests.TestConfiguration.class}, webEnvironment = RANDOM_PORT,
+@SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT,
         properties = {"spring.main.allow-bean-definition-overriding=true",
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
@@ -226,17 +223,6 @@ public class SigaAuthTests {
                 .uri(uriForSignatureBuilder)
                 .payload(payload)
                 .build().getSignature(HMAC_SHARED_SECRET);
-    }
-
-    @Profile("test")
-    @Configuration
-    @Import(SecurityConfiguration.class)
-    @ComponentScan(basePackages = {"ee.openeid.siga.auth", "ee.openeid.siga.common"})
-    static class TestConfiguration {
-        @Bean(destroyMethod = "close")
-        public Ignite ignite() throws IgniteException {
-            return Ignition.start("ignite-test-configuration.xml");
-        }
     }
 }
 
