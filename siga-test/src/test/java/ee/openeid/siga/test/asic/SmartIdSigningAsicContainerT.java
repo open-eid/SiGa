@@ -1,13 +1,13 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -15,11 +15,14 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SmartIdSigningAsicContainerT extends TestBase {
+
+    @ClassRule
+    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
+
     private SigaApiFlow flow;
 
     @Before

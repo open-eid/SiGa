@@ -25,7 +25,7 @@ import static java.time.Instant.now;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "digidoc4jTest", "midRest"})
+@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "midRest"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
 public class MidRestApplicationTests extends TestBase {

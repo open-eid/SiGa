@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import eu.europa.esig.dss.MimeType;
@@ -9,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,6 +25,10 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ManipulateDataFilesAsicContainerT extends TestBase {
+
+    @ClassRule
+    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
+
     private SigaApiFlow flow;
 
     @Before

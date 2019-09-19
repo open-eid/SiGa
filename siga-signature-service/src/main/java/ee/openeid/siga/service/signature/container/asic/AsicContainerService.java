@@ -22,6 +22,7 @@ import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ import static org.digidoc4j.Container.DocumentType.ASICE;
 
 @Slf4j
 @Service
+@Profile("datafileContainer")
 public class AsicContainerService implements AsicSessionHolder {
 
     private SessionService sessionService;

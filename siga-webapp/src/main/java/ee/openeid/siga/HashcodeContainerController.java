@@ -1,6 +1,5 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.DataToSignWrapper;
 import ee.openeid.siga.common.MobileIdInformation;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class HashcodeContainerController {

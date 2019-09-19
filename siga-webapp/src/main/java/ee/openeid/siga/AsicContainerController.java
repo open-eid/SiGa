@@ -1,6 +1,5 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.ContainerInfo;
 import ee.openeid.siga.common.DataToSignWrapper;
@@ -19,6 +18,7 @@ import ee.openeid.siga.webapp.json.*;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
+@Profile("datafileContainer")
 public class AsicContainerController {
 
     private AsicContainerService containerService;

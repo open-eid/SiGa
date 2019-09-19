@@ -1,6 +1,6 @@
 package ee.openeid.siga.test.asic;
 
-
+import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
@@ -9,6 +9,7 @@ import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -20,6 +21,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
 public class RetrieveAsicContainerT extends TestBase {
+
+    @ClassRule
+    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
+
     private SigaApiFlow flow;
 
     @Before
