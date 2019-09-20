@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@Profile("smartId")
+@Profile("smartId & datafileContainer")
 public class SmartIdAsicContainerController {
 
     private AsicContainerSigningService signingService;

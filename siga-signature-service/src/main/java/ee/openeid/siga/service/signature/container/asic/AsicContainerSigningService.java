@@ -14,12 +14,14 @@ import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureBuilder;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 @Service
+@Profile("datafileContainer")
 public class AsicContainerSigningService extends ContainerSigningService implements AsicSessionHolder {
     private Configuration configuration;
 

@@ -1,11 +1,13 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -14,6 +16,10 @@ import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFrom
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class UploadAsicContainerT extends TestBase {
+
+    @ClassRule
+    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
+
     private SigaApiFlow flow;
 
     @Before
