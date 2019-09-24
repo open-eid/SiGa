@@ -186,6 +186,10 @@
                     <resultsFolder>${project.basedir}/target/gatling/results</resultsFolder>
                     <simulationsFolder>${project.basedir}/src/test/scala</simulationsFolder>
                     <failOnError>false</failOnError>
+                    <jvmArgs>
+                        <jvmArg>-Xms3096m</jvmArg>
+                        <jvmArg>-Xmx3096m</jvmArg>
+                    </jvmArgs>
                 </configuration>
             </plugin>
         </plugins>
