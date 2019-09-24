@@ -129,7 +129,7 @@ class RemoteSigningLoadSimulation extends Simulation {
   }
 
   setUp(loadTestScenario.inject(
-    rampUsersPerSec(0) to 10 during (30 seconds),
+    rampUsersPerSec(0) to 10 during (90 seconds),
     constantUsersPerSec(10) during (5 minutes)))
     .protocols(httpProtocol)
     .assertions(
