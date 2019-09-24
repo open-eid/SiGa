@@ -41,7 +41,7 @@ class RemoteSigningLoadSimulation extends Simulation {
   private val loadTestScenario: ScenarioBuilder = scenario("SiGa remote siging flow load test")
     .feed(uuidFeeder)
     .repeat(3) {
-      pause(1, 3).
+      pause(1, 5).
         exec(hcCreateContainer)
         .doIf("${containerId.exists()}") {
           exec(hcRemoteSigningInit)
