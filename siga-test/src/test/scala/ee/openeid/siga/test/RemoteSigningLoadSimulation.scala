@@ -46,9 +46,11 @@ class RemoteSigningLoadSimulation extends Simulation {
         .doIf("${containerId.exists()}") {
           exec(hcRemoteSigningInit)
             .doIf("${generatedSignatureId.exists()}") {
-              exec(session => hcRemoteSigningFinishRequest(session)).
-                exec(hcRemoteSigningFinish).
-                exec(hcGetContainer)
+              exec(session => hcRemoteSigningFinishRequest(session))
+                .doIf("${dataToSign.exists()}") {
+                  exec(hcRemoteSigningFinish).
+                    exec(hcGetContainer)
+                }
               }
             }
         }
