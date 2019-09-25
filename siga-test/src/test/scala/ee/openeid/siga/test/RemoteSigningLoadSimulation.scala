@@ -131,8 +131,8 @@ class RemoteSigningLoadSimulation extends Simulation {
   }
 
   setUp(loadTestScenario.inject(
-    rampUsersPerSec(0) to 8 during (90 seconds),
-    constantUsersPerSec(8) during (5 minutes)))
+    rampUsersPerSec(0) to 5 during (90 seconds),
+    constantUsersPerSec(5) during (5 minutes)))
     .protocols(httpProtocol)
     .assertions(
       details("HC_CREATE_CONTAINER").responseTime.mean.lt(150),
