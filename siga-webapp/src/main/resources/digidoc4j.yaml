@@ -1,4 +1,3 @@
-TSP_SOURCE: http://demo.sk.ee/tsa
 AIA_OCSPS:
   - ISSUER_CN: ESTEID2018
     OCSP_SOURCE: http://aia.sk.ee/esteid2018
