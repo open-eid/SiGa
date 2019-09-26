@@ -90,7 +90,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength, String requestUrl) throws IOException {
         if (!validateConnectionsCount(wrapperResponse, sigaService, connections.size()))
             return false;
-        if (!validateCurrentConnectionCount(wrapperResponse, sigaService, requestUrl, connections, requestLength))
+        if (!validateCurrentConnectionSize(wrapperResponse, sigaService, requestUrl, connections, requestLength))
             return false;
         long existingSize = calculateSize(connections);
         return validationConnectionsSize(wrapperResponse, sigaService, existingSize, requestLength);
@@ -167,7 +167,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         return true;
     }
 
-    private boolean validateCurrentConnectionCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, String requestUrl, List<SigaConnection> connections, double newSize) throws IOException {
+    private boolean validateCurrentConnectionSize(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, String requestUrl, List<SigaConnection> connections, double newSize) throws IOException {
         if (sigaService.getMaxConnectionSize() == LIMITLESS) {
             return true;
         }
