@@ -43,17 +43,19 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             long requestSize = request.getContentLengthLong();
             Optional<SigaService> user = serviceRepository.findByUuid(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue()));
             if (user.isPresent()) {
-                HttpServletFilterResponseWrapper wrapperResponse = new HttpServletFilterResponseWrapper(response);
                 SigaService sigaService = user.get();
+                if (!(sigaService.getMaxConnectionCount() == LIMITLESS && sigaService.getMaxConnectionsSize() == LIMITLESS && sigaService.getMaxConnectionSize() == LIMITLESS)) {
+                    HttpServletFilterResponseWrapper wrapperResponse = new HttpServletFilterResponseWrapper(response);
 
-                Optional<List<SigaConnection>> optionalSigaConnections = connectionRepository.findAllByServiceId(sigaService.getId());
-                List<SigaConnection> connections = optionalSigaConnections.orElseGet(ArrayList::new);
-                boolean isRequestValid = validate(wrapperResponse, sigaService, connections, requestSize, requestUrl);
-                if (isRequestValid)
-                    filterChain.doFilter(request, wrapperResponse);
+                    Optional<List<SigaConnection>> optionalSigaConnections = connectionRepository.findAllByServiceId(sigaService.getId());
+                    List<SigaConnection> connections = optionalSigaConnections.orElseGet(ArrayList::new);
+                    boolean isRequestValid = validate(wrapperResponse, sigaService, connections, requestSize, requestUrl);
+                    if (isRequestValid)
+                        filterChain.doFilter(request, wrapperResponse);
 
-                refreshConnectionData(sigaService, requestSize, wrapperResponse, requestUrl);
-                return;
+                    refreshConnectionData(sigaService, requestSize, wrapperResponse, requestUrl);
+                    return;
+                }
             }
         }
         filterChain.doFilter(request, response);

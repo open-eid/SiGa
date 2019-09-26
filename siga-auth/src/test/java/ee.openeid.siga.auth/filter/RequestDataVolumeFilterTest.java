@@ -105,6 +105,28 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
+    public void allConnectionParametersAreLimitless() throws ServletException, IOException {
+        Optional<SigaService> sigaService = mockSigaService();
+        sigaService.get().setMaxConnectionSize(-1);
+        sigaService.get().setMaxConnectionsSize(-1);
+        sigaService.get().setMaxConnectionCount(-1);
+        when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
+        filter.doFilter(request, response, filterChain);
+        verify(connectionRepository, never()).findAllByServiceId(SERVICE_ID);
+    }
+
+    @Test
+    public void twoOfConnectionParametersAreLimitless() throws ServletException, IOException {
+        Optional<SigaService> sigaService = mockSigaService();
+        sigaService.get().setMaxConnectionSize(-1);
+        sigaService.get().setMaxConnectionsSize(-1);
+
+        when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
+        filter.doFilter(request, response, filterChain);
+        verify(connectionRepository).findAllByServiceId(SERVICE_ID);
+    }
+
+    @Test
     public void connectionCountLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionCount(-1);
