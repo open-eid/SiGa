@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/data/dev-data-3.yaml
   - include:
       file: db/data/dev-data-4.yaml
+  - include:
+      file: db/data/dev-data-5.yaml

@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1569479780-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              # Signing secret 02m5uss0zjDTjIwkME4zYTprtbT5fGnA
+              - column:
+                  name: id
+                  valueNumeric: 5
+              - column:
+                  name: uuid
+                  value: 156ead6d-b884-46b1-aba5-d8cd1a573b1b
+              - column:
+                  name: signing_secret
+                  value: C7+1ek94VshHcqyaQg4LLJeZM5dad0CFP1/cf8eft0etBbNcecTHf2rHyxzlXYvbC6dJ3Mqams0JsLkf6U6KNQ==
+              - column:
+                  name: client_id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: test5.service.ee
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: billing_email
+                  value: service5@af42de4fdeb7649b519963f82e.com
+              - column:
+                  name: detailed_billing
+                  value: false
+              - column:
+                  name: max_connection_count
+                  value: 5
+              - column:
+                  name: max_connections_size
+                  value: 5
+              - column:
+                  name: max_connection_size
+                  value: 2
+            tableName: siga_service
