@@ -160,7 +160,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     private boolean validateConnectionsCount(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, int currentCount) throws IOException {
         if (sigaService.getMaxConnectionCount() == LIMITLESS)
             return true;
-        if (currentCount + 1 >= sigaService.getMaxConnectionCount()) {
+        if (currentCount + 1 > sigaService.getMaxConnectionCount()) {
             throwError(wrapperResponse, "Number of max connections exceeded");
             return false;
         }
