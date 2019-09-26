@@ -237,6 +237,27 @@ public class RequestBuilder {
         return dataFile;
     }
 
+    public static JSONObject addDataFileToAsicRequestFromFile(String fileName) {
+        JSONObject dataFile = new JSONObject();
+        ClassLoader classLoader = RequestBuilder.class.getClassLoader();
+        File file = new File(classLoader.getResource("asic/" + fileName).getFile());
+        String fileBase64 = null;
+        try {
+            fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            dataFile.put("fileName", fileName);
+            dataFile.put("fileContent", fileBase64);
+        } catch (JSONException e) {
+            throw new IllegalStateException("Failed to add a field into JSONObject", e);
+        }
+        return dataFile;
+    }
+
+
     public static JSONObject addDataFileToAsicRequest(String fileName, String fileContent) throws JSONException {
         return addDataFilesToAsicRequest(List.of(addDataFileToAsicRequestDataFile(fileName, fileContent)));
     }

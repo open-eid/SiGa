@@ -35,4 +35,9 @@ public class SigaApiFlow {
     public static SigaApiFlow buildForTestClient2Service3() {
         return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_3).serviceSecret(SERVICE_SECRET_3).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
     }
+
+    @Builder(buildMethodName = "buildForTestClient2Service5")
+    public static SigaApiFlow buildForTestClient2Service5() {
+        return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_5).serviceSecret(SERVICE_SECRET_5).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
+    }
 }

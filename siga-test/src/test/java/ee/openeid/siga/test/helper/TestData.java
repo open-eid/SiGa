@@ -34,6 +34,9 @@ public class TestData {
     public static final String SERVICE_UUID_3 = "400ff9a2-b5fb-4fde-b764-9b519963f82e";
     public static final String SERVICE_SECRET_3 = "746573745365637265744b6579303033";
 
+    public static final String SERVICE_UUID_5 = "156ead6d-b884-46b1-aba5-d8cd1a573b1b";
+    public static final String SERVICE_SECRET_5 = "02m5uss0zjDTjIwkME4zYTprtbT5fGnA";
+
     // Datafile mock strings
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=";
     public static final String DEFAULT_SHA512_DATAFILE = "hQVz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==";
@@ -90,6 +93,7 @@ public class TestData {
     public static final String INVALID_DATA = "INVALID_SESSION_DATA_EXCEPTION";
     public static final String INVALID_CERTIFICATE_EXCEPTION = "INVALID_CERTIFICATE_EXCEPTION";
     public static final String SMARTID_EXCEPTION = "SMARTID_EXCEPTION";
+    public static final String CONNECTION_LIMIT_EXCEPTION = "CONNECTION_LIMIT_EXCEPTION";
 
     // Container paths
     public static final String META_INF = "META-INF";
