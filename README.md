@@ -23,11 +23,15 @@ Run the following command:
 ./mvnw clean install
 ```
 
-## How to run
+## How to deploy
+
+### SiGa Deployment digagram
+
+![SiGa deployment diagram](docs/img/siga_deployment.jpg)
 
 SiGa project compiles into a WAR (Web application archive) file and requires a servlet container to run.
 
-Additionally [Apache Ignite](https://ignite.apache.org/) version 2.7.5 is required for session management. For SiGa to run, a cluster if Ignite servers must be up and running, and accessible to SiGa.
+Additionally [Apache Ignite](https://ignite.apache.org/) version 2.7.5 is required for session management. **Ignite servers must be up and running prior SiGa startup.**
 Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](siga-webapp/src/main/resources/ignite/ignite-configuration.xml).
 
 ### Running SiGa in Tomcat
