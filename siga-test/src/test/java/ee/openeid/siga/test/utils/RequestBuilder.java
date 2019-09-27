@@ -237,23 +237,13 @@ public class RequestBuilder {
         return dataFile;
     }
 
-    public static JSONObject addDataFileToAsicRequestFromFile(String fileName) {
+    public static JSONObject addDataFileToAsicRequestFromFile(String fileName) throws Exception {
         JSONObject dataFile = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
         File file = new File(classLoader.getResource("asic/" + fileName).getFile());
-        String fileBase64 = null;
-        try {
-            fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            dataFile.put("fileName", fileName);
-            dataFile.put("fileContent", fileBase64);
-        } catch (JSONException e) {
-            throw new IllegalStateException("Failed to add a field into JSONObject", e);
-        }
+        String fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
+        dataFile.put("fileName", fileName);
+        dataFile.put("fileContent", fileBase64);
         return dataFile;
     }
 
@@ -294,7 +284,7 @@ public class RequestBuilder {
 
         String urlEncodeString = UriUtils.encode(url.substring(url.lastIndexOf("/") + 1), StandardCharsets.UTF_8.toString());
 
-        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url.substring(0 , url.lastIndexOf("/") + 1) + urlEncodeString + ":" + request;
+        String signableString = flow.getServiceUuid() + ":" + flow.getSigningTime() + ":" + method + ":" + url.substring(0, url.lastIndexOf("/") + 1) + urlEncodeString + ":" + request;
 
         return generateHmacSignature(flow.getServiceSecret(), signableString, flow.getHmacAlgorithm());
     }
