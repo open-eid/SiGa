@@ -3,14 +3,18 @@ package ee.openeid.siga.service.signature.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
 
+@Configuration
 @ConfigurationProperties(prefix = "siga.dds")
 @Validated
 @Getter
 @Setter
+@Profile("!midRest")
 public class MobileServiceConfigurationProperties {
     @NotBlank(message = "siga.dds.url-v1 property must be set")
     private String urlV1;

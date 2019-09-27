@@ -1,21 +1,19 @@
 package ee.openeid.siga.test;
 
-import ee.openeid.siga.common.Result;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
+import java.util.ArrayList;
+import java.util.List;
+
+import static ee.openeid.siga.test.helper.TestData.CONNECTION_LIMIT_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ConnectionLimitsT extends TestBase {
 
@@ -28,25 +26,21 @@ public class ConnectionLimitsT extends TestBase {
 
     @Test
     public void connectionLimitReached() throws Exception {
-        String sessionArray[] = new String[6];
-        Boolean connectionLimitReached = false;
-        for(int i=1; i<=5; i++) {
-            Response validResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
-            sessionArray[i] = flow.getContainerId();
-            if (validResponse.getStatusCode() != 200) {
-                connectionLimitReached = true;
+        List<String> sessions = new ArrayList<>();
+        try {
+            for (int i = 1; i <= 5; i++) {
+                Response validResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
+                sessions.add(flow.getContainerId());
+                Assert.assertEquals("Max connection limit reached before configured value", 200, validResponse.getStatusCode());
+            }
+            Response errorResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
+            expectError(errorResponse, 400, CONNECTION_LIMIT_EXCEPTION);
+        } finally {
+            for (String session : sessions) {
+                flow.setContainerId(session);
+                deleteContainer(flow);
             }
         }
-
-        Response errorResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
-
-        for(int i=1; i<=5; i++) {
-            flow.setContainerId(sessionArray[i]);
-            deleteContainer(flow);
-        }
-
-        assertThat("Max connection limit reached before configured value", connectionLimitReached, equalTo(false));
-        expectError(errorResponse, 400, CONNECTION_LIMIT_EXCEPTION);
     }
 
     @Ignore ("Sending big files seems problematic")
@@ -67,18 +61,18 @@ public class ConnectionLimitsT extends TestBase {
 
     @Test
     public void connectionsTotalSizeReached() throws Exception {
-        String sessionArray[] = new String[6];
-        for(int i=1; i<=2; i++) {
+        List<String> sessions = new ArrayList<>();
+        for (int i = 1; i <= 2; i++) {
             Response validResponse = postUploadContainer(flow, asicContainerRequestFromFile("1385KB_file.asice"));
-            sessionArray[i] = flow.getContainerId();
+            sessions.add(flow.getContainerId());
             validResponse.then()
                     .statusCode(200);
         }
 
         Response errorResponse = postUploadContainer(flow, asicContainerRequestFromFile("1385KB_file.asice"));
 
-        for(int i=1; i<=2; i++) {
-            flow.setContainerId(sessionArray[i]);
+        for (String session : sessions) {
+            flow.setContainerId(session);
             deleteContainer(flow);
         }
 
