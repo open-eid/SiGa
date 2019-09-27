@@ -1,23 +1,41 @@
 package ee.openeid.siga.service.signature.configuration;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Profile;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.annotation.PostConstruct;
+import java.util.List;
 
+@Configuration
 @ConfigurationProperties(prefix = "siga.sid")
-@Validated
 @Getter
 @Setter
-@Profile("smartId")
+@RequiredArgsConstructor
 public class SmartIdServiceConfigurationProperties {
 
-    @NotBlank(message = "siga.sid.url property must be set")
+    @Getter(AccessLevel.NONE)
+    private final Environment environment;
+
     private String url;
-    @NotNull(message = "siga.sid.session-status-response-socket-open-time property must be set")
-    private int sessionStatusResponseSocketOpenTime;
+
+    private int sessionStatusResponseSocketOpenTime = 40;
+
+    @PostConstruct
+    public void validateConfiguration() {
+        if (List.of(environment.getActiveProfiles()).contains("smartId")) {
+            validateUrl();
+        }
+    }
+
+    private void validateUrl() {
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalStateException("siga.sid.url property must be set");
+        }
+    }
 }
