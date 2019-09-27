@@ -57,7 +57,6 @@ public class SigaService {
     private String smartIdRelyingPartyUuid;
     @NonNull
     private String billingEmail;
-    private Boolean detailedBilling;
     private long maxConnectionCount;
     private long maxConnectionsSize;
     private long maxConnectionSize;

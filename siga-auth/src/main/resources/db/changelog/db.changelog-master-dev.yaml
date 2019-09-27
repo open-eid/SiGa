@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/data/dev-data-4.yaml
   - include:
       file: db/data/dev-data-5.yaml
+  - include:
+      file: db/changelog/SIGARIA-104-1-remove-detailed-billing.yaml

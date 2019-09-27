@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/SIGARIA-69.yaml
   - include:
       file: db/changelog/SIGARIA-69-1.yaml
+  - include:
+      file: db/changelog/SIGARIA-104-1-remove-detailed-billing.yaml

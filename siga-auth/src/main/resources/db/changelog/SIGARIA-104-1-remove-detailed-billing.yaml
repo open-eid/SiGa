@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1569586044797-1
+      author: (generated)
+      changes:
+        - dropColumn:
+            columnName: detailed_billing
+            tableName: siga_service

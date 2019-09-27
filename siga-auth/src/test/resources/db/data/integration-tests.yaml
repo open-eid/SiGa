@@ -92,9 +92,6 @@ databaseChangeLog:
                   name: billing_email
                   value: service1@a7fd7728a3ea4975bfabf240a67e894f.com
               - column:
-                  name: detailed_billing
-                  value: true
-              - column:
                   name: sk_relying_party_name
                   value: Testimine
               - column:
@@ -123,9 +120,6 @@ databaseChangeLog:
                   name: billing_email
                   value: service2@824dcfe95c264d76829ae6630f434746.com
               - column:
-                  name: detailed_billing
-                  value: false
-              - column:
                   name: sk_relying_party_name
                   value: Testimine
               - column:
@@ -153,9 +147,6 @@ databaseChangeLog:
               - column:
                   name: billing_email
                   value: service3@400ff9a2b5fb4fdeb7649b519963f82e.com
-              - column:
-                  name: detailed_billing
-                  value: false
               - column:
                   name: sk_relying_party_name
                   value: Testimine
