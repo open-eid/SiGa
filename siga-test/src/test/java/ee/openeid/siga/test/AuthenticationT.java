@@ -329,7 +329,7 @@ public class AuthenticationT extends TestBase {
 
     @Test
     public void signingTimeInPast() throws Exception {
-        Long signingTime = Instant.now().getEpochSecond() - 30;
+        Long signingTime = Instant.now().getEpochSecond() - 120;
 
         flow.setSigningTime(signingTime.toString());
         flow.setForceSigningTime(true);
