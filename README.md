@@ -32,7 +32,7 @@ Ignite servers must be configured the same way as the Ignite client embedded in 
 
 ### Running SiGa in Tomcat
 
-First we need to download Tomcat web servlet container. For example, when using the latest 8.5 version, which as of the writing is 8.5.46, we can download it with `wget`
+First Tomcat web servlet container needs to be downloaded. For example, when using the latest 8.5 version, which at the time of writing was 8.5.46, could be downloaded with `wget`:
 
 ```bash
 wget https://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.46/bin/apache-tomcat-8.5.46.tar.gz
@@ -58,7 +58,7 @@ cp SiGa/siga-webapp/target/siga-webapp-1.1.0.war apache-tomcat-8.5.46/webapps
   * `export JAVA_OPTS="$JAVA_OPTS -Dspring.config.location=file:/path/to/application.properties"`
   * `export JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=list-of-profiles-to-activate"` (see [available profiles](#available-profiles))
 
-Additionally, when running SiGa on a Java version greater than 8, the following parameters should be added to `JAVA_OPTS` (see more on [Ignite Getting Started guide](https://apacheignite.readme.io/docs/getting-started)):
+Additionally, when running SiGa on a Java version greater than 8, the following parameters should be added to `JAVA_OPTS` (see more on [Ignite Getting Started guide](https://apacheignite.readme.io/docs/getting-started#section-running-ignite-with-java-9-10-11)):
 
 ```bash
 --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
@@ -218,9 +218,9 @@ A table holding all the registered services that are allowed to use SiGa.
 | smart_id_relying_party_name  | VARCHAR(20)                         | [Smart-ID relying party name](https://github.com/SK-EID/smart-id-documentation#32-relyingpartyname-handling)  |
 | smart_id_relying_party_uuid  | VARCHAR(100)                        | [Smart-ID relying party UUID](https://github.com/SK-EID/smart-id-documentation#31-uuid-encoding)              |
 | billing_email                | VARCHAR(128)                        | (currently not used by SiGa)                                                                                  |
-| max_connection_count         | INTEGER                             | Allowed maximum number of active sessions for this service                                                    |
-| max_connections_size         | BIGINT                              | Allowed cumulative maximum data volume* for all active sessions                                               |
-| max_connection_size          | BIGINT                              | Allowed maximum data volume* for a single session                                                             |
+| max_connection_count         | INTEGER                             | Allowed maximum number of active sessions for this service. A value of `-1` indicates no limit                |
+| max_connections_size         | BIGINT                              | Allowed cumulative maximum data volume* for all active sessions. A value of `-1` indicates no limit           |
+| max_connection_size          | BIGINT                              | Allowed maximum data volume* for a single session. A value of `-1` indicates no limit                         |
 
 \* data volume is based on the content length of HTTP POST requests.
 
