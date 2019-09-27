@@ -51,7 +51,7 @@ tar -xzf apache-tomcat-8.5.46.tar.gz
 Copy the built WAR file into Tomcat `webapps` directory and start the servlet container:
 
 ```bash
-cp SiGa/siga-webapp/target/siga-webapp-1.1.0.war apache-tomcat-8.5.46/webapps
+cp SiGa/siga-webapp/target/siga-webapp-2.0.0.war apache-tomcat-8.5.46/webapps
 ./apache-tomcat-8.5.46/bin/catalina.sh run
 ```
 
