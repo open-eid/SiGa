@@ -81,8 +81,8 @@ public class SigaApiClientService {
         SSLContext sslContext = new SSLContextBuilder()
                 .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword.toCharArray())
                 .build();
-        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext);
-        HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+        HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
 
         restTemplate = restTemplateBuilder
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient))
