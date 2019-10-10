@@ -186,7 +186,7 @@
                 }
             },
             mounted: function () {
-                this.stompClient = Stomp.over(new WebSocket('ws://localhost:8081/stomp'));
+                this.stompClient = Stomp.over(new WebSocket('ws' + (window.location.protocol === 'https:' ? 's':'') + '://' + window.location.host + (window.location.pathname === '/' ? '/' : window.location.pathname + '/') + 'stomp'));
                 this.stompClient.connect();
                 this.$data.showMobileSigning = false;
             },
