@@ -6,7 +6,7 @@ import ee.openeid.siga.common.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.TechnicalException;
-import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class SivaClient {
     private static final String VALIDATION_ENDPOINT = "/validate";
 
     private RestTemplate restTemplate;
-    private SivaConfigurationProperties configurationProperties;
+    private SivaClientConfigurationProperties configurationProperties;
     private HashcodeContainerService hashcodeContainerService;
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
@@ -132,7 +132,7 @@ public class SivaClient {
     }
 
     @Autowired
-    protected void setConfigurationProperties(SivaConfigurationProperties configurationProperties) {
+    protected void setConfigurationProperties(SivaClientConfigurationProperties configurationProperties) {
         this.configurationProperties = configurationProperties;
     }
 

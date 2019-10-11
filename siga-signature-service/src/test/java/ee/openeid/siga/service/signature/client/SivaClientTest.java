@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.TechnicalException;
-import ee.openeid.siga.service.signature.configuration.SivaConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -36,7 +36,7 @@ public class SivaClientTest {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @Mock
-    private SivaConfigurationProperties sivaConfigurationProperties;
+    private SivaClientConfigurationProperties sivaConfigurationProperties;
     @Mock
     private HashcodeContainerService hashcodeContainerService;
     private SivaClient sivaClient;
