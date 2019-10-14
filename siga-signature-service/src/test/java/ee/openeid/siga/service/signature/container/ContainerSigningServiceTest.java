@@ -11,8 +11,13 @@ import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
+import ee.openeid.siga.service.signature.smartid.InitSmartIdSignatureResponse;
+import ee.openeid.siga.service.signature.smartid.SigaSmartIdClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
+import ee.sk.smartid.SmartIdCertificate;
+import ee.sk.smartid.rest.dao.SessionSignature;
+import ee.sk.smartid.rest.dao.SessionStatus;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.Signature;
@@ -34,6 +39,9 @@ public abstract class ContainerSigningServiceTest {
 
     @Mock
     private MobileIdClient mobileIdClient;
+
+    @Mock
+    private SigaSmartIdClient smartIdClient;
 
     @Mock
     private SmartIdServiceConfigurationProperties smartIdProperties;
@@ -142,7 +150,15 @@ public abstract class ContainerSigningServiceTest {
     }
 
     protected void assertSuccessfulSmartIdSigning() {
-        Mockito.when(smartIdProperties.getUrl()).thenReturn("https://sid.demo.sk.ee/smart-id-rp/v1/");
+        InitSmartIdSignatureResponse initSmartIdSignatureResponse = new InitSmartIdSignatureResponse();
+        initSmartIdSignatureResponse.setSessionCode("sessionCode");
+        initSmartIdSignatureResponse.setChallengeId("1234");
+        Mockito.when(smartIdClient.initSmartIdSigning(any(), any(), any())).thenReturn(initSmartIdSignatureResponse);
+
+        SmartIdCertificate smartIdCertificate = new SmartIdCertificate();
+        smartIdCertificate.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
+
+        Mockito.when(smartIdClient.getCertificate(any())).thenReturn(smartIdCertificate);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
         SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
@@ -151,17 +167,27 @@ public abstract class ContainerSigningServiceTest {
     }
 
     protected void assertSuccessfulSmartIdSignatureProcessing(SessionService sessionService) throws IOException, URISyntaxException {
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        setSigningServiceParameters();
+        DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
+
         Session sessionHolder = getSessionHolder();
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
-        Mockito.when(smartIdProperties.getUrl()).thenReturn("https://sid.demo.sk.ee/smart-id-rp/v1/");
-        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
-        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
+        SessionStatus sessionStatus = new SessionStatus();
+        sessionStatus.setState("COMPLETE");
+        SessionSignature sessionSignature = new SessionSignature();
+        byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
+        sessionSignature.setValue(new String(Base64.getEncoder().encode(signatureRaw)));
+        sessionStatus.setSignature(sessionSignature);
 
-        SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
-        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
-        String result = getSigningService().processSmartIdStatus(CONTAINER_ID, signingChallenge.getGeneratedSignatureId(), smartIdInformation);
-        Assert.assertEquals("COMPLETE", result);
+        Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(sessionStatus);
+
+        mockSmartIdSessionHolder(dataToSign);
+        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
+        getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), smartIdInformation);
+
+
     }
 
 
@@ -174,6 +200,8 @@ public abstract class ContainerSigningServiceTest {
     protected abstract void mockRemoteSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
 
     protected abstract void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
+
+    protected abstract void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
 
     protected abstract Session getSessionHolder() throws IOException, URISyntaxException;
 

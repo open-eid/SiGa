@@ -19,16 +19,11 @@ import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
+import ee.openeid.siga.service.signature.smartid.InitSmartIdSignatureResponse;
+import ee.openeid.siga.service.signature.smartid.SigaSmartIdClient;
 import ee.openeid.siga.session.SessionService;
-import ee.sk.smartid.HashType;
-import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;
-import ee.sk.smartid.SmartIdClient;
-import ee.sk.smartid.rest.SmartIdConnector;
-import ee.sk.smartid.rest.dao.NationalIdentity;
 import ee.sk.smartid.rest.dao.SessionStatus;
-import eu.europa.esig.dss.DSSUtils;
-import eu.europa.esig.dss.DigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.DataToSign;
@@ -42,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
@@ -51,14 +45,15 @@ import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FIN
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.ISSUING_CA;
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.SIGNATURE_ID;
 import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
+import static ee.openeid.siga.service.signature.smartid.SigaSmartIdClient.SMART_ID_FINISHED_STATE;
 
 @Slf4j
 public abstract class ContainerSigningService {
-    private static final String SMART_ID_CERTIFICATE_LEVEL = "QUALIFIED";
-    private static final String SMART_ID_FINISHED_STATE = "COMPLETE";
+
     private SigaEventLogger sigaEventLogger;
     protected SessionService sessionService;
     private MobileIdClient mobileIdClient;
+    private SigaSmartIdClient smartIdClient;
     private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
 
     public DataToSignWrapper createDataToSign(String containerId, SignatureParameters signatureParameters) {
@@ -120,29 +115,20 @@ public abstract class ContainerSigningService {
     public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
-        NationalIdentity nationalIdentity = new NationalIdentity(smartIdInformation.getCountry(), smartIdInformation.getPersonIdentifier());
-        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
-        SmartIdCertificate certificateResponse = smartIdClient
-                .getCertificate()
-                .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
-                .withNationalIdentity(nationalIdentity)
-                .fetch();
 
+        SmartIdCertificate certificateResponse = smartIdClient.getCertificate(smartIdInformation);
         signatureParameters.setSigningCertificate(certificateResponse.getCertificate());
 
         String documentNumber = certificateResponse.getDocumentNumber();
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
-        SignableHash signableHash = createSignableHash(dataToSign);
-        String challengeId = signableHash.calculateVerificationCode();
-
-        String sessionId = initSmartIdSign(smartIdClient, smartIdInformation, signableHash, documentNumber);
+        InitSmartIdSignatureResponse  initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign, documentNumber);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
-        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(sessionId).build());
+        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(initSmartIdSignatureResponse.getSessionCode()).build());
         sessionService.update(containerId, sessionHolder);
 
-        return SigningChallenge.builder().challengeId(challengeId).generatedSignatureId(generatedSignatureId).build();
+        return SigningChallenge.builder().challengeId(initSmartIdSignatureResponse.getChallengeId()).generatedSignatureId(generatedSignatureId).build();
 
     }
 
@@ -150,10 +136,7 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
-        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
-        SmartIdConnector connector = smartIdClient.getSmartIdConnector();
-        connector.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
-        SessionStatus sessionStatus = connector.getSessionStatus(dataToSignHolder.getSessionCode());
+        SessionStatus sessionStatus = smartIdClient.getSmartIdStatus(smartIdInformation, dataToSignHolder.getSessionCode());
         if (SMART_ID_FINISHED_STATE.equals(sessionStatus.getState())) {
             String signatureValue = sessionStatus.getSignature().getValue();
             DataToSign dataToSign = dataToSignHolder.getDataToSign();
@@ -196,34 +179,6 @@ public abstract class ContainerSigningService {
             sigaEventLogger.logExceptionEventFor(finalizationStartEvent, SIGNATURE_FINALIZING_ERROR, exception.getMessage());
             throw new SignatureCreationException("Unable to finalize signature");
         }
-    }
-
-
-    private SignableHash createSignableHash(DataToSign dataToSign) {
-        byte[] digest = DSSUtils.digest(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
-        SignableHash signableHash = new SignableHash();
-        signableHash.setHash(digest);
-        signableHash.setHashType(HashType.SHA512);
-        return signableHash;
-    }
-
-    private String initSmartIdSign(SmartIdClient smartIdClient, SmartIdInformation smartIdInformation, SignableHash signableHash, String documentNumber) {
-        return smartIdClient
-                .createSignature()
-                .withDocumentNumber(documentNumber)
-                .withSignableHash(signableHash)
-                .withDisplayText(smartIdInformation.getMessageToDisplay())
-                .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
-                .initiateSigning();
-    }
-
-    private SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
-        SmartIdClient client = new SmartIdClient();
-        client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
-        client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
-        client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
-        client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
-        return client;
     }
 
     private void logEndEvent(SigaEvent startEvent, Signature signature) {
@@ -311,5 +266,10 @@ public abstract class ContainerSigningService {
     @Autowired
     public void setMobileIdClient(MobileIdClient mobileIdClient) {
         this.mobileIdClient = mobileIdClient;
+    }
+
+    @Autowired
+    public void setSmartIdClient(SigaSmartIdClient smartIdClient) {
+        this.smartIdClient = smartIdClient;
     }
 }

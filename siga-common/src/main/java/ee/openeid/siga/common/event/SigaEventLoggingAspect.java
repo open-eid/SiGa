@@ -108,7 +108,12 @@ public class SigaEventLoggingAspect {
         xc.setFunctions(new ClassFunctions(JXPathHelperFunctions.class, "helper"));
         try {
             for (XPath p : xPaths) {
-                Object value = xc.getValue(p.xpath());
+                Object value;
+                if (p.xpath().contains(".")) {
+                    value = getJXpathValueFromInnerObject(p, xc);
+                } else {
+                    value = xc.getValue(p.xpath());
+                }
                 for (SigaEvent event : events) {
                     event.addEventParameter(p.name(), value != null ? value.toString() : "null");
                 }
@@ -116,6 +121,16 @@ public class SigaEventLoggingAspect {
         } catch (JXPathException e) {
             log.error("XPath not found when logging method execution: ", e.getMessage());
         }
+    }
+
+    private Object getJXpathValueFromInnerObject(XPath p, JXPathContext xc) {
+        Object value = xc.getValue(p.xpath().split("\\.")[0]);
+        if (value != null) {
+            JXPathContext innerXpathContext = JXPathContext.newContext(value);
+            innerXpathContext.setFunctions(new ClassFunctions(JXPathHelperFunctions.class, "helper"));
+            return innerXpathContext.getValue(p.xpath().split("\\.")[1]);
+        }
+        return null;
     }
 
     private Optional<Annotation> createEventParameterForAnnotation(Annotation[] annotations, Class annotationClass) {

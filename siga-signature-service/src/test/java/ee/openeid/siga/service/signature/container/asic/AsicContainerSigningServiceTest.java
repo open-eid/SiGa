@@ -168,6 +168,13 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     }
 
     @Override
+    protected void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
+        AsicContainerSessionHolder session = RequestUtil.createAsicSessionHolder();
+        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode("2342384932").build());
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
+    }
+
+    @Override
     protected Session getSessionHolder() throws IOException, URISyntaxException {
         return RequestUtil.createAsicSessionHolder();
     }

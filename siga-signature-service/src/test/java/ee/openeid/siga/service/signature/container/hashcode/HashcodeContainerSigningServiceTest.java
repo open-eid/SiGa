@@ -128,7 +128,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void successfulSmartIdSignatureTest() throws IOException{
+    public void successfulSmartIdSignatureTest() throws IOException {
         assertSuccessfulSmartIdSigning();
     }
 
@@ -163,6 +163,13 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     protected void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
         HashcodeContainerSessionHolder session = RequestUtil.createHashcodeSessionHolder();
         session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode("2342384932").build());
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
+    }
+
+    @Override
+    protected void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
+        HashcodeContainerSessionHolder session = RequestUtil.createHashcodeSessionHolder();
+        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode("2342384932").build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
     }
 
