@@ -65,7 +65,8 @@ public class SigaSmartIdClient {
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_SIGN_HASH_STATUS,
             logParameters = {@Param(name = "sid_session_id", index = 1)},
-            logReturnObject = {@XPath(name = "sid_status", xpath = "result.endResult")})
+            logReturnObject = {@XPath(name = "sid_status", xpath = "result.endResult")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
     public SessionStatus getSmartIdStatus(SmartIdInformation smartIdInformation, String sessionCode) {
         ee.sk.smartid.SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
         SmartIdConnector connector = smartIdClient.getSmartIdConnector();
