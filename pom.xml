@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.4.RELEASE</version>
+        <version>2.2.0.RELEASE</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -63,6 +63,12 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>${logback-classic.version}</version>
+        </dependency>
+        <!-- Override vulnerable version -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
