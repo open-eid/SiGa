@@ -52,7 +52,7 @@ public class SmartIdAsicContainerController {
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_STATUS)
     @GetMapping(value = "/containers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetContainerSmartIdSigningStatusResponse getSmartSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
+    public GetContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
         SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation(null, null, null);
