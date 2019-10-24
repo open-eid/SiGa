@@ -14,7 +14,6 @@ import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.util.UUIDGenerator;
-import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MidStatus;
@@ -50,11 +49,12 @@ import static ee.openeid.siga.service.signature.smartid.SigaSmartIdClient.SMART_
 @Slf4j
 public abstract class ContainerSigningService {
 
+    private static final String UNABLE_TO_FINALIZE_SIGNATURE = "Unable to finalize signature";
+
     private SigaEventLogger sigaEventLogger;
     protected SessionService sessionService;
     private MobileIdClient mobileIdClient;
     private SigaSmartIdClient smartIdClient;
-    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
 
     public DataToSignWrapper createDataToSign(String containerId, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
@@ -122,7 +122,7 @@ public abstract class ContainerSigningService {
         String documentNumber = certificateResponse.getDocumentNumber();
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
-        InitSmartIdSignatureResponse  initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign, documentNumber);
+        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign, documentNumber);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(initSmartIdSignatureResponse.getSessionCode()).build());
@@ -164,9 +164,9 @@ public abstract class ContainerSigningService {
             logEndEvent(startEvent, signature);
             return signature;
         } catch (TechnicalException e) {
-            log.error("Unable to finalize signature", e);
+            log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
             logExceptionEvent(startEvent, e);
-            throw new SignatureCreationException("Unable to finalize signature");
+            throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE);
         }
     }
 
@@ -175,9 +175,9 @@ public abstract class ContainerSigningService {
         if (!validationResult.isValid()) {
             IllegalStateException exception = new IllegalStateException("Signature validation failed");
             validationResult.getErrors().forEach(exception::addSuppressed);
-            log.error("Unable to finalize signature", exception);
+            log.error(UNABLE_TO_FINALIZE_SIGNATURE, exception);
             sigaEventLogger.logExceptionEventFor(finalizationStartEvent, SIGNATURE_FINALIZING_ERROR, exception.getMessage());
-            throw new SignatureCreationException("Unable to finalize signature");
+            throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE);
         }
     }
 
@@ -223,16 +223,16 @@ public abstract class ContainerSigningService {
     private void validateMobileDeviceSession(DataToSignHolder dataToSignHolder, String signatureId, SigningType signingType) {
         validateSession(dataToSignHolder, signatureId, signingType);
         if (StringUtils.isBlank(dataToSignHolder.getSessionCode())) {
-            throw new InvalidSessionDataException("Unable to finalize signature. Session code not found");
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + ". Session code not found");
         }
     }
 
     private void validateSession(DataToSignHolder dataToSignHolder, String signatureId, SigningType signingType) {
         if (dataToSignHolder == null || dataToSignHolder.getDataToSign() == null) {
-            throw new InvalidSessionDataException("Unable to finalize signature. No data to sign with signature Id: " + signatureId);
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + ". No data to sign with signature Id: " + signatureId);
         }
         if (signingType != dataToSignHolder.getSigningType()) {
-            throw new InvalidSessionDataException("Unable to finalize signature for signing type: " + dataToSignHolder.getSigningType());
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + " for signing type: " + dataToSignHolder.getSigningType());
         }
     }
 
@@ -256,11 +256,6 @@ public abstract class ContainerSigningService {
     @Autowired
     public void setSigaEventLogger(SigaEventLogger sigaEventLogger) {
         this.sigaEventLogger = sigaEventLogger;
-    }
-
-    @Autowired
-    void setSmartIdServiceConfigurationProperties(SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
-        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
     }
 
     @Autowired

@@ -168,11 +168,11 @@ public class HashcodeContainerController {
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURE)
     @GetMapping(value = "/hashcodecontainers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetHashcodeContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
+    public GetContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
         org.digidoc4j.Signature signature = containerService.getSignature(containerId, signatureId);
-        return RequestTransformer.transformHashcodeSignatureToDetails(signature);
+        return RequestTransformer.transformSignatureToDetails(signature);
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_DATAFILES_LIST)

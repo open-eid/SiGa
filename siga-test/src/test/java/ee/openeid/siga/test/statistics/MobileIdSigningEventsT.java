@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class MobileIdSigningEventsT extends StatisticsBaseT {
         mobileSigningFlowFor(service12);
         SigaApiFlow service3 = SigaApiFlow.buildForTestClient2Service3();
         mobileSigningFlowFor(service3);
-
+        Assert.assertEquals(3, containerIds.size());
         NR_OF_CONTAINERS_GENERATED = containerIds.size();
     }
 

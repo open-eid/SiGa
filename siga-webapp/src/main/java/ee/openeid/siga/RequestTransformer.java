@@ -9,7 +9,6 @@ import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
-import ee.openeid.siga.webapp.json.GetHashcodeContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
@@ -170,40 +169,6 @@ public class RequestTransformer {
     static GetContainerSignatureDetailsResponse transformSignatureToDetails(org.digidoc4j.Signature signature) {
 
         GetContainerSignatureDetailsResponse response = new GetContainerSignatureDetailsResponse();
-        try {
-            response.setClaimedSigningTime(signature.getClaimedSigningTime().toString());
-            response.setId(signature.getId());
-            response.setSignerInfo(signature.getSigningCertificate().getSubjectName());
-            if (signature.getOCSPCertificate() != null)
-                response.setOcspCertificate(new String(Base64.getEncoder().encode(signature.getOCSPCertificate().getX509Certificate().getEncoded())));
-            if (signature.getOCSPResponseCreationTime() != null)
-                response.setOcspResponseCreationTime(signature.getOCSPResponseCreationTime().toString());
-
-            SignatureProductionPlace signatureProductionPlace = new SignatureProductionPlace();
-            signatureProductionPlace.setCity(signature.getCity());
-            signatureProductionPlace.setCountryName(signature.getCountryName());
-            signatureProductionPlace.setPostalCode(signature.getPostalCode());
-            signatureProductionPlace.setStateOrProvince(signature.getStateOrProvince());
-
-            response.setSignatureProductionPlace(signatureProductionPlace);
-            response.setSignatureProfile(signature.getProfile().name());
-            response.setSigningCertificate(new String(Base64.getEncoder().encode(signature.getSigningCertificate().getX509Certificate().getEncoded())));
-            if (signature.getTimeStampCreationTime() != null)
-                response.setTimeStampCreationTime(signature.getTimeStampCreationTime().toString());
-            if (signature.getTimeStampTokenCertificate() != null)
-                response.setTimeStampTokenCertificate(new String(Base64.getEncoder().encode(signature.getTimeStampTokenCertificate().getX509Certificate().getEncoded())));
-            if (signature.getTrustedSigningTime() != null)
-                response.setTrustedSigningTime(signature.getTrustedSigningTime().toString());
-            response.getRoles().addAll(signature.getSignerRoles());
-
-        } catch (CertificateEncodingException e) {
-            throw new InvalidSignatureException();
-        }
-        return response;
-    }
-
-    static GetHashcodeContainerSignatureDetailsResponse transformHashcodeSignatureToDetails(org.digidoc4j.Signature signature) {
-        GetHashcodeContainerSignatureDetailsResponse response = new GetHashcodeContainerSignatureDetailsResponse();
         try {
             response.setClaimedSigningTime(signature.getClaimedSigningTime().toString());
             response.setId(signature.getId());

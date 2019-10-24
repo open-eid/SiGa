@@ -38,6 +38,7 @@ public class SigaEventLoggingAspect {
 
     @Pointcut("@annotation(sigaEventLog)")
     public void callAt(SigaEventLog sigaEventLog) {
+        //Do nothing
     }
 
     @Around("callAt(eventLog)")

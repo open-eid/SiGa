@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
@@ -54,7 +55,7 @@ public class MidRestClient implements MobileIdClient {
                 .build();
         try {
             MidCertificateChoiceResponse midCertificateChoiceResponse = midClient.getMobileIdConnector().getCertificate(request);
-            if (OK_RESPONSE.equals(midCertificateChoiceResponse.getResult())) {
+            if (Result.OK.name().equals(midCertificateChoiceResponse.getResult())) {
                 return midClient.createMobileIdCertificate(midCertificateChoiceResponse);
             }
             throw new MidException(mapToCertificateStatus(midCertificateChoiceResponse.getResult()).name());

@@ -84,7 +84,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             return null;
         }
         String suffix = url.substring(url.indexOf(urlPrefix) + urlPrefix.length());
-        return suffix.substring(0, suffix.indexOf("/"));
+        return suffix.substring(0, suffix.indexOf('/'));
     }
 
     private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength, String requestUrl) throws IOException {

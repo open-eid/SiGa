@@ -6,7 +6,6 @@ import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.apache.commons.io.IOUtils;
-import org.digidoc4j.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,14 +33,10 @@ public class HashcodeContainerValidationServiceTest {
     private SivaClient sivaClient;
     @Mock
     private SessionService sessionService;
-    @Mock
-    private HashcodeContainerService hashcodeContainerService;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
-        hashcodeContainerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-        sivaClient.setHashcodeContainerService(hashcodeContainerService);
         Mockito.when(sivaClient.validateHashcodeContainer(any(), any())).thenReturn(validationConclusion);
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
     }

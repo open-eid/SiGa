@@ -9,7 +9,6 @@ import ee.openeid.siga.common.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
-import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.junit.After;
@@ -37,8 +36,6 @@ public class SivaClientTest {
     public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @Mock
     private SivaClientConfigurationProperties sivaConfigurationProperties;
-    @Mock
-    private HashcodeContainerService hashcodeContainerService;
     private SivaClient sivaClient;
     private String requestUrl;
 
@@ -49,7 +46,6 @@ public class SivaClientTest {
         sivaClient = new SivaClient();
         sivaClient.setRestTemplate(new RestTemplate());
         sivaClient.setConfigurationProperties(sivaConfigurationProperties);
-        sivaClient.setHashcodeContainerService(hashcodeContainerService);
     }
 
     @After
@@ -104,7 +100,7 @@ public class SivaClientTest {
         sivaClient.validateHashcodeContainer(signatureWrappers, RequestUtil.createHashcodeDataFiles());
     }
 
-    protected String toJson(Object request) {
+    private String toJson(Object request) {
         try {
             return new ObjectMapper().writeValueAsString(request);
         } catch (JsonProcessingException e) {

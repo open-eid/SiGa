@@ -2,13 +2,12 @@ package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.helper.TestBase;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
-import ee.openeid.siga.webapp.json.GetHashcodeContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.codec.binary.Hex;
@@ -199,7 +198,7 @@ public class SigaApplicationTests extends TestBase {
     public void remoteHashcodeSigningFlowWithBase64EncodedCertificate() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-        GetHashcodeContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
 
         Assert.assertEquals(1, signatures.size());
@@ -219,7 +218,7 @@ public class SigaApplicationTests extends TestBase {
     public void remoteHashcodeSigningFlowWithHexEncodedCertificate() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-        GetHashcodeContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
+        GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
 
         Assert.assertEquals(1, signatures.size());

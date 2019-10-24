@@ -132,7 +132,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     private String encodeUrlWithFileName(String uri) {
-        int startingFileNameIndex = uri.lastIndexOf("/") + 1;
+        int startingFileNameIndex = uri.lastIndexOf('/') + 1;
         String fileName = uri.substring(startingFileNameIndex);
         String encodedFileName = UriUtils.encode(UriUtils.decode(fileName, Charset.defaultCharset()), Charset.defaultCharset());
         return uri.replace(fileName, encodedFileName);

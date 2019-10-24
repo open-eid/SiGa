@@ -72,11 +72,13 @@ public class HttpServletFilterResponseWrapper extends HttpServletResponseWrapper
             this.targetStream.write(arg0);
         }
 
+        @Override
         public void flush() throws IOException {
             super.flush();
             this.targetStream.flush();
         }
 
+        @Override
         public void close() throws IOException {
             super.close();
             this.targetStream.close();
@@ -89,7 +91,7 @@ public class HttpServletFilterResponseWrapper extends HttpServletResponseWrapper
 
         @Override
         public void setWriteListener(WriteListener writeListener) {
-
+            //Do nothing
         }
     }
 }

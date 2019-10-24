@@ -89,8 +89,8 @@ public abstract class TestBase {
         return (GetContainerSignatureDetailsResponse) getRequest("/containers/" + containerId + "/signatures/" + signatureId, GetContainerSignatureDetailsResponse.class);
     }
 
-    protected GetHashcodeContainerSignatureDetailsResponse getHashcodeSignature(String containerId, String signatureId) throws Exception {
-        return (GetHashcodeContainerSignatureDetailsResponse) getRequest("/hashcodecontainers/" + containerId + "/signatures/" + signatureId, GetHashcodeContainerSignatureDetailsResponse.class);
+    protected GetContainerSignatureDetailsResponse getHashcodeSignature(String containerId, String signatureId) throws Exception {
+        return (GetContainerSignatureDetailsResponse) getRequest("/hashcodecontainers/" + containerId + "/signatures/" + signatureId, GetContainerSignatureDetailsResponse.class);
     }
 
     private ValidationConclusion getHashcodeValidationConclusion(String containerId) throws Exception {

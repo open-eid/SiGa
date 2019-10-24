@@ -9,6 +9,8 @@ import java.util.Map;
 
 public final class SoapFaultHandlingUtil {
 
+    private static final String NOT_ACTIVE_FAULT = "NOT_ACTIVE";
+
     private SoapFaultHandlingUtil() {
         throw new IllegalStateException("Utility class");
     }
@@ -16,10 +18,10 @@ public final class SoapFaultHandlingUtil {
     private static final Map<String, String> FAULT_MAPPINGS = Map.of(
             "300", "GENERAL_ERROR",
             "301", "NOT_FOUND",
-            "302", "NOT_ACTIVE",
-            "303", "NOT_ACTIVE",
-            "304", "NOT_ACTIVE",
-            "305", "NOT_ACTIVE"
+            "302", NOT_ACTIVE_FAULT,
+            "303", NOT_ACTIVE_FAULT,
+            "304", NOT_ACTIVE_FAULT,
+            "305", NOT_ACTIVE_FAULT
     );
 
     public static SigaApiException handleSoapFaultClientException(SoapFaultClientException e) {

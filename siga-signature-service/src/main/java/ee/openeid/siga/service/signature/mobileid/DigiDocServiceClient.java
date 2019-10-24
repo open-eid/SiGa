@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
 import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.Result;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
@@ -57,7 +58,7 @@ public class DigiDocServiceClient implements MobileIdClient {
         String relyingPartyName = mobileServiceConfigurationProperties.getRelyingPartyName();
         mobileIdInformation.setRelyingPartyName(relyingPartyName);
         MobileSignHashResponse response = mobileIdService.initMobileSignHash(mobileIdInformation, dataToSign.getDigestAlgorithm().name(), Hex.encodeHexString(digest));
-        if (!OK_RESPONSE.equals(response.getStatus())) {
+        if (!Result.OK.name().equals(response.getStatus())) {
             throw new IllegalStateException("Invalid DigiDocService response");
         }
         return response;

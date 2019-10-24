@@ -38,7 +38,7 @@
                 type="tns:deleteHashcodeContainerSmartIdSigningResponse"/>
     <xs:element name="getHashcodeContainerSignaturesResponse" type="tns:getHashcodeContainerSignaturesResponse"/>
     <xs:element name="getHashcodeContainerSignatureDetailsResponse"
-                type="tns:getHashcodeContainerSignatureDetailsResponse"/>
+                type="tns:getContainerSignatureDetailsResponse"/>
     <xs:element name="createHashcodeContainerDataFileRequest" type="tns:createHashcodeContainerDataFileRequest"/>
     <xs:element name="createHashcodeContainerDataFileResponse" type="tns:createHashcodeContainerDataFileResponse"/>
     <xs:element name="getHashcodeContainerDataFilesResponse" type="tns:getHashcodeContainerDataFilesResponse"/>
@@ -200,22 +200,6 @@
     <xs:complexType name="getHashcodeContainerSignaturesResponse">
         <xs:sequence>
             <xs:element minOccurs="0" name="signatures" maxOccurs="unbounded" type="tns:signature"/>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="getHashcodeContainerSignatureDetailsResponse">
-        <xs:sequence>
-            <xs:element name="id" type="xs:string"/>
-            <xs:element name="signerInfo" type="xs:string"/>
-            <xs:element name="signatureProfile" type="xs:string"/>
-            <xs:element minOccurs="0" name="ocspCertificate" type="xs:string"/>
-            <xs:element minOccurs="0" name="timeStampTokenCertificate" type="xs:string"/>
-            <xs:element minOccurs="0" name="ocspResponseCreationTime" type="xs:string"/>
-            <xs:element minOccurs="0" name="timeStampCreationTime" type="xs:string"/>
-            <xs:element minOccurs="0" name="trustedSigningTime" type="xs:string"/>
-            <xs:element name="signingCertificate" type="xs:string"/>
-            <xs:element name="claimedSigningTime" type="xs:string"/>
-            <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
-            <xs:element minOccurs="0" name="signatureProductionPlace" type="tns:signatureProductionPlace"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="createHashcodeContainerDataFileRequest">
