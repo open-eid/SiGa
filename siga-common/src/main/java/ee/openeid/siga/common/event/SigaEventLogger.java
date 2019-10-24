@@ -174,16 +174,8 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             SigaUserDetails sud = (SigaUserDetails) authentication.getPrincipal();
-            final String clientName = sud.getClientName();
-            final String clientUuid = sud.getClientUuid();
-            final String serviceName = sud.getServiceName();
-            final String serviceUuid = sud.getServiceUuid();
-            events.stream().peek(e -> {
-                e.setClientName(clientName);
-                e.setClientUuid(clientUuid);
-                e.setServiceName(serviceName);
-                e.setServiceUuid(serviceUuid);
-            }).forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
+            insertClientAndServiceDataToEvents(sud);
+            events.forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
         } else {
             if (!events.isEmpty()) {
                 final String serviceUuid = events.get(0).getServiceUuid();
@@ -193,6 +185,19 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
                 });
             }
         }
+    }
+
+    private void insertClientAndServiceDataToEvents(SigaUserDetails sud) {
+        final String clientName = sud.getClientName();
+        final String clientUuid = sud.getClientUuid();
+        final String serviceName = sud.getServiceName();
+        final String serviceUuid = sud.getServiceUuid();
+        events.forEach(e -> {
+            e.setClientName(clientName);
+            e.setClientUuid(clientUuid);
+            e.setServiceName(serviceName);
+            e.setServiceUuid(serviceUuid);
+        });
     }
 
     @Override

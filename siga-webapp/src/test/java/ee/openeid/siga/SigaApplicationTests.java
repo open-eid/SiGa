@@ -32,6 +32,8 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -126,9 +128,7 @@ public class SigaApplicationTests extends TestBase {
         String signatureId = startMobileSigning(containerId);
         String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        Thread.sleep(8000);
-        String mobileStatus = getMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("SIGNATURE", mobileStatus);
+        await().atMost(8, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
     }
 
@@ -188,9 +188,7 @@ public class SigaApplicationTests extends TestBase {
         String signatureId = startHashcodeMobileSigning(containerId);
         String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        Thread.sleep(8000);
-        String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("SIGNATURE", mobileStatus);
+        await().atMost(8, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
     }
 

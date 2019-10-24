@@ -22,6 +22,8 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -63,16 +65,10 @@ public class MidRestApplicationTests extends TestBase {
         Assert.assertEquals(2, dataFiles.size());
 
         String signatureId = startMobileSigning(containerId);
+        String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
+        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        await().atMost(15, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
 
-        String mobileStatus = "";
-        for (int i = 0; i < 5; ++i) {
-            mobileStatus = getMobileIdStatus(containerId, signatureId);
-            if (!"OUTSTANDING_TRANSACTION".equals(mobileStatus)) {
-                break;
-            }
-            Thread.sleep(5000);
-        }
-        Assert.assertEquals("SIGNATURE", mobileStatus);
         assertSignedContainer(containerId, 2);
     }
 
@@ -91,16 +87,10 @@ public class MidRestApplicationTests extends TestBase {
         Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
 
         String signatureId = startHashcodeMobileSigning(containerId);
+        String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
+        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        await().atMost(15, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
 
-        String mobileStatus = "";
-        for (int i = 0; i < 5; ++i) {
-            mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-            if (!"OUTSTANDING_TRANSACTION".equals(mobileStatus)) {
-                break;
-            }
-            Thread.sleep(5000);
-        }
-        Assert.assertEquals("SIGNATURE", mobileStatus);
         assertHashcodeSignedContainer(containerId, 2);
     }
 }

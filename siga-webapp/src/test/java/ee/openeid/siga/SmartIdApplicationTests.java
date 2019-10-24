@@ -23,6 +23,8 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -64,17 +66,9 @@ public class SmartIdApplicationTests extends TestBase {
         Assert.assertEquals(2, dataFiles.size());
 
         String signatureId = startHashcodeSmartIdSigning(containerId);
-        String finalStatus = "";
-        for (int i = 0; i < 5; i++) {
-            String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-            if (!"RUNNING".equals(smartIdStatus)) {
-                finalStatus = smartIdStatus;
-                break;
-            }
-            Thread.sleep(5000);
-        }
-
-        Assert.assertEquals("COMPLETE", finalStatus);
+        String smartIdFirstStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("RUNNING", smartIdFirstStatus);
+        await().atMost(15, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
     }
 
@@ -92,18 +86,9 @@ public class SmartIdApplicationTests extends TestBase {
         Assert.assertEquals(2, dataFiles.size());
 
         String signatureId = startSmartIdSigning(containerId);
-
-        String finalStatus = "";
-        for (int i = 0; i < 5; i++) {
-            String smartIdStatus = getSmartIdStatus(containerId, signatureId);
-            if (!"RUNNING".equals(smartIdStatus)) {
-                finalStatus = smartIdStatus;
-                break;
-            }
-            Thread.sleep(5000);
-        }
-
-        Assert.assertEquals("COMPLETE", finalStatus);
+        String smartIdFirstStatus = getSmartIdStatus(containerId, signatureId);
+        Assert.assertEquals("RUNNING", smartIdFirstStatus);
+        await().atMost(15, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
     }
 }

@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -336,6 +337,34 @@ public abstract class TestBase {
                 .content(request.toString().getBytes());
     }
 
+    protected Callable<Boolean> isHashcodeMobileIdResponseSuccessful(String containerId, String signatureId) {
+        return () -> {
+            String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
+            return "SIGNATURE".equals(mobileStatus);
+        };
+    }
+
+    protected Callable<Boolean> isMobileIdResponseSuccessful(String containerId, String signatureId) {
+        return () -> {
+            String mobileStatus = getMobileIdStatus(containerId, signatureId);
+            return "SIGNATURE".equals(mobileStatus);
+        };
+    }
+
+    protected Callable<Boolean> isSmartIdResponseSuccessful(String containerId, String signatureId) {
+        return () -> {
+            String smartIdStatus = getSmartIdStatus(containerId, signatureId);
+            return "COMPLETE".equals(smartIdStatus);
+        };
+    }
+
+    protected Callable<Boolean> isHashcodeSmartIdResponseSuccessful(String containerId, String signatureId) {
+        return () -> {
+            String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
+            return "COMPLETE".equals(smartIdStatus);
+        };
+    }
+
     private String getSignature(String requestMethod, String uri, String payload) throws Exception {
         return HmacSignature.builder()
                 .macAlgorithm(DEFAULT_HMAC_ALGO)
@@ -351,6 +380,8 @@ public abstract class TestBase {
         Path documentPath = Paths.get(new ClassPathResource(name).getURI());
         return new ByteArrayInputStream(Base64.getEncoder().encode(Files.readAllBytes(documentPath)));
     }
+
     protected abstract ObjectMapper getObjectMapper();
+
     protected abstract MockMvc getMockMvc();
 }
