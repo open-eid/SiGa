@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNumeric;
 @Getter
 @Builder
 public class HmacSignature {
-    private final static String DELIMITER = ":";
+    private static final String DELIMITER = ":";
     @NonNull
     private final String macAlgorithm;
     private final String signature;

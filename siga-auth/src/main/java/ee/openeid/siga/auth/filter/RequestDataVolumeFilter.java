@@ -31,10 +31,10 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
 
     private ServiceRepository serviceRepository;
     private ConnectionRepository connectionRepository;
-    private final static long LIMITLESS = -1;
-    private final static String OBSERVABLE_HTTP_METHOD = "POST";
-    private final static String ASIC_CONTAINERS_ENDPOINT = "/containers/";
-    private final static String HASHCODE_CONTAINERS_ENDPOINT = "/hashcodecontainers/";
+    private static final long LIMITLESS = -1;
+    private static final String OBSERVABLE_HTTP_METHOD = "POST";
+    private static final String ASIC_CONTAINERS_ENDPOINT = "/containers/";
+    private static final String HASHCODE_CONTAINERS_ENDPOINT = "/hashcodecontainers/";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

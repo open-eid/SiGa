@@ -22,7 +22,7 @@ public class RequestValidator {
         throw new IllegalStateException("Utility class");
     }
 
-    private final static String INVALID_DATA_FILE_NAME = "Data file name is invalid";
+    private static final String INVALID_DATA_FILE_NAME = "Data file name is invalid";
 
     public static void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
         if (CollectionUtils.isEmpty(dataFiles)) {

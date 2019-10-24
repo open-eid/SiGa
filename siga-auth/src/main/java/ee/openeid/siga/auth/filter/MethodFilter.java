@@ -17,7 +17,7 @@ import java.io.OutputStream;
 @Component
 public class MethodFilter extends OncePerRequestFilter {
 
-    private final static String NOT_ALLOWED_REQUEST_METHOD = "OPTIONS";
+    private static final String NOT_ALLOWED_REQUEST_METHOD = "OPTIONS";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
