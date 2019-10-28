@@ -128,7 +128,7 @@ public class SigaApplicationTests extends TestBase {
         String signatureId = startMobileSigning(containerId);
         String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        await().atMost(8, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
+        await().atMost(16, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
     }
 
@@ -188,7 +188,7 @@ public class SigaApplicationTests extends TestBase {
         String signatureId = startHashcodeMobileSigning(containerId);
         String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
         Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        await().atMost(8, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
+        await().atMost(16, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
     }
 
