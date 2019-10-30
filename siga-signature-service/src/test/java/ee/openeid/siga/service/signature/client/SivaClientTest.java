@@ -6,7 +6,9 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
+import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -98,6 +100,40 @@ public class SivaClientTest {
         List<HashcodeSignatureWrapper> signatureWrappers = RequestUtil.createSignatureWrapper();
         signatureWrappers.get(0).getDataFiles().get(0).setHashAlgo("SHA386");
         sivaClient.validateHashcodeContainer(signatureWrappers, RequestUtil.createHashcodeDataFiles());
+    }
+
+    @Test
+    public void sivaDocumentMalformed() throws Exception {
+        exceptionRule.expect(InvalidContainerException.class);
+        exceptionRule.expectMessage("Document malformed");
+        String body = "{\"requestErrors\": [{\n" +
+                "    \"message\": \"Document malformed or not matching documentType\",\n" +
+                "    \"key\": \"document\"\n" +
+                "}]}";
+        WireMock.stubFor(
+                WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(400)
+                        .withBody(body))
+        );
+        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+    }
+
+    @Test
+    public void sivaSignatureMalformed() throws Exception {
+        exceptionRule.expect(InvalidSignatureException.class);
+        exceptionRule.expectMessage("Signature malformed");
+        String body = "{\"requestErrors\": [{\n" +
+                "    \"message\": \" Signature file malformed\",\n" +
+                "    \"key\": \"signatureFiles.signature\"\n" +
+                "}]}";
+        WireMock.stubFor(
+                WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(400)
+                        .withBody(body))
+        );
+        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     private String toJson(Object request) {
