@@ -39,7 +39,9 @@
             **/ee/openeid/siga/client/**/*,
             **/ee/openeid/siga/service/signature/configuration/*,
             **/ee/openeid/siga/mobileid/model/mid/*,
-            **/ee/openeid/siga/mobileid/model/dds/*
+            **/ee/openeid/siga/mobileid/model/dds/*,
+            **/ee/openeid/siga/common/model/*,
+            **/ee/openeid/siga/common/exception/*
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
     </properties>

@@ -1,6 +1,6 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;

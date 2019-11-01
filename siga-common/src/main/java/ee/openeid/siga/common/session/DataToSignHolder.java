@@ -1,6 +1,6 @@
 package ee.openeid.siga.common.session;
 
-import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.model.SigningType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;

@@ -1,11 +1,11 @@
 package ee.openeid.siga.service.signature.container;
 
-import ee.openeid.siga.common.DataToSignWrapper;
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.SigningChallenge;
-import ee.openeid.siga.common.SigningType;
-import ee.openeid.siga.common.SmartIdInformation;
+import ee.openeid.siga.common.model.DataToSignWrapper;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;

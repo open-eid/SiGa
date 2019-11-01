@@ -1,6 +1,6 @@
 package ee.openeid.siga.mobileid.client;
 
-import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;

@@ -1,6 +1,6 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;

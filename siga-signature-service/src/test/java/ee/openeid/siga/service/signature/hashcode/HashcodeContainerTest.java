@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.SignatureHashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.test.HashcodeContainerFilesHolder;

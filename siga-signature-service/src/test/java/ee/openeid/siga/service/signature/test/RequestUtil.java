@@ -1,10 +1,11 @@
 package ee.openeid.siga.service.signature.test;
 
 
-import ee.openeid.siga.common.DataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.SmartIdInformation;
+import ee.openeid.siga.common.model.DataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.ValidationReport;
@@ -42,9 +43,9 @@ public class RequestUtil {
     public static final String VALID_ASICE = "test.asice";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
-    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
-        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
-        ee.openeid.siga.common.HashcodeDataFile dataFile = new ee.openeid.siga.common.HashcodeDataFile();
+    public static List<HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
+        List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+        HashcodeDataFile dataFile = new HashcodeDataFile();
         dataFile.setFileName("test.txt");
         dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
@@ -81,15 +82,15 @@ public class RequestUtil {
         return response;
     }
 
-    public static List<ee.openeid.siga.common.HashcodeDataFile> createHashcodeDataFiles() {
-        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
-        ee.openeid.siga.common.HashcodeDataFile dataFile1 = new ee.openeid.siga.common.HashcodeDataFile();
+    public static List<HashcodeDataFile> createHashcodeDataFiles() {
+        List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
+        HashcodeDataFile dataFile1 = new HashcodeDataFile();
         dataFile1.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile1.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile1.setFileSize(10);
         dataFile1.setFileName("first datafile.txt");
         hashcodeDataFiles.add(dataFile1);
-        ee.openeid.siga.common.HashcodeDataFile dataFile2 = new ee.openeid.siga.common.HashcodeDataFile();
+        HashcodeDataFile dataFile2 = new HashcodeDataFile();
         dataFile2.setFileHashSha256("SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms");
         dataFile2.setFileHashSha512("8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw");
         dataFile2.setFileSize(10);

@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.exception.TechnicalException;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;

@@ -1,7 +1,7 @@
 package ee.openeid.siga.common.session;
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;

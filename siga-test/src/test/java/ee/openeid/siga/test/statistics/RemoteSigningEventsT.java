@@ -1,6 +1,6 @@
 package ee.openeid.siga.test.statistics;
 
-import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.response.Response;

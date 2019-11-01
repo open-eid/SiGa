@@ -1,8 +1,8 @@
 package ee.openeid.siga;
 
 
-import ee.openeid.siga.common.SigningChallenge;
-import ee.openeid.siga.common.SmartIdInformation;
+import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;

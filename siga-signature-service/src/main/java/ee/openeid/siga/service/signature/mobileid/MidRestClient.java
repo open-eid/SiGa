@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;

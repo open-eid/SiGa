@@ -1,6 +1,6 @@
 package ee.openeid.siga.test.statistics;
 
-import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.elasticsearch.action.search.SearchResponse;

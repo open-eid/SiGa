@@ -1,10 +1,10 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
-import ee.openeid.siga.common.ContainerInfo;
-import ee.openeid.siga.common.DataFile;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.Signature;
+import ee.openeid.siga.common.model.ContainerInfo;
+import ee.openeid.siga.common.model.DataFile;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;

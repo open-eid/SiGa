@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.common.DataToSignWrapper;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.model.DataToSignWrapper;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.SignatureCreationException;

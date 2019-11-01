@@ -1,6 +1,6 @@
 package ee.openeid.siga.service.signature.mobileid;
 
-import ee.openeid.siga.common.MobileIdInformation;
+import ee.openeid.siga.common.model.MobileIdInformation;
 import org.digidoc4j.DataToSign;
 
 import java.security.cert.X509Certificate;

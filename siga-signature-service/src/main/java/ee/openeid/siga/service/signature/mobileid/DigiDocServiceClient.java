@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.mobileid;
 
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.Result;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;

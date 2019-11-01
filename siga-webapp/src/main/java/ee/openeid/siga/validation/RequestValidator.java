@@ -1,7 +1,7 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.SmartIdInformation;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.util.Base64Util;
 import ee.openeid.siga.common.util.FileUtil;

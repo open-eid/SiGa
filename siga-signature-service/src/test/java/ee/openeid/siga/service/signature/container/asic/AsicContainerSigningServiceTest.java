@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
-import ee.openeid.siga.common.SigningType;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;

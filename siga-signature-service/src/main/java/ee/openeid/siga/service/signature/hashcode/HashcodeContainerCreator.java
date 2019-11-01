@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.MimeType;
 import org.digidoc4j.Container;

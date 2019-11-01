@@ -1,11 +1,11 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
-import ee.openeid.siga.common.ContainerInfo;
-import ee.openeid.siga.common.DataToSignWrapper;
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.SigningChallenge;
+import ee.openeid.siga.common.model.ContainerInfo;
+import ee.openeid.siga.common.model.DataToSignWrapper;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -167,7 +167,7 @@ public class AsicContainerController {
     public GetContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        List<ee.openeid.siga.common.Signature> signatures = containerService.getSignatures(containerId);
+        List<ee.openeid.siga.common.model.Signature> signatures = containerService.getSignatures(containerId);
         GetContainerSignaturesResponse response = new GetContainerSignaturesResponse();
         response.getSignatures().addAll(RequestTransformer.transformSignaturesForResponse(signatures));
         return response;
@@ -187,7 +187,7 @@ public class AsicContainerController {
     public GetContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        List<ee.openeid.siga.common.DataFile> dataFiles = containerService.getDataFiles(containerId);
+        List<ee.openeid.siga.common.model.DataFile> dataFiles = containerService.getDataFiles(containerId);
         GetContainerDataFilesResponse response = new GetContainerDataFilesResponse();
         response.getDataFiles().addAll(RequestTransformer.transformDataFilesForResponse(dataFiles));
         return response;
@@ -200,7 +200,7 @@ public class AsicContainerController {
         List<DataFile> dataFiles = containerDataFileRequest.getDataFiles();
         RequestValidator.validateDataFiles(dataFiles);
 
-        List<ee.openeid.siga.common.DataFile> dataFilesForApplication = RequestTransformer.transformDataFilesForApplication(dataFiles);
+        List<ee.openeid.siga.common.model.DataFile> dataFilesForApplication = RequestTransformer.transformDataFilesForApplication(dataFiles);
         Result result = containerService.addDataFiles(containerId, dataFilesForApplication);
         CreateContainerDataFileResponse response = new CreateContainerDataFileResponse();
         response.setResult(result.name());

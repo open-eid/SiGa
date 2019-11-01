@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.util;
 
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.SignatureHashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;

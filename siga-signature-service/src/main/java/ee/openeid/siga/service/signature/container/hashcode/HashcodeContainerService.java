@@ -1,9 +1,9 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.Signature;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;

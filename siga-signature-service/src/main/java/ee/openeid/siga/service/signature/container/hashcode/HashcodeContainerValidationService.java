@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;

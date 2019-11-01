@@ -1,9 +1,9 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.common.DataFile;
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.SmartIdInformation;
+import ee.openeid.siga.common.model.DataFile;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.util.CertificateUtil;
@@ -30,7 +30,7 @@ public class RequestTransformer {
         throw new IllegalStateException("Utility class");
     }
 
-    static List<ee.openeid.siga.common.HashcodeDataFile> transformHashcodeDataFilesForApplication(List<ee.openeid.siga.webapp.json.HashcodeDataFile> requestHashcodeDataFiles) {
+    static List<HashcodeDataFile> transformHashcodeDataFilesForApplication(List<ee.openeid.siga.webapp.json.HashcodeDataFile> requestHashcodeDataFiles) {
         List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
         requestHashcodeDataFiles.forEach(
                 requestHashcodeDataFile -> {
@@ -57,7 +57,7 @@ public class RequestTransformer {
         return dataFiles;
     }
 
-    static List<Signature> transformSignaturesForResponse(List<ee.openeid.siga.common.Signature> requestSignatures) {
+    static List<Signature> transformSignaturesForResponse(List<ee.openeid.siga.common.model.Signature> requestSignatures) {
         List<Signature> signatures = new ArrayList<>();
         requestSignatures.forEach(
                 requestSignature -> {

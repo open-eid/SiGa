@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
-import ee.openeid.siga.common.HashcodeDataFile;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.Signature;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
@@ -67,7 +67,7 @@ public class HashcodeContainerServiceTest {
 
     @Test
     public void successfulCreateContainer() {
-        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
+        List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         String containerId = containerService.createContainer(hashcodeDataFiles);
         Assert.assertFalse(StringUtils.isBlank(containerId));
 
@@ -82,7 +82,7 @@ public class HashcodeContainerServiceTest {
 
     @Test
     public void successfulCreateContainerFromDataFileWithUnknownExtension() {
-        List<ee.openeid.siga.common.HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles().stream().limit(1)
+        List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles().stream().limit(1)
                 .peek(dataFile -> dataFile.setFileName("filename.unknown")).collect(Collectors.toList());
         String containerId = containerService.createContainer(hashcodeDataFiles);
         Assert.assertFalse(StringUtils.isBlank(containerId));

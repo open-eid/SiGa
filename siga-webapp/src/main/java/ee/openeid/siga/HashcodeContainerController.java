@@ -1,10 +1,10 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
-import ee.openeid.siga.common.DataToSignWrapper;
-import ee.openeid.siga.common.MobileIdInformation;
-import ee.openeid.siga.common.Result;
-import ee.openeid.siga.common.SigningChallenge;
+import ee.openeid.siga.common.model.DataToSignWrapper;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -160,7 +160,7 @@ public class HashcodeContainerController {
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        List<ee.openeid.siga.common.Signature> signatures = containerService.getSignatures(containerId);
+        List<ee.openeid.siga.common.model.Signature> signatures = containerService.getSignatures(containerId);
         GetHashcodeContainerSignaturesResponse response = new GetHashcodeContainerSignaturesResponse();
         response.getSignatures().addAll(RequestTransformer.transformSignaturesForResponse(signatures));
         return response;
@@ -180,7 +180,7 @@ public class HashcodeContainerController {
     public GetHashcodeContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
         RequestValidator.validateContainerId(containerId);
 
-        List<ee.openeid.siga.common.HashcodeDataFile> dataFiles = containerService.getDataFiles(containerId);
+        List<ee.openeid.siga.common.model.HashcodeDataFile> dataFiles = containerService.getDataFiles(containerId);
         GetHashcodeContainerDataFilesResponse response = new GetHashcodeContainerDataFilesResponse();
         response.getDataFiles().addAll(RequestTransformer.transformHashcodeDataFilesForResponse(dataFiles));
         return response;
@@ -193,7 +193,7 @@ public class HashcodeContainerController {
         List<HashcodeDataFile> hashcodeDataFiles = containerDataFileRequest.getDataFiles();
         RequestValidator.validateHashcodeDataFiles(hashcodeDataFiles);
 
-        List<ee.openeid.siga.common.HashcodeDataFile> dataFilesForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(hashcodeDataFiles);
+        List<ee.openeid.siga.common.model.HashcodeDataFile> dataFilesForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(hashcodeDataFiles);
         Result result = containerService.addDataFiles(containerId, dataFilesForApplication);
         CreateHashcodeContainerDataFileResponse response = new CreateHashcodeContainerDataFileResponse();
         response.setResult(result.name());
