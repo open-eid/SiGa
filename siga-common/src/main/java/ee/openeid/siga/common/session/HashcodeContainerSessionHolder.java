@@ -2,18 +2,15 @@ package ee.openeid.siga.common.session;
 
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
 @Builder
 public class HashcodeContainerSessionHolder implements Session {
     @NonNull
@@ -26,8 +23,6 @@ public class HashcodeContainerSessionHolder implements Session {
     private String sessionId;
     private List<HashcodeDataFile> dataFiles;
     private List<HashcodeSignatureWrapper> signatures;
-    @Getter(AccessLevel.PRIVATE)
-    @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private Map<String, DataToSignHolder> dataToSignHolder = new HashMap<>();
 
