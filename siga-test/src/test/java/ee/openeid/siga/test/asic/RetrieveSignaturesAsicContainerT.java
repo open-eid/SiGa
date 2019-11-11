@@ -49,7 +49,7 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = getSignatureList(flow);
 

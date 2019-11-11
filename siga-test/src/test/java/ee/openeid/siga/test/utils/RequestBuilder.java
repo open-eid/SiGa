@@ -147,7 +147,7 @@ public class RequestBuilder {
     }
 
     public static JSONObject midSigningRequestWithDefault(String personIdentifier, String phoneNo, String signatureProfile) throws JSONException {
-        return midSigningRequest(personIdentifier, phoneNo, "EST", signatureProfile, "something", null, null, null, null, null);
+        return midSigningRequest(personIdentifier, phoneNo, "EST", signatureProfile, "SIGA test", null, null, null, null, null);
     }
 
     public static JSONObject midSigningRequest(String personIdentifier, String phoneNo, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {

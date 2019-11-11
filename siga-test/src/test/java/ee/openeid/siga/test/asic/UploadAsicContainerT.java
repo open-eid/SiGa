@@ -46,7 +46,7 @@ public class UploadAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignatures() throws Exception {
-        Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         response.then()
                 .statusCode(200)

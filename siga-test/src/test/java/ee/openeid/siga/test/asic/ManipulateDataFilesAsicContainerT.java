@@ -52,7 +52,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = getDataFileList(flow);
 
@@ -116,7 +116,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
 
@@ -133,7 +133,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = deleteDataFile(flow, "random.txt");
 
@@ -164,7 +164,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void uploadAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
 
@@ -243,7 +243,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     @Test
     public void deleteToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.bdoc"));
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
 
