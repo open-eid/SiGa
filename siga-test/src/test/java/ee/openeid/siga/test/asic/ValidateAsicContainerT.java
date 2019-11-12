@@ -69,6 +69,34 @@ public class ValidateAsicContainerT extends TestBase {
     }
 
     @Test
+    public void validateAsicContainerWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void uploadAsicContainerWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void createAsicContainerWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
     public void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = getValidationReportForContainerInSession(flow);
         assertThat(response.statusCode(), equalTo(400));

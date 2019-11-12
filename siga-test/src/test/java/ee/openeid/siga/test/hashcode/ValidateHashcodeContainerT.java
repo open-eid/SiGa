@@ -72,6 +72,34 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void validateHashcodeContainerWithoutSignatures() throws Exception {
+        Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithoutSignaturesAndValidateInSession() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void createHashcodeContainerWithoutSignaturesAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
     public void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = getValidationReportForContainerInSession(flow);
         assertThat(response.statusCode(), equalTo(400));
