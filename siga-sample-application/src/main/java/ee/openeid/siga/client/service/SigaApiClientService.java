@@ -1,10 +1,14 @@
 package ee.openeid.siga.client.service;
 
+import ee.openeid.siga.client.hashcode.HashcodeContainer;
 import ee.openeid.siga.client.hmac.HmacTokenAuthorizationHeaderInterceptor;
 import ee.openeid.siga.client.model.AsicContainerWrapper;
+import ee.openeid.siga.client.model.FinalizeRemoteSigningRequest;
 import ee.openeid.siga.client.model.GetContainerMobileIdSigningStatusResponse;
 import ee.openeid.siga.client.model.HashcodeContainerWrapper;
 import ee.openeid.siga.client.model.MobileSigningRequest;
+import ee.openeid.siga.client.model.PrepareRemoteSigningRequest;
+import ee.openeid.siga.client.model.PrepareRemoteSigningResponse;
 import ee.openeid.siga.client.model.ProcessingStatus;
 import ee.openeid.siga.webapp.json.*;
 import lombok.SneakyThrows;
@@ -18,6 +22,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
@@ -32,7 +37,9 @@ import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,14 +56,19 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 @Service
 @RequestScope
 public class SigaApiClientService {
+
+    private static final String ASIC_ENDPOINT = "containers";
+    private static final String HASHCODE_ENDPOINT = "hashcodecontainers";
+    private static final String RESULT_OK = "OK";
+    private static final String SIGNATURE_PROFILE_LT = "LT";
+
     private final String hmacAlgorithm;
     private final String hmacServiceUuid;
     private final String hmacSharedSigningKey;
     private final String sigaApiUri;
     private RestTemplate restTemplate;
     private String websocketChannelId;
-    private final static String ASIC_ENDPOINT = "containers";
-    private final static String HASHCODE_ENDPOINT = "hashcodecontainers";
+
     @Autowired
     private ContainerService containerService;
     @Autowired
@@ -93,73 +105,167 @@ public class SigaApiClientService {
     @Async
     @SneakyThrows
     public void startMobileSigningFlow(MobileSigningRequest mobileSigningRequest) {
-        String fileId = mobileSigningRequest.getFileId();
-        setUpClientNotificationChannel(fileId);
-
-        String containerId;
-        if (mobileSigningRequest.isContainerCreated()) {
-            if (MobileSigningRequest.ContainerType.HASHCODE == mobileSigningRequest.getContainerType()) {
-                log.info("Container is already uploaded. Getting container {} from cacheHashcodeContainer", fileId);
-                containerId = containerService.getHashcodeContainer(fileId).getId();
-            } else {
-                log.info("Container is already uploaded. Getting container {} from cacheAsicContainer", fileId);
-                containerId = containerService.getAsicContainer(fileId).getId();
-            }
-
-        } else {
-            log.info("Uploading container file with id: {}", fileId);
-            containerId = uploadContainer(fileId);
-        }
+        setUpClientNotificationChannel(mobileSigningRequest.getContainerId());
 
         if (MobileSigningRequest.ContainerType.HASHCODE == mobileSigningRequest.getContainerType()) {
-            startHashcodeMobileIdSigningFlow(containerId, mobileSigningRequest);
-
+            startHashcodeMobileIdSigningFlow(mobileSigningRequest);
         } else {
-            startAsicMobileIdSigningFlow(containerId, mobileSigningRequest);
-        }
-
-    }
-
-    private void startAsicMobileIdSigningFlow(String containerId, MobileSigningRequest mobileSigningRequest) {
-        getSignatureList(ASIC_ENDPOINT, containerId, GetContainerSignaturesResponse.class);
-        CreateContainerMobileIdSigningRequest mobileIdRequest = createAsicMobileIdRequest(mobileSigningRequest);
-        CreateContainerMobileIdSigningResponse mobileIdResponse =
-                prepareMobileIdSignatureSigning(ASIC_ENDPOINT, containerId, CreateContainerMobileIdSigningResponse.class, mobileIdRequest);
-        String generatedSignatureId = mobileIdResponse.getGeneratedSignatureId();
-        if (StringUtils.isNotBlank(generatedSignatureId)) {
-
-            if (getMobileSigningStatus(ASIC_ENDPOINT, containerId, generatedSignatureId)) {
-                getContainerValidation(ASIC_ENDPOINT, containerId, GetContainerValidationReportResponse.class);
-                GetContainerResponse getContainerResponse = getContainer(ASIC_ENDPOINT, containerId, GetContainerResponse.class);
-                AsicContainerWrapper container = containerService.getAsicContainer(mobileSigningRequest.getFileId());
-                containerService.cacheAsicContainer(mobileSigningRequest.getFileId(), container.getName(), Base64.getDecoder().decode(getContainerResponse.getContainer()));
-                deleteContainer(ASIC_ENDPOINT, containerId, DeleteContainerResponse.class);
-            }
+            startAsicMobileIdSigningFlow(mobileSigningRequest);
         }
     }
 
-    private void startHashcodeMobileIdSigningFlow(String containerId, MobileSigningRequest mobileSigningRequest) {
+    private void startHashcodeMobileIdSigningFlow(MobileSigningRequest mobileSigningRequest) {
+        String containerId = mobileSigningRequest.getContainerId();
+
         getSignatureList(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerSignaturesResponse.class);
         CreateHashcodeContainerMobileIdSigningRequest mobileIdRequest = createHashcodeMobileIdRequest(mobileSigningRequest);
         CreateHashcodeContainerMobileIdSigningResponse mobileIdResponse =
                 prepareMobileIdSignatureSigning(HASHCODE_ENDPOINT, containerId, CreateHashcodeContainerMobileIdSigningResponse.class, mobileIdRequest);
 
         String generatedSignatureId = mobileIdResponse.getGeneratedSignatureId();
-
         if (StringUtils.isNotBlank(generatedSignatureId)) {
-
             if (getMobileSigningStatus(HASHCODE_ENDPOINT, containerId, generatedSignatureId)) {
-                getContainerValidation(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerValidationReportResponse.class);
-                GetHashcodeContainerResponse getContainerResponse = getContainer(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerResponse.class);
-                HashcodeContainerWrapper container = containerService.getHashcodeContainer(mobileSigningRequest.getFileId());
-                containerService.cacheHashcodeContainer(mobileSigningRequest.getFileId(), container.getFileName(), Base64.getDecoder().decode(getContainerResponse.getContainer()), container.getOriginalDataFiles());
-                deleteContainer(HASHCODE_ENDPOINT, containerId, DeleteHashcodeContainerResponse.class);
+                endHashcodeContainerFlow(containerId);
             }
         }
     }
 
+    private void endHashcodeContainerFlow(String containerId) {
+        getContainerValidation(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerValidationReportResponse.class);
+        GetHashcodeContainerResponse getContainerResponse = getContainer(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerResponse.class);
+        HashcodeContainerWrapper container = containerService.getHashcodeContainer(containerId);
+        containerService.cacheHashcodeContainer(containerId, container.getFileName(), Base64.getDecoder().decode(getContainerResponse.getContainer()), container.getOriginalDataFiles());
+        deleteContainer(HASHCODE_ENDPOINT, containerId, DeleteHashcodeContainerResponse.class);
+    }
+
+    private void startAsicMobileIdSigningFlow(MobileSigningRequest mobileSigningRequest) {
+        String containerId = mobileSigningRequest.getContainerId();
+
+        getSignatureList(ASIC_ENDPOINT, containerId, GetContainerSignaturesResponse.class);
+        CreateContainerMobileIdSigningRequest mobileIdRequest = createAsicMobileIdRequest(mobileSigningRequest);
+        CreateContainerMobileIdSigningResponse mobileIdResponse =
+                prepareMobileIdSignatureSigning(ASIC_ENDPOINT, containerId, CreateContainerMobileIdSigningResponse.class, mobileIdRequest);
+
+        String generatedSignatureId = mobileIdResponse.getGeneratedSignatureId();
+        if (StringUtils.isNotBlank(generatedSignatureId)) {
+            if (getMobileSigningStatus(ASIC_ENDPOINT, containerId, generatedSignatureId)) {
+                endAsicContainerFlow(containerId);
+            }
+        }
+    }
+
+    private void endAsicContainerFlow(String containerId) {
+        getContainerValidation(ASIC_ENDPOINT, containerId, GetContainerValidationReportResponse.class);
+        GetContainerResponse getContainerResponse = getContainer(ASIC_ENDPOINT, containerId, GetContainerResponse.class);
+        AsicContainerWrapper container = containerService.getAsicContainer(containerId);
+        containerService.cacheAsicContainer(containerId, container.getName(), Base64.getDecoder().decode(getContainerResponse.getContainer()));
+        deleteContainer(ASIC_ENDPOINT, containerId, DeleteContainerResponse.class);
+    }
+
     private void setUpClientNotificationChannel(String fileId) {
         websocketChannelId = "/progress/" + fileId;
+    }
+
+    public PrepareRemoteSigningResponse prepareRemoteSigning(PrepareRemoteSigningRequest prepareRemoteSigningRequest) {
+        setUpClientNotificationChannel(prepareRemoteSigningRequest.getContainerId());
+
+        if (MobileSigningRequest.ContainerType.HASHCODE == prepareRemoteSigningRequest.getContainerType()) {
+            return prepareHashcodeContainerRemoteSigning(prepareRemoteSigningRequest);
+        } else {
+            return prepareAsicContainerRemoteSigning(prepareRemoteSigningRequest);
+        }
+    }
+
+    private PrepareRemoteSigningResponse prepareHashcodeContainerRemoteSigning(PrepareRemoteSigningRequest prepareRemoteSigningRequest) {
+        String containerId = prepareRemoteSigningRequest.getContainerId();
+
+        getSignatureList(HASHCODE_ENDPOINT, containerId, GetContainerSignaturesResponse.class);
+
+        CreateHashcodeContainerRemoteSigningRequest remoteSigningRequest = createHashcodeContainerRemoteSigningRequest(prepareRemoteSigningRequest);
+        CreateHashcodeContainerRemoteSigningResponse remoteSigningResponse = prepareContainerRemoteSigning(HASHCODE_ENDPOINT, containerId, CreateHashcodeContainerRemoteSigningResponse.class, remoteSigningRequest);
+
+        return PrepareRemoteSigningResponse.from(remoteSigningResponse);
+    }
+
+    private CreateHashcodeContainerRemoteSigningRequest createHashcodeContainerRemoteSigningRequest(PrepareRemoteSigningRequest prepareRemoteSigningRequest) {
+        CreateHashcodeContainerRemoteSigningRequest request = new CreateHashcodeContainerRemoteSigningRequest();
+        request.setSigningCertificate(encodeBase64String(prepareRemoteSigningRequest.getCertificate()));
+        request.setSignatureProfile(SIGNATURE_PROFILE_LT);
+        return request;
+    }
+
+    private PrepareRemoteSigningResponse prepareAsicContainerRemoteSigning(PrepareRemoteSigningRequest prepareRemoteSigningRequest) {
+        String containerId = prepareRemoteSigningRequest.getContainerId();
+
+        getSignatureList(ASIC_ENDPOINT, containerId, GetContainerSignaturesResponse.class);
+
+        CreateContainerRemoteSigningRequest remoteSigningRequest = createAsicContainerRemoteSigningRequest(prepareRemoteSigningRequest);
+        CreateContainerRemoteSigningResponse remoteSigningResponse = prepareContainerRemoteSigning(ASIC_ENDPOINT, containerId, CreateContainerRemoteSigningResponse.class, remoteSigningRequest);
+
+        return PrepareRemoteSigningResponse.from(remoteSigningResponse);
+    }
+
+    private CreateContainerRemoteSigningRequest createAsicContainerRemoteSigningRequest(PrepareRemoteSigningRequest prepareRemoteSigningRequest) {
+        CreateContainerRemoteSigningRequest request = new CreateContainerRemoteSigningRequest();
+        request.setSigningCertificate(encodeBase64String(prepareRemoteSigningRequest.getCertificate()));
+        request.setSignatureProfile(SIGNATURE_PROFILE_LT);
+        return request;
+    }
+
+    private <T> T prepareContainerRemoteSigning(String containerEndpoint, String containerId, Class<T> clazz, Object request) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "remotesigning");
+        T response = restTemplate.postForObject(endpoint, request, clazz);
+        sendStatus(POST, endpoint, request, response);
+        return response;
+    }
+
+    public void finalizeRemoteSigning(FinalizeRemoteSigningRequest finalizeRemoteSigningRequest) {
+        setUpClientNotificationChannel(finalizeRemoteSigningRequest.getContainerId());
+
+        if (MobileSigningRequest.ContainerType.HASHCODE == finalizeRemoteSigningRequest.getContainerType()) {
+            finalizeHashcodeContainerRemoteSigning(finalizeRemoteSigningRequest);
+        } else {
+            finalizeAsicContainerRemoteSigning(finalizeRemoteSigningRequest);
+        }
+    }
+
+    private void finalizeHashcodeContainerRemoteSigning(FinalizeRemoteSigningRequest finalizeRemoteSigningRequest) {
+        String containerId = finalizeRemoteSigningRequest.getContainerId();
+
+        UpdateHashcodeContainerRemoteSigningRequest remoteSigningRequest = new UpdateHashcodeContainerRemoteSigningRequest();
+        remoteSigningRequest.setSignatureValue(encodeBase64String(finalizeRemoteSigningRequest.getSignature()));
+
+        HttpEntity<UpdateHashcodeContainerRemoteSigningRequest> request = new HttpEntity<>(remoteSigningRequest);
+
+        UpdateHashcodeContainerRemoteSigningResponse response = finalizeContainerRemoteSignature(HASHCODE_ENDPOINT,
+                containerId, finalizeRemoteSigningRequest.getSignatureId(), UpdateHashcodeContainerRemoteSigningResponse.class, request);
+
+        if (RESULT_OK.equals(response.getResult())) {
+            endHashcodeContainerFlow(containerId);
+        }
+    }
+
+    private void finalizeAsicContainerRemoteSigning(FinalizeRemoteSigningRequest finalizeRemoteSigningRequest) {
+        String containerId = finalizeRemoteSigningRequest.getContainerId();
+
+        UpdateContainerRemoteSigningRequest remoteSigningRequest = new UpdateContainerRemoteSigningRequest();
+        remoteSigningRequest.setSignatureValue(encodeBase64String(finalizeRemoteSigningRequest.getSignature()));
+
+        HttpEntity<UpdateContainerRemoteSigningRequest> request = new HttpEntity<>(remoteSigningRequest);
+
+        UpdateContainerRemoteSigningResponse response = finalizeContainerRemoteSignature(ASIC_ENDPOINT,
+                containerId, finalizeRemoteSigningRequest.getSignatureId(), UpdateContainerRemoteSigningResponse.class, request);
+
+        if (RESULT_OK.equals(response.getResult())) {
+            endAsicContainerFlow(containerId);
+        }
+    }
+
+    private <T> T finalizeContainerRemoteSignature(String containerEndpoint, String containerId, String generatedSignatureId, Class<T> clazz, HttpEntity<?> request) {
+        String endpoint = getSigaApiUri(containerEndpoint, containerId, "remotesigning", generatedSignatureId);
+        T response = restTemplate.exchange(endpoint, PUT, request, clazz).getBody();
+        sendStatus(PUT, endpoint, request.getBody(), response);
+        return response;
     }
 
     @SneakyThrows
@@ -195,15 +301,30 @@ public class SigaApiClientService {
         return containerService.cacheHashcodeContainer(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()), originalDataFiles);
     }
 
-    private String uploadContainer(String fileId) {
+    @SneakyThrows
+    public HashcodeContainerWrapper convertAndUploadHashcodeContainer(Map<String, MultipartFile> fileMap) {
+        HashcodeContainer hashcodeContainer = convertToHashcodeContainer(fileMap);
+        UploadHashcodeContainerResponse response = uploadHashcodeContainer(hashcodeContainer);
+
+        String containerId = response.getContainerId();
+        GetHashcodeContainerResponse getContainerResponse = restTemplate.getForObject(getSigaApiUri(HASHCODE_ENDPOINT, containerId), GetHashcodeContainerResponse.class);
+        log.info("Uploaded hashcode container with id {}", containerId);
+        return containerService.cacheHashcodeContainer(containerId, containerId + ".asice", Base64.getDecoder().decode(getContainerResponse.getContainer()), hashcodeContainer.getRegularDataFiles());
+    }
+
+    private HashcodeContainer convertToHashcodeContainer(Map<String, MultipartFile> fileMap) throws IOException {
+        MultipartFile file = fileMap.entrySet().iterator().next().getValue();
+        log.info("Converting container: {}", file.getOriginalFilename());
+        InputStream inputStream = new ByteArrayInputStream(file.getBytes());
+        return HashcodeContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
+    }
+
+    private UploadHashcodeContainerResponse uploadHashcodeContainer(HashcodeContainer hashcodeContainer) {
         String endpoint = fromUriString(sigaApiUri).path("upload/hashcodecontainers").build().toUriString();
-        String encodedContainerContent = encodeBase64String(containerService.getHashcodeContainer(fileId).getHashcodeContainer());
+        String encodedContainerContent = encodeBase64String(hashcodeContainer.getHashcodeContainer());
         UploadHashcodeContainerRequest request = new UploadHashcodeContainerRequest();
         request.setContainer(encodedContainerContent);
-        UploadHashcodeContainerResponse response = restTemplate.postForObject(endpoint, request, UploadHashcodeContainerResponse.class);
-        log.info("Container id {} for uploaded file id {}", response.getContainerId(), fileId);
-        sendStatus(POST, endpoint, request, response);
-        return response.getContainerId();
+        return restTemplate.postForObject(endpoint, request, UploadHashcodeContainerResponse.class);
     }
 
     private <T> void getSignatureList(String containerEndpoint, String containerId, Class<T> clazz) {
@@ -286,7 +407,7 @@ public class SigaApiClientService {
     private CreateHashcodeContainerMobileIdSigningRequest createHashcodeMobileIdRequest(MobileSigningRequest mobileSigningRequest) {
         CreateHashcodeContainerMobileIdSigningRequest request = new CreateHashcodeContainerMobileIdSigningRequest();
         request.setMessageToDisplay("SiGa DEMO app");
-        request.setSignatureProfile("LT");
+        request.setSignatureProfile(SIGNATURE_PROFILE_LT);
         request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
         request.setLanguage("EST");
         request.setPhoneNo(mobileSigningRequest.getPhoneNr());
@@ -296,7 +417,7 @@ public class SigaApiClientService {
     private CreateContainerMobileIdSigningRequest createAsicMobileIdRequest(MobileSigningRequest mobileSigningRequest) {
         CreateContainerMobileIdSigningRequest request = new CreateContainerMobileIdSigningRequest();
         request.setMessageToDisplay("SiGa DEMO app");
-        request.setSignatureProfile("LT");
+        request.setSignatureProfile(SIGNATURE_PROFILE_LT);
         request.setPersonIdentifier(mobileSigningRequest.getPersonIdentifier());
         request.setLanguage("EST");
         request.setPhoneNo(mobileSigningRequest.getPhoneNr());

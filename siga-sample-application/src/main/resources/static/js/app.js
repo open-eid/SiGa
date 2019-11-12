@@ -4,7 +4,8 @@ requirejs.config({
         "vue": "https://cdn.jsdelivr.net/npm/require-vuejs@1.1.3/dist/require-vuejs.min",
         "vue-dropzone": "/webjars/vue2-dropzone/dist/vue2Dropzone",
         "vue-bootstrap": "/webjars/bootstrap-vue/dist/bootstrap-vue.min",
-        "axios": "/webjars/axios/0.19.0/dist/axios"
+        "axios": "/webjars/axios/0.19.0/dist/axios",
+        "base64js": "/webjars/base64-js/base64js.min"
     },
     shim: {
         "Vue": {"exports": "Vue"}
@@ -20,7 +21,7 @@ require(["Vue", "vue-bootstrap", "vue!components/container-processing.vue"], fun
     Vue.directive('highlightjs', {
         deep: true,
         bind: function (el, binding) {
-            let targets = el.querySelectorAll('code')
+            let targets = el.querySelectorAll('code');
             targets.forEach((target) => {
                 if (binding.value) {
                     target.textContent = binding.value
@@ -29,10 +30,10 @@ require(["Vue", "vue-bootstrap", "vue!components/container-processing.vue"], fun
             })
         },
         componentUpdated: function (el, binding) {
-            let targets = el.querySelectorAll('code')
+            let targets = el.querySelectorAll('code');
             targets.forEach((target) => {
                 if (binding.value) {
-                    target.textContent = binding.value
+                    target.textContent = binding.value;
                     hljs.highlightBlock(target)
                 }
             })

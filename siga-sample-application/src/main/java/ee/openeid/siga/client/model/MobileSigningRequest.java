@@ -1,18 +1,12 @@
 package ee.openeid.siga.client.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class MobileSigningRequest {
-    private boolean containerCreated;
-    private ContainerType containerType;
-    private String fileId;
+@EqualsAndHashCode(callSuper = true)
+public class MobileSigningRequest extends SigningRequest {
     private String personIdentifier;
     private String phoneNr;
     private String country;
-
-    public enum ContainerType {
-        HASHCODE,
-        ASIC
-    }
 }

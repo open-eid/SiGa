@@ -2,8 +2,10 @@ package ee.openeid.siga.client.controller;
 
 import ee.openeid.siga.client.hashcode.HashcodeContainer;
 import ee.openeid.siga.client.model.AsicContainerWrapper;
+import ee.openeid.siga.client.model.FinalizeRemoteSigningRequest;
 import ee.openeid.siga.client.model.HashcodeContainerWrapper;
 import ee.openeid.siga.client.model.MobileSigningRequest;
+import ee.openeid.siga.client.model.PrepareRemoteSigningRequest;
 import ee.openeid.siga.client.service.ContainerService;
 import ee.openeid.siga.client.service.SigaApiClientService;
 import lombok.SneakyThrows;
@@ -24,12 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Base64;
 import java.util.Map;
-import java.util.UUID;
 
 
 @Slf4j
@@ -50,16 +48,10 @@ public class MainController {
 
     @PostMapping(value = "/convert-container", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public HashcodeContainerWrapper convertContainerToHashcodeContainer(MultipartHttpServletRequest request) throws IOException {
+    public HashcodeContainerWrapper convertContainerToHashcodeContainer(MultipartHttpServletRequest request) {
         Map<String, MultipartFile> fileMap = request.getFileMap();
         log.info("Nr of files uploaded: {}", fileMap.size());
-        MultipartFile file = fileMap.entrySet().iterator().next().getValue();
-        log.info("Converting container: {}", file.getOriginalFilename());
-        InputStream inputStream = new ByteArrayInputStream(file.getBytes());
-        HashcodeContainer hashcodeContainer = HashcodeContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
-        String id = UUID.randomUUID().toString();
-        log.info("Generated file id: {}", id);
-        return containerService.cacheHashcodeContainer(id, file.getOriginalFilename(), hashcodeContainer);
+        return sigaApiClientService.convertAndUploadHashcodeContainer(fileMap);
     }
 
     @PostMapping(value = "/create-hashcode-container", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -121,5 +113,20 @@ public class MainController {
         log.info("Mobile signing request: {}", request);
         sigaApiClientService.startMobileSigningFlow(request);
         return request;
+    }
+
+    @PostMapping(value = "/prepare-remote-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity prepareRemoteSigning(@RequestBody PrepareRemoteSigningRequest request) {
+        log.info("Prepare remote signing request: {}", request);
+        return ResponseEntity.ok(sigaApiClientService.prepareRemoteSigning(request));
+    }
+
+    @PostMapping(value = "/finalize-remote-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity finalizeRemoteSigning(@RequestBody FinalizeRemoteSigningRequest request) {
+        log.info("Finalize remote signing request: {}", request);
+        sigaApiClientService.finalizeRemoteSigning(request);
+        return ResponseEntity.ok().build();
     }
 }

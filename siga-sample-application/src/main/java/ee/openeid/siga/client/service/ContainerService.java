@@ -35,16 +35,6 @@ public class ContainerService {
                 .build();
     }
 
-    @CachePut(key = "#id")
-    public HashcodeContainerWrapper cacheHashcodeContainer(String id, String fileName, ee.openeid.siga.client.hashcode.HashcodeContainer hashcodeContainer) {
-        return HashcodeContainerWrapper.builder()
-                .id(id)
-                .fileName(fileName)
-                .hashcodeContainer(hashcodeContainer.getHashcodeContainer())
-                .originalDataFiles(hashcodeContainer.getRegularDataFiles())
-                .build();
-    }
-
     @Cacheable(key = "#id")
     public HashcodeContainerWrapper getHashcodeContainer(String id) {
         log.info("Get file from cacheHashcodeContainer: {}", id);

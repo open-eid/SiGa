@@ -11,7 +11,7 @@
                     <h5 class="card-header">Container upload and conversion to hashcode format</h5>
                     <div class="card-body">
                         <b-form-group>
-                            <b-form-radio v-model="containerConversionType" value="convertContainer">Convert ASIC container to HASHCODE container</b-form-radio>
+                            <b-form-radio v-model="containerConversionType" value="convertContainer">Convert ASIC container to HASHCODE container and upload</b-form-radio>
                             <b-form-radio v-model="containerConversionType" value="createContainer">Create ASIC container from files</b-form-radio>
                             <b-form-radio v-model="containerConversionType" value="createHashcodeContainer" v-on:input="onChangeConversionType">Create HASHCODE container from files</b-form-radio>
                         </b-form-group>
@@ -31,7 +31,7 @@
                             {{ dropzoneError }}
                         </b-alert>
                         <vue-dropzone id="filedropzone" v-if="!containerConverted" ref="fileDropzone" :options="dropzoneOptions" v-on:vdropzone-success-multiple="onUploadContainerSuccess" v-on:vdropzone-error="onDropzoneError"></vue-dropzone>
-                        <b-button target="_blank" v-if="containerConverted && containerConversionType != 'createContainer'" v-bind:href="downloadHashcodeUrl" size="sm">Download unsigned hashcode container</b-button>
+                        <b-button target="_blank" v-if="downloadUnsignedContainerAllowed && containerConverted && containerConversionType != 'createContainer'" v-bind:href="downloadHashcodeUrl" size="sm">Download unsigned hashcode container</b-button>
                     </div>
                 </div>
             </b-col>
@@ -41,28 +41,36 @@
                 <div class="card">
                     <h5 class="card-header">Sign container</h5>
                     <div class="card-body">
-                        <b-collapse visible>
-                            <b-container>
-                                <b-row>
-                                    <b-col>
-                                        <b-form @submit="onMobileSign">
-                                            <b-form-group label="Person identifier code:" label-for="input-1" label-cols-md="3">
-                                                <b-form-input id="input-1" v-model="mobileSigningForm.personIdentifier" type="text" required placeholder="Person identifier code"></b-form-input>
-                                            </b-form-group>
-                                            <b-form-group label="Phone nr:" label-for="input-2" label-cols-md="3">
-                                                <b-form-input id="input-2" v-model="mobileSigningForm.phoneNr" type="text" required placeholder="Phone nr"></b-form-input>
-                                            </b-form-group>
-                                            <b-form-group label="Select country:" label-for="input-3" label-cols-md="3">
-                                                <b-form-select id="input-3" v-model="mobileSigningForm.country" :options="countryOptions"></b-form-select>
-                                            </b-form-group>
-                                            <b-form-group label-cols-md="12">
-                                                <b-button type="submit" v-b-toggle.collapse-ms variant="primary" size="sm">Start mobile signing</b-button>
-                                            </b-form-group>
-                                        </b-form>
-                                    </b-col>
-                                </b-row>
-                            </b-container>
-                        </b-collapse>
+                        <b-tabs content-class="mt-2">
+                            <b-tab title="Mobile-ID" active>
+                                <b-collapse visible>
+                                    <b-container>
+                                        <b-row>
+                                            <b-col>
+                                                <b-form @submit="onMobileSign">
+                                                    <b-form-group label="Person identifier code:" label-for="input-1" label-cols-md="3">
+                                                        <b-form-input id="input-1" v-model="mobileSigningForm.personIdentifier" type="text" required placeholder="Person identifier code"></b-form-input>
+                                                    </b-form-group>
+                                                    <b-form-group label="Phone nr:" label-for="input-2" label-cols-md="3">
+                                                        <b-form-input id="input-2" v-model="mobileSigningForm.phoneNr" type="text" required placeholder="Phone nr"></b-form-input>
+                                                    </b-form-group>
+                                                    <b-form-group label="Select country:" label-for="input-3" label-cols-md="3">
+                                                        <b-form-select id="input-3" v-model="mobileSigningForm.country" :options="countryOptions"></b-form-select>
+                                                    </b-form-group>
+                                                    <b-form-group label-cols-md="12">
+                                                        <b-button type="submit" v-b-toggle.collapse-ms variant="primary" size="sm">Start mobile signing</b-button>
+                                                    </b-form-group>
+                                                </b-form>
+                                            </b-col>
+                                        </b-row>
+                                    </b-container>
+                                </b-collapse>
+                            </b-tab>
+                            <b-tab title="ID-card">
+                                <b-button variant="primary" size="sm" v-on:click="onIdCardSign">Start ID-card signing</b-button>
+                            </b-tab>
+                        </b-tabs>
+
                         <div class="process-callout process-start" v-bind:class="{ 'process-default': item.status === 'PROCESSING', 'process-highlight': item.status === 'VALIDATION', 'process-highlight': item.status === 'CHALLENGE', 'process-result': item.status === 'RESULT', 'process-error': item.status === 'ERROR'}" v-for="(item, index) in processingSteps">
                             <h6>
                                 <b-badge variant="primary">{{index}}</b-badge>
@@ -94,7 +102,7 @@
 </template>
 
 <script>
-    define(["Vue", "vue-dropzone", "axios"], function (Vue, VueDropzone, axios) {
+    define(["Vue", "vue-dropzone", "axios", "base64js"], function (Vue, VueDropzone, axios, base64js) {
         return Vue.component("siga-container-processing", {
             template: template,
             components: {
@@ -103,13 +111,13 @@
             data: function () {
                 return {
                     processingSteps: [],
-                    fileId: null,
                     containerConversionType: 'convertContainer',
                     containerConverted: false,
+                    downloadUnsignedContainerAllowed: true,
                     downloadHashcodeUrl: null,
                     downloadRegularUrl: null,
                     mobileSigningForm: {
-                        fileId: null,
+                        containerId: null,
                         personIdentifier: '60001019906',
                         phoneNr: '+37200000766',
                         country: 'EE',
@@ -143,7 +151,7 @@
                     this.$refs.fileDropzone.removeAllFiles();
                     this.$data.downloadHashcodeUrl = '/download/hashcode/' + response.id;
                     this.$data.downloadRegularUrl = '/download/regular/' + this.$data.mobileSigningForm.containerType + '/' + response.id;
-                    this.$data.mobileSigningForm.fileId = response.id;
+                    this.$data.mobileSigningForm.containerId = response.id;
                     this.$data.containerConverted = true;
                     let processingSteps = this.$data.processingSteps;
                     this.stompClient.subscribe('/progress/' + response.id, function (message) {
@@ -151,38 +159,54 @@
                     });
                 },
                 onMobileSign: function (evt) {
-                    evt.preventDefault()
+                    evt.preventDefault();
+                    this.$data.downloadUnsignedContainerAllowed = false;
                     axios.post('/mobile-signing', this.$data.mobileSigningForm);
                 },
                 onDropzoneError: function (file, message, xhr) {
-                    this.$refs.fileDropzone.removeFile(file)
+                    this.$refs.fileDropzone.removeFile(file);
                     this.$data.dropzoneError = message;
                     this.$data.dropzoneErrorCountdown = 5;
                 },
                 onChangeConversionType: function () {
                     this.$refs.fileDropzone.removeAllFiles();
                     if (this.$data.containerConversionType === 'convertContainer') {
-                        this.$data.mobileSigningForm.containerCreated = false;
                         this.$data.mobileSigningForm.containerType = "HASHCODE";
                         this.$refs.fileDropzone.setOption('url', '/convert-container');
                         this.$refs.fileDropzone.setOption('maxFiles', '1');
                         this.$refs.fileDropzone.setOption('acceptedFiles', '.asice, .bdoc');
                         this.$refs.fileDropzone.setOption('autoProcessQueue', true);
                     } else if(this.$data.containerConversionType === 'createHashcodeContainer'){
-                        this.$data.mobileSigningForm.containerCreated = true;
                         this.$data.mobileSigningForm.containerType = "HASHCODE";
                         this.$refs.fileDropzone.setOption('url', '/create-hashcode-container');
                         this.$refs.fileDropzone.setOption('maxFiles', '10');
                         this.$refs.fileDropzone.setOption('acceptedFiles', null);
                         this.$refs.fileDropzone.setOption('autoProcessQueue', false);
                     } else {
-                        this.$data.mobileSigningForm.containerCreated = true;
                         this.$data.mobileSigningForm.containerType = "ASIC";
                         this.$refs.fileDropzone.setOption('url', '/create-container');
                         this.$refs.fileDropzone.setOption('maxFiles', '10');
                         this.$refs.fileDropzone.setOption('acceptedFiles', null);
                         this.$refs.fileDropzone.setOption('autoProcessQueue', false);
                     }
+                },
+                onIdCardSign: function () {
+                    this.$data.downloadUnsignedContainerAllowed = false;
+                    let form = this.$data.mobileSigningForm;
+                    let hwcCertificate = null;
+
+                    window.hwcrypto.getCertificate({lang: 'en'}).then(function (certificate) {
+                        form.certificate = Array.prototype.slice.call(certificate.encoded);
+                        hwcCertificate = certificate;
+                        return axios.post('/prepare-remote-signing', form);
+                    }).then(function (response) {
+                        form.signatureId = response.data.generatedSignatureId;
+                        let dataToSignHash = new Uint8Array(base64js.toByteArray(response.data.dataToSignHash));
+                        return window.hwcrypto.sign(hwcCertificate, {type: response.data.digestAlgorithm, value: dataToSignHash}, {lang: 'en'});
+                    }).then(function (signature) {
+                        form.signature = Array.prototype.slice.call(signature.value);
+                        return axios.post('/finalize-remote-signing', form);
+                    });
                 }
             },
             mounted: function () {
