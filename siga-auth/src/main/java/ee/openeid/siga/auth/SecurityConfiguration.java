@@ -51,9 +51,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private MethodFilter methodFilter;
 
     @Autowired
-    private RequestDataVolumeFilter requestDataVolumeFilter;
-
-    @Autowired
     private SigaEventLoggingFilter eventsLoggingFilter;
 
     @Autowired
@@ -82,7 +79,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
                 .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
+                .addFilterAfter(requestDataVolumeFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PUBLIC_URLS).permitAll()
@@ -106,5 +103,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         final FilterRegistrationBean registration = new FilterRegistrationBean(filter);
         registration.setEnabled(false);
         return registration;
+    }
+
+    @Bean
+    RequestDataVolumeFilter requestDataVolumeFilter(){
+        return new RequestDataVolumeFilter(configurationProperties.getMaxFileSize());
     }
 }

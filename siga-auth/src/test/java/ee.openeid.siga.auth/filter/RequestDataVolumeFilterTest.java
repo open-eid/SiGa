@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class RequestDataVolumeFilterTest {
 
-    @InjectMocks
     private RequestDataVolumeFilter filter;
     @Mock
     private ConnectionRepository connectionRepository;
@@ -59,6 +57,7 @@ public class RequestDataVolumeFilterTest {
             mockResponse(response);
             response.getOutputStream();
         };
+        filter = new RequestDataVolumeFilter(250);
         filter.setConnectionRepository(connectionRepository);
         filter.setServiceRepository(serviceRepository);
     }
@@ -187,7 +186,24 @@ public class RequestDataVolumeFilterTest {
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
         Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of connection exceeded\"}", response.getContentAsString());
+    }
 
+    @Test
+    public void requestMaxSizeExceeded() throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject dataFile = new JSONObject();
+        JSONArray dataFiles = new JSONArray();
+        dataFile.put("fileName", "test.txt");
+        dataFile.put("fileHashSha256", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaK7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=");
+        dataFile.put("fileHashSha512", "vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg==");
+        dataFile.put("fileSize", 10);
+        dataFiles.put(dataFile);
+        jsonObject.put("dataFiles", dataFiles);
+
+        request.setContent(jsonObject.toString().getBytes());
+        filterChain = new MockFilterChain();
+        filter.doFilter(request, response, filterChain);
+        Assert.assertEquals("{\"errorCode\":\"REQUEST_SIZE_LIMIT_EXCEPTION\",\"errorMessage\":\"Request max size exceeded\"}", response.getContentAsString());
     }
 
     private Optional<SigaService> mockSigaService() {

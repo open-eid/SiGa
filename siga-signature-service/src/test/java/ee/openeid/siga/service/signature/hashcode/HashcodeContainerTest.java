@@ -1,16 +1,18 @@
 package ee.openeid.siga.service.signature.hashcode;
 
+import ee.openeid.siga.common.exception.InvalidContainerException;
+import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
-import ee.openeid.siga.common.exception.InvalidContainerException;
-import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.service.signature.test.HashcodeContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,6 +24,9 @@ import java.util.List;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 
 public class HashcodeContainerTest {
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     @Test
     public void validHashcodeContainerCreation() throws IOException {
@@ -56,8 +61,10 @@ public class HashcodeContainerTest {
     }
 
 
-    @Test(expected = SignatureExistsException.class)
+    @Test
     public void couldNotAddDataFileWhenSignatureExists() throws IOException, URISyntaxException {
+        expectedEx.expect(SignatureExistsException.class);
+        expectedEx.expectMessage("Unable to add data file when signature exists");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
         hashcodeContainer.open(inputStream);
@@ -67,8 +74,10 @@ public class HashcodeContainerTest {
         hashcodeContainer.addDataFile(hashcodeDataFile);
     }
 
-    @Test(expected = InvalidContainerException.class)
+    @Test
     public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Container must have data files");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
@@ -78,16 +87,28 @@ public class HashcodeContainerTest {
         }
     }
 
-    @Test(expected = InvalidContainerException.class)
+    @Test
     public void hashcodeContainerMissingSha512() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Hashcode container is missing SHA512 hash");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeMissingSha512File.asice"));
     }
 
-    @Test(expected = InvalidContainerException.class)
+    @Test
     public void directoryNotAllowedForFileName() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Hashcode container contains invalid file name");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeShaFileIsDirectory.asice"));
+    }
+
+    @Test
+    public void containerWithTooLargeFiles() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Container contains file which is too large");
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeWithBigHashcodesFile.asice"));
     }
 
     @Test

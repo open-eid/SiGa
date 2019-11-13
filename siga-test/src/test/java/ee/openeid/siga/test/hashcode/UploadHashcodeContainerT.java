@@ -117,6 +117,12 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void uploadHashcodeContainerDatafilesSizeExceeded() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithBigHashcodesFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
     public void deleteToUploadHashcodeContainer() throws Exception {
         Response response = delete(UPLOAD + HASHCODE_CONTAINERS, flow);
 

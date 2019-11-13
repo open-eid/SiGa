@@ -17,7 +17,7 @@ import javax.validation.constraints.PositiveOrZero;
 @Setter
 public class SecurityConfigurationProperties {
 
-
+    private int maxFileSize = 4194304; //4mb
     @Valid
     private HmacConf hmac = new HmacConf();
 

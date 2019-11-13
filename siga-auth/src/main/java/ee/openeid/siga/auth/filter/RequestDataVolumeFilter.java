@@ -8,10 +8,10 @@ import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -26,9 +26,9 @@ import java.util.Optional;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SERVICE_UUID;
 
-@Component
+@Slf4j
 public class RequestDataVolumeFilter extends OncePerRequestFilter {
-
+    private int maxRequestSize;
     private ServiceRepository serviceRepository;
     private ConnectionRepository connectionRepository;
     private static final long LIMITLESS = -1;
@@ -36,11 +36,18 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     private static final String ASIC_CONTAINERS_ENDPOINT = "/containers/";
     private static final String HASHCODE_CONTAINERS_ENDPOINT = "/hashcodecontainers/";
 
+    public RequestDataVolumeFilter(int maxRequestSize) {
+        this.maxRequestSize = maxRequestSize;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestUrl = request.getRequestURI();
         if (OBSERVABLE_HTTP_METHOD.equals(request.getMethod()) && !isValidationReportUrl(requestUrl)) {
             long requestSize = request.getContentLengthLong();
+            if (!validateRequestSize(requestSize, response)) {
+                return;
+            }
             Optional<SigaService> user = serviceRepository.findByUuid(request.getHeader(X_AUTHORIZATION_SERVICE_UUID.getValue()));
             if (user.isPresent()) {
                 SigaService sigaService = user.get();
@@ -61,12 +68,12 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void throwError(HttpServletFilterResponseWrapper response, String message) throws IOException {
+    private void throwError(HttpServletResponse response, String message, ErrorResponseCode errorResponseCode) throws IOException {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         try (OutputStream out = response.getOutputStream()) {
             ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setErrorCode(ErrorResponseCode.CONNECTION_LIMIT_EXCEPTION.name());
+            errorResponse.setErrorCode(errorResponseCode.name());
             errorResponse.setErrorMessage(message);
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(out, errorResponse);
@@ -85,6 +92,15 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         }
         String suffix = url.substring(url.indexOf(urlPrefix) + urlPrefix.length());
         return suffix.substring(0, suffix.indexOf('/'));
+    }
+
+    private boolean validateRequestSize(long requestSize, HttpServletResponse response) throws IOException {
+        if (requestSize > maxRequestSize) {
+            log.warn("Request max size exceeded. Request size:{}", requestSize);
+            throwError(response, "Request max size exceeded", ErrorResponseCode.REQUEST_SIZE_LIMIT_EXCEPTION);
+            return false;
+        }
+        return true;
     }
 
     private boolean validate(HttpServletFilterResponseWrapper wrapperResponse, SigaService sigaService, List<SigaConnection> connections, long requestLength, String requestUrl) throws IOException {
@@ -151,7 +167,8 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             return true;
         double currentSizeInMb = (currentSize + newSize) / 1024 / 1024;
         if (currentSizeInMb >= sigaService.getMaxConnectionsSize()) {
-            throwError(wrapperResponse, "Size of total connections exceeded");
+            log.warn("Size of total connections exceeded. {} current connections size is {} MB", sigaService.getName(), currentSizeInMb);
+            throwError(wrapperResponse, "Size of total connections exceeded", ErrorResponseCode.CONNECTION_LIMIT_EXCEPTION);
             return false;
         }
         return true;
@@ -161,7 +178,8 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         if (sigaService.getMaxConnectionCount() == LIMITLESS)
             return true;
         if (currentCount + 1 > sigaService.getMaxConnectionCount()) {
-            throwError(wrapperResponse, "Number of max connections exceeded");
+            log.warn("Number of max connections exceeded. {} current connections count is {} ", sigaService.getName(), currentCount);
+            throwError(wrapperResponse, "Number of max connections exceeded", ErrorResponseCode.CONNECTION_LIMIT_EXCEPTION);
             return false;
         }
         return true;
@@ -182,7 +200,8 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         }
         double currentSizeInMb = (currentSize + newSize) / 1024 / 1024;
         if (currentSizeInMb >= sigaService.getMaxConnectionSize()) {
-            throwError(wrapperResponse, "Size of connection exceeded");
+            log.warn("Size of connection exceeded. {} current connection size is {} MB", sigaService.getName(), currentSizeInMb);
+            throwError(wrapperResponse, "Size of connection exceeded", ErrorResponseCode.CONNECTION_LIMIT_EXCEPTION);
             return false;
         }
         return true;
@@ -199,4 +218,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     }
 
 
+    public void setMaxRequestSize(int maxRequestSize) {
+        this.maxRequestSize = maxRequestSize;
+    }
 }

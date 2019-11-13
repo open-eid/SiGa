@@ -1,9 +1,9 @@
 package ee.openeid.siga.service.signature.hashcode;
 
-import ee.openeid.siga.common.model.HashcodeDataFile;
-import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.DSSDocument;
@@ -30,7 +30,7 @@ import java.util.zip.ZipInputStream;
 import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.SIGNATURE_FILE_PREFIX;
 
 public class HashcodeContainer {
-
+    private static final int MAX_FILE_SIZE = 500000;
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
     private Map<String, ManifestEntry> manifest;
@@ -112,6 +112,7 @@ public class HashcodeContainer {
     }
 
     private void operateWithEntry(ZipEntry entry, ZipInputStream zipStream) throws IOException {
+        validateFileSize(entry);
         String entryName = entry.getName();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] byteBuff = new byte[4096];
@@ -179,6 +180,12 @@ public class HashcodeContainer {
                 dataFiles.add(hashcodeDataFile);
             }
         });
+    }
+
+    private void validateFileSize(ZipEntry zipEntry) {
+        if (zipEntry.getSize() > MAX_FILE_SIZE) {
+            throw new InvalidContainerException("Container contains file which is too large");
+        }
     }
 
     private List<org.digidoc4j.DataFile> convertDataFiles() {
