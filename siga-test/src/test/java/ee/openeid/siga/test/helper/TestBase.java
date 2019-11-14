@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
@@ -47,6 +46,11 @@ public abstract class TestBase {
     @Step("Create container")
     protected Response postCreateContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(getContainerEndpoint(), flow, request.toString());
+    }
+
+    @Step("Create container without logging")
+    protected Response postCreateContainerWithoutLogging(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return postWithoutLogging(getContainerEndpoint(), flow, request.toString());
     }
 
     @Step("Upload container")
@@ -191,6 +195,27 @@ public abstract class TestBase {
                 .post(createUrl(endpoint))
                 .then()
                 .log().all()
+                .extract()
+                .response();
+        if (response.getBody().path(CONTAINER_ID) != null) {
+            flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
+        }
+        return response;
+    }
+
+    @Step("HTTP POST {0}")
+    protected Response postWithoutLogging(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
+        Response response = given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint))
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .body(request)
+                .contentType(ContentType.JSON)
+                .when()
+                .post(createUrl(endpoint))
+                .then()
                 .extract()
                 .response();
         if (response.getBody().path(CONTAINER_ID) != null) {

@@ -94,6 +94,7 @@ public class TestData {
     public static final String INVALID_CERTIFICATE_EXCEPTION = "INVALID_CERTIFICATE_EXCEPTION";
     public static final String SMARTID_EXCEPTION = "SMARTID_EXCEPTION";
     public static final String CONNECTION_LIMIT_EXCEPTION = "CONNECTION_LIMIT_EXCEPTION";
+    public static final String REQUEST_SIZE_LIMIT_EXCEPTION = "REQUEST_SIZE_LIMIT_EXCEPTION";
     public static final String INVALID_CONTAINER_EXCEPTION ="INVALID_CONTAINER_EXCEPTION";
     // Container paths
     public static final String META_INF = "META-INF";

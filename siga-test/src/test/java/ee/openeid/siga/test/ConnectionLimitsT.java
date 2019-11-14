@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import jodd.util.Base64;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.ResourceUtils;
 
@@ -46,7 +45,6 @@ public class ConnectionLimitsT extends TestBase {
         }
     }
 
-    @Ignore("Sending big files seems problematic")
     @Test
     public void connectionSizeReached() throws Exception {
         Response errorResponse = postUploadContainer(flow, asicContainerRequestFromFile("2379KB_file.asice"));
@@ -86,8 +84,8 @@ public class ConnectionLimitsT extends TestBase {
     public void requestMaxSizeReached() throws Exception {
         File dataFile = ResourceUtils.getFile("classpath:20mb.jpg");
         byte[] dataFileString = Files.readAllBytes(dataFile.toPath());
-        Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, Base64.encodeToString(dataFileString), DEFAULT_ASICE_CONTAINER_NAME));
-        expectError(response, 400, CONNECTION_LIMIT_EXCEPTION);
+        Response response = postCreateContainerWithoutLogging(flow, asicContainersDataRequest(DEFAULT_FILENAME, Base64.encodeToString(dataFileString), DEFAULT_ASICE_CONTAINER_NAME));
+        expectError(response, 400, REQUEST_SIZE_LIMIT_EXCEPTION);
     }
 
     @Override

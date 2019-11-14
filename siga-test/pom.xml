@@ -157,12 +157,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
                 <configuration>
-                    <argLine>-Xmx1024m</argLine>
                     <includes>
                         <include>**/*.java</include>
                     </includes>
                     <argLine>
-                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar" -Xmx1700m
                     </argLine>
                     <properties>
                         <property>
