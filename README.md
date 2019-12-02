@@ -240,3 +240,24 @@ A table holding cumulative data volume* per active session.
 | size          | BIGINT                              | Cumulative data volume* for this session                                     |
 
 \* data volume is based on the content length of HTTP POST requests.
+
+### Running SiGa with Docker
+
+For development and testing purposes only!
+
+Docker must be installed and running.
+
+From your project directory, start up your applications in test mode by running
+```bash
+docker-compose up
+```
+
+Then, open siga-sample-application
+`
+https://localhost:8444/
+`
+
+SiGa itself is accessible 
+`
+https://localhost:8443/siga
+`

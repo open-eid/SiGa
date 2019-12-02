@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  siga-sample-application:
+    build: siga-sample-application
+    ports:
+      - "8444:8444"
+    networks:
+      siga:
+        aliases:
+          - sampleapp.docker.internal
+    depends_on:
+      - siga-webapp
+  siga-webapp:
+    build: siga-webapp
+    ports:
+      - "8443:8443"
+    networks:
+      siga:
+        aliases:
+          - siga.docker.internal
+    depends_on:
+      - ignite
+  ignite:
+    build:
+      context: docker/ignite/
+    ports:
+      - "47500:47500"
+    networks:
+      siga:
+        aliases:
+          - ignite.docker.internal
+networks:
+  siga:
+    driver: bridge

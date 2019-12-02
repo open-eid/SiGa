@@ -65,22 +65,13 @@
                 <util:constant static-field="org.apache.ignite.events.EventType.EVT_CACHE_OBJECT_EXPIRED"/>
             </list>
         </property>
-        <property name="sslContextFactory">
-            <bean class="org.apache.ignite.ssl.SslContextFactory">
-                <property name="keyStoreFilePath" value="siga-webapp/src/main/resources/ignite/client.keystore"/>
-                <property name="keyStorePassword" value="password"/>
-                <property name="trustManagers">
-                    <bean class="org.apache.ignite.ssl.SslContextFactory" factory-method="getDisabledTrustManager"/>
-                </property>
-            </bean>
-        </property>
         <property name="discoverySpi">
             <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
                 <property name="ipFinder">
                     <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder">
                         <property name="addresses">
                             <list>
-                                <value>127.0.0.1:47500..47509</value>
+                                <value>ignite.docker.internal:47500..47509</value>
                             </list>
                         </property>
                     </bean>

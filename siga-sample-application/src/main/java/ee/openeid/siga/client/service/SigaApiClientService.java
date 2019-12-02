@@ -2,14 +2,8 @@ package ee.openeid.siga.client.service;
 
 import ee.openeid.siga.client.hashcode.HashcodeContainer;
 import ee.openeid.siga.client.hmac.HmacTokenAuthorizationHeaderInterceptor;
-import ee.openeid.siga.client.model.AsicContainerWrapper;
-import ee.openeid.siga.client.model.FinalizeRemoteSigningRequest;
 import ee.openeid.siga.client.model.GetContainerMobileIdSigningStatusResponse;
-import ee.openeid.siga.client.model.HashcodeContainerWrapper;
-import ee.openeid.siga.client.model.MobileSigningRequest;
-import ee.openeid.siga.client.model.PrepareRemoteSigningRequest;
-import ee.openeid.siga.client.model.PrepareRemoteSigningResponse;
-import ee.openeid.siga.client.model.ProcessingStatus;
+import ee.openeid.siga.client.model.*;
 import ee.openeid.siga.webapp.json.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +16,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +25,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.annotation.RequestScope;
@@ -91,7 +85,7 @@ public class SigaApiClientService {
     @SneakyThrows
     private void setUpRestTemplateForRequestScope(RestTemplateBuilder restTemplateBuilder, String trustStore, String trustStorePassword) {
         SSLContext sslContext = new SSLContextBuilder()
-                .loadTrustMaterial(ResourceUtils.getFile(trustStore), trustStorePassword.toCharArray())
+                .loadTrustMaterial(new ClassPathResource(trustStore).getURL(), trustStorePassword.toCharArray())
                 .build();
         SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
         HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
