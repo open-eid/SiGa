@@ -247,6 +247,11 @@ For development and testing purposes only!
 
 Docker must be installed and running.
 
+At first build this project:
+```bash
+./mvnw clean install
+```
+
 From your project directory, start up your applications in test mode by running
 ```bash
 docker-compose up
