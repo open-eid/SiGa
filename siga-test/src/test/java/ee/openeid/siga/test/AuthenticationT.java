@@ -5,10 +5,12 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.security.Security;
 import java.time.Instant;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -71,10 +73,43 @@ public class AuthenticationT extends TestBase {
                 .statusCode(200)
                 .body(CONTAINER_ID, notNullValue());
     }
-
+    
     @Test
     public void algoHmacSHA512ExplicitlySet() throws Exception {
         flow.setHmacAlgorithm("HmacSHA512");
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID, notNullValue());
+    }
+
+    @Test
+    public void algoHmacSHA3_256ExplicitlySet() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        flow.setHmacAlgorithm("HmacSHA3-256");
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID, notNullValue());
+    }
+
+    @Test
+    public void algoHmacSHA3_384ExplicitlySet() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        flow.setHmacAlgorithm("HmacSHA3-384");
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID, notNullValue());
+    }
+
+    @Test
+    public void algoHmacSHA3_512ExplicitlySet() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        flow.setHmacAlgorithm("HmacSHA3-512");
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
