@@ -7,7 +7,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -103,15 +102,11 @@ public class AuthenticationT extends TestBase {
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
 
-    @Ignore ("How to use SHA3 algos?")
     @Test
-    public void algoHmacSHA3224ExplicitlySet() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA3-224");
+    public void algoHmacSHA3_512_224ExplicitlySetShouldNotBeAllowed() throws Exception {
+        flow.setHmacAlgorithm("HmacSHA512/224");
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        response.then()
-                .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
+        expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test

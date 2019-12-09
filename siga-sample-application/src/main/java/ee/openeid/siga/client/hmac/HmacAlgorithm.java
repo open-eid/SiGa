@@ -9,8 +9,6 @@ public enum HmacAlgorithm {
     HMAC_SHA_256("HmacSHA256"),
     HMAC_SHA_384("HmacSHA384"),
     HMAC_SHA_512("HmacSHA512"),
-    HMAC_SHA_512_224("HmacSHA512/224"),
-    HMAC_SHA_512_256("HmacSHA512/256"),
     HMAC_SHA3_256("HmacSHA3-256"),
     HMAC_SHA3_384("HmacSHA3-384"),
     HMAC_SHA3_512("HmacSHA3-512");

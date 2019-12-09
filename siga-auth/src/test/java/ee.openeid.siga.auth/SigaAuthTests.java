@@ -2,6 +2,7 @@ package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.auth.helper.TestConfiguration;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static java.lang.String.valueOf;
@@ -50,7 +52,7 @@ public class SigaAuthTests {
 
     @Test
     public void accessShouldBeAuthorized_WithValidTokenAndPayload() throws Exception {
-        mockMvc.perform(buildRequest(get("/"), "/", "{\"test\":\"value\"}".getBytes())).andExpect(status().isNotFound());
+        mockMvc.perform(buildRequest(get("/"), "/", "{\"test\":\"value\"}".getBytes(), DEFAULT_HMAC_ALGO)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -94,16 +96,37 @@ public class SigaAuthTests {
 
     @Test
     public void accessShouldBeUnauthorized_WithInvalidXAuthorizationHmacAlgorithmHeader() throws Exception {
-        mockMvc.perform(buildRequest(get("/"), "/")
-                .header(X_AUTHORIZATION_HMAC_ALGORITHM.getValue(), "HmacSHA111"))
+        String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, "/", null, DEFAULT_HMAC_ALGO);
+        mockMvc.perform(get("/")
+                .header(X_AUTHORIZATION_HMAC_ALGORITHM.getValue(), "HmacSHA111")
+                .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), REQUESTING_SERVICE_UUID)
+                .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
+                .header(X_AUTHORIZATION_SIGNATURE.getValue(), xAuthorizationSignature))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid HMAC algorithm: HmacSHA111"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    public void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_224() throws Exception {
+        mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA512/224")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_256() throws Exception {
+        mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA512/256")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void accessShouldBeAuthorized_WithSHA3XAuthorizationHmacAlgorithmHeader() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA3-256")).andExpect(status().isNotFound());
+    }
+
+    @Test
     public void accessShouldBeUnauthorized_WithoutXAuthorizationServiceUuidHeader() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
-        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp);
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
@@ -114,7 +137,7 @@ public class SigaAuthTests {
 
     @Test
     public void accessShouldBeUnauthorized_WithoutXAuthorizationTimestampHeader() throws Exception {
-        String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
+        String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), REQUESTING_SERVICE_UUID)
@@ -127,21 +150,21 @@ public class SigaAuthTests {
     public void accessShouldBeUnauthorized_WithInvalidXAuthorizationTimestampFormat() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         xAuthorizationTimestamp = xAuthorizationTimestamp.substring(0, xAuthorizationTimestamp.length() - 1);
-        String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
+        String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         ResultMatcher expectErrorMessage = MockMvcResultMatchers.jsonPath("$.errorMessage").value("Invalid X-Authorization-Timestamp header. Not in Unix epoch seconds format.");
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
 
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         xAuthorizationTimestamp += "0";
-        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
+        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
 
         xAuthorizationTimestamp = "123456789a";
-        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
+        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
 
         xAuthorizationTimestamp = "";
-        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()));
+        xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
     }
 
@@ -184,39 +207,40 @@ public class SigaAuthTests {
     @Test
     public void accessShouldBeUnauthorized_WithTokenTimestampInFuture() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().plusSeconds(TOKEN_CLOCK_SKEW).plusSeconds(10).getEpochSecond());
-        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp);
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in future."));
     }
 
     @Test
     public void accessShouldBeUnauthorized_WithExpiredToken() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().minusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW).getEpochSecond());
-        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp);
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in past."));
     }
 
     private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String uriForSignatureBuilder) throws InvalidKeyException, NoSuchAlgorithmException {
-        return buildRequest(builder, uriForSignatureBuilder, null);
+        return buildRequest(builder, uriForSignatureBuilder, null, DEFAULT_HMAC_ALGO);
     }
 
-    private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String uriForSignatureBuilder, byte[] payload) throws InvalidKeyException, NoSuchAlgorithmException {
+    private MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String uriForSignatureBuilder, byte[] payload, String hmacAlgo) throws InvalidKeyException, NoSuchAlgorithmException {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
-        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, uriForSignatureBuilder, payload);
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, uriForSignatureBuilder, payload, hmacAlgo);
         return builder.accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), REQUESTING_SERVICE_UUID)
                 .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
                 .header(X_AUTHORIZATION_SIGNATURE.getValue(), xAuthorizationSignature)
+                .header(X_AUTHORIZATION_HMAC_ALGORITHM.getValue(), hmacAlgo)
                 .content(payload);
     }
 
-    private String buildSignature(String xAuthorizationTimestamp) throws NoSuchAlgorithmException, InvalidKeyException {
-        return buildSignature(xAuthorizationTimestamp, "/", null);
+    private String buildSignature(String xAuthorizationTimestamp, String hmacAlgo) throws NoSuchAlgorithmException, InvalidKeyException {
+        return buildSignature(xAuthorizationTimestamp, "/", null, hmacAlgo);
     }
 
-    private String buildSignature(String xAuthorizationTimestamp, String uriForSignatureBuilder, byte[] payload) throws NoSuchAlgorithmException, InvalidKeyException {
+    private String buildSignature(String xAuthorizationTimestamp, String uriForSignatureBuilder, byte[] payload, String hmacAlgo) throws NoSuchAlgorithmException, InvalidKeyException {
         return HmacSignature.builder()
-                .macAlgorithm(DEFAULT_HMAC_ALGO)
+                .macAlgorithm(hmacAlgo)
                 .serviceUuid(REQUESTING_SERVICE_UUID)
                 .timestamp(xAuthorizationTimestamp)
                 .requestMethod("GET")
