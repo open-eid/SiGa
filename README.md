@@ -266,3 +266,5 @@ SiGa itself is accessible
 `
 https://localhost:8443/siga
 `
+
+ASIC container support is not ready for production.
