@@ -19,14 +19,14 @@ public class AsicContainerValidationService implements AsicSessionHolder {
     private SivaClient sivaClient;
 
     public ValidationConclusion validateContainer(String containerName, String container) {
-        return sivaClient.validateAsicContainer(containerName, container);
+        return sivaClient.validateContainer(containerName, container);
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
         AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
 
         String container = new String(Base64.getEncoder().encode(sessionHolder.getContainer()));
-        return sivaClient.validateAsicContainer(sessionHolder.getContainerName(), container);
+        return sivaClient.validateContainer(sessionHolder.getContainerName(), container);
     }
 
     @Override

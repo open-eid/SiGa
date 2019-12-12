@@ -40,6 +40,21 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void validateDDOCHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcode_container.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path("validationConclusion.policy.policyName"), equalTo("POLv4"));
+        assertThat(response.getBody().path("validationConclusion.validationWarnings[0].content"), equalTo("Please add Time-Stamp to the file for long term DDOC validation. This can be done with Time-Stamping application TeRa"));
+        assertThat(response.getBody().path(REPORT_SIGNATURE_FORM), equalTo("DIGIDOC_XML_1.3_hashcode"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signatureFormat"), equalTo("DIGIDOC_XML_1.3"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-12-12T09:00:52Z"));
+    }
+
+    @Test
     public void validateHashcodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));
         assertThat(response.statusCode(), equalTo(400));
@@ -69,6 +84,14 @@ public class ValidateHashcodeContainerT extends TestBase {
         Response validationResponse = getValidationReportForContainerInSession(flow);
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+    }
+
+    @Test
+    public void validateRegularDDOCContainer() throws Exception {
+        Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("container.ddoc"));
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.getBody().path(ERROR_MESSAGE), equalTo("EMBEDDED DDOC is not supported"));
     }
 
     @Test

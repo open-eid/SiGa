@@ -38,7 +38,7 @@ public class AsicContainerValidationServiceTest {
     @Before
     public void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
-        Mockito.when(sivaClient.validateAsicContainer(any(), any())).thenReturn(validationConclusion);
+        Mockito.when(sivaClient.validateContainer(any(), any())).thenReturn(validationConclusion);
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
     }
 

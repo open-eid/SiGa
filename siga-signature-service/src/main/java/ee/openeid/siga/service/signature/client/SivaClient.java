@@ -51,7 +51,7 @@ public class SivaClient {
         }
     }
 
-    public ValidationConclusion validateAsicContainer(String name, String container) {
+    public ValidationConclusion validateContainer(String name, String container) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(name);
         request.setDocument(container);
