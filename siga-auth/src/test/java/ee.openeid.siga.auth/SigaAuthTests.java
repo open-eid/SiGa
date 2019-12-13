@@ -108,6 +108,18 @@ public class SigaAuthTests {
     }
 
     @Test
+    public void accessShouldBeUnauthorized_WithInactiveService() throws Exception {
+        String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
+        String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, "/", null, DEFAULT_HMAC_ALGO);
+        mockMvc.perform(get("/")
+                .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), "cfbdce49-0ec9-4b83-8b41-d22655ea4741")
+                .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
+                .header(X_AUTHORIZATION_SIGNATURE.getValue(), xAuthorizationSignature))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("User account is locked"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     public void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_224() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA512/224")).andExpect(status().isUnauthorized());
     }

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1576239942508-1
+      author: (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: inactive
+                  type: BOOLEAN
+                  defaultValue: false
+                  constraints:
+                    nullable: false
+            tableName: siga_service

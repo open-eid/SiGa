@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1576240695163-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              # Signing secret 746573745365637265744b6579303036 (testSecretKey006 in HEX)
+              - column:
+                  name: id
+                  valueNumeric: 6
+              - column:
+                  name: uuid
+                  value: cfbdce49-0ec9-4b83-8b41-d22655ea4741
+              - column:
+                  name: signing_secret
+                  value: sqo77Ed3kNr1qkuN+UU4XttdCan0KwrzzOm9qKAFmMNryuqu8mNbyaFLjJBbxlQJ+/cUx8oeQP0I15pF1KrVdg==
+              - column:
+                  name: client_id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: test6.service.ee
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: billing_email
+                  value: service6@af42de4fdeb7649b519963f82e.com
+              - column:
+                  name: inactive
+                  value: true
+            tableName: siga_service

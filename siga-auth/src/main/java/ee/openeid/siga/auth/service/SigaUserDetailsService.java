@@ -32,6 +32,7 @@ public class SigaUserDetailsService implements UserDetailsService {
                 .skRelyingPartyUuid(service.getSkRelyingPartyUuid())
                 .smartIdRelyingPartyName(service.getSmartIdRelyingPartyName())
                 .smartIdRelyingPartyUuid(service.getSmartIdRelyingPartyUuid())
+                .active(!service.isInactive())
                 .build();
     }
 }

@@ -21,3 +21,7 @@ databaseChangeLog:
       file: db/data/dev-data-5.yaml
   - include:
       file: db/changelog/SIGARIA-104-1-remove-detailed-billing.yaml
+  - include:
+      file: db/changelog/SIGA-31-new-inactive-column.yaml
+  - include:
+      file: db/data/dev-data-6.yaml
