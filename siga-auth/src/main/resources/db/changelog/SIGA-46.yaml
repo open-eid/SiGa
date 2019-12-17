@@ -12,27 +12,16 @@ databaseChangeLog:
       author: (generated)
       dbms: postgresql
       changes:
-        - alterSequence:
-            start: 1000
-            sequenceName: siga_client_id_seq
-        - alterSequence:
-            start: 1000
-            sequenceName: siga_service_id_seq
+        - sql:
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER SEQUENCE siga_service_id_seq MINVALUE 1000 START 1000 RESTART 1000
+        - sql:
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER SEQUENCE siga_client_id_seq MINVALUE 1000 START 1000 RESTART 1000
   - changeSet:
       id: 1576491824643-2
-      author: (generated)
-      dbms: postgresql
-      changes:
-        - alterSequence:
-            restart: 1000
-            minValue: 1000
-            sequenceName: siga_client_id_seq
-        - alterSequence:
-            restart: 1000
-            minValue: 1000
-            sequenceName: siga_service_id_seq
-  - changeSet:
-      id: 1576491824643-3
       author: (generated)
       changes:
         - modifyDataType:
@@ -53,7 +42,7 @@ databaseChangeLog:
             tableName: siga_client
 
   - changeSet:
-      id: 1576491824643-4
+      id: 1576491824643-3
       author: (generated)
       changes:
         - addNotNullConstraint:
@@ -73,7 +62,7 @@ databaseChangeLog:
             validate: true
 
   - changeSet:
-      id: 1576491824643-5
+      id: 1576491824643-4
       author: (generated)
       changes:
         - addUniqueConstraint:
@@ -85,7 +74,7 @@ databaseChangeLog:
             tableName: siga_connection
             validate: true
   - changeSet:
-      id: 1576491824643-6
+      id: 1576491824643-5
       author: (generated)
       changes:
         - addColumn:
