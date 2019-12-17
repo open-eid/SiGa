@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1576240695163-1
+      author: (generated)
+      changes:
+        - update:
+            columns:
+              - column:
+                  name: billing_email
+                  value: service4@783ed784bf62c5ffec06447e0107a204
+            tableName: siga_service
+            where: id=4

@@ -25,3 +25,7 @@ databaseChangeLog:
       file: db/changelog/SIGA-31-new-inactive-column.yaml
   - include:
       file: db/data/dev-data-6.yaml
+  - include:
+      file: db/data/dev-data-7.yaml
+  - include:
+      file: db/changelog/SIGA-46.yaml

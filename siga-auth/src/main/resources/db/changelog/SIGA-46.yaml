@@ -1,0 +1,112 @@
+databaseChangeLog:
+  - property:
+      name: date_function
+      value: now() at time zone 'utc'
+      dbms: postgresql
+  - property:
+      name: date_function
+      value: now()
+      dbms: h2
+  - changeSet:
+      id: 1576491824643-1
+      author: (generated)
+      dbms: postgresql
+      changes:
+        - alterSequence:
+            minValue: 1000
+            start: 1000
+            restart: 1000
+            sequenceName: siga_client_id_seq
+        - alterSequence:
+            minValue: 1000
+            start: 1000
+            restart: 1000
+            sequenceName: siga_service_id_seq
+
+  - changeSet:
+      id: 1576491824643-2
+      author: (generated)
+      changes:
+        - modifyDataType:
+            columnName: name
+            newDataType: VARCHAR(100)
+            tableName: siga_service
+        - modifyDataType:
+            columnName: sk_relying_party_name
+            newDataType: VARCHAR(100)
+            tableName: siga_service
+        - modifyDataType:
+            columnName: smart_id_relying_party_name
+            newDataType: VARCHAR(100)
+            tableName: siga_service
+        - modifyDataType:
+            columnName: name
+            newDataType: VARCHAR(100)
+            tableName: siga_client
+
+  - changeSet:
+      id: 1576491824643-3
+      author: (generated)
+      changes:
+        - addNotNullConstraint:
+            columnName: name
+            tableName: siga_client
+            validate: true
+        - addNotNullConstraint:
+            columnName: name
+            tableName: siga_service
+            validate: true
+        - addNotNullConstraint:
+            columnName: billing_email
+            tableName: siga_service
+            validate: true
+
+  - changeSet:
+      id: 1576491824643-4
+      author: (generated)
+      changes:
+        - addUniqueConstraint:
+            columnNames: name,signing_secret
+            tableName: siga_service
+            validate: true
+        - addUniqueConstraint:
+            columnNames: container_id
+            tableName: siga_connection
+            validate: true
+  - changeSet:
+      id: 1576491824643-5
+      author: (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+            tableName: siga_connection
+        - addColumn:
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+            tableName: siga_client
+        - addColumn:
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+            tableName: siga_service
