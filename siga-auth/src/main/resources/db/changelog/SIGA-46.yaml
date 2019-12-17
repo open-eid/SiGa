@@ -1,7 +1,7 @@
 databaseChangeLog:
   - property:
       name: date_function
-      value: now() at time zone 'utc'
+      value: timezone('utc', now())
       dbms: postgresql
   - property:
       name: date_function
@@ -51,14 +51,17 @@ databaseChangeLog:
         - addNotNullConstraint:
             columnName: name
             tableName: siga_client
+            columnDataType: VARCHAR(100)
             validate: true
         - addNotNullConstraint:
             columnName: name
             tableName: siga_service
+            columnDataType: VARCHAR(100)
             validate: true
         - addNotNullConstraint:
             columnName: billing_email
             tableName: siga_service
+            columnDataType: VARCHAR(128)
             validate: true
 
   - changeSet:
