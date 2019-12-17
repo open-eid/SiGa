@@ -13,14 +13,14 @@ databaseChangeLog:
       dbms: postgresql
       changes:
         - alterSequence:
-            minValue: 1000
             start: 1000
             restart: 1000
+            minValue: 1000
             sequenceName: siga_client_id_seq
         - alterSequence:
-            minValue: 1000
             start: 1000
             restart: 1000
+            minValue: 1000
             sequenceName: siga_service_id_seq
 
   - changeSet:
