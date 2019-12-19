@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
@@ -22,10 +22,14 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -66,6 +70,16 @@ public class SivaClientTest {
         ValidationConclusion response = sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
         Assert.assertEquals(Integer.valueOf(1), response.getSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
+    }
+
+    @Test
+    public void invalidSivaTruststoreCertificate() throws Exception {
+        exceptionRule.expect(TechnicalException.class);
+        exceptionRule.expectMessage("SIVA service error");
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));
+        sivaClient.setRestTemplate(restTemplate);
+        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 
     @Test

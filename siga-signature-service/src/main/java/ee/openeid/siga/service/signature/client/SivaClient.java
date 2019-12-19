@@ -1,14 +1,14 @@
 package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.common.model.HashcodeDataFile;
-import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
@@ -41,26 +41,17 @@ public class SivaClient {
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
-        try {
-            ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
-            validateLTASignatureProfile(validationResponse);
-            return validationResponse;
-        } catch (HttpStatusCodeException e) {
-            handleHttpStatusCodeException(e);
-            throw e; //Cannot reach here
-        }
+        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
+        validateLTASignatureProfile(validationResponse);
+        return validationResponse;
+
     }
 
     public ValidationConclusion validateContainer(String name, String container) {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(name);
         request.setDocument(container);
-        try {
-            return validate(request, VALIDATION_ENDPOINT);
-        } catch (HttpStatusCodeException e) {
-            handleHttpStatusCodeException(e);
-            throw e; //Cannot reach here
-        }
+        return validate(request, VALIDATION_ENDPOINT);
     }
 
     private void handleHttpStatusCodeException(HttpStatusCodeException e) {
@@ -90,8 +81,15 @@ public class SivaClient {
 
     private ValidationConclusion validate(Object request, String validationEndpoint) {
         ResponseEntity<ValidationResponse> responseEntity;
-        responseEntity = restTemplate.exchange(configurationProperties.getUrl() + validationEndpoint,
-                HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
+        try {
+            responseEntity = restTemplate.exchange(configurationProperties.getUrl() + validationEndpoint,
+                    HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
+        } catch (HttpStatusCodeException e) {
+            handleHttpStatusCodeException(e);
+            throw e; //Cannot reach here
+        } catch (Exception e) {
+            throw new TechnicalException("SIVA service error");
+        }
         if (responseEntity.getBody() == null) {
             throw new TechnicalException("Unable to parse client empty response");
         }
