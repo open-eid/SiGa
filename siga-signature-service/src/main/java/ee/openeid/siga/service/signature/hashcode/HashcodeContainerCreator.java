@@ -1,9 +1,9 @@
 package ee.openeid.siga.service.signature.hashcode;
 
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.exception.TechnicalException;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.MimeType;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;

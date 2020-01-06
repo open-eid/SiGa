@@ -93,6 +93,7 @@ public class TestData {
     public static final String INVALID_LANGUAGE = "INVALID_LANGUAGE_EXCEPTION";
     public static final String INVALID_DATA = "INVALID_SESSION_DATA_EXCEPTION";
     public static final String INVALID_CERTIFICATE_EXCEPTION = "INVALID_CERTIFICATE_EXCEPTION";
+    public static final String INVALID_SIGNATURE_EXCEPTION = "INVALID_SIGNATURE_EXCEPTION";
     public static final String SMARTID_EXCEPTION = "SMARTID_EXCEPTION";
     public static final String CONNECTION_LIMIT_EXCEPTION = "CONNECTION_LIMIT_EXCEPTION";
     public static final String REQUEST_SIZE_LIMIT_EXCEPTION = "REQUEST_SIZE_LIMIT_EXCEPTION";

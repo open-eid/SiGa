@@ -3,24 +3,21 @@ package ee.openeid.siga.test.hashcode;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import eu.europa.esig.dss.MimeType;
 import io.restassured.path.xml.XmlPath;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.stream.Collectors;
 
 import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.ContainerUtil.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
+import static ee.openeid.siga.test.utils.ContainerUtil.hashcodeDataFileAsXmlPath;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class HashcodeContainerStructureT extends TestBase {
 

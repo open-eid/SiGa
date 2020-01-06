@@ -1,20 +1,22 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.InvalidSignatureException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.Signature;
-import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
-import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.MimeType;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
+import org.digidoc4j.exceptions.DigiDoc4JException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -122,7 +124,12 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     public Signature transformSignature(HashcodeSignatureWrapper signatureWrapper) {
         Signature signature = new Signature();
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration);
-        org.digidoc4j.Signature dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
+        org.digidoc4j.Signature dd4jSignature;
+        try {
+            dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
+        } catch (DigiDoc4JException e) {
+            throw new InvalidSignatureException(e.getMessage());
+        }
         signature.setId(dd4jSignature.getId());
         signature.setGeneratedSignatureId(signatureWrapper.getGeneratedSignatureId());
         signature.setSignatureProfile(dd4jSignature.getProfile().name());

@@ -1,6 +1,5 @@
 package ee.openeid.siga.common.event;
 
-import ch.qos.logback.classic.Level;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -23,10 +22,9 @@ import static org.slf4j.MarkerFactory.getMarker;
 @Component
 @RequestScope
 @Slf4j
-public class SigaEventLogger implements InitializingBean, DisposableBean {
+public class SigaEventLogger {
     public static final String SIGA_EVENT = "SIGA_EVENT";
     private final List<SigaEvent> events = new ArrayList<>();
-    private final List<LogObserver> logObservers = new ArrayList<>();
 
     public Optional<SigaEvent> getFirstMachingEvent(SigaEventName eventName, SigaEvent.EventType eventType) {
         for (SigaEvent e : events) {
@@ -200,13 +198,4 @@ public class SigaEventLogger implements InitializingBean, DisposableBean {
         });
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        logObservers.add(LogObserver.buildForSkDataLoader(this, Level.DEBUG));
-    }
-
-    @Override
-    public void destroy() {
-        logObservers.forEach(LogObserver::detatch);
-    }
 }

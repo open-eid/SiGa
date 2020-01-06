@@ -2,7 +2,7 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.MimeType;
 import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.json.JSONArray;
@@ -17,7 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
 import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.ContainerUtil.*;
+import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
+import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

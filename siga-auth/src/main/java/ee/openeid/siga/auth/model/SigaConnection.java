@@ -32,6 +32,5 @@ public class SigaConnection {
     private int id;
     @NonNull
     private String containerId;
-    @NonNull
     private long size;
 }

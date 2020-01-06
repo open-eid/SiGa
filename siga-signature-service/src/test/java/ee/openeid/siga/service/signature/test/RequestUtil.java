@@ -2,18 +2,18 @@ package ee.openeid.siga.service.signature.test;
 
 
 import ee.openeid.siga.common.model.DataFile;
+import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
-import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.MimeType;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;

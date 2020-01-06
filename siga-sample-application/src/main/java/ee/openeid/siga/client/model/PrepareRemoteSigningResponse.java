@@ -2,7 +2,7 @@ package ee.openeid.siga.client.model;
 
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import eu.europa.esig.dss.DigestAlgorithm;
+import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;

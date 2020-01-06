@@ -1,12 +1,12 @@
 package ee.openeid.siga.service.signature;
 
-import ee.openeid.siga.common.model.DataToSignWrapper;
-import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.DataToSignWrapper;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.mobileid.client.DigiDocService;
@@ -14,13 +14,14 @@ import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.DSSException;
+import eu.europa.esig.dss.model.DSSException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.exceptions.OCSPRequestFailedException;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -79,7 +80,6 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(true);
         signingService.setConfiguration(configuration);
         when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createHashcodeSessionHolder());
-        sigaEventLogger.afterPropertiesSet();
     }
 
     @Test
@@ -125,14 +125,14 @@ public class SignatureFinalizingTest {
     }
 
     private void assertTSAOCSPEvents(String tsaUrl, String ocspUrl) {
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
         Optional<SigaEvent> tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH);
 
-        assertNotNull(ocspEvent);
+        assertNotNull(finalizeSignatureEvent);
         assertNotNull(ocspRequestEvent);
         assertEquals(ocspUrl, ocspRequestEvent.getEventParameter(REQUEST_URL));
-        assertEquals(SUCCESS, ocspEvent.getResultType());
+        assertEquals(SUCCESS, finalizeSignatureEvent.getResultType());
         assertEquals(SUCCESS, ocspRequestEvent.getResultType());
         if (tsaUrl != null) {
             SigaEvent tsaEvent = tsaRequestEvent.get();
@@ -165,18 +165,19 @@ public class SignatureFinalizingTest {
         } catch (SignatureCreationException e) {
             assertThat(e.getMessage(), containsString("Unable to finalize signature"));
             sigaEventLogger.logEvents();
-            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+            SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
             SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
 
-            assertNotNull(ocspEvent);
+            assertNotNull(finalizeSignatureEvent);
             assertNotNull(tsaRequestEvent);
             assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
+
             assertEquals("http://demo.invalid.url.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-            assertEquals(EXCEPTION, ocspEvent.getResultType());
+            assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
             assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
-            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspEvent.getErrorCode());
+            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), finalizeSignatureEvent.getErrorCode());
             assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), tsaRequestEvent.getErrorCode());
-            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", ocspEvent.getErrorMessage());
+            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", finalizeSignatureEvent.getErrorMessage());
             assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", tsaRequestEvent.getErrorMessage());
             throw e;
         }
@@ -260,13 +261,12 @@ public class SignatureFinalizingTest {
         try {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
             fail("Should not reach here!");
-        } catch (SignatureCreationException e) {
-            assertEquals("Unable to finalize signature", e.getMessage());
+        } catch (OCSPRequestFailedException e) {
+            assertEquals("OCSP request failed. Please check GitHub Wiki for more information: https://github.com/open-eid/digidoc4j/wiki/Questions-&-Answers#if-ocsp-request-has-failed", e.getMessage());
         }
         sigaEventLogger.logEvents();
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        assertFalse(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
-        assertNotNull(ocspEvent);
         assertNotNull(tsaRequestEvent);
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
         assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));

@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.mobileid;
 
+import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.mobileid.client.DigiDocService;
 import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.mobileid.model.dds.GetMobileCertificateResponse;
@@ -10,7 +10,7 @@ import ee.openeid.siga.mobileid.model.mid.GetMobileSignHashStatusResponse;
 import ee.openeid.siga.mobileid.model.mid.MobileSignHashResponse;
 import ee.openeid.siga.mobileid.model.mid.ProcessStatusType;
 import ee.openeid.siga.service.signature.configuration.MobileServiceConfigurationProperties;
-import eu.europa.esig.dss.DSSUtils;
+import eu.europa.esig.dss.spi.DSSUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;

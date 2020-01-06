@@ -1,8 +1,8 @@
 package ee.openeid.siga.client.hashcode;
 
-import eu.europa.esig.dss.DSSDocument;
-import eu.europa.esig.dss.DigestDocument;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.model.DigestDocument;
+import eu.europa.esig.dss.model.MimeType;
 import lombok.SneakyThrows;
 import org.digidoc4j.Container;
 import org.digidoc4j.DataFile;

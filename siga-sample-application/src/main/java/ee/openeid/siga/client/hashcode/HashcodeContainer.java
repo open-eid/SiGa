@@ -1,6 +1,6 @@
 package ee.openeid.siga.client.hashcode;
 
-import eu.europa.esig.dss.InMemoryDocument;
+import eu.europa.esig.dss.model.InMemoryDocument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.SneakyThrows;

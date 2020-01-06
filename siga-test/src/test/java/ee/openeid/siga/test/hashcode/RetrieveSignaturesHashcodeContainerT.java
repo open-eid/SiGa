@@ -69,20 +69,6 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithInvalidSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
-
-        Response response = getSignatureList(flow);
-
-        response.then()
-                .statusCode(200)
-                .body("signatures[0].id", equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"))
-                .body("signatures[0].signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
-                .body("signatures[0].signatureProfile", equalTo("LT"))
-                .body("signatures[0].generatedSignatureId", notNullValue());
-    }
-
-    @Test
     public void createSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
@@ -160,16 +146,13 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithCorruptedInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void uploadHashcodeContainerWithInvalidSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
-
-        Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
-
+        
+        Response response = getSignatureList(flow);
         response.then()
-                .statusCode(200)
-                .body("id", equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"))
-                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
-                .body("signatureProfile", equalTo("LT"));
+                .statusCode(400)
+                .body(ERROR_CODE, equalTo(INVALID_SIGNATURE_EXCEPTION));
     }
 
     @Test

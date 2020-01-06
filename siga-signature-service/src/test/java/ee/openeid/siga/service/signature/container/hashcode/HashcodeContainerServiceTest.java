@@ -1,16 +1,16 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
-import ee.openeid.siga.common.model.HashcodeDataFile;
-import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.model.Signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
+import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.model.Signature;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.MimeType;
+import eu.europa.esig.dss.model.MimeType;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Configuration;
 import org.junit.Assert;
