@@ -18,6 +18,8 @@ databaseChangeLog:
                   name: service_id
                   type: INTEGER
               - column:
+                  constraints:
+                    nullable: false
                   name: ip_range_start
                   type: VARCHAR(50)
               - column:
