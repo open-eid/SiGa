@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1578559667506-1
+      author: (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: ip_permission_pk
+                  name: id
+                  type: SERIAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: service_id
+                  type: INTEGER
+              - column:
+                  name: ip_range_start
+                  type: VARCHAR(50)
+              - column:
+                  name: ip_range_end
+                  type: VARCHAR(50)
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: ${date_function}
+            tableName: ip_permission
+        - addForeignKeyConstraint:
+            baseColumnNames: service_id
+            baseTableName: ip_permission
+            constraintName: ip_permission_service_id_fk
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: siga_service
+            validate: true
