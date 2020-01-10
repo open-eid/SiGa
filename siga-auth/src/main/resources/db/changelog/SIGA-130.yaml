@@ -33,10 +33,10 @@ databaseChangeLog:
                   name: updated_at
                   type: timestamp
                   defaultValueComputed: ${date_function}
-            tableName: ip_permission
+            tableName: siga_ip_permission
         - addForeignKeyConstraint:
             baseColumnNames: service_id
-            baseTableName: ip_permission
+            baseTableName: siga_ip_permission
             constraintName: ip_permission_service_id_fk
             deferrable: false
             initiallyDeferred: false
