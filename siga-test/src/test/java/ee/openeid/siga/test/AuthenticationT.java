@@ -165,7 +165,29 @@ public class AuthenticationT extends TestBase {
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS))
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .body(request.toString())
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .post(createUrl(HASHCODE_CONTAINERS))
+                .then()
+                .log().all()
+                .statusCode(401)
+                .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
+    }
+
+    @Test
+    public void notExistingHmacAlgoInHeader() throws Exception {
+        JSONObject request = hashcodeContainersDataRequestWithDefault();
+        flow.setHmacAlgorithm("HmacSHA512");
+        given()
+                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS))
+                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
+                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
+                .header(X_AUTHORIZATION_HMAC_ALGO, "SomeRandomAlgo")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
                 .log().all()
