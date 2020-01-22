@@ -30,9 +30,19 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
+    public void serviceDisabled() throws Exception {
+        flow.setServiceUuid(SERVICE_UUID_6);
+        flow.setServiceSecret(SERVICE_SECRET_6);
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        expectError(response, 401, AUTHORIZATION_ERROR);
+    }
+
+    @Test
     public void uuidAndSecretMismatch() throws Exception {
         flow.setServiceUuid(SERVICE_UUID_2);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
