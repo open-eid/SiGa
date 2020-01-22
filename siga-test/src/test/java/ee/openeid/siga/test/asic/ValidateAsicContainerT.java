@@ -45,6 +45,33 @@ public class ValidateAsicContainerT extends TestBase {
     }
 
     @Test
+    public void validateDDOCContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile("ddocSingleSignature.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+    }
+
+    @Test
+    public void validateDDOCHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile("hashcodeDdoc.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+    }
+
+    @Test
+    public void validatePadesContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile("pdfSingleSignature.pdf"));
+
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+    }
+
+    @Test
     public void uploadAsicContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithMultipleSignatures.asice"));
 

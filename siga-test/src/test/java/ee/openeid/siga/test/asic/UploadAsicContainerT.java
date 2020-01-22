@@ -61,8 +61,15 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithDdoc() throws Exception {
+    public void uploadDdocContainer() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("ddocSingleSignature.ddoc"));
+
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadPadesContainer() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("pdfSingleSignature.pdf"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
