@@ -20,10 +20,7 @@ databaseChangeLog:
               - column:
                   constraints:
                     nullable: false
-                  name: ip_range_start
-                  type: VARCHAR(50)
-              - column:
-                  name: ip_range_end
+                  name: ip_address
                   type: VARCHAR(50)
               - column:
                   name: created_at
