@@ -88,6 +88,23 @@ public class RetrieveSignaturesAsicContainerT extends TestBase {
     }
 
     @Test
+    public void uploadAsicContainerAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo("S0"))
+                .body("signerInfo", equalTo("SERIALNUMBER=11404176865, GIVENNAME=MÄRÜ-LÖÖZ, SURNAME=ŽÕRINÜWŠKY, CN=\"ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865\", OU=digital signature, O=ESTEID, C=EE"))
+                .body("signatureProfile", equalTo("LT"))
+                .body("ocspResponseCreationTime", equalTo("2014-11-17T14:11:46Z"))
+                .body("timeStampCreationTime", equalTo("2014-11-17T14:11:46Z"))
+                .body("trustedSigningTime", equalTo("2014-11-17T14:11:46Z"))
+                .body("claimedSigningTime", equalTo("2014-11-17T14:11:47Z"));
+    }
+
+    @Test
     public void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
