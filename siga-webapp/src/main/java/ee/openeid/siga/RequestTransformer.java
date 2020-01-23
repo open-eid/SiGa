@@ -170,13 +170,13 @@ public class RequestTransformer {
 
         GetContainerSignatureDetailsResponse response = new GetContainerSignatureDetailsResponse();
         try {
-            response.setClaimedSigningTime(signature.getClaimedSigningTime().toString());
+            response.setClaimedSigningTime(signature.getClaimedSigningTime().toInstant().toString());
             response.setId(signature.getId());
             response.setSignerInfo(signature.getSigningCertificate().getSubjectName());
             if (signature.getOCSPCertificate() != null)
                 response.setOcspCertificate(new String(Base64.getEncoder().encode(signature.getOCSPCertificate().getX509Certificate().getEncoded())));
             if (signature.getOCSPResponseCreationTime() != null)
-                response.setOcspResponseCreationTime(signature.getOCSPResponseCreationTime().toString());
+                response.setOcspResponseCreationTime(signature.getOCSPResponseCreationTime().toInstant().toString());
 
             SignatureProductionPlace signatureProductionPlace = new SignatureProductionPlace();
             signatureProductionPlace.setCity(signature.getCity());
@@ -188,11 +188,11 @@ public class RequestTransformer {
             response.setSignatureProfile(signature.getProfile().name());
             response.setSigningCertificate(new String(Base64.getEncoder().encode(signature.getSigningCertificate().getX509Certificate().getEncoded())));
             if (signature.getTimeStampCreationTime() != null)
-                response.setTimeStampCreationTime(signature.getTimeStampCreationTime().toString());
+                response.setTimeStampCreationTime(signature.getTimeStampCreationTime().toInstant().toString());
             if (signature.getTimeStampTokenCertificate() != null)
                 response.setTimeStampTokenCertificate(new String(Base64.getEncoder().encode(signature.getTimeStampTokenCertificate().getX509Certificate().getEncoded())));
             if (signature.getTrustedSigningTime() != null)
-                response.setTrustedSigningTime(signature.getTrustedSigningTime().toString());
+                response.setTrustedSigningTime(signature.getTrustedSigningTime().toInstant().toString());
             response.getRoles().addAll(signature.getSignerRoles());
 
         } catch (CertificateEncodingException e) {
