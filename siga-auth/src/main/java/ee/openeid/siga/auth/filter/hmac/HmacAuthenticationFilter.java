@@ -10,6 +10,7 @@ import ee.openeid.siga.webapp.json.ErrorResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -120,11 +121,12 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
             errorResponse.setErrorCode(ErrorResponseCode.AUTHORIZATION_ERROR.name());
             if (failed instanceof InternalAuthenticationServiceException) {
                 errorResponse.setErrorMessage("Internal service error");
-                exceptionEvent.setErrorMessage("Internal service error");
-            } else {
+            } else if (failed instanceof LockedException){
+                errorResponse.setErrorMessage("Bad credentials");
+            } else{
                 errorResponse.setErrorMessage(failed.getMessage());
-                exceptionEvent.setErrorMessage(failed.getMessage());
             }
+            exceptionEvent.setErrorMessage(errorResponse.getErrorMessage());
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(out, errorResponse);
             out.flush();

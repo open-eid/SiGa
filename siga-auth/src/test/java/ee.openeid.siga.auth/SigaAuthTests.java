@@ -115,7 +115,7 @@ public class SigaAuthTests {
                 .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), "cfbdce49-0ec9-4b83-8b41-d22655ea4741")
                 .header(X_AUTHORIZATION_TIMESTAMP.getValue(), xAuthorizationTimestamp)
                 .header(X_AUTHORIZATION_SIGNATURE.getValue(), xAuthorizationSignature))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("User account is locked"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Bad credentials"))
                 .andExpect(status().isUnauthorized());
     }
 
