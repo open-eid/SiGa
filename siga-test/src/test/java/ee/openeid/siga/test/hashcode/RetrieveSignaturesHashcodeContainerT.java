@@ -84,6 +84,23 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void uploadHashcodeContainerAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
+
+        response.then()
+                .statusCode(200)
+                .body("id", equalTo("id-a9fae00496ae203a6a8b92adbe762bd3"))
+                .body("signerInfo", equalTo("SERIALNUMBER=PNOEE-38001085718, GIVENNAME=JAAK-KRISTJAN, SURNAME=JÕEORG, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", C=EE"))
+                .body("signatureProfile", equalTo("LT"))
+                .body("ocspResponseCreationTime", equalTo("2019-02-22T11:04:27Z"))
+                .body("timeStampCreationTime", equalTo("2019-02-22T11:04:25Z"))
+                .body("trustedSigningTime", equalTo("2019-02-22T11:04:25Z"))
+                .body("claimedSigningTime", equalTo("2019-02-22T11:04:24Z"));
+    }
+
+    @Test
     public void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
