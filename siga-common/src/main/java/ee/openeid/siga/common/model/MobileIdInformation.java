@@ -2,7 +2,6 @@ package ee.openeid.siga.common.model;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 
 @Data
 @Builder
@@ -11,7 +10,6 @@ public class MobileIdInformation {
     private String phoneNo;
     private String language;
     private String messageToDisplay;
-    @NonNull
     private String relyingPartyName;
     private String relyingPartyUUID;
 }
