@@ -27,6 +27,13 @@
             <charset>utf8</charset>
             <immediateFlush>true</immediateFlush>
         </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>return message.contains("request_uri=/actuator/health");</expression>
+            </evaluator>
+            <OnMismatch>NEUTRAL</OnMismatch>
+            <OnMatch>DENY</OnMatch>
+        </filter>
     </appender>
     <appender name="EVENTS_LOG_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${EVENTS_LOG_FILE}</file>
@@ -41,6 +48,13 @@
             </evaluator>
             <onMismatch>DENY</onMismatch>
             <onMatch>NEUTRAL</onMatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>return message.contains("request_uri=/actuator/health");</expression>
+            </evaluator>
+            <OnMismatch>NEUTRAL</OnMismatch>
+            <OnMatch>DENY</OnMatch>
         </filter>
     </appender>
     <logger name="ee.openeid.siga" level="INFO"/>
