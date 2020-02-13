@@ -109,6 +109,15 @@ public class RequestValidator {
         validatePersonIdentifier(smartIdInformation.getPersonIdentifier());
     }
 
+    public static void validateRoles(List<String> roles) {
+        if (CollectionUtils.isEmpty(roles)) {
+            return;
+        }
+
+        if (roles.stream().anyMatch(StringUtils::isBlank)) {
+            throw new RequestValidationException("Roles may not include blank values");
+        }
+    }
 
     private static void validatePersonIdentifier(String personIdentifier) {
         if (StringUtils.isBlank(personIdentifier) || personIdentifier.length() > 30) {

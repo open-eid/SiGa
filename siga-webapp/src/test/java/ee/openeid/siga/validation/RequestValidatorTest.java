@@ -11,6 +11,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 public class RequestValidatorTest {
 
     public static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
@@ -347,5 +351,41 @@ public class RequestValidatorTest {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
         RequestValidator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void validateRoles_nullIsValid() {
+        RequestValidator.validateRoles(null);
+    }
+
+    @Test
+    public void validateRoles_emptyListIsValid() {
+        RequestValidator.validateRoles(new ArrayList<>());
+    }
+
+    @Test
+    public void validateRoles_listWithValuesIsValid() {
+        RequestValidator.validateRoles(Arrays.asList("role1", "role2"));
+    }
+
+    @Test
+    public void validateRoles_includingNullValueIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Roles may not include blank values");
+        RequestValidator.validateRoles(Collections.singletonList(null));
+    }
+
+    @Test
+    public void validateRoles_includingEmptyValueIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Roles may not include blank values");
+        RequestValidator.validateRoles(Collections.singletonList(""));
+    }
+
+    @Test
+    public void validateRoles_includingBlankValueIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Roles may not include blank values");
+        RequestValidator.validateRoles(Collections.singletonList(" "));
     }
 }
