@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature;
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.SignatureCreationException;
@@ -32,6 +33,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -75,8 +79,16 @@ public class SignatureFinalizingTest {
     @Spy
     private SigaEventLogger sigaEventLogger;
 
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private SecurityContext securityContext;
+
     @Before
     public void setUp() throws IOException, URISyntaxException {
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
+        SecurityContextHolder.setContext(securityContext);
         configuration.setPreferAiaOcsp(true);
         signingService.setConfiguration(configuration);
         when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createHashcodeSessionHolder());

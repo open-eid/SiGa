@@ -1,7 +1,8 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.RequestValidationException;
+import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
@@ -10,6 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class RequestValidatorTest {
 
@@ -50,6 +55,11 @@ public class RequestValidatorTest {
 
     @Test
     public void successfulCreateContainerHashcodeRequest() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
         RequestValidator.validateHashcodeDataFiles(getCreateHashcodeContainerRequest().getDataFiles());
     }
 

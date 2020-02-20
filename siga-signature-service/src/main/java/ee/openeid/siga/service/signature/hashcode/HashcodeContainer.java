@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -34,6 +35,15 @@ public class HashcodeContainer {
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
     private Map<String, ManifestEntry> manifest;
+    private ServiceType serviceType;
+
+    public HashcodeContainer(ServiceType serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public HashcodeContainer() {
+        this.serviceType = ServiceType.REST;
+    }
 
     public void save(OutputStream outputStream) {
         createHashcodeContainer(outputStream);
@@ -85,7 +95,7 @@ public class HashcodeContainer {
             if (StringUtils.isBlank(dataFile.getFileHashSha256())) {
                 throw new InvalidContainerException("Hashcode container is missing SHA256 hash");
             }
-            if (StringUtils.isBlank(dataFile.getFileHashSha512())) {
+            if (ServiceType.REST == serviceType && StringUtils.isBlank(dataFile.getFileHashSha512())) {
                 throw new InvalidContainerException("Hashcode container is missing SHA512 hash");
             }
             if (!isValidFileName(dataFile.getFileName())) {

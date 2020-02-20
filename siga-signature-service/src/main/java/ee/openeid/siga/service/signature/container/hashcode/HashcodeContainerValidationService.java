@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
@@ -11,6 +12,7 @@ import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -40,7 +42,8 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     }
 
     private ValidationConclusion validateHashcodeContainer(byte[] container) {
-        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer(sigaUserDetails.getServiceType());
         hashcodeContainer.open(new ByteArrayInputStream(container));
         validateContainerSignatures(hashcodeContainer.getSignatures());
         return createHashcodeContainerValidationConclusion(hashcodeContainer.getSignatures(), hashcodeContainer.getDataFiles());

@@ -50,7 +50,8 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
 
     public String uploadContainer(String container) {
         String sessionId = UUIDGenerator.generateUUID();
-        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        HashcodeContainer hashcodeContainer = new HashcodeContainer(sigaUserDetails.getServiceType());
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
         hashcodeContainer.open(inputStream);
         sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));

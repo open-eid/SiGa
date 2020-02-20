@@ -1,10 +1,11 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
-import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
@@ -23,6 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,15 +46,21 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Mock
     private SessionService sessionService;
-
     @Mock
     private Configuration configuration;
-
     @Mock
     private SigaEventLogger sigaEventLogger;
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private SecurityContext securityContext;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
+        SecurityContextHolder.setContext(securityContext);
+
         configuration = new Configuration(Configuration.Mode.TEST);
         signingService.setConfiguration(configuration);
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());

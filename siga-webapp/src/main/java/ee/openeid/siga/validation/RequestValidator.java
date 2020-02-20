@@ -1,8 +1,10 @@
 package ee.openeid.siga.validation;
 
-import ee.openeid.siga.common.model.MobileIdInformation;
-import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.RequestValidationException;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.ServiceType;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.Base64Util;
 import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
@@ -12,6 +14,7 @@ import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -68,7 +71,10 @@ public class RequestValidator {
         validateFileName(dataFile.getFileName(), INVALID_DATA_FILE_NAME);
         validateFileSize(dataFile.getFileSize());
         validateHashSha256(dataFile.getFileHashSha256());
-        validateHashSha512(dataFile.getFileHashSha512());
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (ServiceType.REST == sigaUserDetails.getServiceType()) {
+            validateHashSha512(dataFile.getFileHashSha512());
+        }
     }
 
     public static void validateDataFile(DataFile dataFile) {

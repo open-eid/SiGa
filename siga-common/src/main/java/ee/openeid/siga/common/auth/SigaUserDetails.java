@@ -1,5 +1,6 @@
 package ee.openeid.siga.common.auth;
 
+import ee.openeid.siga.common.model.ServiceType;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,6 +21,7 @@ public class SigaUserDetails implements UserDetails {
     private String signingSecret;
     private String skRelyingPartyName;
     private String skRelyingPartyUuid;
+    private ServiceType serviceType;
     private String smartIdRelyingPartyName;
     private String smartIdRelyingPartyUuid;
     @Builder.Default()

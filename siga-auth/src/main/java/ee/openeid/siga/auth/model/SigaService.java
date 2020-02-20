@@ -11,13 +11,10 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.jasypt.hibernate5.type.EncryptedStringType;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static ee.openeid.siga.auth.HibernateStringEncryptorConfiguration.HIBERNATE_STRING_ENCRYPTOR;
 
@@ -61,4 +58,7 @@ public class SigaService {
     private long maxConnectionsSize;
     private long maxConnectionSize;
     private boolean inactive;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "service")
+    @ToString.Exclude
+    private Set<SigaIpPermission> ipPermissions = new HashSet<>();
 }

@@ -56,7 +56,7 @@ public class SigaApplicationTests extends TestBase {
 
     @Test
     public void hashcodeModifyingContainerFlow() throws Exception {
-        String containerId = createHashcodeContainer();
+        String containerId = createHashcodeContainerWithBothHashes();
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(0, originalContainer.getSignatures().size());
         Assert.assertEquals(1, originalContainer.getDataFiles().size());

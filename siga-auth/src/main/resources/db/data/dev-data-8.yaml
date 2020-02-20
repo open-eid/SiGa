@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1582110149837-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              # Signing secret 746573745365637265744b6579303037 (testSecretKey007 in HEX)
+              - column:
+                  name: id
+                  valueNumeric: 7
+              - column:
+                  name: uuid
+                  value: 7dc75cb8-7076-4bed-9f06-b304f85cdccd
+              - column:
+                  name: signing_secret
+                  value: Ie9lYgio0sx71z+A/P5hRb7iRCFA+33fl0rGKXQpvOVnrMZZ4RmmbDFsyVaGbUCp5sOveXS+27aXwJtmDJtSdw==
+              - column:
+                  name: client_id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: test7.service.ee
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: billing_email
+                  value: service7@af42de4fdeb7649b519963f82e.com
+              - column:
+                  name: inactive
+                  value: false
+            tableName: siga_service
+  - changeSet:
+      id: 1582110149837-2
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: service_id
+                  valueNumeric: 7
+              - column:
+                  name: ip_address
+                  value: 127.0.0.1
+            tableName: siga_ip_permission
