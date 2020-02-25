@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1582619372998-1
+      author: (generated)
+      dbms: postgresql
+      changes:
+        - dropUniqueConstraint:
+            constraintName: siga_service_name_signing_secret_key
+            tableName: siga_service
+        - addUniqueConstraint:
+            columnNames: signing_secret
+            tableName: siga_service
+            validate: true
