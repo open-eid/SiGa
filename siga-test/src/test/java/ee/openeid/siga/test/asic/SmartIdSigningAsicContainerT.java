@@ -62,6 +62,14 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void signWithSmartIdInvalidRole() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("10101010005", "EE", "LT", null, null, null, null, null, ""));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void deleteToStartAsicSmartIdSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 

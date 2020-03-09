@@ -162,6 +162,14 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         expectError(response, 405, INVALID_REQUEST);
     }
 
+    @Test
+    public void signWithSmartIdInvalidRole() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("10101010005", "EE", "LT", null, null, null, null, null, ""));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;

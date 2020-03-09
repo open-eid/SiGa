@@ -2,11 +2,10 @@ package ee.openeid.siga.test.utils;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
 import org.apache.commons.codec.binary.Base64;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.web.util.UriUtils;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -75,10 +74,10 @@ public class RequestBuilder {
         ));
     }
 
-    public static JSONObject hashcodeContainersDataRequest(List<JSONObject> dataFiles) throws JSONException {
+    public static JSONObject hashcodeContainersDataRequest(List<JSONObject> dataFilesInput) throws JSONException {
         JSONArray datafiles = new JSONArray();
         JSONObject request = new JSONObject();
-        dataFiles.forEach(datafiles::put);
+        dataFilesInput.forEach(datafiles::put);
         request.put("dataFiles", datafiles);
         return request;
     }

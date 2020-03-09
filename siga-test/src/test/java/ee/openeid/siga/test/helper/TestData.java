@@ -34,8 +34,13 @@ public class TestData {
     public static final String SERVICE_UUID_3 = "400ff9a2-b5fb-4fde-b764-9b519963f82e";
     public static final String SERVICE_SECRET_3 = "746573745365637265744b6579303033";
 
+    // Connection limits set
     public static final String SERVICE_UUID_5 = "156ead6d-b884-46b1-aba5-d8cd1a573b1b";
     public static final String SERVICE_SECRET_5 = "02m5uss0zjDTjIwkME4zYTprtbT5fGnA";
+
+    // Inactive == true
+    public static final String SERVICE_UUID_6 = "cfbdce49-0ec9-4b83-8b41-d22655ea4741";
+    public static final String SERVICE_SECRET_6 = "746573745365637265744b6579303036";
 
     // Datafile mock strings
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=";

@@ -36,6 +36,7 @@ public class SmartIdHashcodeContainerController {
         RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createSmartIdSigningRequest.getRoles();
+        RequestValidator.validateRoles(roles);
         String signatureProfile = createSmartIdSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createSmartIdSigningRequest.getSignatureProductionPlace();
 

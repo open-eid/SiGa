@@ -32,7 +32,7 @@ public abstract class TestBase {
     static {
         properties = new Properties();
         try {
-            ClassLoader classLoader = RequestBuilder.class.getClassLoader();
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             String path = classLoader.getResource("application-test.properties").getPath();
             properties.load(new FileInputStream(new File(path)));
         } catch (IOException e) {

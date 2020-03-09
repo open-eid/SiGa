@@ -94,6 +94,7 @@ public class HashcodeContainerController {
         String signatureProfile = createRemoteSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createRemoteSigningRequest.getSignatureProductionPlace();
         List<String> roles = createRemoteSigningRequest.getRoles();
+        RequestValidator.validateRoles(roles);
 
         SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(signingCertificate, signatureProfile, signatureProductionPlace, roles);
         DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
@@ -126,6 +127,7 @@ public class HashcodeContainerController {
         RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createMobileIdSigningRequest.getRoles();
+        RequestValidator.validateRoles(roles);
         String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
 

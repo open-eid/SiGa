@@ -16,6 +16,9 @@ import static java.time.Instant.ofEpochMilli;
 @Component
 public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
 
+    private static final String REQUEST_LENGTH_PARAM_NAME = "request_length";
+    private static final String REQUEST_URI_PARAM_NAME = "request_uri";
+
     @Autowired
     private SigaEventLogger sigaEventLogger;
 
@@ -24,8 +27,8 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
         SigaEvent event = sigaEventLogger.logStartEvent(SigaEventName.REQUEST);
         String xAuthorizationServiceUuid = request.getHeader(HmacHeader.X_AUTHORIZATION_SERVICE_UUID.getValue());
         event.setServiceUuid(xAuthorizationServiceUuid);
-        event.addEventParameter("request_length", Integer.toString(getContentLength(request)));
-        event.addEventParameter("request_uri", request.getRequestURI());
+        event.addEventParameter(REQUEST_LENGTH_PARAM_NAME, Integer.toString(getContentLength(request)));
+        event.addEventParameter(REQUEST_URI_PARAM_NAME, request.getRequestURI());
     }
 
     @Override
@@ -34,6 +37,7 @@ public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
         SigaEvent endRequest = sigaEventLogger.logEndEvent(SigaEventName.REQUEST);
         long executionTimeInMilli = Duration.between(ofEpochMilli(startRequest.getTimestamp()), ofEpochMilli(endRequest.getTimestamp())).toMillis();
         endRequest.setDuration(executionTimeInMilli);
+        endRequest.addEventParameter(REQUEST_URI_PARAM_NAME, request.getRequestURI());
         sigaEventLogger.logEvents();
     }
 

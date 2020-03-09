@@ -254,6 +254,15 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void StartAsicRemoteSigningContainerInvalidRole() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "", null, null, null, null));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void finalizeRemoteSigningContainerReturnsOk() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);

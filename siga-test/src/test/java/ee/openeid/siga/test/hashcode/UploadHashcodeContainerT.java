@@ -13,6 +13,7 @@ import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UploadHashcodeContainerT extends TestBase {
 
@@ -94,6 +95,22 @@ public class UploadHashcodeContainerT extends TestBase {
         Response response = postUploadContainer(flow, request);
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void uploadDDOCHashcodeContainer() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeDdoc.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void uploadDDOCContainer() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("container.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(400));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
     }
 
     @Test

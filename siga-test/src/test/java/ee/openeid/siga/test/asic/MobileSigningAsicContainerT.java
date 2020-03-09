@@ -259,6 +259,14 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void invalidRoleInRequest() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "LT", null, null, null, null, null, ""));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void maximumDataInRequest() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "LT", "message", "Tallinn", "Harjumaa", "75544", "Estonia", "I hava a role"));

@@ -38,7 +38,7 @@ public class RetrieveAsicContainerT extends TestBase {
         Response response = getContainer(flow);
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832))
+                .body(CONTAINER + ".length()", equalTo(11812))
                 .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
 
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
@@ -53,7 +53,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", greaterThan(1800))
+                .body(CONTAINER + ".length()", greaterThan(800))
                 .body(CONTAINER_NAME, equalTo(DEFAULT_ASICE_CONTAINER_NAME));
 
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
@@ -69,13 +69,13 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", greaterThan(1800));
+                .body(CONTAINER + ".length()", greaterThan(800));
 
         response = getContainer(flow);
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", greaterThan(1800));
+                .body(CONTAINER + ".length()", greaterThan(800));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832));
+                .body(CONTAINER + ".length()", equalTo(11812));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832));
+                .body(CONTAINER + ".length()", equalTo(11812));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832));
+                .body(CONTAINER + ".length()", equalTo(11812));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832));
+                .body(CONTAINER + ".length()", equalTo(11812));
     }
 
     @Test
@@ -164,7 +164,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(11832));
+                .body(CONTAINER + ".length()", equalTo(11812));
     }
 
     @Test
