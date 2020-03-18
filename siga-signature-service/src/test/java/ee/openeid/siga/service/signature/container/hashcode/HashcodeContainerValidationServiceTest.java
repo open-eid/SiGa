@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.common.exception.InvalidContainerException;
+import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
@@ -54,7 +55,8 @@ public class HashcodeContainerValidationServiceTest {
 
     @Test
     public void DDOCHashcodeContainerValidation() throws IOException, URISyntaxException {
-        ValidationConclusion validationConclusion = validationService.validateContainer(createContainer(HASHCODE_DDOC_FILE));
+        ValidationConclusion validationConclusion = validationService
+                .validateContainer(createContainer(HASHCODE_DDOC_FILE), ServiceType.REST);
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
     }
@@ -63,12 +65,13 @@ public class HashcodeContainerValidationServiceTest {
     public void regularDDOCNotSupported() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidContainerException.class);
         exceptionRule.expectMessage("EMBEDDED DDOC is not supported");
-        validationService.validateContainer(createContainer(DDOC_FILE));
+        validationService.validateContainer(createContainer(DDOC_FILE), ServiceType.REST);
     }
 
     @Test
     public void successfulHashcodeContainerValidation() throws IOException, URISyntaxException {
-        ValidationConclusion validationConclusion = validationService.validateContainer(createContainer(SIGNED_HASHCODE));
+        ValidationConclusion validationConclusion = validationService
+                .validateContainer(createContainer(SIGNED_HASHCODE), ServiceType.REST);
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
     }

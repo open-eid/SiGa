@@ -1,10 +1,10 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 
-import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
@@ -12,7 +12,6 @@ import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -28,12 +27,12 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     private SivaClient sivaClient;
     private SessionService sessionService;
 
-    public ValidationConclusion validateContainer(String container) {
+    public ValidationConclusion validateContainer(String container, ServiceType serviceType) {
         byte[] decodedContainer = Base64.getDecoder().decode(container.getBytes());
         if (isHashcodeDDOC(decodedContainer)) {
             return validateDDOCHashcodeContainer(decodedContainer);
         }
-        return validateHashcodeContainer(decodedContainer);
+        return validateHashcodeContainer(decodedContainer, serviceType);
     }
 
     private ValidationConclusion validateDDOCHashcodeContainer(byte[] container) {
@@ -41,9 +40,8 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
         return createDDOCHashcodeContainerValidationConclusion(encodedContainer);
     }
 
-    private ValidationConclusion validateHashcodeContainer(byte[] container) {
-        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        HashcodeContainer hashcodeContainer = new HashcodeContainer(sigaUserDetails.getServiceType());
+    private ValidationConclusion validateHashcodeContainer(byte[] container, ServiceType serviceType) {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer(serviceType);
         hashcodeContainer.open(new ByteArrayInputStream(container));
         validateContainerSignatures(hashcodeContainer.getSignatures());
         return createHashcodeContainerValidationConclusion(hashcodeContainer.getSignatures(), hashcodeContainer.getDataFiles());
