@@ -56,6 +56,7 @@ public class MonitoringT extends TestBase {
                 .response();
     }
 
+    @Override
     protected String createUrl(String endpoint) {
         return properties.get("siga.protocol") + "://" + properties.get("siga.hostname") + ":" + properties.get("siga.port") + properties.get("siga.application-context-path") + endpoint;
     }

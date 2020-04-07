@@ -14,7 +14,6 @@ import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
 
     private ValidationConclusion validateHashcodeContainer(byte[] container, ServiceType serviceType) {
         HashcodeContainer hashcodeContainer = new HashcodeContainer(serviceType);
-        hashcodeContainer.open(new ByteArrayInputStream(container));
+        hashcodeContainer.open(container);
         validateContainerSignatures(hashcodeContainer.getSignatures());
         return createHashcodeContainerValidationConclusion(hashcodeContainer.getSignatures(), hashcodeContainer.getDataFiles());
     }

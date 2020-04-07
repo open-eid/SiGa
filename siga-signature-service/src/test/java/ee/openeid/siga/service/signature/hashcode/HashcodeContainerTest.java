@@ -46,8 +46,8 @@ public class HashcodeContainerTest {
     @Test
     public void validHashcodeContainerOpening() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
-        hashcodeContainer.open(inputStream);
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE);
+        hashcodeContainer.open(container);
         Assert.assertEquals(1, hashcodeContainer.getSignatures().size());
         Assert.assertFalse(StringUtils.isBlank(hashcodeContainer.getSignatures().get(0).getGeneratedSignatureId()));
         Assert.assertEquals(2, hashcodeContainer.getDataFiles().size());
@@ -66,8 +66,8 @@ public class HashcodeContainerTest {
         expectedEx.expect(SignatureExistsException.class);
         expectedEx.expectMessage("Unable to add data file when signature exists");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
-        hashcodeContainer.open(inputStream);
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE);
+        hashcodeContainer.open(container);
         HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
         hashcodeDataFile.setFileName("randomFile.txt");
         hashcodeDataFile.setFileHashSha256("asdasd=");
@@ -82,8 +82,7 @@ public class HashcodeContainerTest {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
             HashcodeContainer newHashcodeContainer = new HashcodeContainer();
-            ByteArrayOutputStream byteArrayOutputStream = outputStream;
-            newHashcodeContainer.open(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            newHashcodeContainer.open(outputStream.toByteArray());
         }
     }
 
@@ -92,7 +91,7 @@ public class HashcodeContainerTest {
         expectedEx.expect(InvalidContainerException.class);
         expectedEx.expectMessage("Hashcode container is missing SHA512 hash");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeMissingSha512File.asice"));
+        hashcodeContainer.open(TestUtil.getFile("hashcodeMissingSha512File.asice"));
     }
 
     @Test
@@ -100,7 +99,7 @@ public class HashcodeContainerTest {
         expectedEx.expect(InvalidContainerException.class);
         expectedEx.expectMessage("Hashcode container contains invalid file name");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeShaFileIsDirectory.asice"));
+        hashcodeContainer.open(TestUtil.getFile("hashcodeShaFileIsDirectory.asice"));
     }
 
     @Test
@@ -108,14 +107,13 @@ public class HashcodeContainerTest {
         expectedEx.expect(InvalidContainerException.class);
         expectedEx.expectMessage("Container contains file which is too large");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        hashcodeContainer.open(TestUtil.getFileInputStream("hashcodeWithBigHashcodesFile.asice"));
+        hashcodeContainer.open(TestUtil.getFile("hashcodeWithBigHashcodesFile.asice"));
     }
 
     @Test
     public void validHashcodeContainerAddedNewData() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        InputStream inputStream = TestUtil.getFileInputStream(SIGNED_HASHCODE);
-        hashcodeContainer.open(inputStream);
+        hashcodeContainer.open(TestUtil.getFile(SIGNED_HASHCODE));
         HashcodeSignatureWrapper signature = hashcodeContainer.getSignatures().get(0);
 
         hashcodeContainer.getSignatures().remove(0);
@@ -132,9 +130,23 @@ public class HashcodeContainerTest {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
             HashcodeContainer newContainer = new HashcodeContainer();
-            newContainer.open(new ByteArrayInputStream(outputStream.toByteArray()));
+            newContainer.open(outputStream.toByteArray());
             Assert.assertEquals(1, newContainer.getSignatures().size());
             Assert.assertEquals(3, newContainer.getDataFiles().size());
         }
+    }
+
+    @Test
+    public void validHashcodeContainerOpening_StoredAlgoWithDataDescriptor() throws IOException, URISyntaxException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        hashcodeContainer.open(TestUtil.getFile("hashcodeStoredAlgoWithDataDescriptor.asice"));
+        Assert.assertEquals(1, hashcodeContainer.getSignatures().size());
+        Assert.assertFalse(StringUtils.isBlank(hashcodeContainer.getSignatures().get(0).getGeneratedSignatureId()));
+        Assert.assertEquals(1, hashcodeContainer.getDataFiles().size());
+
+        List<SignatureHashcodeDataFile> signatureDataFiles = hashcodeContainer.getSignatures().get(0).getDataFiles();
+        Assert.assertEquals(1, signatureDataFiles.size());
+        Assert.assertEquals("client_test.go", signatureDataFiles.get(0).getFileName());
+        Assert.assertEquals("SHA512", signatureDataFiles.get(0).getHashAlgo());
     }
 }

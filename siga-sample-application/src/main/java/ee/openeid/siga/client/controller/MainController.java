@@ -96,7 +96,7 @@ public class MainController {
             log.info("Downloading regular container {} with id {}", cachedFile.getFileName(), cachedFile.getId());
 
             HashcodeContainer hashcodeContainer = HashcodeContainer.fromHashcodeContainerBuilder()
-                    .base64Container(Base64.getEncoder().encodeToString(cachedFile.getHashcodeContainer()))
+                    .container(cachedFile.getHashcodeContainer())
                     .regularDataFiles(cachedFile.getOriginalDataFiles())
                     .build();
             container = hashcodeContainer.getRegularContainer();

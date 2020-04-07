@@ -4,24 +4,25 @@ import eu.europa.esig.dss.model.InMemoryDocument;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;
 import org.digidoc4j.impl.asic.manifest.ManifestEntry;
 import org.digidoc4j.impl.asic.manifest.ManifestParser;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static ee.openeid.siga.client.hashcode.HashcodeContainerWriter.SIGNATURE_FILE_PREFIX;
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.convertToHashcodeEntries;
@@ -38,25 +39,22 @@ public class HashcodeContainer {
 
     @Builder(builderClassName = "FromRegularContainerBuilder", builderMethodName = "fromRegularContainerBuilder")
     @SneakyThrows
-    public HashcodeContainer(InputStream containerInputStream) {
-        processContainer(containerInputStream);
+    public HashcodeContainer(byte[] container) {
+        processContainer(container);
     }
 
     @Builder(builderClassName = "FromHashcodeContainerBuilder", builderMethodName = "fromHashcodeContainerBuilder")
     @SneakyThrows
-    public HashcodeContainer(String base64Container, Map<String, byte[]> regularDataFiles) {
-        InputStream containerInputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64Container));
-        processContainer(containerInputStream);
+    public HashcodeContainer(byte[] container, Map<String, byte[]> regularDataFiles) {
+        processContainer(container);
         this.regularDataFiles = regularDataFiles;
     }
 
-    private void processContainer(InputStream regularContainerInputStream) throws IOException {
-        ZipInputStream zipStream = new ZipInputStream(regularContainerInputStream);
-        ZipEntry entry;
-        while ((entry = zipStream.getNextEntry()) != null) {
-            operateWithEntry(entry, zipStream);
+    private void processContainer(byte[] container) throws IOException {
+        try (SeekableInMemoryByteChannel byteChannel = new SeekableInMemoryByteChannel(container);
+             ZipFile zipFile = new ZipFile(byteChannel)) {
+            operateWithZipFile(zipFile);
         }
-        zipStream.close();
         addMimeTypes();
     }
 
@@ -109,28 +107,29 @@ public class HashcodeContainer {
         return Base64.getEncoder().encodeToString(getHashcodeContainer());
     }
 
-    private void operateWithEntry(ZipEntry entry, ZipInputStream zipStream) throws IOException {
+    private void operateWithZipFile(ZipFile zipFile) throws IOException {
+        Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
+        while (entries.hasMoreElements()) {
+            operateWithEntry(entries.nextElement(), zipFile);
+        }
+    }
+
+    private void operateWithEntry(ZipArchiveEntry entry, ZipFile zipFile) throws IOException {
         String entryName = entry.getName();
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            byte[] byteBuff = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = zipStream.read(byteBuff)) != -1) {
-                baos.write(byteBuff, 0, bytesRead);
-            }
+        try (InputStream inputStream = zipFile.getInputStream(entry)) {
+            byte[] dataFile = inputStream.readAllBytes();
             if (isSignatureEntry(entryName)) {
-                signatures.add(baos.toByteArray());
+                signatures.add(dataFile);
             } else if (isDataFileEntry(entryName)) {
-                byte[] dataFile = baos.toByteArray();
                 regularDataFiles.put(entryName, dataFile);
                 hashcodeDataFiles.add(createHashcodeDataFile(entry, dataFile));
             } else if (isManifestEntry(entryName)) {
-                InMemoryDocument manifestFile = new InMemoryDocument(baos.toByteArray());
+                InMemoryDocument manifestFile = new InMemoryDocument(dataFile);
                 ManifestParser manifestParser = new ManifestParser(manifestFile);
                 manifest = manifestParser.getManifestFileItems();
             } else if (isHashcodeDatafileEntry(entryName)) {
-                addDataFilesFromHashcodeEntries(convertToHashcodeEntries(baos.toByteArray()), entryName);
+                addDataFilesFromHashcodeEntries(convertToHashcodeEntries(dataFile), entryName);
             }
-            zipStream.closeEntry();
         }
     }
 

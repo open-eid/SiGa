@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -52,8 +50,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
         String sessionId = UUIDGenerator.generateUUID();
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         HashcodeContainer hashcodeContainer = new HashcodeContainer(sigaUserDetails.getServiceType());
-        InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(container.getBytes()));
-        hashcodeContainer.open(inputStream);
+        hashcodeContainer.open(Base64.getDecoder().decode(container.getBytes()));
         sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
         return sessionId;
     }

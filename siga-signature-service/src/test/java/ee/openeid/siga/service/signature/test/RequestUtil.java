@@ -67,7 +67,7 @@ public class RequestUtil {
     public static List<HashcodeSignatureWrapper> createSignatureWrapper() throws IOException, URISyntaxException {
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
-        hashcodeContainer.open(TestUtil.getFileInputStream(SIGNED_HASHCODE));
+        hashcodeContainer.open(TestUtil.getFile(SIGNED_HASHCODE));
         return hashcodeContainer.getSignatures();
     }
 

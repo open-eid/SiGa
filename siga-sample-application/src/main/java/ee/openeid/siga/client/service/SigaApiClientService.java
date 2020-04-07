@@ -309,8 +309,9 @@ public class SigaApiClientService {
     private HashcodeContainer convertToHashcodeContainer(Map<String, MultipartFile> fileMap) throws IOException {
         MultipartFile file = fileMap.entrySet().iterator().next().getValue();
         log.info("Converting container: {}", file.getOriginalFilename());
-        InputStream inputStream = new ByteArrayInputStream(file.getBytes());
-        return HashcodeContainer.fromRegularContainerBuilder().containerInputStream(inputStream).build();
+        return HashcodeContainer.fromRegularContainerBuilder()
+                .container(file.getBytes())
+                .build();
     }
 
     private UploadHashcodeContainerResponse uploadHashcodeContainer(HashcodeContainer hashcodeContainer) {

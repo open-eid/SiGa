@@ -109,7 +109,7 @@ public abstract class TestBase {
         GetHashcodeContainerResponse originalContainer = getRequest("/hashcodecontainers/" + containerId, GetHashcodeContainerResponse.class);
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer(getServiceType());
-        hashcodeContainer.open(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer())));
+        hashcodeContainer.open(Base64.getDecoder().decode(originalContainer.getContainer()));
         return hashcodeContainer;
     }
 

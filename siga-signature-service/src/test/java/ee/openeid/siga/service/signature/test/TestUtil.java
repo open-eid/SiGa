@@ -1,17 +1,18 @@
 package ee.openeid.siga.service.signature.test;
 
 import ee.openeid.siga.service.signature.hashcode.HashcodesDataFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.Enumeration;
 
 public class TestUtil {
     public static final String MANIFEST_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\"><manifest:file-entry manifest:full-path=\"/\" manifest:media-type=\"application/vnd.etsi.asic-e+zip\"/><manifest:file-entry manifest:full-path=\"first datafile.txt\" manifest:media-type=\"application/octet-stream\"/><manifest:file-entry manifest:full-path=\"second datafile.txt\" manifest:media-type=\"application/octet-stream\"/></manifest:manifest>";
@@ -20,38 +21,44 @@ public class TestUtil {
     public static final String MIMETYPE = "application/vnd.etsi.asic-e+zip";
 
     public static HashcodeContainerFilesHolder getContainerFiles(byte[] container) throws IOException {
-        HashcodeContainerFilesHolder hashcodeContainer = new HashcodeContainerFilesHolder();
-        ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(container));
-        ZipEntry entry;
-        while ((entry = zipStream.getNextEntry()) != null) {
+        try (SeekableInMemoryByteChannel byteChannel = new SeekableInMemoryByteChannel(container);
+             ZipFile zipFile = new ZipFile(byteChannel)) {
+            return buildHashcodeContainerFilesHolder(zipFile);
+        }
+    }
 
+    private static HashcodeContainerFilesHolder buildHashcodeContainerFilesHolder(ZipFile zipFile) throws IOException {
+        HashcodeContainerFilesHolder hashcodeContainer = new HashcodeContainerFilesHolder();
+        Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
+        while (entries.hasMoreElements()) {
+            ZipArchiveEntry entry = entries.nextElement();
             String entryName = entry.getName();
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] byteBuff = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = zipStream.read(byteBuff)) != -1) {
-                    out.write(byteBuff, 0, bytesRead);
-                }
+            try (InputStream inputStream = zipFile.getInputStream(entry)) {
                 if ("mimetype".equals(entryName)) {
-                    hashcodeContainer.setMimeTypeContent(out.toString());
+                    hashcodeContainer.setMimeTypeContent(new String(inputStream.readAllBytes()));
                 } else if ("META-INF/manifest.xml".equals(entryName)) {
-                    hashcodeContainer.setManifestContent(out.toString());
+                    hashcodeContainer.setManifestContent(new String(inputStream.readAllBytes()));
                 } else if (HashcodesDataFile.HASHCODES_SHA256.equals(entryName)) {
-                    hashcodeContainer.setHashcodesSha256Content(out.toString());
+                    hashcodeContainer.setHashcodesSha256Content(new String(inputStream.readAllBytes()));
                 } else if (HashcodesDataFile.HASHCODES_SHA512.equals(entryName)) {
-                    hashcodeContainer.setHashcodesSha512Content(out.toString());
+                    hashcodeContainer.setHashcodesSha512Content(new String(inputStream.readAllBytes()));
                 }
             }
-
-            zipStream.closeEntry();
         }
-        zipStream.close();
         return hashcodeContainer;
     }
 
     public static InputStream getFileInputStream(String filePath) throws URISyntaxException, IOException {
-        Path documentPath = Paths.get(TestUtil.class.getClassLoader().getResource(filePath).toURI());
+        Path documentPath = getDocumentPath(filePath);
         return new ByteArrayInputStream(Files.readAllBytes(documentPath));
+    }
 
+    public static byte[] getFile(String filePath) throws URISyntaxException, IOException {
+        Path documentPath = getDocumentPath(filePath);
+        return Files.readAllBytes(documentPath);
+    }
+
+    private static Path getDocumentPath(String filePath) throws URISyntaxException {
+        return Paths.get(TestUtil.class.getClassLoader().getResource(filePath).toURI());
     }
 }

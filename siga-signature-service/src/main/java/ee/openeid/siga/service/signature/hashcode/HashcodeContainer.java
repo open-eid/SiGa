@@ -11,22 +11,23 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.MimeType;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;
 import org.digidoc4j.impl.asic.manifest.ManifestEntry;
 import org.digidoc4j.impl.asic.manifest.ManifestParser;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.SIGNATURE_FILE_PREFIX;
 
@@ -49,24 +50,16 @@ public class HashcodeContainer {
         createHashcodeContainer(outputStream);
     }
 
-    public void open(InputStream inputStream) {
-        try {
-            ZipInputStream zipStream = new ZipInputStream(inputStream);
-            ZipEntry entry;
-            boolean isValidZip = false;
-            while ((entry = zipStream.getNextEntry()) != null) {
-                operateWithEntry(entry, zipStream);
-                isValidZip = true;
-            }
-            zipStream.close();
-            if (!isValidZip) {
-                throw new InvalidContainerException("Invalid hashcode container");
-            }
-            validateDataFiles();
-            addMimeTypes();
+    public void open(byte[] container) {
+        try (SeekableInMemoryByteChannel byteChannel = new SeekableInMemoryByteChannel(container);
+             ZipFile zipFile = new ZipFile(byteChannel)) {
+            operateWithZipFile(zipFile);
         } catch (IOException e) {
             throw new InvalidContainerException("Unable to open hashcode container");
         }
+
+        validateDataFiles();
+        addMimeTypes();
     }
 
     public List<HashcodeSignatureWrapper> getSignatures() {
@@ -121,26 +114,32 @@ public class HashcodeContainer {
         hashcodeContainerCreator.finalizeZipFile();
     }
 
-    private void operateWithEntry(ZipEntry entry, ZipInputStream zipStream) throws IOException {
+    private void operateWithZipFile(ZipFile zipFile) throws IOException {
+        Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
+
+        if (!entries.hasMoreElements()) {
+            throw new InvalidContainerException("Invalid hashcode container");
+        }
+
+        while (entries.hasMoreElements()) {
+            operateWithEntry(entries.nextElement(), zipFile);
+        }
+    }
+
+    private void operateWithEntry(ZipArchiveEntry entry, ZipFile zipFile) throws IOException {
         validateFileSize(entry);
         String entryName = entry.getName();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] byteBuff = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = zipStream.read(byteBuff)) != -1) {
-                out.write(byteBuff, 0, bytesRead);
-            }
+        try (InputStream inputStream = zipFile.getInputStream(entry)) {
             if (AsicManifest.XML_PATH.equals(entryName)) {
-                InMemoryDocument manifestFile = new InMemoryDocument(out.toByteArray());
+                InMemoryDocument manifestFile = new InMemoryDocument(inputStream.readAllBytes());
                 ManifestParser manifestParser = new ManifestParser(manifestFile);
                 manifest = manifestParser.getManifestFileItems();
             } else if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
-                signatures.add(createSignatureWrapper(out.toByteArray()));
+                signatures.add(createSignatureWrapper(inputStream.readAllBytes()));
             } else if (entryName.startsWith(HashcodesDataFile.HASHCODES_PREFIX)) {
-                HashcodesDataFileParser parser = new HashcodesDataFileParser(out.toByteArray());
+                HashcodesDataFileParser parser = new HashcodesDataFileParser(inputStream.readAllBytes());
                 addDataFileEntries(parser.getEntries(), entryName);
             }
-            zipStream.closeEntry();
         }
     }
 
@@ -192,7 +191,7 @@ public class HashcodeContainer {
         });
     }
 
-    private void validateFileSize(ZipEntry zipEntry) {
+    private void validateFileSize(ZipArchiveEntry zipEntry) {
         if (zipEntry.getSize() > MAX_FILE_SIZE) {
             throw new InvalidContainerException("Container contains file which is too large");
         }

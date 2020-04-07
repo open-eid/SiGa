@@ -182,6 +182,15 @@ public class UploadHashcodeContainerT extends TestBase {
         expectError(response, 405, INVALID_REQUEST);
     }
 
+    @Test
+    public void uploadHashcodeContainer_storedAlgoWithDataDescriptor() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeStoredAlgoWithDataDescriptor.asice"));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;
