@@ -35,3 +35,5 @@ databaseChangeLog:
       file: db/changelog/SIGA-46-1.yaml
   - include:
       file: db/data/dev-data-8.yaml
+  - include:
+      file: db/data/dev-data-9.yaml

@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1586844572-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              # Signing secret KOWXxVk1E434pmsyD9S7AzgZjs4o4h5o (testSecretKey008)
+              - column:
+                  name: id
+                  valueNumeric: 8
+              - column:
+                  name: uuid
+                  value: 3df75ca1-4272-4fcd-af01-b304f85bcccd
+              - column:
+                  name: signing_secret
+                  value: qnqwYPiW8BFVuZxP0jqYX+//dbp9eYob1U0Uby7rLt0TvCXAUezZ6SwvssAf4N8Atg0y3D2H+uZvslzxkzod1w==
+              - column:
+                  name: client_id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: test8.service.ee
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: billing_email
+                  value: service8@af42de4fdeb7649b519963f82e.com
+              - column:
+                  name: inactive
+                  value: false
+            tableName: siga_service
+  - changeSet:
+      id: 1586844572-2
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: service_id
+                  valueNumeric: 8
+              - column:
+                  name: ip_address
+                  value: 192.168.1.1
+            tableName: siga_ip_permission
