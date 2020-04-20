@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
@@ -140,6 +141,8 @@ public class HashcodeContainer {
                 HashcodesDataFileParser parser = new HashcodesDataFileParser(inputStream.readAllBytes());
                 addDataFileEntries(parser.getEntries(), entryName);
             }
+        } catch (org.digidoc4j.exceptions.DuplicateDataFileException e) {
+            throw new DuplicateDataFileException(e.getMessage());
         }
     }
 

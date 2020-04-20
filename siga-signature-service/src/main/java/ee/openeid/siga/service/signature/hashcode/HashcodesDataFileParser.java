@@ -48,6 +48,6 @@ public class HashcodesDataFileParser {
 
     private void validateNotDuplicateFile(String filePath) {
         if (entries.containsKey(filePath))
-            throw new DuplicateDataFileException("Unable to parse hashcodes datafile");
+            throw new DuplicateDataFileException("Hashcodes data file contains duplicate entry: " + filePath);
     }
 }

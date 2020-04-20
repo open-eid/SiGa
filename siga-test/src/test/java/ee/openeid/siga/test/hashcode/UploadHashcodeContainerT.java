@@ -191,6 +191,24 @@ public class UploadHashcodeContainerT extends TestBase {
                 .body(CONTAINER_ID + ".length()", equalTo(36));
     }
 
+    @Test
+    public void uploadContainerWithDuplicateDataFiles() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode_duplicate_data_files.asice"));
+        expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFileInManifest() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode_duplicate_data_files_in_manifest.asice"));
+        expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFilesInSignature() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode_duplicate_data_files_in_signature.asice"));
+        expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;

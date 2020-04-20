@@ -189,7 +189,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     public void createHashcodeContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        JSONObject dataFiles = addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
+        JSONObject dataFiles = addDataFileToHashcodeRequest("testFile1.xml", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
         JSONObject dataFile = addDataFileToHashcodeRequestDataFile("testFile2.xml", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
         dataFiles.getJSONArray("dataFiles").put(dataFile);
 
@@ -203,7 +203,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[0].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
                 .body("dataFiles[0].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
                 .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE))
-                .body("dataFiles[1].fileName", equalTo(DEFAULT_FILENAME))
+                .body("dataFiles[1].fileName", equalTo("testFile1.xml"))
                 .body("dataFiles[1].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
                 .body("dataFiles[1].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
                 .body("dataFiles[1].fileSize", equalTo(DEFAULT_FILESIZE))
@@ -211,6 +211,15 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[2].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
                 .body("dataFiles[2].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
                 .body("dataFiles[2].fileSize", equalTo(DEFAULT_FILESIZE));
+    }
+
+    @Test
+    public void createHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+
+        expectError(response, 400, DUPLICATE_DATA_FILE);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
@@ -66,6 +67,8 @@ public class AsicContainerService implements AsicSessionHolder {
         Container container;
         try {
             container = ContainerUtil.createContainer(Base64.getDecoder().decode(base64container.getBytes()), configuration);
+        } catch (org.digidoc4j.exceptions.DuplicateDataFileException e) {
+            throw new DuplicateDataFileException(e.getMessage());
         } catch (Exception e) {
             log.error("Invalid container:", e);
             throw new InvalidContainerException("Invalid container");
@@ -128,7 +131,7 @@ public class AsicContainerService implements AsicSessionHolder {
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
 
-        addDataFilesToContainer(container, dataFiles);
+        dataFiles.forEach(dataFile -> addDataFileToContainer(container, dataFile));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
@@ -163,13 +166,15 @@ public class AsicContainerService implements AsicSessionHolder {
         return Result.OK.name();
     }
 
-    private void addDataFilesToContainer(Container container, List<DataFile> dataFiles) {
-        dataFiles.forEach(dataFile -> {
+    private void addDataFileToContainer(Container container, DataFile dataFile) {
+        try {
             org.digidoc4j.DataFile digidoc4jDataFile = new org.digidoc4j.DataFile();
             DSSDocument dssDocument = new InMemoryDocument(Base64.getDecoder().decode(dataFile.getContent().getBytes()), dataFile.getFileName());
             digidoc4jDataFile.setDocument(dssDocument);
             container.addDataFile(digidoc4jDataFile);
-        });
+        } catch (org.digidoc4j.exceptions.DuplicateDataFileException e) {
+            throw new DuplicateDataFileException("Duplicate data files not allowed: " + dataFile.getFileName());
+        }
     }
 
     private void validateIfSessionMutable(Container container) {

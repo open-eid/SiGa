@@ -169,6 +169,20 @@ public class UploadAsicContainerT extends TestBase {
         expectError(response, 405, INVALID_REQUEST);
     }
 
+    @Test
+    public void uploadContainerWithDuplicateDataFiles() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("asice_duplicate_data_files.asice"));
+
+        expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFileInManifest() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("asice_duplicate_data_files_in_manifest.asice"));
+
+        expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
     @Override
     public String getContainerEndpoint() {
         return CONTAINERS;

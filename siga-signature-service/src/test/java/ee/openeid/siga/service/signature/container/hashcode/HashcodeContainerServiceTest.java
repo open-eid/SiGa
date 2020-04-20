@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
@@ -149,7 +150,7 @@ public class HashcodeContainerServiceTest {
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
-        Result result = containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile());
+        Result result = containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile("test1.txt"));
         Assert.assertEquals(Result.OK, result);
     }
 
@@ -184,12 +185,51 @@ public class HashcodeContainerServiceTest {
         Assert.assertEquals(Result.OK, result);
     }
 
+    @Test
+    public void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("Hashcodes data file contains duplicate entry: test1.txt");
+        String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files.asice")));
+        containerService.uploadContainer(container);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("duplicate entry in manifest file: test.txt");
+        String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files_in_manifest.asice")));
+        containerService.uploadContainer(container);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFilesInSignatureThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("Signature contains duplicate data file: test1.txt");
+        String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files_in_signature.asice")));
+        containerService.uploadContainer(container);
+    }
+
+    @Test
+    public void addDuplicateDataFileThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("Duplicate data files not allowed: test.txt");
+
+        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        session.getSignatures().clear();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile());
+    }
+
     private void verifySessionServiceUpdateCalled(String expectedSessionId, Consumer<HashcodeContainerSessionHolder> sessionValidator) {
         ArgumentCaptor<HashcodeContainerSessionHolder> sessionCaptor = ArgumentCaptor.forClass(HashcodeContainerSessionHolder.class);
         Mockito.verify(sessionService, Mockito.times(1)).update(Mockito.eq(expectedSessionId), sessionCaptor.capture());
         Mockito.verifyNoMoreInteractions(sessionService);
 
         sessionValidator.accept(sessionCaptor.getValue());
+    }
+
+    private byte[] getFile(String fileName) throws IOException, URISyntaxException {
+        return TestUtil.getFileInputStream(fileName).readAllBytes();
     }
 
 }

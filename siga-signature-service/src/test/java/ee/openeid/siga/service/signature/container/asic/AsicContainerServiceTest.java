@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.model.ContainerInfo;
 import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.Result;
@@ -213,5 +214,55 @@ public class AsicContainerServiceTest {
     public void successfulCloseSession() {
         String result = containerService.closeSession(CONTAINER_ID);
         Assert.assertEquals(Result.OK.name(), result);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("Container contains duplicate data file: readme.txt");
+        String container = new String(Base64.getEncoder().encode(getFile("asice_duplicate_data_files.asice")));
+        containerService.uploadContainer("test.asice", container);
+    }
+
+    @Test
+    public void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("duplicate entry in manifest file: test.xml");
+        String container = new String(Base64.getEncoder().encode(getFile("asice_duplicate_data_files_in_manifest.asice")));
+        containerService.uploadContainer("test.asice", container);
+    }
+
+    @Test
+    public void addDuplicateDataFileThrows() {
+        exceptionRule.expect(DuplicateDataFileException.class);
+        exceptionRule.expectMessage("Duplicate data files not allowed: test.xml");
+
+        Container container = ContainerBuilder
+                .aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain"))
+                .build();
+        Map<String, Integer> signatureIdHolder = new HashMap<>();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
+        AsicContainerSessionHolder session = AsicContainerSessionHolder.builder()
+                .sessionId(CONTAINER_ID)
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
+                .signatureIdHolder(signatureIdHolder)
+                .containerName("test.asice")
+                .container(outputStream.toByteArray())
+                .build();
+
+        container.getSignatures().clear();
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        List<DataFile> dataFiles = createDataFileListWithOneFile();
+        dataFiles.get(0).setFileName("test.xml");
+        containerService.addDataFiles(CONTAINER_ID, dataFiles);
+    }
+
+    private byte[] getFile(String fileName) throws IOException, URISyntaxException {
+        return TestUtil.getFileInputStream(fileName).readAllBytes();
     }
 }

@@ -44,9 +44,13 @@ public class RequestUtil {
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
 
     public static List<HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
+        return createHashcodeDataFileListWithOneFile("test.txt");
+    }
+
+    public static List<HashcodeDataFile> createHashcodeDataFileListWithOneFile(String fileName) {
         List<HashcodeDataFile> hashcodeDataFiles = new ArrayList<>();
         HashcodeDataFile dataFile = new HashcodeDataFile();
-        dataFile.setFileName("test.txt");
+        dataFile.setFileName(fileName);
         dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
         dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");

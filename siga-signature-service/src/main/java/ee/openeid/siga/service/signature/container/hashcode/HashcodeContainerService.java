@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
@@ -102,7 +103,10 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     public Result addDataFiles(String containerId, List<HashcodeDataFile> dataFiles) {
         HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
-        dataFiles.forEach(HashcodeContainerService::updateMimeTypeIfNotSet);
+        dataFiles.forEach(dataFile -> {
+            validateNotDuplicateFile(dataFile, sessionHolder);
+            updateMimeTypeIfNotSet(dataFile);
+        });
         sessionHolder.getDataFiles().addAll(dataFiles);
         sessionService.update(containerId, sessionHolder);
         return Result.OK;
@@ -152,6 +156,15 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
                 .dataFiles(container.getDataFiles())
                 .signatures(container.getSignatures())
                 .build();
+    }
+
+    private void validateNotDuplicateFile(HashcodeDataFile dataFileToAdd, HashcodeContainerSessionHolder sessionHolder) {
+        sessionHolder.getDataFiles().stream()
+                .filter(dataFile -> dataFile.getFileName().equals(dataFileToAdd.getFileName()))
+                .findFirst()
+                .ifPresent(dataFile -> {
+                    throw new DuplicateDataFileException("Duplicate data files not allowed: " + dataFile.getFileName());
+                });
     }
 
     private static void updateMimeTypeIfNotSet(HashcodeDataFile dataFile) {

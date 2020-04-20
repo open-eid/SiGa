@@ -70,6 +70,6 @@ public class SignatureDataFilesParser {
 
     private void validateNotDuplicateFile(String filePath) {
         if (entries.containsKey(filePath))
-            throw new DuplicateDataFileException("Unable to parse hashcodes datafile");
+            throw new DuplicateDataFileException("Signature contains duplicate data file: " + filePath);
     }
 }
