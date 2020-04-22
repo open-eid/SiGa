@@ -291,7 +291,11 @@ public class SignatureFinalizingTest {
         byte[] signatureRaw = signatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
 
         HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
-        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder()
+                .dataToSign(dataToSign)
+                .signingType(SigningType.REMOTE)
+                .dataFilesHash(signingService.generateDataFilesHash(sessionHolder))
+                .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         return Pair.of(dataToSign.getSignatureParameters().getSignatureId(), new String(Base64.getEncoder().encode(signatureRaw)));

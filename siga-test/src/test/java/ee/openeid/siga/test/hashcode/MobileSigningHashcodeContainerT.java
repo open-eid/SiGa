@@ -8,7 +8,6 @@ import ee.openeid.siga.webapp.json.GetHashcodeContainerMobileIdSigningStatusResp
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -289,6 +288,17 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         response = getMidSigningInSession(flow, signatureId);
 
         expectError(response, 400, RESOURCE_NOT_FOUND);
+    }
+
+    @Test
+    public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        Response pollResponse = pollForMidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
     @Test

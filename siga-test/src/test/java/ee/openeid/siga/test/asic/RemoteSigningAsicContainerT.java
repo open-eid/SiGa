@@ -305,6 +305,20 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+        CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow,
+                remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+        deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
+
+        Response response = putRemoteSigningInSession(flow,
+                remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())),
+                dataToSignResponse.getGeneratedSignatureId());
+
+        expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @Test
     public void deleteToStartAsicRemoteSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 

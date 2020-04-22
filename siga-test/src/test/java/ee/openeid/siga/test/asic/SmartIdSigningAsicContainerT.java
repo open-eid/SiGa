@@ -70,6 +70,17 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response pollResponse = pollForSidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @Test
     public void deleteToStartAsicSmartIdSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 

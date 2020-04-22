@@ -61,21 +61,32 @@ public abstract class ContainerSigningService {
     public DataToSignWrapper createDataToSign(String containerId, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
+
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
+
         String generatedSignatureId = UUIDGenerator.generateUUID();
-        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
+                .dataToSign(dataToSign)
+                .signingType(SigningType.REMOTE)
+                .dataFilesHash(generateDataFilesHash(sessionHolder))
+                .build();
+
+        sessionHolder.addDataToSign(generatedSignatureId, dataToSignHolder);
         sessionService.update(containerId, sessionHolder);
-        return DataToSignWrapper.builder().dataToSign(dataToSign).generatedSignatureId(generatedSignatureId).build();
+
+        return DataToSignWrapper.builder()
+                .dataToSign(dataToSign)
+                .generatedSignatureId(generatedSignatureId)
+                .build();
     }
 
     public Result finalizeSigning(String containerId, String signatureId, String signatureValue) {
         Session sessionHolder = getSession(containerId);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         validateRemoteSession(dataToSignHolder, signatureId);
-        DataToSign dataToSign = dataToSignHolder.getDataToSign();
 
         byte[] base64Decoded = Base64.getDecoder().decode(signatureValue.getBytes());
-        Signature signature = finalizeSignature(dataToSign, base64Decoded);
+        Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, base64Decoded);
 
         addSignatureToSession(sessionHolder, signature, signatureId);
         sessionService.update(containerId, sessionHolder);
@@ -93,10 +104,20 @@ public abstract class ContainerSigningService {
         InitMidSignatureResponse initMidSignatureResponse = mobileIdClient.initMobileSigning(dataToSign, mobileIdInformation);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
-        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode(initMidSignatureResponse.getSessionCode()).build());
+        DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
+                .dataToSign(dataToSign)
+                .signingType(SigningType.MOBILE_ID)
+                .sessionCode(initMidSignatureResponse.getSessionCode())
+                .dataFilesHash(generateDataFilesHash(sessionHolder))
+                .build();
+
+        sessionHolder.addDataToSign(generatedSignatureId, dataToSignHolder);
         sessionService.update(containerId, sessionHolder);
 
-        return SigningChallenge.builder().challengeId(initMidSignatureResponse.getChallengeId()).generatedSignatureId(generatedSignatureId).build();
+        return SigningChallenge.builder()
+                .challengeId(initMidSignatureResponse.getChallengeId())
+                .generatedSignatureId(generatedSignatureId)
+                .build();
     }
 
     public String processMobileStatus(String containerId, String signatureId, MobileIdInformation mobileIdInformation) {
@@ -105,8 +126,7 @@ public abstract class ContainerSigningService {
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode(), mobileIdInformation);
         if (getStatusResponse.getStatus() == MidStatus.SIGNATURE) {
-            DataToSign dataToSign = dataToSignHolder.getDataToSign();
-            Signature signature = finalizeSignature(dataToSign, getStatusResponse.getSignature());
+            Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, getStatusResponse.getSignature());
 
             addSignatureToSession(sessionHolder, signature, signatureId);
             sessionService.update(containerId, sessionHolder);
@@ -127,11 +147,20 @@ public abstract class ContainerSigningService {
         InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign, documentNumber);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
-        sessionHolder.addDataToSign(generatedSignatureId, DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode(initSmartIdSignatureResponse.getSessionCode()).build());
+        DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
+                .dataToSign(dataToSign)
+                .signingType(SigningType.SMART_ID)
+                .sessionCode(initSmartIdSignatureResponse.getSessionCode())
+                .dataFilesHash(generateDataFilesHash(sessionHolder))
+                .build();
+
+        sessionHolder.addDataToSign(generatedSignatureId, dataToSignHolder);
         sessionService.update(containerId, sessionHolder);
 
-        return SigningChallenge.builder().challengeId(initSmartIdSignatureResponse.getChallengeId()).generatedSignatureId(generatedSignatureId).build();
-
+        return SigningChallenge.builder()
+                .challengeId(initSmartIdSignatureResponse.getChallengeId())
+                .generatedSignatureId(generatedSignatureId)
+                .build();
     }
 
     public String processSmartIdStatus(String containerId, String signatureId, SmartIdInformation smartIdInformation) {
@@ -141,8 +170,7 @@ public abstract class ContainerSigningService {
         SessionStatus sessionStatus = smartIdClient.getSmartIdStatus(smartIdInformation, dataToSignHolder.getSessionCode());
         if (SMART_ID_FINISHED_STATE.equals(sessionStatus.getState())) {
             String signatureValue = sessionStatus.getSignature().getValue();
-            DataToSign dataToSign = dataToSignHolder.getDataToSign();
-            Signature signature = finalizeSignature(dataToSign, Base64.getDecoder().decode(signatureValue.getBytes()));
+            Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, Base64.getDecoder().decode(signatureValue.getBytes()));
 
             addSignatureToSession(sessionHolder, signature, signatureId);
             sessionService.update(containerId, sessionHolder);
@@ -150,8 +178,9 @@ public abstract class ContainerSigningService {
         return sessionStatus.getState();
     }
 
-
-    protected Signature finalizeSignature(DataToSign dataToSign, byte[] base64Decoded) {
+    protected Signature finalizeSignature(Session session, String containerId, String signatureId, byte[] base64Decoded) {
+        validateContainerDataFilesUnchanged(session, containerId, signatureId);
+        DataToSign dataToSign = session.getDataToSignHolder(signatureId).getDataToSign();
         SigaEvent startEvent = sigaEventLogger.logStartEvent(FINALIZE_SIGNATURE).addEventParameter(SIGNATURE_ID, dataToSign.getSignatureParameters().getSignatureId());
 
         Signature signature;
@@ -167,6 +196,20 @@ public abstract class ContainerSigningService {
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE);
         }
         return signature;
+    }
+
+    private void validateContainerDataFilesUnchanged(Session session, String containerId, String signatureId) {
+        DataToSignHolder dataToSignHolder = session.getDataToSignHolder(signatureId);
+
+        if (dataToSignHolder.getDataFilesHash() == null) {
+            throw new IllegalStateException("Trying to finalize signature without container data files hash in session for data to sign");
+        }
+
+        if (!generateDataFilesHash(session).equals(dataToSignHolder.getDataFilesHash())) {
+            session.clearSigning(signatureId);
+            sessionService.update(containerId, session);
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + ". Container data files have been changed after signing was initiated. Repeat signing process");
+        }
     }
 
     private ServiceAccessListener createServiceAccessListener() {
@@ -256,6 +299,8 @@ public abstract class ContainerSigningService {
     }
 
     public abstract void verifySigningObjectExistence(Session session);
+
+    public abstract String generateDataFilesHash(Session session);
 
     @Autowired
     public void setSessionService(SessionService sessionService) {

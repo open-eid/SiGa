@@ -7,7 +7,6 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.InvalidKeyException;
@@ -15,7 +14,6 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -168,6 +166,17 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("10101010005", "EE", "LT", null, null, null, null, null, ""));
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
+        String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response pollResponse = pollForSidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
     @Override

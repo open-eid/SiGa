@@ -12,8 +12,10 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.test.RequestUtil;
-import ee.openeid.siga.session.SessionService;
 import org.digidoc4j.Configuration;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.DataFile;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
@@ -26,11 +28,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
+import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,9 +50,6 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @InjectMocks
     private AsicContainerSigningService signingService;
-
-    @Mock
-    private SessionService sessionService;
 
     @Mock
     private SigaEventLogger sigaEventLogger;
@@ -137,6 +140,33 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
         assertSuccessfulSmartIdSignatureProcessing(sessionService);
     }
 
+    @Test
+    public void generateDataFilesHash_generatesOrderAgnosticDataFilesHash() {
+        assertGeneratesOrderAgnosticDataFilesHash();
+    }
+
+    @Test
+    public void generateDataFilesHash_sameFileNameButDifferentDataGeneratesDifferentHash() {
+        assertSameFileNameButDifferentDataGeneratesDifferentHash();
+    }
+
+    @Test
+    public void generateDataFilesHash_sameDataButDifferentFileNameGeneratesDifferentHash() {
+        assertSameDataButDifferentFileNameGeneratesDifferentHash();
+    }
+
+    @Test
+    public void finalizeSignatureWithContainerDataFilesChangedThrows() {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to finalize signature. " +
+                "Container data files have been changed after signing was initiated. Repeat signing process");
+        finalizeSignatureWithContainerDataFilesChanged();
+    }
+
+    @Test
+    public void finalizeSignatureWithContainerDataFilesChangedClearsDataToSign() {
+        assertFinalizeSignatureWithContainerDataFilesChangedClearsDataToSign();
+    }
 
     @Override
     protected ContainerSigningService getSigningService() {
@@ -156,27 +186,78 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     @Override
     protected void mockRemoteSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
         AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
-        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.REMOTE).build());
+        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
+                DataToSignHolder.builder()
+                        .dataToSign(dataToSign)
+                        .signingType(SigningType.REMOTE)
+                        .dataFilesHash(signingService.generateDataFilesHash(sessionHolder))
+                        .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
     }
 
     @Override
     protected void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
         AsicContainerSessionHolder session = RequestUtil.createAsicSessionHolder();
-        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.MOBILE_ID).sessionCode("2342384932").build());
+        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
+                DataToSignHolder.builder()
+                        .dataToSign(dataToSign)
+                        .signingType(SigningType.MOBILE_ID)
+                        .sessionCode("2342384932")
+                        .dataFilesHash(signingService.generateDataFilesHash(session))
+                        .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
     }
 
     @Override
     protected void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
         AsicContainerSessionHolder session = RequestUtil.createAsicSessionHolder();
-        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder().dataToSign(dataToSign).signingType(SigningType.SMART_ID).sessionCode("2342384932").build());
+        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
+                DataToSignHolder.builder()
+                        .dataToSign(dataToSign)
+                        .signingType(SigningType.SMART_ID)
+                        .sessionCode("2342384932")
+                        .dataFilesHash(signingService.generateDataFilesHash(session))
+                        .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
     }
 
     @Override
     protected Session getSessionHolder() throws IOException, URISyntaxException {
         return RequestUtil.createAsicSessionHolder();
+    }
+
+    @Override
+    protected SimpleSessionHolderBuilder getSimpleSessionHolderBuilder() {
+        return new SimpleAsicContainerSessionHolderBuilder();
+    }
+
+    private static class SimpleAsicContainerSessionHolderBuilder implements SimpleSessionHolderBuilder {
+        private final List<DataFile> dataFiles = new ArrayList<>();
+
+        public SimpleAsicContainerSessionHolderBuilder addDataFile(String fileName, String text) {
+            dataFiles.add(new DataFile(text.getBytes(), fileName, "application/text"));
+            return this;
+        }
+
+        public AsicContainerSessionHolder build() {
+            ContainerBuilder containerBuilder = ContainerBuilder.aContainer(ASICE)
+                    .withConfiguration(Configuration.of(Configuration.Mode.TEST));
+            for (DataFile dataFile : dataFiles) {
+                containerBuilder.withDataFile(dataFile);
+            }
+            Container container = containerBuilder.build();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            container.save(outputStream);
+
+            return AsicContainerSessionHolder.builder()
+                    .sessionId(RequestUtil.CONTAINER_ID)
+                    .clientName(RequestUtil.CLIENT_NAME)
+                    .serviceName(RequestUtil.SERVICE_NAME)
+                    .serviceUuid(RequestUtil.SERVICE_UUID)
+                    .containerName("test.asice")
+                    .container(outputStream.toByteArray())
+                    .build();
+        }
     }
 
 }

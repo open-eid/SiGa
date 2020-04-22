@@ -5,6 +5,7 @@ import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
@@ -24,6 +25,7 @@ import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Assert;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -33,9 +35,13 @@ import java.util.Base64;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 
 public abstract class ContainerSigningServiceTest {
+
+    private static final String SIG_ID = "sig123";
 
     @Mock
     private MobileIdClient mobileIdClient;
@@ -45,6 +51,9 @@ public abstract class ContainerSigningServiceTest {
 
     @Mock
     private SmartIdServiceConfigurationProperties smartIdProperties;
+
+    @Mock
+    protected SessionService sessionService;
 
     protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
@@ -190,6 +199,89 @@ public abstract class ContainerSigningServiceTest {
 
     }
 
+    protected void assertGeneratesOrderAgnosticDataFilesHash() {
+        Session session1 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile1.txt", "data1")
+                .addDataFile("datafile2.txt", "data2")
+                .addDataFile("datafile3.txt", "data3")
+                .build();
+
+        Session session2 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile3.txt", "data3")
+                .addDataFile("datafile1.txt", "data1")
+                .addDataFile("datafile2.txt", "data2")
+                .build();
+
+        String hash1 = getSigningService().generateDataFilesHash(session1);
+        String hash2 = getSigningService().generateDataFilesHash(session2);
+        assertEquals(hash1, hash2);
+    }
+
+    protected void assertSameFileNameButDifferentDataGeneratesDifferentHash() {
+        Session session1 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile1.txt", "data1")
+                .build();
+
+        Session session2 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile1.txt", "data2")
+                .build();
+
+        String hash1 = getSigningService().generateDataFilesHash(session1);
+        String hash2 = getSigningService().generateDataFilesHash(session2);
+        assertNotEquals(hash1, hash2);
+    }
+
+    protected void assertSameDataButDifferentFileNameGeneratesDifferentHash() {
+        Session session1 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile1.txt", "data1")
+                .build();
+
+        Session session2 = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile2.txt", "data1")
+                .build();
+
+        String hash1 = getSigningService().generateDataFilesHash(session1);
+        String hash2 = getSigningService().generateDataFilesHash(session2);
+        assertNotEquals(hash1, hash2);
+    }
+
+    protected void finalizeSignatureWithContainerDataFilesChanged() {
+        Session session = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile.txt", "data")
+                .build();
+        DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
+                .dataFilesHash("someRandomHashFromBefore")
+                .build();
+        session.addDataToSign(SIG_ID, dataToSignHolder);
+        getSigningService().finalizeSignature(session, CONTAINER_ID, SIG_ID, "b64".getBytes());
+    }
+
+    protected void assertFinalizeSignatureWithContainerDataFilesChangedClearsDataToSign() {
+        Session session = getSimpleSessionHolderBuilder()
+                .addDataFile("datafile.txt", "data")
+                .build();
+        DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
+                .dataFilesHash("someRandomHashFromBefore")
+                .build();
+        session.addDataToSign(SIG_ID, dataToSignHolder);
+
+        ArgumentCaptor<String> containerIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Session> sessionCaptor = ArgumentCaptor.forClass(Session.class);
+        Mockito.doNothing().when(sessionService).update(containerIdCaptor.capture(), sessionCaptor.capture());
+
+        try {
+            getSigningService().finalizeSignature(session, CONTAINER_ID, SIG_ID, "b64".getBytes());
+        } catch (InvalidSessionDataException e) {
+            //Error response not important for the test
+        }
+
+        String updatedContainerId = containerIdCaptor.getValue();
+        Session updatedSession = sessionCaptor.getValue();
+
+        Assert.assertEquals(CONTAINER_ID, updatedContainerId);
+        Assert.assertEquals(CONTAINER_ID, updatedSession.getSessionId());
+        Assert.assertNull(updatedSession.getDataToSignHolder(SIG_ID));
+    }
 
     protected abstract ContainerSigningService getSigningService();
 
@@ -204,5 +296,12 @@ public abstract class ContainerSigningServiceTest {
     protected abstract void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException;
 
     protected abstract Session getSessionHolder() throws IOException, URISyntaxException;
+
+    protected abstract SimpleSessionHolderBuilder getSimpleSessionHolderBuilder();
+
+    protected interface SimpleSessionHolderBuilder {
+        SimpleSessionHolderBuilder addDataFile(String fileName, String text);
+        Session build();
+    }
 
 }

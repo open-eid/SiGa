@@ -17,6 +17,7 @@ public class DataToSignHolder implements Binarylizable {
     private String sessionCode;
     private DataToSign dataToSign;
     private SigningType signingType;
+    private String dataFilesHash;
 
     @Override
     @SneakyThrows
@@ -24,6 +25,7 @@ public class DataToSignHolder implements Binarylizable {
         writer.writeString("sessionCode", sessionCode);
         writer.writeByteArray("dataToSignSerialized", SerializationUtils.serialize(dataToSign));
         writer.writeObject("signingType", signingType);
+        writer.writeString("dataFilesHash", dataFilesHash);
     }
 
     @Override
@@ -32,5 +34,6 @@ public class DataToSignHolder implements Binarylizable {
         sessionCode = reader.readString("sessionCode");
         dataToSign = SerializationUtils.deserialize(reader.readByteArray("dataToSignSerialized"));
         signingType = reader.readObject("signingType");
+        dataFilesHash = reader.readString("dataFilesHash");
     }
 }

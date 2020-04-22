@@ -13,6 +13,7 @@ import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
@@ -27,8 +28,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,6 +62,15 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
     @Override
     public void verifySigningObjectExistence(Session session) {
         verifyDataFileExistence((HashcodeContainerSessionHolder) session);
+    }
+
+    @Override
+    public String generateDataFilesHash(Session session) {
+        String joinedDataFiles = ((HashcodeContainerSessionHolder) session).getDataFiles().stream()
+                .sorted(Comparator.comparing(HashcodeDataFile::getFileName))
+                .map(dataFile -> dataFile.getFileName() + dataFile.getFileHashSha256())
+                .collect(Collectors.joining());
+        return new String(DigestUtils.sha256(joinedDataFiles));
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashcodeDataFile> dataFiles, SignatureParameters signatureParameters) {

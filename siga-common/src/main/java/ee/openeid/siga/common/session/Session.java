@@ -12,4 +12,6 @@ public interface Session {
     void addDataToSign(String signatureId, DataToSignHolder dataToSign);
 
     DataToSignHolder getDataToSignHolder(String signatureId);
+
+    DataToSignHolder clearSigning(String signatureId);
 }
