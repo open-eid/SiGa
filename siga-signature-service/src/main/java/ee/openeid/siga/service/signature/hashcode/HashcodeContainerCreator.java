@@ -40,7 +40,9 @@ class HashcodeContainerCreator {
 
     void writeHashcodeFiles(List<HashcodeDataFile> dataFiles) {
         writeHashcodeFile(dataFiles, DigestAlgorithm.SHA256, HashcodesDataFile.HASHCODES_SHA256);
-        writeHashcodeFile(dataFiles, DigestAlgorithm.SHA512, HashcodesDataFile.HASHCODES_SHA512);
+        if (dataFiles.stream().anyMatch(df -> df.getFileHashSha512() != null)) {
+            writeHashcodeFile(dataFiles, DigestAlgorithm.SHA512, HashcodesDataFile.HASHCODES_SHA512);
+        }
     }
 
     private void writeHashcodeFile(List<HashcodeDataFile> dataFiles, DigestAlgorithm digestAlgorithm, String entryName) {

@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import ee.openeid.siga.service.signature.test.HashcodeContainerFilesHolder;
 import ee.openeid.siga.service.signature.test.RequestUtil;
@@ -14,10 +15,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -149,4 +148,21 @@ public class HashcodeContainerTest {
         Assert.assertEquals("client_test.go", signatureDataFiles.get(0).getFileName());
         Assert.assertEquals("SHA512", signatureDataFiles.get(0).getHashAlgo());
     }
+
+    @Test
+    public void validHashcodeContainerCreation_withOneDataFile() throws IOException, URISyntaxException{
+        List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
+        hashcodeDataFiles.forEach(hashcodeDataFile -> hashcodeDataFile.setFileHashSha512(null));
+        HashcodeContainer hashcodeContainer = new HashcodeContainer(ServiceType.PROXY);
+        hashcodeDataFiles.forEach(hashcodeContainer::addDataFile);
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            hashcodeContainer.save(outputStream);
+            HashcodeContainerFilesHolder hashcodeContainerFilesHolder = TestUtil.getContainerFiles(outputStream.toByteArray());
+            Assert.assertEquals(TestUtil.MIMETYPE, hashcodeContainerFilesHolder.getMimeTypeContent());
+            Assert.assertEquals(TestUtil.MANIFEST_CONTENT, hashcodeContainerFilesHolder.getManifestContent());
+            Assert.assertEquals(TestUtil.HASHCODES_SHA256_CONTENT, hashcodeContainerFilesHolder.getHashcodesSha256Content());
+            Assert.assertNull(hashcodeContainerFilesHolder.getHashcodesSha512Content());
+        }
+    }
+
 }
