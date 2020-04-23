@@ -304,6 +304,17 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
+        Response pollResponse = pollForMidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @Test
     public void deleteToStartAsicMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 

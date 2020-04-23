@@ -179,6 +179,17 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
+    @Test
+    public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        addDataFile(flow, addDataFileToHashcodeRequest("file.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+        String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response pollResponse = pollForSidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;

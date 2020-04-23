@@ -302,6 +302,17 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+        Response pollResponse = pollForMidSigning(flow, signatureId);
+
+        expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @Test
     public void deleteToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
