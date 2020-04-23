@@ -205,6 +205,8 @@ A table holding all the registered clients that are allowed to use SiGa.
 | contact_email  | VARCHAR(256)                        | Client contact e-mail       |
 | contact_phone  | VARCHAR(30)                         | Client contact phone        |
 | uuid           | VARCHAR(36)                         | Client UUID                 |
+| created_at     | TIMESTAMP                           | Client creation date        |
+| updated_at     | TIMESTAMP                           | Client update date          |
 
 #### SIGA_SERVICE
 
@@ -216,15 +218,18 @@ A table holding all the registered services that are allowed to use SiGa.
 | uuid                         | VARCHAR(36)                         | Service UUID                                                                                                  |
 | signing_secret               | VARCHAR(128)                        | A previously agreed secret that is used to sign all requests sent to SiGa by this service                     |
 | client_id                    | INTEGER                             | Client ID (foreign key to SIGA_CLIENT)                                                                        |
-| name                         | VARCHAR(20)                         | Service name                                                                                                  |
-| sk_relying_party_name        | VARCHAR(20)                         | [MID REST relying party name](https://github.com/SK-EID/MID#21-relyingpartyname)                              |
+| name                         | VARCHAR(100)                        | Service name                                                                                                  |
+| sk_relying_party_name        | VARCHAR(100)                        | [MID REST relying party name](https://github.com/SK-EID/MID#21-relyingpartyname)                              |
 | sk_relying_party_uuid        | VARCHAR(100)                        | [MID REST relying party UUID](https://github.com/SK-EID/MID#22-relyingpartyuuid)                              |
-| smart_id_relying_party_name  | VARCHAR(20)                         | [Smart-ID relying party name](https://github.com/SK-EID/smart-id-documentation#32-relyingpartyname-handling)  |
+| smart_id_relying_party_name  | VARCHAR(100)                        | [Smart-ID relying party name](https://github.com/SK-EID/smart-id-documentation#32-relyingpartyname-handling)  |
 | smart_id_relying_party_uuid  | VARCHAR(100)                        | [Smart-ID relying party UUID](https://github.com/SK-EID/smart-id-documentation#31-uuid-encoding)              |
 | billing_email                | VARCHAR(128)                        | (currently not used by SiGa)                                                                                  |
 | max_connection_count         | INTEGER                             | Allowed maximum number of active sessions for this service. A value of `-1` indicates no limit                |
 | max_connections_size         | BIGINT                              | Allowed cumulative maximum data volume* for all active sessions. A value of `-1` indicates no limit           |
 | max_connection_size          | BIGINT                              | Allowed maximum data volume* for a single session. A value of `-1` indicates no limit                         |
+| inactive                     | BOOLEAN                             | Indicates if the service is active or not                                                                     |
+| created_at                   | TIMESTAMP                           | Service creation date                                                                                         |
+| updated_at                   | TIMESTAMP                           | Service update date                                                                                           |
 
 \* data volume is based on the content length of HTTP POST requests.
 
@@ -238,8 +243,22 @@ A table holding cumulative data volume* per active session.
 | container_id  | VARCHAR(36)                         | Container ID (an internal identifier identifying a currently active session) |
 | service_id    | INTEGER                             | Service ID (foreign key to SIGA_SERVICE)                                     |
 | size          | BIGINT                              | Cumulative data volume* for this session                                     |
+| created_at    | TIMESTAMP                           | Connection creation date                                                     |
+| updated_at    | TIMESTAMP                           | Connection update date                                                       |
 
 \* data volume is based on the content length of HTTP POST requests.
+
+#### SIGA_IP_PERMISSION
+
+A table holding ip permissions for external Siga service (SOAP PROXY)
+
+| Column name   | Type                                | Description                                           |
+| ------------- | ----------------------------------- | ----------------------------------------------------- |
+| id            | SERIAL (autoincrement primary key)  | Entry ID                                              |
+| service_id    | INTEGER                             | Service ID (foreign key to SIGA_SERVICE)              |
+| ip_address    | VARCHAR(36)                         | Allowed ip address                                    |
+| created_at    | TIMESTAMP                           | Ip permission creation date                           |
+| updated_at    | TIMESTAMP                           | Ip permission update date                             |
 
 ### Running SiGa with Docker
 
