@@ -49,7 +49,6 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
-getContainer(flow);
         Response response = getValidationReportForContainerInSession(flow);
         response.then()
                 .statusCode(200)

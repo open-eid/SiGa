@@ -2,6 +2,7 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import eu.europa.esig.dss.model.MimeType;
 import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
@@ -40,10 +41,10 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
-                .body("dataFiles[0].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
-                .body("dataFiles[0].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
-                .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE));
+                .body("dataFiles[0].fileName", equalTo(UPLOADED_FILENAME))
+                .body("dataFiles[0].fileHashSha256", equalTo(UPLOADED_SHA256_DATAFILE))
+                .body("dataFiles[0].fileHashSha512", equalTo(UPLOADED_SHA512_DATAFILE))
+                .body("dataFiles[0].fileSize", equalTo(UPLOADED_FILESIZE));
     }
 
     @Test
@@ -54,10 +55,10 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
-                .body("dataFiles[0].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
-                .body("dataFiles[0].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
-                .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE));
+                .body("dataFiles[0].fileName", equalTo(UPLOADED_FILENAME))
+                .body("dataFiles[0].fileHashSha256", equalTo(UPLOADED_SHA256_DATAFILE))
+                .body("dataFiles[0].fileHashSha512", equalTo(UPLOADED_SHA512_DATAFILE))
+                .body("dataFiles[0].fileSize", equalTo(UPLOADED_FILESIZE));
     }
 
     @Test
@@ -68,10 +69,10 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
-                .body("dataFiles[0].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
-                .body("dataFiles[0].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
-                .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE));
+                .body("dataFiles[0].fileName", equalTo(UPLOADED_FILENAME))
+                .body("dataFiles[0].fileHashSha256", equalTo(UPLOADED_SHA256_DATAFILE))
+                .body("dataFiles[0].fileHashSha512", equalTo(UPLOADED_SHA512_DATAFILE))
+                .body("dataFiles[0].fileSize", equalTo(UPLOADED_FILESIZE));
     }
 
     @Test
@@ -163,10 +164,19 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
-                .body("dataFiles[0].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
-                .body("dataFiles[0].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
-                .body("dataFiles[0].fileSize", equalTo(DEFAULT_FILESIZE));
+                .body("dataFiles[2].fileName", equalTo(DEFAULT_FILENAME))
+                .body("dataFiles[2].fileHashSha256", equalTo(DEFAULT_SHA256_DATAFILE))
+                .body("dataFiles[2].fileHashSha512", equalTo(DEFAULT_SHA512_DATAFILE))
+                .body("dataFiles[2].fileSize", equalTo(DEFAULT_FILESIZE));
+    }
+
+    @Test
+    public void uploadHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+
+        Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+
+        expectError(response, 400, DUPLICATE_DATA_FILE);
     }
 
     @Test

@@ -173,7 +173,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body("dataFiles[0].fileName", equalTo(DEFAULT_FILENAME))
+                .body("dataFiles[0].fileName", equalTo(UPLOADED_FILENAME))
                 .body("dataFiles[0].fileContent", startsWith("c2VlIG9uIHRlc3RmYWls"))
                 .body("dataFiles[1].fileName", equalTo("testFile.txt"))
                 .body("dataFiles[1].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -203,6 +203,15 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
                 .body("dataFiles[0].fileContent", startsWith(DEFAULT_DATAFILE_CONTENT))
                 .body("dataFiles[1].fileName", equalTo("testFile.txt"))
                 .body("dataFiles[1].fileContent", equalTo("eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
+    }
+
+    @Test
+    public void createAsicContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = addDataFile(flow, addDataFileToAsicRequest(DEFAULT_FILENAME, "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
+
+        expectError(response, 400, DUPLICATE_DATA_FILE);
     }
 
     @Test

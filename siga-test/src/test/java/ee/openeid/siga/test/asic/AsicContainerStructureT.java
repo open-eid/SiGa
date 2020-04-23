@@ -52,7 +52,7 @@ public class AsicContainerStructureT extends TestBase {
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
         Assert.assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(DEFAULT_FILENAME, containerBase64));
+        Assert.assertTrue(fileExistsInContainer(UPLOADED_FILENAME, containerBase64));
         Assert.assertTrue(fileExistsInContainer("test.xml", containerBase64));
         Assert.assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
         Assert.assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
