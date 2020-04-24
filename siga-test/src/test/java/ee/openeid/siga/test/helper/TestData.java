@@ -42,6 +42,10 @@ public class TestData {
     public static final String SERVICE_UUID_6 = "cfbdce49-0ec9-4b83-8b41-d22655ea4741";
     public static final String SERVICE_SECRET_6 = "746573745365637265744b6579303036";
 
+    // IP access == true
+    public static final String SERVICE_UUID_7 = "7dc75cb8-7076-4bed-9f06-b304f85cdccd";
+    public static final String SERVICE_SECRET_7 = "746573745365637265744b6579303037";
+
     // Datafile mock strings
     public static final String DEFAULT_SHA256_DATAFILE = "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=";
     public static final String DEFAULT_SHA512_DATAFILE = "hQVz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==";
