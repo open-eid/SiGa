@@ -152,7 +152,7 @@ public class HashcodeContainerTest {
     @Test
     public void validHashcodeContainerCreation_withOneDataFile() throws IOException, URISyntaxException{
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
-        hashcodeDataFiles.forEach(hashcodeDataFile -> hashcodeDataFile.setFileHashSha512(null));
+        hashcodeDataFiles.get(0).setFileHashSha512(null);
         HashcodeContainer hashcodeContainer = new HashcodeContainer(ServiceType.PROXY);
         hashcodeDataFiles.forEach(hashcodeContainer::addDataFile);
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
