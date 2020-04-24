@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.util.Base64;
 import java.util.Optional;
 
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_SHA512;
+
 @UtilityClass
 public final class ContainerUtil {
 
@@ -70,6 +72,18 @@ public final class ContainerUtil {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read hashcode file", e);
         }
+    }
+
+    public static boolean getHashcodeSha512FilePresent(String container) {
+        try {
+            hashcodeDataFileAsXmlPath(HASHCODE_SHA512, container);
+        }
+        catch (IllegalStateException e) {
+            if(e.getMessage().equals("No entry META-INF/hashcodes-sha512.xml found")) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

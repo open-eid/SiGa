@@ -74,43 +74,24 @@ public class SoapProxySpecificT extends TestBase {
 
     @Test
     public void createContainerForSoapProxyDoNotContainSha512file() throws Exception {
-        Boolean sha512NotPresent = false;
         postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null , DEFAULT_FILESIZE));
 
         Response response = getContainer(flow);
         String containerBase64 = response.path(CONTAINER).toString();
-        try {
-            hashcodeDataFileAsXmlPath(HASHCODE_SHA512, containerBase64);
-        }
-        catch (IllegalStateException e) {
-            Assert.assertEquals("No entry META-INF/hashcodes-sha512.xml found", e.getMessage());
-            sha512NotPresent = true;
-        }
-        Assert.assertTrue("Container has hashcodes-sha512.xml file", sha512NotPresent);
+
+        Assert.assertFalse("hashcodes-sha512.xml is present", getHashcodeSha512FilePresent(containerBase64));
     }
 
     @Test
     public void addDataFileForUploadedContainerForSoapProxyDoNotContainSha512file() throws Exception {
-        Boolean sha512NotPresent = false;
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
         addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null, DEFAULT_FILESIZE));
 
         Response response = getContainer(flow);
         String containerBase64 = response.path(CONTAINER).toString();
-        try {
-            hashcodeDataFileAsXmlPath(HASHCODE_SHA512, containerBase64);
-        }
-        catch (IllegalStateException e) {
-            Assert.assertEquals("No entry META-INF/hashcodes-sha512.xml found", e.getMessage());
-            sha512NotPresent = true;
-        }
-        Assert.assertTrue("Container has hashcodes-sha512.xml file", sha512NotPresent);
+
+        Assert.assertFalse("hashcodes-sha512.xml is present", getHashcodeSha512FilePresent(containerBase64));
     }
-
-
-
-
-
 
     @Override
     public String getContainerEndpoint() {
