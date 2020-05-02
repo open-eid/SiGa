@@ -22,9 +22,9 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", equalTo("UP"))
-                .body("details.siga.status", equalTo("UP"))
-                .body("details.siga.details.ignite.status", equalTo("UP"))
-                .body("details.db.status", equalTo("UP"));
+                .body("components.siga.status", equalTo("UP"))
+                .body("components.siga.details.ignite.status", equalTo("UP"))
+                .body("components.db.status", equalTo("UP"));
     }
 
     @Test
@@ -34,12 +34,13 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", notNullValue())
-                .body("details.siga.status", notNullValue())
-                .body("details.siga.details.ignite.status", notNullValue())
-                .body("details.siga.details.ignite.details.igniteActiveContainers", notNullValue())
-                .body("details.db.status", notNullValue())
-                .body("details.db.details.database", notNullValue())
-                .body("details.db.details.hello", notNullValue());
+                .body("components.siga.status", notNullValue())
+                .body("components.siga.details.ignite.status", notNullValue())
+                .body("components.siga.details.ignite.details.igniteActiveContainers", notNullValue())
+                .body("components.db.status", notNullValue())
+                .body("components.db.details.database", notNullValue())
+                .body("components.db.details.result", notNullValue())
+                .body("components.db.details.validationQuery", notNullValue());
     }
 
     @Step("HTTP GET Monitoring status {0}")
