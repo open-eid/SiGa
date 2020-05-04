@@ -54,6 +54,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+        <dependency>
             <groupId>de.qaware.jasypt</groupId>
             <artifactId>jasypt-hibernate5</artifactId>
             <version>1.9.2</version>
