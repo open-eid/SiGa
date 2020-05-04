@@ -92,6 +92,20 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.3</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <SiGa-Webapp-Name>${project.artifactId}</SiGa-Webapp-Name>
+                            <SiGa-Webapp-Version>${project.version}</SiGa-Webapp-Version>
+                            <SiGa-Webapp-Build-Time>${maven.build.timestamp}</SiGa-Webapp-Build-Time>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

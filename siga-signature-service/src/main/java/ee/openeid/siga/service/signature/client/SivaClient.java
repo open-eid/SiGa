@@ -1,6 +1,7 @@
 package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
@@ -9,7 +10,7 @@ import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
-import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
+
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
