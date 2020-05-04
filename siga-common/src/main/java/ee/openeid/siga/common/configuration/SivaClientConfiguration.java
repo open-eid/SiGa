@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.configuration;
+package ee.openeid.siga.common.configuration;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -26,7 +26,8 @@ public class SivaClientConfiguration {
     private ResourceLoader resourceLoader;
 
     @Bean
-    RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) throws Exception {
+    public RestTemplate restTemplate() throws Exception {
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
         SSLContext sslContext = new SSLContextBuilder()
                 .loadTrustMaterial(resourceLoader.getResource(sivaClientConfigurationProperties.getTrustStore()).getFile(), sivaClientConfigurationProperties.getTrustStorePassword().toCharArray())
                 .build();

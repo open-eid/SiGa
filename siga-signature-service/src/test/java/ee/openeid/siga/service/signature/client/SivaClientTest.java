@@ -10,7 +10,7 @@ import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import ee.openeid.siga.service.signature.configuration.SivaClientConfigurationProperties;
+import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.junit.After;
