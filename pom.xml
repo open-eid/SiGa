@@ -95,12 +95,6 @@
             <artifactId>commons-codec</artifactId>
             <version>1.12</version>
         </dependency>
-        <!-- Force older version -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>3.8.0</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
