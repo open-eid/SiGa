@@ -22,8 +22,9 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", equalTo("UP"))
-                .body("components.siga.status", equalTo("UP"))
-                .body("components.siga.details.ignite.status", equalTo("UP"))
+                .body("components.ignite.status", equalTo("UP"))
+                .body("components.metaInfo.status", equalTo("UP"))
+                .body("components.siva.status", equalTo("UP"))
                 .body("components.db.status", equalTo("UP"));
     }
 
@@ -34,13 +35,20 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", notNullValue())
-                .body("components.siga.status", notNullValue())
-                .body("components.siga.details.ignite.status", notNullValue())
-                .body("components.siga.details.ignite.details.igniteActiveContainers", notNullValue())
+                .body("components.ignite.status", notNullValue())
+                .body("components.ignite.status", notNullValue())
+                .body("components.ignite.details.igniteActiveContainers", notNullValue())
                 .body("components.db.status", notNullValue())
                 .body("components.db.details.database", notNullValue())
                 .body("components.db.details.result", notNullValue())
-                .body("components.db.details.validationQuery", notNullValue());
+                .body("components.db.details.validationQuery", notNullValue())
+                .body("components.metaInfo.status", notNullValue())
+                .body("components.metaInfo.details.webappName", notNullValue())
+                .body("components.metaInfo.details.version", notNullValue())
+                .body("components.metaInfo.details.buildTime", notNullValue())
+                .body("components.metaInfo.details.startTime", notNullValue())
+                .body("components.metaInfo.details.currentTime", notNullValue())
+                .body("components.siva.status", notNullValue());
     }
 
     @Step("HTTP GET Monitoring status {0}")
