@@ -22,10 +22,10 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", equalTo("UP"))
-                .body("components.ignite.status", equalTo("UP"))
-                .body("components.metaInfo.status", equalTo("UP"))
-                .body("components.siva.status", equalTo("UP"))
-                .body("components.db.status", equalTo("UP"));
+                .body("details.ignite.status", equalTo("UP"))
+                .body("details.metaInfo.status", equalTo("UP"))
+                .body("details.siva.status", equalTo("UP"))
+                .body("details.db.status", equalTo("UP"));
     }
 
     @Test
@@ -35,20 +35,19 @@ public class MonitoringT extends TestBase {
         response.then()
                 .statusCode(200)
                 .body("status", notNullValue())
-                .body("components.ignite.status", notNullValue())
-                .body("components.ignite.status", notNullValue())
-                .body("components.ignite.details.igniteActiveContainers", notNullValue())
-                .body("components.db.status", notNullValue())
-                .body("components.db.details.database", notNullValue())
-                .body("components.db.details.result", notNullValue())
-                .body("components.db.details.validationQuery", notNullValue())
-                .body("components.metaInfo.status", notNullValue())
-                .body("components.metaInfo.details.webappName", notNullValue())
-                .body("components.metaInfo.details.version", notNullValue())
-                .body("components.metaInfo.details.buildTime", notNullValue())
-                .body("components.metaInfo.details.startTime", notNullValue())
-                .body("components.metaInfo.details.currentTime", notNullValue())
-                .body("components.siva.status", notNullValue());
+                .body("details.ignite.status", notNullValue())
+                .body("details.ignite.status", notNullValue())
+                .body("details.ignite.details.igniteActiveContainers", notNullValue())
+                .body("details.db.status", notNullValue())
+                .body("details.db.details.database", notNullValue())
+                .body("details.db.details.hello", notNullValue())
+                .body("details.metaInfo.status", notNullValue())
+                .body("details.metaInfo.details.webappName", notNullValue())
+                .body("details.metaInfo.details.version", notNullValue())
+                .body("details.metaInfo.details.buildTime", notNullValue())
+                .body("details.metaInfo.details.startTime", notNullValue())
+                .body("details.metaInfo.details.currentTime", notNullValue())
+                .body("details.siva.status", notNullValue());
     }
 
     @Step("HTTP GET Monitoring status {0}")

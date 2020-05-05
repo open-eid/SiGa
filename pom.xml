@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.6.RELEASE</version>
+        <version>2.1.13.RELEASE</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -88,12 +88,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-to-slf4j</artifactId>
             <version>2.13.2</version>
-        </dependency>
-        <!-- Downgrade transitive dependency from spring boot which produces unhandled base64 validation exception via DD4J -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.12</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
