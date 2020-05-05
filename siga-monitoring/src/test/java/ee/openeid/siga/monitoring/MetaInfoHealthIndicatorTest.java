@@ -39,7 +39,6 @@ public class MetaInfoHealthIndicatorTest {
         healthIndicator = new MetaInfoHealthIndicator(manifestReader);
         Health health = healthIndicator.health();
         assertEquals(Status.UP, health.getStatus());
-        assertEquals(health.getStatus(), Status.UP);
         assertEquals(
                 Stream.of(
                         MetaInfoHealthIndicator.RESPONSE_PARAM_WEBAPP_NAME,
@@ -75,7 +74,7 @@ public class MetaInfoHealthIndicatorTest {
         Mockito.when(manifestReader.read(MANIFEST_PARAM_BUILD_TIME)).thenReturn("random_time");
         healthIndicator = new MetaInfoHealthIndicator(manifestReader);
         Health health = healthIndicator.health();
-        assertEquals(health.getStatus(), Status.UP);
+        assertEquals(Status.UP, health.getStatus());
         assertEquals(TEST_WEBAPP, health.getDetails().get(MetaInfoHealthIndicator.RESPONSE_PARAM_WEBAPP_NAME));
         assertEquals(TEST_VERSION, health.getDetails().get(MetaInfoHealthIndicator.RESPONSE_PARAM_VERSION));
         assertEquals(NOT_AVAILABLE, health.getDetails().get(MetaInfoHealthIndicator.RESPONSE_PARAM_BUILD_TIME));
