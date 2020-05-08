@@ -1,4 +1,4 @@
-![EU Regional Development Fund](docs/img/EL_Regionaalarengu_Fond_horisontaalne-vaike.jpg)
+![EU Regional Development Fund](https://github.com/open-eid/SiGa/blob/develop/docs/img/EL_Regionaalarengu_Fond_horisontaalne-vaike.jpg)
 
 # Signature Gateway sample application
 
