@@ -4,29 +4,16 @@
     ​
     <property name="COMMON_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-common.log"/>​
     <property name="EVENTS_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-events.log"/>​
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
-    <property name="COMMON_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%15.15t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
-    <property name="ELK_LOG_PATTERN"
-              value="[x_b3_traceid=%X{X-B3-TraceId}, x_b3_spanid=%X{X-B3-SpanId}] %m%n"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
-        <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
-        </encoder>
+        <encoder class="co.elastic.logging.logback.EcsEncoder"/>
     </appender>
     <appender name="COMMON_LOG_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${COMMON_LOG_FILE}</file>
-        <encoder>
-            <pattern>${COMMON_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
-            <immediateFlush>true</immediateFlush>
-        </encoder>
+        <encoder class="co.elastic.logging.logback.EcsEncoder"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
                 <expression>return message.contains("request_uri=/actuator/health");</expression>
@@ -37,11 +24,7 @@
     </appender>
     <appender name="EVENTS_LOG_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${EVENTS_LOG_FILE}</file>
-        <encoder>
-            <pattern>${ELK_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
-            <immediateFlush>true</immediateFlush>
-        </encoder>
+        <encoder class="co.elastic.logging.logback.EcsEncoder"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>SIGA_EVENT</marker>
