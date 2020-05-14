@@ -266,12 +266,16 @@ For development and testing purposes only!
 
 Docker must be installed and running.
 
-At first build this project:
+First time  setup: 
+
+* build this project
+
 ```bash
 ./mvnw clean install
 ```
 
-From your project directory, start up your applications in test mode by running
+* From your project directory, start up your applications in test mode by running
+
 ```bash
 docker-compose up
 ```
@@ -286,4 +290,22 @@ SiGa itself is accessible
 https://localhost:8443/siga
 `
 
-ASIC container support is not ready for production.
+For updating software:
+
+* Build the project with changes
+
+```bash
+./mvnw clean install
+```
+
+* Update docker image
+
+```bash
+docker-compose build
+```
+
+* Run the image
+
+```bash
+docker-compose up
+```
