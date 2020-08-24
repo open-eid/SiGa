@@ -28,3 +28,6 @@
 /.nb-gradle/
 /build/
 logs/
+
+### Ignite work dirs ###
+ignite/

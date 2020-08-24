@@ -23,7 +23,7 @@ services:
       - ignite
   ignite:
     build:
-      context: docker/ignite/
+      context: docker/docker-ignite/
     ports:
       - "47500:47500"
     networks:
