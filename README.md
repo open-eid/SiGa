@@ -31,7 +31,7 @@ Run the following command:
 
 SiGa project compiles into a WAR (Web application archive) file and requires a servlet container to run.
 
-Additionally [Apache Ignite](https://ignite.apache.org/) version 2.7.5 is required for session management. **Ignite servers must be up and running prior SiGa startup.**
+Additionally [Apache Ignite](https://ignite.apache.org/) version 2.8.1 is required for session management. **Ignite servers must be up and running prior SiGa startup.**
 Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](siga-webapp/src/main/resources/ignite/ignite-configuration.xml).
 
 ### Running SiGa in Tomcat
