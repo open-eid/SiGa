@@ -112,6 +112,12 @@
             <groupId>org.webjars.npm</groupId>
             <artifactId>bootstrap-vue</artifactId>
             <version>2.0.0-rc.13</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.npm</groupId>
+                    <artifactId>bootstrap</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.webjars.npm</groupId>
