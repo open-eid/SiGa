@@ -10,8 +10,6 @@ import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
-import ee.openeid.siga.mobileid.client.DigiDocService;
-import ee.openeid.siga.mobileid.client.MobileIdService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -63,12 +61,6 @@ public class SignatureFinalizingTest {
 
     @InjectMocks
     private HashcodeContainerSigningService signingService;
-
-    @Mock
-    private MobileIdService mobileIdService;
-
-    @Mock
-    private DigiDocService digiDocService;
 
     @Mock
     private SessionService sessionService;

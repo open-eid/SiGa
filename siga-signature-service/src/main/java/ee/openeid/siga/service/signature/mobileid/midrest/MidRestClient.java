@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.mobileid;
+package ee.openeid.siga.service.signature.mobileid.midrest;
 
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.Result;
@@ -10,7 +10,11 @@ import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
 import ee.openeid.siga.common.exception.MidException;
-import ee.openeid.siga.service.signature.configuration.MidRestConfigurationProperties;
+import ee.openeid.siga.service.signature.mobileid.CertificateStatus;
+import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
+import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
+import ee.openeid.siga.service.signature.mobileid.MidStatus;
+import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import ee.sk.mid.MidClient;
 import ee.sk.mid.MidHashToSign;
 import ee.sk.mid.MidHashType;
@@ -25,15 +29,18 @@ import ee.sk.mid.rest.dao.response.MidCertificateChoiceResponse;
 import ee.sk.mid.rest.dao.response.MidSignatureResponse;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ServerErrorException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
 
+@Component
+@EnableConfigurationProperties(MidRestConfigurationProperties.class)
 public class MidRestClient implements MobileIdClient {
 
-    private MidRestConfigurationProperties configurationProperties;
     private static final Map<String, MidStatus> COMPLETE_STATE_MAPPINGS = Map.of(
             "OK", MidStatus.SIGNATURE,
             "TIMEOUT", MidStatus.EXPIRED_TRANSACTION,
@@ -43,6 +50,13 @@ public class MidRestClient implements MobileIdClient {
             "SIM_ERROR", MidStatus.SIM_ERROR,
             "PHONE_ABSENT", MidStatus.PHONE_ABSENT
     );
+
+    private final MidRestConfigurationProperties configurationProperties;
+
+    @Autowired
+    public MidRestClient(MidRestConfigurationProperties configurationProperties) {
+        this.configurationProperties = configurationProperties;
+    }
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
@@ -167,14 +181,7 @@ public class MidRestClient implements MobileIdClient {
     private static CertificateStatus mapToCertificateStatus(String result) {
         if (CertificateStatus.NOT_FOUND.name().equals(result)) {
             return CertificateStatus.NOT_FOUND;
-        } else if (CertificateStatus.NOT_ACTIVE.name().equals(result)) {
-            return CertificateStatus.NOT_ACTIVE;
         }
         return CertificateStatus.UNEXPECTED_STATUS;
-    }
-
-    @Autowired
-    public void setConfigurationProperties(MidRestConfigurationProperties configurationProperties) {
-        this.configurationProperties = configurationProperties;
     }
 }

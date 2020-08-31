@@ -8,7 +8,8 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.MidException;
-import ee.openeid.siga.service.signature.configuration.MidRestConfigurationProperties;
+import ee.openeid.siga.service.signature.mobileid.midrest.MidRestClient;
+import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
 import ee.sk.mid.MidVerificationCodeCalculator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.DataToSign;
@@ -81,17 +82,6 @@ public class MidRestClientWireMockTest {
             Assert.fail("Should not reach here");
         } catch (MidException e) {
             Assert.assertEquals("NOT_FOUND", e.getMessage());
-        }
-    }
-
-    @Test
-    public void getCertificate_midRestReturnsNotActive() {
-        stubCertificateRequestOkResponse("{\"result\": \"NOT_ACTIVE\"}");
-        try {
-            midRestClient.getCertificate(createDefaultMobileIdInformation());
-            Assert.fail("Should not reach here");
-        } catch (MidException e) {
-            Assert.assertEquals("NOT_ACTIVE", e.getMessage());
         }
     }
 

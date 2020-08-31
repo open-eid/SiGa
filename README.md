@@ -7,7 +7,7 @@ Signature Gateway is a web service for creating, signing and validating ASIC-E a
 ## External services used by SiGa
 
 * [Signature Validation Service](http://open-eid.github.io/SiVa/) for validating signatures.
-* [DigiDocService](http://sk-eid.github.io/dds-documentation/) or [MID REST service](https://github.com/SK-EID/MID/wiki) for signing with Mobile-ID (depending on the configuration).
+* [MID REST service](https://github.com/SK-EID/MID/wiki) for signing with Mobile-ID (depending on the configuration).
 * [Smart-ID service](https://github.com/SK-EID/smart-id-documentation)* for signing with Smart-ID (if enabled in configuration).
 
 \* Smart-ID support is not currently production ready. Use at your own risk.
@@ -83,7 +83,6 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 | digidoc4jProd      | Use DD4J production mode                                |
 | digidoc4jTest      | Use DD4J test mode (prefer AIA-OCSP)                    |
 | digidoc4jPerf      | Use DD4J test mode (without AIA-OCSP)                   |
-| midRest            | Use MID REST instead of DDS for signing with mobile-ID  |
 | smartId            | Enable endpoints for signing with Smart-ID*             |
 | datafileContainer  | Enable datafile container endpoints**                   |
 
@@ -125,21 +124,7 @@ More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Qu
 | -------------- | --------- | ---------------------------------- | ----------------------------------- |
 | siga.siva.url  | Y         | Signature validation service URL.  | `https://siva-arendus.eesti.ee/V3`  |
 
-#### SiGa DDS configuration
-
-Applicable if `midRest` profile is **not** active.
-
-| Parameter                      | Mandatory | Description                                                                                                                        | Example                             |
-| ------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| siga.dds.url-v1                | Y         | DigiDocService access url for v1 endpoint.                                                                                         | `https://tsp.demo.sk.ee/`           |
-| siga.dds.url-v2                | Y         | DigiDocService access url for v2 endpoint.                                                                                         | `https://tsp.demo.sk.ee/v2/`        |
-| siga.dds.trust-store           | Y         | Location of the DDS truststore file.                                                                                               | `file:/path/to/dds_truststore.p12`  |
-| siga.dds.trust-store-password  | Y         | Password to access DDS truststore file.                                                                                            | `changeit`                          |
-| siga.dds.relying-party-name    | Y         | DigiDocService relying party name: name of the service – previously agreed with Application Provider and DigiDocService operator.  | `Testimine`                         |
-
 #### SiGa MID REST configuration
-
-Applicable if `midRest` profile is active.
 
 | Parameter         | Mandatory | Description            | Example                           |
 | ----------------- | --------- | ---------------------- | --------------------------------- |

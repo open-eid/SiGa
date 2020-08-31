@@ -16,7 +16,6 @@
     <name>Signature Gateway</name>
 
     <modules>
-        <module>mobile-id-client</module>
         <module>siga-common</module>
         <module>siga-webapp</module>
         <module>siga-auth</module>
@@ -39,7 +38,6 @@
             **/ee/openeid/siga/client/**/*,
             **/ee/openeid/siga/service/signature/configuration/*,
             **/ee/openeid/siga/mobileid/model/mid/*,
-            **/ee/openeid/siga/mobileid/model/dds/*,
             **/ee/openeid/siga/common/model/*,
             **/ee/openeid/siga/common/exception/*
         </sonar.exclusions>

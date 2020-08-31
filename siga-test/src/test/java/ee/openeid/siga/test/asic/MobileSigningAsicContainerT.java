@@ -82,22 +82,6 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void mobileIdNotActivated() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019928", "+37200000366", "LT"));
-
-        expectError(response, 400, MID_EXCEPTION, NOT_ACTIVE);
-    }
-
-    @Test
-    public void mobileIdCertificateRevoked() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019939", "+37200000266", "LT"));
-
-        expectError(response, 400, MID_EXCEPTION, NOT_ACTIVE);
-    }
-
-    @Test
     public void mobileIdSendingFailed() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019947", "+37207110066", "LT"));

@@ -59,7 +59,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     public void validateHashcodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));
         assertThat(response.statusCode(), equalTo(400));
-        assertThat(response.getBody().path(ERROR_CODE), equalTo("CLIENT_EXCEPTION"));
+        assertThat(response.getBody().path(ERROR_CODE), equalTo(CLIENT_EXCEPTION));
         assertThat(response.getBody().path(ERROR_MESSAGE), equalTo("Unable to validate container! Container contains signature with unsupported signature profile: LTA"));
     }
 
