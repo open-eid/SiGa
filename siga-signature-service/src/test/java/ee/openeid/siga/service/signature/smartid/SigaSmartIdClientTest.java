@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;

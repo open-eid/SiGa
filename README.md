@@ -83,6 +83,7 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 | digidoc4jProd      | Use DD4J production mode                                |
 | digidoc4jTest      | Use DD4J test mode (prefer AIA-OCSP)                    |
 | digidoc4jPerf      | Use DD4J test mode (without AIA-OCSP)                   |
+| mobileId           | Enable endpoints for signing with Mobile-ID             |
 | smartId            | Enable endpoints for signing with Smart-ID*             |
 | datafileContainer  | Enable datafile container endpoints**                   |
 
@@ -125,6 +126,8 @@ More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Qu
 | siga.siva.url  | Y         | Signature validation service URL.  | `https://siva-arendus.eesti.ee/V3`  |
 
 #### SiGa MID REST configuration
+
+Applicable if `mobileId` profile is active.
 
 | Parameter         | Mandatory | Description            | Example                           |
 | ----------------- | --------- | ---------------------- | --------------------------------- |
