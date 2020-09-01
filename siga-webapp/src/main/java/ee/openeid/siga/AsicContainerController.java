@@ -3,9 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.model.ContainerInfo;
 import ee.openeid.siga.common.model.DataToSignWrapper;
-import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -127,43 +125,6 @@ public class AsicContainerController {
         return response;
     }
 
-
-    @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
-    @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreateContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
-
-        List<String> roles = createMobileIdSigningRequest.getRoles();
-        RequestValidator.validateRoles(roles);
-        String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
-        SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
-
-        MobileIdInformation mobileIdInformation = getMobileIdInformation(createMobileIdSigningRequest);
-        SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-
-        SigningChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
-
-        CreateContainerMobileIdSigningResponse response = new CreateContainerMobileIdSigningResponse();
-        response.setChallengeId(challenge.getChallengeId());
-        response.setGeneratedSignatureId(challenge.getGeneratedSignatureId());
-        return response;
-    }
-
-    @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_STATUS)
-    @GetMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
-        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation();
-        String status = signingService.processMobileStatus(containerId, signatureId, mobileIdInformation);
-
-        GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
-        response.setMidStatus(status);
-        return response;
-    }
-
     @SigaEventLog(eventName = SigaEventName.GET_SIGNATURES_LIST)
     @GetMapping(value = "/containers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
@@ -244,14 +205,6 @@ public class AsicContainerController {
         DeleteContainerResponse response = new DeleteContainerResponse();
         response.setResult(result);
         return response;
-    }
-
-    private MobileIdInformation getMobileIdInformation(CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
-        String language = createMobileIdSigningRequest.getLanguage();
-        String messageToDisplay = createMobileIdSigningRequest.getMessageToDisplay();
-        String phoneNo = createMobileIdSigningRequest.getPhoneNo();
-        String personIdentifier = createMobileIdSigningRequest.getPersonIdentifier();
-        return RequestTransformer.transformMobileIdInformation(language, messageToDisplay, personIdentifier, phoneNo);
     }
 
     @Autowired

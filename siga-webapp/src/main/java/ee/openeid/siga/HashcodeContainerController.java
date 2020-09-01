@@ -3,9 +3,7 @@ package ee.openeid.siga;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.model.DataToSignWrapper;
-import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -123,43 +121,6 @@ public class HashcodeContainerController {
         return response;
     }
 
-    @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_INIT)
-    @PostMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
-
-        List<String> roles = createMobileIdSigningRequest.getRoles();
-        RequestValidator.validateRoles(roles);
-        String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
-        SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
-
-        MobileIdInformation mobileIdInformation = getMobileIdInformation(createMobileIdSigningRequest);
-
-        SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
-
-        SigningChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
-
-        CreateHashcodeContainerMobileIdSigningResponse response = new CreateHashcodeContainerMobileIdSigningResponse();
-        response.setChallengeId(challenge.getChallengeId());
-        response.setGeneratedSignatureId(challenge.getGeneratedSignatureId());
-        return response;
-    }
-
-    @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_STATUS)
-    @GetMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
-        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation();
-        String status = signingService.processMobileStatus(containerId, signatureId, mobileIdInformation);
-
-        GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
-        response.setMidStatus(status);
-        return response;
-    }
-
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURES_LIST)
     @GetMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
@@ -240,14 +201,6 @@ public class HashcodeContainerController {
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
         response.setResult(result.name());
         return response;
-    }
-
-    private MobileIdInformation getMobileIdInformation(CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
-        String language = createMobileIdSigningRequest.getLanguage();
-        String messageToDisplay = createMobileIdSigningRequest.getMessageToDisplay();
-        String phoneNo = createMobileIdSigningRequest.getPhoneNo();
-        String personIdentifier = createMobileIdSigningRequest.getPersonIdentifier();
-        return RequestTransformer.transformMobileIdInformation(language, messageToDisplay, personIdentifier, phoneNo);
     }
 
     @Autowired

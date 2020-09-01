@@ -1,4 +1,4 @@
-package ee.openeid.siga.service.signature.configuration;
+package ee.openeid.siga.service.signature.smartid;
 
 import lombok.AccessLevel;
 import lombok.Getter;

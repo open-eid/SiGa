@@ -7,7 +7,6 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;

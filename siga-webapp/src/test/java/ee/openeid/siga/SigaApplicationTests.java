@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer"})
+@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
 public class SigaApplicationTests extends TestBase {

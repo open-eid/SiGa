@@ -743,7 +743,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/remotesigning">
+            <resource path="containers/{containerId}/remotesigning/{signatureId}">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="updateContainerRemoteSigning" name="PUT">
@@ -836,7 +836,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/mobileidsigning/status">
+            <resource path="containers/{containerId}/mobileidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getContainerMobileIdSigningStatus" name="GET">
@@ -923,7 +923,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/smartidsigning/status">
+            <resource path="containers/{containerId}/smartidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getContainerSmartIdSigningStatus" name="GET">
@@ -977,7 +977,7 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hcontainers/{containerId}/signatures">
+            <resource path="containers/{containerId}/signatures">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getContainerSignatures" name="GET">

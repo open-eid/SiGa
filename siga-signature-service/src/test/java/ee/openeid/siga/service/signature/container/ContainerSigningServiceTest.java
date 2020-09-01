@@ -7,7 +7,7 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.service.signature.configuration.SmartIdServiceConfigurationProperties;
+import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MidStatus;

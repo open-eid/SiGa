@@ -27,7 +27,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer"})
+@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
 public class SigaProxyApplicationTests extends TestBase {
