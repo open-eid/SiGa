@@ -18,24 +18,18 @@
                 type="tns:updateHashcodeContainerRemoteSigningRequest"/>
     <xs:element name="updateHashcodeContainerRemoteSigningResponse"
                 type="tns:updateHashcodeContainerRemoteSigningResponse"/>
-    <xs:element name="deleteHashcodeContainerRemoteSigningResponse"
-                type="tns:deleteHashcodeContainerRemoteSigningResponse"/>
     <xs:element name="createHashcodeContainerMobileIdSigningRequest"
                 type="tns:createHashcodeContainerMobileIdSigningRequest"/>
     <xs:element name="createHashcodeContainerMobileIdSigningResponse"
                 type="tns:createHashcodeContainerMobileIdSigningResponse"/>
     <xs:element name="getHashcodeContainerMobileIdSigningStatusResponse"
                 type="tns:getHashcodeContainerMobileIdSigningStatusResponse"/>
-    <xs:element name="deleteHashcodeContainerMobileIdSigningResponse"
-                type="tns:deleteHashcodeContainerMobileIdSigningResponse"/>
     <xs:element name="createHashcodeContainerSmartIdSigningRequest"
                 type="tns:createHashcodeContainerSmartIdSigningRequest"/>
     <xs:element name="createHashcodeContainerSmartIdSigningResponse"
                 type="tns:createHashcodeContainerSmartIdSigningResponse"/>
     <xs:element name="getHashcodeContainerSmartIdSigningStatusResponse"
                 type="tns:getHashcodeContainerSmartIdSigningStatusResponse"/>
-    <xs:element name="deleteHashcodeContainerSmartIdSigningResponse"
-                type="tns:deleteHashcodeContainerSmartIdSigningResponse"/>
     <xs:element name="getHashcodeContainerSignaturesResponse" type="tns:getHashcodeContainerSignaturesResponse"/>
     <xs:element name="getHashcodeContainerSignatureDetailsResponse"
                 type="tns:getContainerSignatureDetailsResponse"/>
@@ -57,15 +51,12 @@
     <xs:element name="createContainerRemoteSigningResponse" type="tns:createContainerRemoteSigningResponse"/>
     <xs:element name="updateContainerRemoteSigningRequest" type="tns:updateContainerRemoteSigningRequest"/>
     <xs:element name="updateContainerRemoteSigningResponse" type="tns:updateContainerRemoteSigningResponse"/>
-    <xs:element name="deleteContainerRemoteSigningResponse" type="tns:deleteContainerRemoteSigningResponse"/>
     <xs:element name="createContainerMobileIdSigningRequest" type="tns:createContainerMobileIdSigningRequest"/>
     <xs:element name="createContainerMobileIdSigningResponse" type="tns:createContainerMobileIdSigningResponse"/>
     <xs:element name="getContainerMobileIdSigningStatusResponse" type="tns:getContainerMobileIdSigningStatusResponse"/>
-    <xs:element name="deleteContainerMobileIdSigningResponse" type="tns:deleteContainerMobileIdSigningResponse"/>
     <xs:element name="createContainerSmartIdSigningRequest" type="tns:createContainerSmartIdSigningRequest"/>
     <xs:element name="createContainerSmartIdSigningResponse" type="tns:createContainerSmartIdSigningResponse"/>
     <xs:element name="getContainerSmartIdSigningStatusResponse" type="tns:getContainerSmartIdSigningStatusResponse"/>
-    <xs:element name="deleteContainerSmartIdSigningResponse" type="tns:deleteContainerSmartIdSigningResponse"/>
     <xs:element name="getContainerSignaturesResponse" type="tns:getContainerSignaturesResponse"/>
     <xs:element name="getContainerSignatureDetailsResponse" type="tns:getContainerSignatureDetailsResponse"/>
     <xs:element name="createContainerDataFileRequest" type="tns:createContainerDataFileRequest"/>
@@ -139,11 +130,6 @@
             <xs:element name="result" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="deleteHashcodeContainerRemoteSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
     <xs:complexType name="createHashcodeContainerMobileIdSigningRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
@@ -166,11 +152,6 @@
             <xs:element name="midStatus" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="deleteHashcodeContainerMobileIdSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
     <xs:complexType name="createHashcodeContainerSmartIdSigningRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
@@ -190,11 +171,6 @@
     <xs:complexType name="getHashcodeContainerSmartIdSigningStatusResponse">
         <xs:sequence>
             <xs:element name="sidStatus" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="deleteHashcodeContainerSmartIdSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="getHashcodeContainerSignaturesResponse">
@@ -296,11 +272,6 @@
             <xs:element name="result" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="deleteContainerRemoteSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
     <xs:complexType name="createContainerMobileIdSigningRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
@@ -323,11 +294,6 @@
             <xs:element name="midStatus" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="deleteContainerMobileIdSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
     <xs:complexType name="createContainerSmartIdSigningRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
@@ -347,11 +313,6 @@
     <xs:complexType name="getContainerSmartIdSigningStatusResponse">
         <xs:sequence>
             <xs:element name="sidStatus" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="deleteContainerSmartIdSigningResponse">
-        <xs:sequence>
-            <xs:element name="result" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="getContainerSignaturesResponse">

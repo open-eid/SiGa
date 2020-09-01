@@ -192,33 +192,6 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hashcodecontainers/{containerId}/remotesigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteHashcodeContainerRemoteSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteHashcodeContainerRemoteSigningResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
             <resource path="hashcodecontainers/{containerId}/mobileidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -279,33 +252,6 @@
                     </response>
                 </method>
             </resource>
-            <resource path="hashcodecontainers/{containerId}/mobileidsigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteHashcodeContainerMobileIdSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteHashcodeContainerMobileIdSigningResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
             <resource path="hashcodecontainers/{containerId}/smartidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -346,33 +292,6 @@
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getHashcodeContainerSmartIdSigningStatusResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
-            <resource path="hashcodecontainers/{containerId}/smartidsigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteHashcodeContainerSmartIdSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteHashcodeContainerSmartIdSigningResponse"
                                             mediaType="application/json"
                                             xmlns=""/>
                     </response>
@@ -776,33 +695,6 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/remotesigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteContainerRemoteSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteContainerRemoteSigningResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
             <resource path="containers/{containerId}/mobileidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -863,33 +755,6 @@
                     </response>
                 </method>
             </resource>
-            <resource path="containers/{containerId}/mobileidsigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteContainerMobileIdSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteContainerMobileIdSigningResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
             <resource path="containers/{containerId}/smartidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -930,33 +795,6 @@
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getContainerSmartIdSigningStatusResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="400">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="401">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                    <response status="500">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
-                                            mediaType="application/json"
-                                            xmlns=""/>
-                    </response>
-                </method>
-            </resource>
-            <resource path="containers/{containerId}/smartidsigning">
-                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
-                <method id="deleteContainerSmartIdSigning" name="DELETE">
-                    <response status="200">
-                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
-                                            element="tns:deleteContainerSmartIdSigningResponse"
                                             mediaType="application/json"
                                             xmlns=""/>
                     </response>
