@@ -15,7 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ValidateHashcodeContainerT extends TestBase {
@@ -49,7 +49,7 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
         assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
         assertThat(response.getBody().path("validationConclusion.policy.policyName"), equalTo("POLv4"));
-        assertThat(response.getBody().path("validationConclusion.validationWarnings[0].content"), equalTo("Please add Time-Stamp to the file for long term DDOC validation. This can be done with Time-Stamping application TeRa"));
+        assertThat(response.getBody().path("validationConclusion.validationWarnings.content"), hasItem("Please add Time-Stamp to the file for long term DDOC validation. This can be done with Time-Stamping application TeRa"));
         assertThat(response.getBody().path(REPORT_SIGNATURE_FORM), equalTo("DIGIDOC_XML_1.3_hashcode"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signatureFormat"), equalTo("DIGIDOC_XML_1.3"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2012-10-03T07:46:51Z"));
