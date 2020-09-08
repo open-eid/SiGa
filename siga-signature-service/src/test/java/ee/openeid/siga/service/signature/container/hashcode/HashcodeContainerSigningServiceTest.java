@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -44,6 +45,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
+    @Spy
     @InjectMocks
     private HashcodeContainerSigningService signingService;
 
@@ -145,7 +147,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
-        assertSuccessfulSmartIdSignatureProcessing(sessionService);
+        assertSuccessfulSmartIdSignatureProcessing(sessionService, signingService);
     }
 
     @Test

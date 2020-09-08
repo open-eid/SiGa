@@ -171,7 +171,7 @@ public abstract class TestBase {
     private Callable<Boolean> isSidFinished(SigaApiFlow flow, String signatureId) {
         return new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                return !"RUNNING".equals(getSmartIdSigningInSession(flow, signatureId).getBody().path(SMARTID_STATUS));
+                return !"OUTSTANDING_TRANSACTION".equals(getSmartIdSigningInSession(flow, signatureId).getBody().path(SMARTID_STATUS));
             }
         };
     }
@@ -356,5 +356,11 @@ public abstract class TestBase {
         response.then()
                 .statusCode(200)
                 .body(MID_STATUS, equalTo(message));
+    }
+
+    protected void expectSmartIdStatus(Response response, String message) {
+        response.then()
+                .statusCode(200)
+                .body(SMARTID_STATUS, equalTo(message));
     }
 }

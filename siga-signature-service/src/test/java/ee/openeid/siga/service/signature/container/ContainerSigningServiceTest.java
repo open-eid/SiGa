@@ -7,18 +7,17 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import ee.openeid.siga.service.signature.smartid.InitSmartIdSignatureResponse;
 import ee.openeid.siga.service.signature.smartid.SigaSmartIdClient;
+import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
+import ee.openeid.siga.service.signature.smartid.SmartIdStatusResponse;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.SmartIdCertificate;
-import ee.sk.smartid.rest.dao.SessionSignature;
-import ee.sk.smartid.rest.dao.SessionStatus;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.Signature;
@@ -38,6 +37,8 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.createSignature
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 public abstract class ContainerSigningServiceTest {
 
@@ -48,9 +49,6 @@ public abstract class ContainerSigningServiceTest {
 
     @Mock
     private SigaSmartIdClient smartIdClient;
-
-    @Mock
-    private SmartIdServiceConfigurationProperties smartIdProperties;
 
     @Mock
     protected SessionService sessionService;
@@ -175,7 +173,8 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());
     }
 
-    protected void assertSuccessfulSmartIdSignatureProcessing(SessionService sessionService) throws IOException, URISyntaxException {
+    protected void assertSuccessfulSmartIdSignatureProcessing(SessionService sessionService,
+            ContainerSigningService containerSigningService) throws IOException, URISyntaxException {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
@@ -183,20 +182,21 @@ public abstract class ContainerSigningServiceTest {
         Session sessionHolder = getSessionHolder();
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
-        SessionStatus sessionStatus = new SessionStatus();
-        sessionStatus.setState("COMPLETE");
-        SessionSignature sessionSignature = new SessionSignature();
-        byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
-        sessionSignature.setValue(new String(Base64.getEncoder().encode(signatureRaw)));
-        sessionStatus.setSignature(sessionSignature);
+        byte[] signature = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
+        SmartIdStatusResponse statusResponse = SmartIdStatusResponse.builder()
+                .status(SmartIdSessionStatus.OK)
+                .signature(signature)
+                .build();
 
-        Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(sessionStatus);
+        Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
 
         mockSmartIdSessionHolder(dataToSign);
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
-        getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), smartIdInformation);
-
-
+        String status = getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(),
+                smartIdInformation);
+        Assert.assertEquals(SmartIdSessionStatus.OK.getSigaMessage(), status);
+        Mockito.verify(sessionService, Mockito.times(2)).update(eq(CONTAINER_ID), any());
+        Mockito.verify(containerSigningService, Mockito.times(1)).finalizeSignature(any(), eq(CONTAINER_ID), anyString(), any());
     }
 
     protected void assertGeneratesOrderAgnosticDataFilesHash() {

@@ -46,11 +46,20 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void signWithSmartIdNonExistingPersonalNo() throws Exception {
+    public void signWithSmartIdUserRefused() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("11111111111", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010016", "LT"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
 
-        expectError(response, 400, SMARTID_EXCEPTION);
+    @Test
+    public void signWithSmartIdNotFound() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("123abc", "LT"));
+        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
     }
 
     @Test

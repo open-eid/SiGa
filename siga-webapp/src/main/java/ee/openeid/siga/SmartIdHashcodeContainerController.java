@@ -31,7 +31,9 @@ public class SmartIdHashcodeContainerController {
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_INIT)
     @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreateHashcodeContainerSmartIdSigningResponse createHashcodeContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerSmartIdSigningRequest createSmartIdSigningRequest) {
+    public CreateHashcodeContainerSmartIdSigningResponse createHashcodeContainerSmartIdSigning(
+            @PathVariable(value = "containerId") String containerId,
+            @RequestBody CreateHashcodeContainerSmartIdSigningRequest createSmartIdSigningRequest) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
 
@@ -44,7 +46,7 @@ public class SmartIdHashcodeContainerController {
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
         RequestValidator.validateSmartIdInformation(smartIdInformation);
 
-        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, getSmartIdInformation(createSmartIdSigningRequest), signatureParameters);
+        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
         CreateHashcodeContainerSmartIdSigningResponse response = new CreateHashcodeContainerSmartIdSigningResponse();
         response.setChallengeId(signingChallenge.getChallengeId());
@@ -54,7 +56,9 @@ public class SmartIdHashcodeContainerController {
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_STATUS)
     @GetMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public GetHashcodeContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
+    public GetHashcodeContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(
+            @PathVariable(value = "containerId") String containerId,
+            @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
         SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation(null, null, null);
@@ -64,7 +68,6 @@ public class SmartIdHashcodeContainerController {
         response.setSidStatus(status);
         return response;
     }
-
 
     private SmartIdInformation getSmartIdInformation(CreateHashcodeContainerSmartIdSigningRequest containerSmartIdSigningRequest) {
         String country = containerSmartIdSigningRequest.getCountry();

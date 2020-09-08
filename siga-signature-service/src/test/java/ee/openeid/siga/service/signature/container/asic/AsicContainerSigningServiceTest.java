@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
@@ -48,6 +49,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
+    @Spy
     @InjectMocks
     private AsicContainerSigningService signingService;
 
@@ -137,7 +139,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
 
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
-        assertSuccessfulSmartIdSignatureProcessing(sessionService);
+        assertSuccessfulSmartIdSignatureProcessing(sessionService, signingService);
     }
 
     @Test

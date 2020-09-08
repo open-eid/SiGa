@@ -41,6 +41,22 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void signWithSmartIdUserRefused() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010016", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdNotFound() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("123abc", "LT"));
+        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+    }
+
+    @Test
     public void deleteToStartHashcodeSmartIdSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 

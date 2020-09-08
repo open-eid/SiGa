@@ -366,14 +366,14 @@ public abstract class TestBase {
     protected Callable<Boolean> isSmartIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String smartIdStatus = getSmartIdStatus(containerId, signatureId);
-            return "COMPLETE".equals(smartIdStatus);
+            return "SIGNATURE".equals(smartIdStatus);
         };
     }
 
     protected Callable<Boolean> isHashcodeSmartIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-            return "COMPLETE".equals(smartIdStatus);
+            return "SIGNATURE".equals(smartIdStatus);
         };
     }
 

@@ -20,9 +20,10 @@ import ee.openeid.siga.service.signature.mobileid.MidStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdClient;
 import ee.openeid.siga.service.signature.smartid.InitSmartIdSignatureResponse;
 import ee.openeid.siga.service.signature.smartid.SigaSmartIdClient;
+import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
+import ee.openeid.siga.service.signature.smartid.SmartIdStatusResponse;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.SmartIdCertificate;
-import ee.sk.smartid.rest.dao.SessionStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.DataToSign;
@@ -46,7 +47,6 @@ import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FIN
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.*;
 import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
-import static ee.openeid.siga.service.signature.smartid.SigaSmartIdClient.SMART_ID_FINISHED_STATE;
 
 @Slf4j
 public abstract class ContainerSigningService {
@@ -167,15 +167,15 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
-        SessionStatus sessionStatus = smartIdClient.getSmartIdStatus(smartIdInformation, dataToSignHolder.getSessionCode());
-        if (SMART_ID_FINISHED_STATE.equals(sessionStatus.getState())) {
-            String signatureValue = sessionStatus.getSignature().getValue();
-            Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, Base64.getDecoder().decode(signatureValue.getBytes()));
+        SmartIdStatusResponse sessionResponse = smartIdClient.getSmartIdStatus(smartIdInformation, dataToSignHolder.getSessionCode());
 
+        if (sessionResponse.getStatus() == SmartIdSessionStatus.OK) {
+            Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, sessionResponse.getSignature());
             addSignatureToSession(sessionHolder, signature, signatureId);
             sessionService.update(containerId, sessionHolder);
         }
-        return sessionStatus.getState();
+
+        return sessionResponse.getStatus().getSigaMessage();
     }
 
     protected Signature finalizeSignature(Session session, String containerId, String signatureId, byte[] base64Decoded) {
