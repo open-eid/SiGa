@@ -214,7 +214,6 @@ public abstract class ContainerSigningServiceTest {
 
         SignatureParameters signatureParameters = createSignatureParameters(null);
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
-        smartIdInformation.setDocumentNumber(DOCUMENT_NUMBER);
         SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
         Assert.assertNotNull(signingChallenge.getChallengeId());
         Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());

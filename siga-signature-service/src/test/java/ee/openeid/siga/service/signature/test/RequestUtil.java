@@ -165,6 +165,7 @@ public class RequestUtil {
         SmartIdInformation smartIdInformation = SmartIdInformation.builder()
                 .personIdentifier("10101010005")
                 .country("EE")
+                .documentNumber(DOCUMENT_NUMBER)
                 .relyingPartyUuid("00000000-0000-0000-0000-000000000000")
                 .relyingPartyName("DEMO")
                 .build();

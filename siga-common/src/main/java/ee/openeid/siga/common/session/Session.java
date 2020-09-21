@@ -13,9 +13,9 @@ public interface Session {
 
     void addDataToSign(String signatureId, DataToSignHolder dataToSign);
 
-    void addCertificateSession(String certificateId, String sessionId);
+    void addCertificateSessionId(String certificateId, String sessionId);
 
-    String getCertificateSession(String certificateId);
+    String getCertificateSessionId(String certificateId);
 
     void addCertificate(String documentNumber, X509Certificate certificate);
 
@@ -25,7 +25,7 @@ public interface Session {
 
     DataToSignHolder clearSigning(String signatureId);
 
-    String clearCertificateSession(String certificateId);
+    String clearCertificateSessionId(String certificateId);
 
     X509Certificate clearCertificate(String documentNumber);
 }

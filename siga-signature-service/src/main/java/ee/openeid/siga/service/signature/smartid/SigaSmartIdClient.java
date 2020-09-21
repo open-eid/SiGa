@@ -9,6 +9,7 @@ import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SigaSmartIdException;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.CertificateUtil;
+import ee.openeid.siga.common.util.TokenGenerator;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;
@@ -80,6 +81,7 @@ public class SigaSmartIdClient {
                     .getCertificate()
                     .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
                     .withDocumentNumber(smartIdInformation.getDocumentNumber())
+                    .withNonce(TokenGenerator.generateToken(30))
                     .fetch();
         } catch (CertificateNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
@@ -108,6 +110,7 @@ public class SigaSmartIdClient {
                     .withDocumentNumber(smartIdInformation.getDocumentNumber())
                     .withSignableHash(signableHash)
                     .withDisplayText(smartIdInformation.getMessageToDisplay())
+                    .withNonce(TokenGenerator.generateToken(30))
                     .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
                     .initiateSigning();
             InitSmartIdSignatureResponse initSmartIdSignatureResponse = new InitSmartIdSignatureResponse();
@@ -148,6 +151,7 @@ public class SigaSmartIdClient {
 
     private CertificateRequest createCertificateRequest(SmartIdInformation smartIdInformation) {
         CertificateRequest request = new CertificateRequest();
+        request.setNonce(TokenGenerator.generateToken(30));
         request.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
         request.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
         request.setCertificateLevel(MINIMUM_CERTIFICATE_LEVEL);

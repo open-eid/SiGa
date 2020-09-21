@@ -139,21 +139,21 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         String smartIdSessionId = smartIdClient.initiateCertificateChoice(smartIdInformation);
         String generatedCertificateId = UUIDGenerator.generateUUID();
-        sessionHolder.addCertificateSession(generatedCertificateId, smartIdSessionId);
+        sessionHolder.addCertificateSessionId(generatedCertificateId, smartIdSessionId);
         sessionService.update(containerId, sessionHolder);
         return generatedCertificateId;
     }
 
     public CertificateStatus processSmartIdCertificateStatus(String containerId, String certificateId, SmartIdInformation smartIdInformation) {
         Session sessionHolder = getSession(containerId);
-        String smartIdSessionId = sessionHolder.getCertificateSession(certificateId);
+        String smartIdSessionId = sessionHolder.getCertificateSessionId(certificateId);
         SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(smartIdInformation, smartIdSessionId);
         CertificateStatus certificateStatus = new CertificateStatus();
         if (smartIdStatusResponse.getStatus() == SmartIdSessionStatus.OK) {
             SmartIdCertificate smartIdCertificate = smartIdStatusResponse.getSmartIdCertificate();
             sessionHolder.addCertificate(smartIdCertificate.getDocumentNumber(), smartIdCertificate.getCertificate());
             certificateStatus.setDocumentNumber(smartIdStatusResponse.getSmartIdCertificate().getDocumentNumber());
-            sessionHolder.clearCertificateSession(certificateId);
+            sessionHolder.clearCertificateSessionId(certificateId);
             sessionService.update(containerId, sessionHolder);
         }
         certificateStatus.setStatus(smartIdStatusResponse.getStatus().getSigaMessage(SmartIdSessionStatus.SessionType.CERT));
@@ -164,8 +164,7 @@ public abstract class ContainerSigningService {
     public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
-        X509Certificate certificate;
-        certificate = sessionHolder.getCertificate(smartIdInformation.getDocumentNumber());
+        X509Certificate certificate = sessionHolder.getCertificate(smartIdInformation.getDocumentNumber());
 
         if (certificate == null) {
             SmartIdCertificate certificateResponse = smartIdClient.getCertificate(smartIdInformation);

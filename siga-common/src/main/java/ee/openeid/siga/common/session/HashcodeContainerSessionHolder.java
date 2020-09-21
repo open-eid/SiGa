@@ -36,12 +36,12 @@ public class HashcodeContainerSessionHolder implements Session {
     }
 
     @Override
-    public void addCertificateSession(String certificateId, String sessionId) {
+    public void addCertificateSessionId(String certificateId, String sessionId) {
         certificateSessionHolder.put(certificateId, sessionId);
     }
 
     @Override
-    public String getCertificateSession(String certificateId) {
+    public String getCertificateSessionId(String certificateId) {
         return certificateSessionHolder.get(certificateId);
     }
 
@@ -64,7 +64,7 @@ public class HashcodeContainerSessionHolder implements Session {
     }
 
     @Override
-    public String clearCertificateSession(String certificateId) {
+    public String clearCertificateSessionId(String certificateId) {
         return certificateSessionHolder.remove(certificateId);
     }
 
