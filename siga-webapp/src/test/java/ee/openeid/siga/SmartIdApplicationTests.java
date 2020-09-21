@@ -2,6 +2,7 @@ package ee.openeid.siga;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.helper.TestBase;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.DataFile;
@@ -53,7 +54,47 @@ public class SmartIdApplicationTests extends TestBase {
     }
 
     @Test
-    public void smartIdHashcodeSigningFlow() throws Exception {
+    public void smartIdHashcodeFlowWihCertificateChoice() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        List<Signature> signatures = getHashcodeSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
+        Assert.assertEquals(2, dataFiles.size());
+        String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
+        CertificateStatus certificateStatus = getHashcodeCertificateChoiceStatus(containerId, certificateId);
+        Assert.assertEquals("CERTIFICATE", certificateStatus.getStatus());
+        String signatureId = startHashcodeSmartIdSigning(containerId, certificateStatus.getDocumentNumber());
+        await().atMost(15, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
+        assertHashcodeSignedContainer(containerId, 2);
+    }
+
+    @Test
+    public void smartIdFlowWihCertificateChoice() throws Exception {
+        String containerId = uploadContainer();
+        List<Signature> signatures = getSignatures(containerId);
+
+        Assert.assertEquals(1, signatures.size());
+        Container originalContainer = getContainer(containerId);
+        Assert.assertEquals(1, originalContainer.getSignatures().size());
+        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+
+        List<DataFile> dataFiles = getDataFiles(containerId);
+        Assert.assertEquals(2, dataFiles.size());
+        String certificateId = startSmartIdCertificateChoice(containerId);
+        CertificateStatus certificateStatus = getCertificateChoiceStatus(containerId, certificateId);
+        Assert.assertEquals("CERTIFICATE", certificateStatus.getStatus());
+        String signatureId = startSmartIdSigning(containerId, certificateStatus.getDocumentNumber());
+        await().atMost(15, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
+        assertSignedContainer(containerId, 2);
+    }
+
+    @Test
+    public void smartIdHashcodeSigningFlowWithDocumentNumber() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
@@ -65,13 +106,13 @@ public class SmartIdApplicationTests extends TestBase {
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
 
-        String signatureId = startHashcodeSmartIdSigning(containerId);
+        String signatureId = startHashcodeSmartIdSigning(containerId, null);
         await().atMost(15, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
     }
 
     @Test
-    public void smartIdSigningFlow() throws Exception {
+    public void smartIdSigningFlowWithDocumentNumber() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
@@ -83,7 +124,7 @@ public class SmartIdApplicationTests extends TestBase {
         List<DataFile> dataFiles = getDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
 
-        String signatureId = startSmartIdSigning(containerId);
+        String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(15, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
     }

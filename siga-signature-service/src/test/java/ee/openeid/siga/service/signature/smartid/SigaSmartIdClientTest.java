@@ -37,7 +37,7 @@ public class SigaSmartIdClientTest {
     private static final String DEFAULT_MOCK_RELYING_PARTY_UUID = UUID.randomUUID().toString();
     private static final String DEFAULT_MOCK_SIGNATURE_BASE_64 = "c2lnbmF0dXJlMTIz";
     private static final String DEFAULT_MOCK_SIGNATURE = "signature123";
-    private static final String DEFAULT_MOCK_DOCUMENT_NUMBER = "PNOEE-3725666666";
+    private static final String DEFAULT_MOCK_DOCUMENT_NUMBER = "PNOEE-3725666666-QWER";
     private static final String DEFAULT_MOCK_RELYING_PARTY_NAME = "RELYING-PARTY";
     private static final String DEFAULT_MOCK_NATIONAL_IDENTITY_NUMBER = "1234567890";
     private static final byte[] DEFAULT_MOCK_DATA_TO_SIGN = "Data to be signed.".getBytes(StandardCharsets.UTF_8);
@@ -66,9 +66,37 @@ public class SigaSmartIdClientTest {
     }
 
     @Test
+    public void initiateCertificateChoice_ok() {
+        stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
+                "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
+                "}");
+        String sessionId = smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+    }
+
+    @Test
+    public void initiateCertificateChoice_notFound() {
+        exceptionRule.expect(SigaSmartIdException.class);
+        exceptionRule.expectMessage(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
+        stubCertificateChoiceEtsiSessionResponse(404, "");
+        String sessionId = smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+    }
+
+
+    @Test
+    public void initiateCertificateChoice_serverError() {
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Smart-ID service error");
+
+        stubCertificateChoiceErrorResponse(504);
+        smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+    }
+
+    @Test
     public void getCertificate_ok() throws Exception {
         X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
-        stubCertificateChoiceSessionResponse(200, "{\n" +
+        stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
@@ -82,16 +110,16 @@ public class SigaSmartIdClientTest {
         exceptionRule.expect(SigaSmartIdException.class);
         exceptionRule.expectMessage(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
 
-        stubCertificateChoiceSessionResponse(404, "");
+        stubCertificateChoiceDocumentSessionResponse(404, "");
         smartIdClient.getCertificate(createDefaultSmartIdInformation());
     }
 
     @Test
     public void getCertificate_userRefused() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.USER_REFUSED.getSigaMessage());
+        exceptionRule.expectMessage(SmartIdSessionStatus.USER_REFUSED.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
 
-        stubCertificateChoiceSessionResponse(200, "{\n" +
+        stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED");
@@ -101,9 +129,9 @@ public class SigaSmartIdClientTest {
     @Test
     public void getCertificate_sessionTimeout() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.TIMEOUT.getSigaMessage());
+        exceptionRule.expectMessage(SmartIdSessionStatus.TIMEOUT.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
 
-        stubCertificateChoiceSessionResponse(200, "{\n" +
+        stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "TIMEOUT");
@@ -113,9 +141,9 @@ public class SigaSmartIdClientTest {
     @Test
     public void getCertificate_documentUnusable() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaMessage());
+        exceptionRule.expectMessage(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
 
-        stubCertificateChoiceSessionResponse(200, "{\n" +
+        stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
@@ -142,7 +170,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service error");
 
 
-        stubCertificateChoiceSessionResponse(status, "");
+        stubCertificateChoiceDocumentSessionResponse(status, "");
         smartIdClient.getCertificate(createDefaultSmartIdInformation());
     }
 
@@ -151,8 +179,7 @@ public class SigaSmartIdClientTest {
         stubSigningInitiationResponse(200, "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}");
 
         InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createDefaultSmartIdInformation(),
-                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN),
-                DEFAULT_MOCK_DOCUMENT_NUMBER);
+                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
         SignableHash signableHash = new SignableHash();
         signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
         signableHash.setHashType(HashType.SHA512);
@@ -168,8 +195,7 @@ public class SigaSmartIdClientTest {
 
         stubSigningInitiationResponse(504, "");
         smartIdClient.initSmartIdSigning(createDefaultSmartIdInformation(),
-                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN),
-                DEFAULT_MOCK_DOCUMENT_NUMBER);
+                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
     }
 
     @Test
@@ -272,14 +298,31 @@ public class SigaSmartIdClientTest {
         );
     }
 
-    private void stubCertificateChoiceSessionResponse(int status, String responseBody) {
+    private void stubCertificateChoiceDocumentSessionResponse(int status, String responseBody) {
         WireMock.stubFor(
-                WireMock.post("/certificatechoice/pno/EE/" + DEFAULT_MOCK_NATIONAL_IDENTITY_NUMBER)
+                WireMock.post("/certificatechoice/document/" + DEFAULT_MOCK_DOCUMENT_NUMBER)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(status)
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(responseBody))
         );
+    }
+
+    private void stubCertificateChoiceEtsiSessionResponse(int status, String responseBody) {
+        WireMock.stubFor(
+                WireMock.post("/certificatechoice/etsi/PNO" + DEFAULT_MOCK_COUNTRY + "-" + DEFAULT_MOCK_NATIONAL_IDENTITY_NUMBER)
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(status)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseBody))
+        );
+    }
+
+    private void stubCertificateChoiceErrorResponse(int status) {
+        WireMock.stubFor(
+                WireMock.post("/certificatechoice/etsi/PNO" + DEFAULT_MOCK_COUNTRY + "-" + DEFAULT_MOCK_NATIONAL_IDENTITY_NUMBER)
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(status)));
     }
 
     private void stubGetStatusErrorResponse(int status) {
@@ -363,6 +406,7 @@ public class SigaSmartIdClientTest {
                 .personIdentifier(DEFAULT_MOCK_NATIONAL_IDENTITY_NUMBER)
                 .messageToDisplay(DEFAULT_MOCK_DISPLAY_TEXT)
                 .country(DEFAULT_MOCK_COUNTRY)
+                .documentNumber(DEFAULT_MOCK_DOCUMENT_NUMBER)
                 .relyingPartyUuid(DEFAULT_MOCK_RELYING_PARTY_UUID)
                 .relyingPartyName(DEFAULT_MOCK_RELYING_PARTY_NAME)
                 .build();

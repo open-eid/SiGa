@@ -24,7 +24,7 @@ public class SmartIdServiceConfigurationProperties {
 
     private String url;
 
-    private int sessionStatusResponseSocketOpenTime = 40;
+    private int sessionStatusResponseSocketOpenTime = 1000;
 
     @PostConstruct
     public void validateConfiguration() {

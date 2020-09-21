@@ -57,6 +57,12 @@ public class RequestValidator {
         }
     }
 
+    public static void validateCertificateId(String containerId) {
+        if (StringUtils.isBlank(containerId) || containerId.length() > 36) {
+            throw new RequestValidationException("Certificate Id is invalid");
+        }
+    }
+
     public static void validateFileContent(String content) {
         if (StringUtils.isBlank(content) || isNotBase64StringEncoded(content)) {
             throw new RequestValidationException("File content is invalid");
@@ -109,9 +115,13 @@ public class RequestValidator {
         validatePersonIdentifier(mobileIdInformation.getPersonIdentifier());
     }
 
-    public static void validateSmartIdInformation(SmartIdInformation smartIdInformation) {
-        validateCountry(smartIdInformation.getCountry());
+    public static void validateSmartIdInformationForSigning(SmartIdInformation smartIdInformation) {
         validateDisplayText(smartIdInformation.getMessageToDisplay());
+        validateDocumentNumber(smartIdInformation.getDocumentNumber());
+    }
+
+    public static void validateSmartIdInformationForCertChoice(SmartIdInformation smartIdInformation) {
+        validateCountry(smartIdInformation.getCountry());
         validatePersonIdentifier(smartIdInformation.getPersonIdentifier());
     }
 
@@ -157,6 +167,12 @@ public class RequestValidator {
     private static void validateDisplayText(String displayText) {
         if (displayText != null && displayText.length() > 60) {
             throw new RequestValidationException("Invalid Smart-Id message to display");
+        }
+    }
+
+    private static void validateDocumentNumber(String documentNumber){
+        if (StringUtils.isBlank(documentNumber) || documentNumber.length() > 40) {
+            throw new RequestValidationException("Invalid Smart-Id documentNumber");
         }
     }
 

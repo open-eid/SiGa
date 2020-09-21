@@ -2,6 +2,7 @@ package ee.openeid.siga.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
+import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.*;
@@ -28,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
@@ -128,6 +130,22 @@ public abstract class TestBase {
         return response.getMidStatus();
     }
 
+    protected CertificateStatus getHashcodeCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
+        GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class);
+        CertificateStatus status = new CertificateStatus();
+        status.setStatus(response.getSidStatus());
+        status.setDocumentNumber(response.getDocumentNumber());
+        return status;
+    }
+
+    protected CertificateStatus getCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
+        GetContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/containers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetContainerSmartIdCertificateChoiceStatusResponse.class);
+        CertificateStatus status = new CertificateStatus();
+        status.setStatus(response.getSidStatus());
+        status.setDocumentNumber(response.getDocumentNumber());
+        return status;
+    }
+
     protected String getHashcodeSmartIdStatus(String containerId, String signatureId) throws Exception {
         GetHashcodeContainerSmartIdSigningStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/" + signatureId + "/status", GetHashcodeContainerSmartIdSigningStatusResponse.class);
         return response.getSidStatus();
@@ -173,21 +191,37 @@ public abstract class TestBase {
         return postRequest(url, request, responseObject);
     }
 
-    private <T> T startSmartIdSigning(String url, Class<T> responseObject) throws Exception {
+    private <T> T startSmartIdSigning(String url, String documentNumber, Class<T> responseObject) throws Exception {
         JSONObject request = new JSONObject();
-        request.put("personIdentifier", "10101010005");
-        request.put("country", "EE");
+        request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-10101010005-Z1B2-Q"));
         request.put("signatureProfile", "LT");
         return postRequest(url, request, responseObject);
     }
 
-    protected String startHashcodeSmartIdSigning(String containerId) throws Exception {
-        CreateHashcodeContainerSmartIdSigningResponse response = startSmartIdSigning("/hashcodecontainers/" + containerId + "/smartidsigning", CreateHashcodeContainerSmartIdSigningResponse.class);
+    private <T> T startSmartIdCertificateChoice(String url, Class<T> responseObject) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("personIdentifier", "10101010005");
+        request.put("country", "EE");
+        return postRequest(url, request, responseObject);
+    }
+
+    protected String startHashcodeSmartIdCertificateChoice(String containerId) throws Exception {
+        CreateHashcodeContainerSmartIdCertificateChoiceResponse response = startSmartIdCertificateChoice("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice", CreateHashcodeContainerSmartIdCertificateChoiceResponse.class);
+        return response.getGeneratedCertificateId();
+    }
+
+    protected String startSmartIdCertificateChoice(String containerId) throws Exception {
+        CreateContainerSmartIdCertificateChoiceResponse response = startSmartIdCertificateChoice("/containers/" + containerId + "/smartidsigning/certificatechoice", CreateContainerSmartIdCertificateChoiceResponse.class);
+        return response.getGeneratedCertificateId();
+    }
+
+    protected String startHashcodeSmartIdSigning(String containerId, String documentNumber) throws Exception {
+        CreateHashcodeContainerSmartIdSigningResponse response = startSmartIdSigning("/hashcodecontainers/" + containerId + "/smartidsigning", documentNumber, CreateHashcodeContainerSmartIdSigningResponse.class);
         return response.getGeneratedSignatureId();
     }
 
-    protected String startSmartIdSigning(String containerId) throws Exception {
-        CreateContainerSmartIdSigningResponse response = startSmartIdSigning("/containers/" + containerId + "/smartidsigning", CreateContainerSmartIdSigningResponse.class);
+    protected String startSmartIdSigning(String containerId, String documentNumber) throws Exception {
+        CreateContainerSmartIdSigningResponse response = startSmartIdSigning("/containers/" + containerId + "/smartidsigning", documentNumber, CreateContainerSmartIdSigningResponse.class);
         return response.getGeneratedSignatureId();
     }
 

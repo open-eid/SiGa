@@ -133,8 +133,23 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     }
 
     @Test
-    public void successfulSmartIdSignatureTest() throws IOException {
-        assertSuccessfulSmartIdSigning();
+    public void successfulCertificateChoice(){
+        assertSuccessfulCertificateChoice();
+    }
+
+    @Test
+    public void successfulCertificateChoiceProcessing(){
+        assertSuccessfulCertificateChoiceProcessing();
+    }
+
+    @Test
+    public void successfulSmartIdSigningWithSessionCert() throws IOException, URISyntaxException {
+        assertSuccessfulSmartIdSigningWithSessionCert();
+    }
+
+    @Test
+    public void successfulSmartIdSigningWithoutSessionCert() throws IOException {
+        assertSuccessfulSmartIdSigningWithoutSessionCert();
     }
 
     @Test

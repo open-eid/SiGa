@@ -1,11 +1,11 @@
 package ee.openeid.siga;
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
@@ -155,12 +155,17 @@ public class RequestTransformer {
                 .build();
     }
 
-    static SmartIdInformation transformSmartIdInformation(String country, String messageToDisplay, String personIdentifier) {
+    static SmartIdInformation transformSmartIdInformation() {
+        return RequestTransformer.transformSmartIdInformation(null, null, null, null);
+    }
+
+    static SmartIdInformation transformSmartIdInformation(String documentNumber, String country, String messageToDisplay, String personIdentifier) {
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return SmartIdInformation.builder()
                 .country(country)
                 .messageToDisplay(messageToDisplay)
                 .personIdentifier(personIdentifier)
+                .documentNumber(documentNumber)
                 .relyingPartyName(sigaUserDetails.getSmartIdRelyingPartyName())
                 .relyingPartyUuid(sigaUserDetails.getSmartIdRelyingPartyUuid())
                 .build();

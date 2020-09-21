@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +29,34 @@ public class AsicContainerSessionHolder implements Session {
     private Map<String, Integer> signatureIdHolder = new HashMap<>();
     @Builder.Default
     private Map<String, DataToSignHolder> dataToSignHolder = new HashMap<>();
+    @Builder.Default
+    private Map<String, String> certificateSessionHolder = new HashMap<>();
+    @Builder.Default
+    private Map<String, X509Certificate> certificateHolder = new HashMap<>();
 
     @Override
     public void addDataToSign(String signatureId, DataToSignHolder dataToSign) {
-        this.dataToSignHolder.put(signatureId, dataToSign);
+        dataToSignHolder.put(signatureId, dataToSign);
+    }
+
+    @Override
+    public void addCertificateSession(String certificateId, String sessionId) {
+        certificateSessionHolder.put(certificateId, sessionId);
+    }
+
+    @Override
+    public String getCertificateSession(String certificateId) {
+        return certificateSessionHolder.get(certificateId);
+    }
+
+    @Override
+    public void addCertificate(String documentNumber, X509Certificate certificate) {
+        certificateHolder.put(documentNumber, certificate);
+    }
+
+    @Override
+    public X509Certificate getCertificate(String documentNumber) {
+        return certificateHolder.get(documentNumber);
     }
 
     public void addSignatureId(String signatureId, Integer hash) {
@@ -44,6 +69,15 @@ public class AsicContainerSessionHolder implements Session {
 
     public DataToSignHolder clearSigning(String signatureId) {
         return dataToSignHolder.remove(signatureId);
+    }
+
+    @Override
+    public String clearCertificateSession(String certificateId) {
+        return certificateSessionHolder.remove(certificateId);
+    }
+    @Override
+    public X509Certificate clearCertificate(String documentNumber){
+        return certificateHolder.remove(documentNumber);
     }
 
 }

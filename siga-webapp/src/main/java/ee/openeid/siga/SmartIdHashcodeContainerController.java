@@ -1,14 +1,18 @@
 package ee.openeid.siga;
 
 
-import ee.openeid.siga.common.model.SigningChallenge;
-import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.model.CertificateStatus;
+import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdCertificateChoiceStatusResponse;
 import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
@@ -29,6 +33,40 @@ public class SmartIdHashcodeContainerController {
 
     private HashcodeContainerSigningService signingService;
 
+    @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_CERTIFICATE_CHOICE_INIT)
+    @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CreateHashcodeContainerSmartIdCertificateChoiceResponse createHashcodeContainerSmartIdCertificateChoice(
+            @PathVariable(value = "containerId") String containerId,
+            @RequestBody CreateHashcodeContainerSmartIdCertificateChoiceRequest certificateChoiceRequest) {
+
+        SmartIdInformation smartIdInformation = getSmartIdInformation(certificateChoiceRequest);
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        String certificateId = signingService.initSmartIdCertificateChoice(containerId, smartIdInformation);
+        CreateHashcodeContainerSmartIdCertificateChoiceResponse response = new CreateHashcodeContainerSmartIdCertificateChoiceResponse();
+        response.setGeneratedCertificateId(certificateId);
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_CERTIFICATE_CHOICE_STATUS)
+    @GetMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/certificatechoice/{certificateId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GetHashcodeContainerSmartIdCertificateChoiceStatusResponse getSmartIdCertificateChoiceStatus(
+            @PathVariable(value = "containerId") String containerId,
+            @PathVariable(value = "certificateId") String certificateId) {
+
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateCertificateId(certificateId);
+        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
+
+        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId, smartIdInformation);
+        GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = new GetHashcodeContainerSmartIdCertificateChoiceStatusResponse();
+        response.setSidStatus(status.getStatus());
+        response.setDocumentNumber(status.getDocumentNumber());
+        return response;
+    }
+
+
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_INIT)
     @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerSmartIdSigningResponse createHashcodeContainerSmartIdSigning(
@@ -44,7 +82,7 @@ public class SmartIdHashcodeContainerController {
 
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
-        RequestValidator.validateSmartIdInformation(smartIdInformation);
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
 
         SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
@@ -61,7 +99,7 @@ public class SmartIdHashcodeContainerController {
             @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation(null, null, null);
+        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
         String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
 
         GetHashcodeContainerSmartIdSigningStatusResponse response = new GetHashcodeContainerSmartIdSigningStatusResponse();
@@ -69,12 +107,14 @@ public class SmartIdHashcodeContainerController {
         return response;
     }
 
-    private SmartIdInformation getSmartIdInformation(CreateHashcodeContainerSmartIdSigningRequest containerSmartIdSigningRequest) {
-        String country = containerSmartIdSigningRequest.getCountry();
-        String messageToDisplay = containerSmartIdSigningRequest.getMessageToDisplay();
-        String personIdentifier = containerSmartIdSigningRequest.getPersonIdentifier();
-        return RequestTransformer.transformSmartIdInformation(country, messageToDisplay, personIdentifier);
+    private SmartIdInformation getSmartIdInformation(CreateHashcodeContainerSmartIdSigningRequest request) {
+        return RequestTransformer.transformSmartIdInformation(request.getDocumentNumber(),
+                null, request.getMessageToDisplay(), null);
+    }
 
+    private SmartIdInformation getSmartIdInformation(CreateHashcodeContainerSmartIdCertificateChoiceRequest request) {
+        return RequestTransformer.transformSmartIdInformation(null, request.getCountry(),
+                null, request.getPersonIdentifier());
     }
 
     @Autowired

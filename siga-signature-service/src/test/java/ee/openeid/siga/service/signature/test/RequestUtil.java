@@ -41,7 +41,10 @@ public class RequestUtil {
     public static final String SERVICE_NAME = "Testimine";
     public static final String SIGNED_HASHCODE = "hashcode.asice";
     public static final String VALID_ASICE = "test.asice";
+    public static final String DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
+    public static final String SMART_ID_SESSION_ID = "23423423-234234234-324234-1111";
+    public static final String CERTIFICATE_ID = "23423423-234234234-324234-1111";
 
     public static List<HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
         return createHashcodeDataFileListWithOneFile("test.txt");

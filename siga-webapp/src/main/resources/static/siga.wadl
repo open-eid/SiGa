@@ -252,6 +252,66 @@
                     </response>
                 </method>
             </resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning/certificatechoice">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createHashcodeContainerSmartIdCertificateChoice" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerSmartIdCertificateChoiceRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createHashcodeContainerSmartIdCertificateChoiceResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="hashcodecontainers/{containerId}/smartidsigning/certificatechoice/{generatedCertificateId}/status">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getHashcodeContainerSmartIdCertificateChoiceStatus" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getHashcodeContainerSmartIdCertificateChoiceStatusResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
             <resource path="hashcodecontainers/{containerId}/smartidsigning">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
@@ -735,6 +795,66 @@
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getContainerMobileIdSigningStatusResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/smartidsigning/certificatechoice">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="createContainerSmartIdCertificateChoice" name="POST">
+                    <request>
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerSmartIdCertificateChoiceRequest"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </request>
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:createContainerSmartIdCertificateChoiceResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
+            <resource path="containers/{containerId}/smartidsigning/certificatechoice/{generatedCertificateId}/status">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="getContainerSmartIdCertificateChoiceStatus" name="GET">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:getContainerSmartIdCertificateChoiceStatusResponse"
                                             mediaType="application/json"
                                             xmlns=""/>
                     </response>

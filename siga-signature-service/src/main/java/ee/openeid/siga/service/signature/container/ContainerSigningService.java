@@ -5,6 +5,7 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.SignatureCreationException;
+import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.Result;
@@ -134,17 +135,47 @@ public abstract class ContainerSigningService {
         return getStatusResponse.getStatus().name();
     }
 
+    public String initSmartIdCertificateChoice(String containerId, SmartIdInformation smartIdInformation) {
+        Session sessionHolder = getSession(containerId);
+        String smartIdSessionId = smartIdClient.initiateCertificateChoice(smartIdInformation);
+        String generatedCertificateId = UUIDGenerator.generateUUID();
+        sessionHolder.addCertificateSession(generatedCertificateId, smartIdSessionId);
+        sessionService.update(containerId, sessionHolder);
+        return generatedCertificateId;
+    }
+
+    public CertificateStatus processSmartIdCertificateStatus(String containerId, String certificateId, SmartIdInformation smartIdInformation) {
+        Session sessionHolder = getSession(containerId);
+        String smartIdSessionId = sessionHolder.getCertificateSession(certificateId);
+        SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(smartIdInformation, smartIdSessionId);
+        CertificateStatus certificateStatus = new CertificateStatus();
+        if (smartIdStatusResponse.getStatus() == SmartIdSessionStatus.OK) {
+            SmartIdCertificate smartIdCertificate = smartIdStatusResponse.getSmartIdCertificate();
+            sessionHolder.addCertificate(smartIdCertificate.getDocumentNumber(), smartIdCertificate.getCertificate());
+            certificateStatus.setDocumentNumber(smartIdStatusResponse.getSmartIdCertificate().getDocumentNumber());
+            sessionHolder.clearCertificateSession(certificateId);
+            sessionService.update(containerId, sessionHolder);
+        }
+        certificateStatus.setStatus(smartIdStatusResponse.getStatus().getSigaMessage(SmartIdSessionStatus.SessionType.CERT));
+        return certificateStatus;
+    }
+
+
     public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
+        X509Certificate certificate;
+        certificate = sessionHolder.getCertificate(smartIdInformation.getDocumentNumber());
 
-        SmartIdCertificate certificateResponse = smartIdClient.getCertificate(smartIdInformation);
-        signatureParameters.setSigningCertificate(certificateResponse.getCertificate());
+        if (certificate == null) {
+            SmartIdCertificate certificateResponse = smartIdClient.getCertificate(smartIdInformation);
+            certificate = certificateResponse.getCertificate();
+        }
 
-        String documentNumber = certificateResponse.getDocumentNumber();
+        signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
-        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign, documentNumber);
+        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
@@ -172,10 +203,11 @@ public abstract class ContainerSigningService {
         if (sessionResponse.getStatus() == SmartIdSessionStatus.OK) {
             Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, sessionResponse.getSignature());
             addSignatureToSession(sessionHolder, signature, signatureId);
+            sessionHolder.clearCertificate(smartIdInformation.getDocumentNumber());
             sessionService.update(containerId, sessionHolder);
         }
 
-        return sessionResponse.getStatus().getSigaMessage();
+        return sessionResponse.getStatus().getSigaMessage(SmartIdSessionStatus.SessionType.SIGN);
     }
 
     protected Signature finalizeSignature(Session session, String containerId, String signatureId, byte[] base64Decoded) {

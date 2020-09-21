@@ -24,6 +24,12 @@
                 type="tns:createHashcodeContainerMobileIdSigningResponse"/>
     <xs:element name="getHashcodeContainerMobileIdSigningStatusResponse"
                 type="tns:getHashcodeContainerMobileIdSigningStatusResponse"/>
+    <xs:element name="createHashcodeContainerSmartIdCertificateChoiceRequest"
+                type="tns:createHashcodeContainerSmartIdCertificateChoiceRequest"/>
+    <xs:element name="createHashcodeContainerSmartIdCertificateChoiceResponse"
+                type="tns:createHashcodeContainerSmartIdCertificateChoiceResponse"/>
+    <xs:element name="getHashcodeContainerSmartIdCertificateChoiceStatusResponse"
+                type="tns:getHashcodeContainerSmartIdCertificateChoiceStatusResponse"/>
     <xs:element name="createHashcodeContainerSmartIdSigningRequest"
                 type="tns:createHashcodeContainerSmartIdSigningRequest"/>
     <xs:element name="createHashcodeContainerSmartIdSigningResponse"
@@ -54,6 +60,12 @@
     <xs:element name="createContainerMobileIdSigningRequest" type="tns:createContainerMobileIdSigningRequest"/>
     <xs:element name="createContainerMobileIdSigningResponse" type="tns:createContainerMobileIdSigningResponse"/>
     <xs:element name="getContainerMobileIdSigningStatusResponse" type="tns:getContainerMobileIdSigningStatusResponse"/>
+    <xs:element name="createContainerSmartIdCertificateChoiceRequest"
+                type="tns:createContainerSmartIdCertificateChoiceRequest"/>
+    <xs:element name="createContainerSmartIdCertificateChoiceResponse"
+                type="tns:createContainerSmartIdCertificateChoiceResponse"/>
+    <xs:element name="getContainerSmartIdCertificateChoiceStatusResponse"
+                type="tns:getContainerSmartIdCertificateChoiceStatusResponse"/>
     <xs:element name="createContainerSmartIdSigningRequest" type="tns:createContainerSmartIdSigningRequest"/>
     <xs:element name="createContainerSmartIdSigningResponse" type="tns:createContainerSmartIdSigningResponse"/>
     <xs:element name="getContainerSmartIdSigningStatusResponse" type="tns:getContainerSmartIdSigningStatusResponse"/>
@@ -152,10 +164,26 @@
             <xs:element name="midStatus" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createHashcodeContainerSmartIdSigningRequest">
+    <xs:complexType name="createHashcodeContainerSmartIdCertificateChoiceRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
             <xs:element name="country" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createHashcodeContainerSmartIdCertificateChoiceResponse">
+        <xs:sequence>
+            <xs:element name="generatedCertificateId" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="getHashcodeContainerSmartIdCertificateChoiceStatusResponse">
+        <xs:sequence>
+            <xs:element name="sidStatus" type="xs:string"/>
+            <xs:element minOccurs="0" name="documentNumber" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createHashcodeContainerSmartIdSigningRequest">
+        <xs:sequence>
+            <xs:element name="documentNumber" type="xs:string"/>
             <xs:element minOccurs="0" name="messageToDisplay" type="xs:string"/>
             <xs:element name="signatureProfile" type="xs:string"/>
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>
@@ -294,10 +322,26 @@
             <xs:element name="midStatus" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="createContainerSmartIdSigningRequest">
+    <xs:complexType name="createContainerSmartIdCertificateChoiceRequest">
         <xs:sequence>
             <xs:element name="personIdentifier" type="xs:string"/>
             <xs:element name="country" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createContainerSmartIdCertificateChoiceResponse">
+        <xs:sequence>
+            <xs:element name="generatedCertificateId" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="getContainerSmartIdCertificateChoiceStatusResponse">
+        <xs:sequence>
+            <xs:element name="sidStatus" type="xs:string"/>
+            <xs:element minOccurs="0" name="documentNumber" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createContainerSmartIdSigningRequest">
+        <xs:sequence>
+            <xs:element name="documentNumber" type="xs:string"/>
             <xs:element minOccurs="0" name="messageToDisplay" type="xs:string"/>
             <xs:element name="signatureProfile" type="xs:string"/>
             <xs:element minOccurs="0" name="roles" maxOccurs="unbounded" type="xs:string"/>

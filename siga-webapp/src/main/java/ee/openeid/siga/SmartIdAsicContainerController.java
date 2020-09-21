@@ -1,13 +1,19 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.common.model.SigningChallenge;
-import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.model.CertificateStatus;
+import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceRequest;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceResponse;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
+
+
+import ee.openeid.siga.webapp.json.GetContainerSmartIdCertificateChoiceStatusResponse;
 import ee.openeid.siga.webapp.json.GetContainerSmartIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
@@ -28,6 +34,39 @@ public class SmartIdAsicContainerController {
 
     private AsicContainerSigningService signingService;
 
+    @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_INIT)
+    @PostMapping(value = "/containers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CreateContainerSmartIdCertificateChoiceResponse createContainerSmartIdCertificateChoice(
+            @PathVariable(value = "containerId") String containerId,
+            @RequestBody CreateContainerSmartIdCertificateChoiceRequest certificateChoiceRequest) {
+
+        SmartIdInformation smartIdInformation = getSmartIdInformation(certificateChoiceRequest);
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        String certificateId = signingService.initSmartIdCertificateChoice(containerId, smartIdInformation);
+        CreateContainerSmartIdCertificateChoiceResponse response = new CreateContainerSmartIdCertificateChoiceResponse();
+        response.setGeneratedCertificateId(certificateId);
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_STATUS)
+    @GetMapping(value = "/containers/{containerId}/smartidsigning/certificatechoice/{certificateId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GetContainerSmartIdCertificateChoiceStatusResponse getSmartIdCertificateChoiceStatus(
+            @PathVariable(value = "containerId") String containerId,
+            @PathVariable(value = "certificateId") String certificateId) {
+
+        RequestValidator.validateContainerId(containerId);
+        RequestValidator.validateCertificateId(certificateId);
+        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
+
+        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId, smartIdInformation);
+        GetContainerSmartIdCertificateChoiceStatusResponse response = new GetContainerSmartIdCertificateChoiceStatusResponse();
+        response.setSidStatus(status.getStatus());
+        response.setDocumentNumber(status.getDocumentNumber());
+        return response;
+    }
+
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_INIT)
     @PostMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerSmartIdSigningResponse createContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerSmartIdSigningRequest createSmartIdSigningRequest) {
@@ -41,9 +80,9 @@ public class SmartIdAsicContainerController {
 
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
-        RequestValidator.validateSmartIdInformation(smartIdInformation);
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
 
-        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, getSmartIdInformation(createSmartIdSigningRequest), signatureParameters);
+        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
         CreateContainerSmartIdSigningResponse response = new CreateContainerSmartIdSigningResponse();
         response.setChallengeId(signingChallenge.getChallengeId());
@@ -56,7 +95,7 @@ public class SmartIdAsicContainerController {
     public GetContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         RequestValidator.validateContainerId(containerId);
         RequestValidator.validateSignatureId(signatureId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation(null, null, null);
+        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
         String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
 
         GetContainerSmartIdSigningStatusResponse response = new GetContainerSmartIdSigningStatusResponse();
@@ -64,12 +103,14 @@ public class SmartIdAsicContainerController {
         return response;
     }
 
-    private SmartIdInformation getSmartIdInformation(CreateContainerSmartIdSigningRequest containerSmartIdSigningRequest) {
-        String country = containerSmartIdSigningRequest.getCountry();
-        String messageToDisplay = containerSmartIdSigningRequest.getMessageToDisplay();
-        String personIdentifier = containerSmartIdSigningRequest.getPersonIdentifier();
-        return RequestTransformer.transformSmartIdInformation(country, messageToDisplay, personIdentifier);
+    private SmartIdInformation getSmartIdInformation(CreateContainerSmartIdSigningRequest request) {
+        return RequestTransformer.transformSmartIdInformation(request.getDocumentNumber(),
+                null, request.getMessageToDisplay(), null);
+    }
 
+    private SmartIdInformation getSmartIdInformation(CreateContainerSmartIdCertificateChoiceRequest request) {
+        return RequestTransformer.transformSmartIdInformation(null, request.getCountry(),
+                null, request.getPersonIdentifier());
     }
 
     @Autowired

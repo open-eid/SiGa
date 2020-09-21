@@ -3,6 +3,7 @@ package ee.openeid.siga.validation;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 public class RequestValidatorTest {
 
@@ -397,5 +399,144 @@ public class RequestValidatorTest {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Roles may not include blank values");
         RequestValidator.validateRoles(Collections.singletonList(" "));
+    }
+
+    @Test
+    public void validateCertificateId_isValid() {
+        RequestValidator.validateCertificateId(UUID.randomUUID().toString());
+    }
+
+    @Test
+    public void validateCertificateId_nullIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Certificate Id is invalid");
+        RequestValidator.validateCertificateId(null);
+    }
+
+    @Test
+    public void validateCertificateId_emptyStringIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Certificate Id is invalid");
+        RequestValidator.validateCertificateId("");
+    }
+
+    @Test
+    public void validateCertificateId_tooLongStringIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Certificate Id is invalid");
+        RequestValidator.validateCertificateId(UUID.randomUUID().toString() + "a");
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_isValid() {
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_nullCountryIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id country");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setCountry(null);
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_tooShortCountryIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id country");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setCountry("E");
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_tooLongCountryIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id country");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setCountry("EEE");
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_nullPersonIdentifierIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setPersonIdentifier(null);
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_tooLongPersonIdentifierIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForCertChoice_emptyPersonIdentifierIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setPersonIdentifier("");
+        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForSigning_isValid() {
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForSigning_tooLongMessageIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id message to display");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setMessageToDisplay(StringUtils.repeat("a", 61));
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForSigning_nullDocumentNumberIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setDocumentNumber(null);
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForSigning_tooLongDocumentNumberIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setDocumentNumber(StringUtils.repeat("a", 41));
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    @Test
+    public void validateSmartIdInformationForSigning_emptyDocumentNumberIsInvalid() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
+        SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
+        smartIdInformation.setDocumentNumber("");
+        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    private SmartIdInformation getDefaultSmartIdInformation() {
+        return SmartIdInformation.builder()
+                .country("EE")
+                .messageToDisplay("test message")
+                .documentNumber("PNOEE-12345678912-QRTS")
+                .personIdentifier("12345678912")
+                .relyingPartyName("name")
+                .relyingPartyUuid("uuid")
+                .build();
     }
 }

@@ -8,6 +8,7 @@ import lombok.NonNull;
 @Data
 @Builder
 public class SmartIdInformation {
+    private String documentNumber;
     private String country;
     private String messageToDisplay;
     private String personIdentifier;
