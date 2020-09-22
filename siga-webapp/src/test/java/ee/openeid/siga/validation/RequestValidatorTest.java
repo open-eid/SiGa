@@ -365,7 +365,7 @@ public class RequestValidatorTest {
     @Test
     public void validatePhoneNo_invalidCountryPrefix() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid phone No.");
+        exceptionRule.expectMessage("Invalid international calling code");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3795394823");
         validator.validateMobileIdInformation(mobileIdInformation);
@@ -374,7 +374,7 @@ public class RequestValidatorTest {
     @Test
     public void validatePhoneNo_notAllowedCountryPrefix() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid phone No.");
+        exceptionRule.expectMessage("Invalid international calling code");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3715394823");
         validator.validateMobileIdInformation(mobileIdInformation);
@@ -496,7 +496,7 @@ public class RequestValidatorTest {
     @Test
     public void validateSmartIdInformationForCertChoice_countryIsNotInAllowedList() {
         exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country");
+        exceptionRule.expectMessage("LV is not allowed for Smart-Id country");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("LV");
         validator.validateSmartIdInformationForCertChoice(smartIdInformation);

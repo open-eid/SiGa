@@ -156,7 +156,7 @@ public class RequestValidator {
         }
         PhoneNumberUtil.CountryCallingCode countryNumber = PhoneNumberUtil.CountryCallingCode.getCountryByPrefix(phoneNo.substring(0, 4));
         if (countryNumber == null || !midAllowedCountries.contains(countryNumber.name())) {
-            throw new RequestValidationException("Invalid phone No. international calling code");
+            throw new RequestValidationException("Invalid international calling code");
         }
     }
 
@@ -167,8 +167,11 @@ public class RequestValidator {
     }
 
     private void validateCountry(String country, List<String> allowedCountries) {
-        if (country == null || country.length() != 2 || !allowedCountries.contains(country)) {
+        if (country == null || country.length() != 2) {
             throw new RequestValidationException("Invalid Smart-Id country");
+        }
+        if (!allowedCountries.contains(country)) {
+            throw new RequestValidationException(country + " is not allowed for Smart-Id country");
         }
     }
 
