@@ -27,26 +27,28 @@ import java.util.List;
 public class MobileIdAsicContainerController {
 
     private final AsicContainerSigningService signingService;
+    private final RequestValidator validator;
 
     @Autowired
-    public MobileIdAsicContainerController(AsicContainerSigningService signingService) {
+    public MobileIdAsicContainerController(AsicContainerSigningService signingService, RequestValidator validator) {
         this.signingService = signingService;
+        this.validator = validator;
     }
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
     @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
+        validator.validateContainerId(containerId);
+        validator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createMobileIdSigningRequest.getRoles();
-        RequestValidator.validateRoles(roles);
+        validator.validateRoles(roles);
         String signatureProfile = createMobileIdSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createMobileIdSigningRequest.getSignatureProductionPlace();
 
         MobileIdInformation mobileIdInformation = getMobileIdInformation(createMobileIdSigningRequest);
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
-        RequestValidator.validateMobileIdInformation(mobileIdInformation);
+        validator.validateMobileIdInformation(mobileIdInformation);
 
         SigningChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 
@@ -59,8 +61,8 @@ public class MobileIdAsicContainerController {
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_STATUS)
     @GetMapping(value = "/containers/{containerId}/mobileidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
+        validator.validateContainerId(containerId);
+        validator.validateSignatureId(signatureId);
         MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation();
         String status = signingService.processMobileStatus(containerId, signatureId, mobileIdInformation);
 

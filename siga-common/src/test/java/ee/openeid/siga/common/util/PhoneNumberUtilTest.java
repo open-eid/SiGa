@@ -24,4 +24,19 @@ public class PhoneNumberUtilTest {
     public void phoneNumberTooLong() {
         Assert.assertFalse(PhoneNumberUtil.isPhoneNumberValid("+372538737293729373"));
     }
+
+    @Test
+    public void countryPrefixIsNotInList(){
+        Assert.assertNull(PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("+371"));
+    }
+
+    @Test
+    public void invalidCountryPrefix(){
+        Assert.assertNull(PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("random"));
+    }
+
+    @Test
+    public void validCountryPrefix(){
+        Assert.assertEquals(PhoneNumberUtil.CountryCallingCode.EE, PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("+372"));
+    }
 }

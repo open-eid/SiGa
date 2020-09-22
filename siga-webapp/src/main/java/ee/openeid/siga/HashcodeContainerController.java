@@ -32,16 +32,27 @@ import java.util.List;
 @RestController
 public class HashcodeContainerController {
 
-    private HashcodeContainerService containerService;
-    private HashcodeContainerValidationService validationService;
-    private HashcodeContainerSigningService signingService;
-    private ConnectionRepository connectionRepository;
+    private final HashcodeContainerService containerService;
+    private final HashcodeContainerValidationService validationService;
+    private final HashcodeContainerSigningService signingService;
+    private final ConnectionRepository connectionRepository;
+    private final RequestValidator validator;
+
+    @Autowired
+    public HashcodeContainerController(HashcodeContainerService containerService, HashcodeContainerValidationService validationService,
+                                       HashcodeContainerSigningService signingService, ConnectionRepository connectionRepository, RequestValidator validator) {
+        this.containerService = containerService;
+        this.validationService = validationService;
+        this.signingService = signingService;
+        this.connectionRepository = connectionRepository;
+        this.validator = validator;
+    }
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @PostMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerResponse createContainer(@RequestBody CreateHashcodeContainerRequest createContainerRequest) {
         List<HashcodeDataFile> dataFiles = createContainerRequest.getDataFiles();
-        RequestValidator.validateHashcodeDataFiles(dataFiles);
+        validator.validateHashcodeDataFiles(dataFiles);
 
         String sessionId = containerService.createContainer(RequestTransformer.transformHashcodeDataFilesForApplication(dataFiles));
         CreateHashcodeContainerResponse response = new CreateHashcodeContainerResponse();
@@ -53,7 +64,7 @@ public class HashcodeContainerController {
     @PostMapping(value = "/upload/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
     public UploadHashcodeContainerResponse uploadContainer(@RequestBody UploadHashcodeContainerRequest uploadContainerRequest) {
         String container = uploadContainerRequest.getContainer();
-        RequestValidator.validateFileContent(container);
+        validator.validateFileContent(container);
 
         String sessionId = containerService.uploadContainer(container);
         UploadHashcodeContainerResponse response = new UploadHashcodeContainerResponse();
@@ -65,7 +76,7 @@ public class HashcodeContainerController {
     @PostMapping(value = "/hashcodecontainers/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerValidationReportResponse validateContainer(@RequestBody CreateHashcodeContainerValidationReportRequest validationReportRequest) {
         String container = validationReportRequest.getContainer();
-        RequestValidator.validateFileContent(container);
+        validator.validateFileContent(container);
 
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ValidationConclusion validationConclusion = validationService.validateContainer(container, sigaUserDetails.getServiceType());
@@ -77,7 +88,7 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_VALIDATE_CONTAINER_BY_ID)
     @GetMapping(value = "/hashcodecontainers/{containerId}/validationreport", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerValidationReportResponse getContainerValidation(@PathVariable(value = "containerId") String containerId) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
 
         ValidationConclusion validationConclusion = validationService.validateExistingContainer(containerId);
         GetHashcodeContainerValidationReportResponse response = new GetHashcodeContainerValidationReportResponse();
@@ -88,14 +99,14 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_INIT, logParameters = {@Param(index = 1, fields = {@XPath(name = "signature_profile", xpath = "signatureProfile")})})
     @PostMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
+        validator.validateContainerId(containerId);
+        validator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
         String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
         String signatureProfile = createRemoteSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createRemoteSigningRequest.getSignatureProductionPlace();
         List<String> roles = createRemoteSigningRequest.getRoles();
-        RequestValidator.validateRoles(roles);
+        validator.validateRoles(roles);
 
         SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(signingCertificate, signatureProfile, signatureProductionPlace, roles);
         DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
@@ -112,9 +123,9 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_REMOTE_SIGNING_FINISH)
     @PutMapping(value = "/hashcodecontainers/{containerId}/remotesigning/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UpdateHashcodeContainerRemoteSigningResponse finalizeRemoteSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId, @RequestBody UpdateHashcodeContainerRemoteSigningRequest updateRemoteSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
-        RequestValidator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
+        validator.validateContainerId(containerId);
+        validator.validateSignatureId(signatureId);
+        validator.validateSignatureValue(updateRemoteSigningRequest.getSignatureValue());
         Result result = signingService.finalizeSigning(containerId, signatureId, updateRemoteSigningRequest.getSignatureValue());
         UpdateHashcodeContainerRemoteSigningResponse response = new UpdateHashcodeContainerRemoteSigningResponse();
         response.setResult(result.name());
@@ -124,7 +135,7 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURES_LIST)
     @GetMapping(value = "/hashcodecontainers/{containerId}/signatures", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerSignaturesResponse getSignatureList(@PathVariable(value = "containerId") String containerId) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
 
         List<ee.openeid.siga.common.model.Signature> signatures = containerService.getSignatures(containerId);
         GetHashcodeContainerSignaturesResponse response = new GetHashcodeContainerSignaturesResponse();
@@ -135,8 +146,8 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_GET_SIGNATURE)
     @GetMapping(value = "/hashcodecontainers/{containerId}/signatures/{signatureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSignatureDetailsResponse getSignature(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
+        validator.validateContainerId(containerId);
+        validator.validateSignatureId(signatureId);
         org.digidoc4j.Signature signature = containerService.getSignature(containerId, signatureId);
         return RequestTransformer.transformSignatureToDetails(signature);
     }
@@ -144,7 +155,7 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_GET_DATAFILES_LIST)
     @GetMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerDataFilesResponse getDataFilesList(@PathVariable(value = "containerId") String containerId) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
 
         List<ee.openeid.siga.common.model.HashcodeDataFile> dataFiles = containerService.getDataFiles(containerId);
         GetHashcodeContainerDataFilesResponse response = new GetHashcodeContainerDataFilesResponse();
@@ -155,9 +166,9 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_ADD_DATAFILE)
     @PostMapping(value = "/hashcodecontainers/{containerId}/datafiles", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerDataFileResponse addHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerDataFileRequest containerDataFileRequest) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
         List<HashcodeDataFile> hashcodeDataFiles = containerDataFileRequest.getDataFiles();
-        RequestValidator.validateHashcodeDataFiles(hashcodeDataFiles);
+        validator.validateHashcodeDataFiles(hashcodeDataFiles);
 
         List<ee.openeid.siga.common.model.HashcodeDataFile> dataFilesForApplication = RequestTransformer.transformHashcodeDataFilesForApplication(hashcodeDataFiles);
         Result result = containerService.addDataFiles(containerId, dataFilesForApplication);
@@ -169,8 +180,8 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_DELETE_DATAFILE)
     @DeleteMapping(value = "/hashcodecontainers/{containerId}/datafiles/{datafileName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteHashcodeContainerDataFileResponse deleteHashcodeContainerDataFile(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "datafileName") String datafileName) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateFileName(datafileName);
+        validator.validateContainerId(containerId);
+        validator.validateFileName(datafileName);
 
         Result result = containerService.removeDataFile(containerId, datafileName);
         DeleteHashcodeContainerDataFileResponse response = new DeleteHashcodeContainerDataFileResponse();
@@ -182,7 +193,7 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
     @GetMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
 
         String container = containerService.getContainer(containerId);
         GetHashcodeContainerResponse response = new GetHashcodeContainerResponse();
@@ -193,7 +204,7 @@ public class HashcodeContainerController {
     @SigaEventLog(eventName = SigaEventName.HC_DELETE_CONTAINER)
     @DeleteMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
-        RequestValidator.validateContainerId(containerId);
+        validator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);
 
         connectionRepository.deleteByContainerId(containerId);
@@ -203,23 +214,4 @@ public class HashcodeContainerController {
         return response;
     }
 
-    @Autowired
-    protected void setContainerService(HashcodeContainerService containerService) {
-        this.containerService = containerService;
-    }
-
-    @Autowired
-    protected void setValidationService(HashcodeContainerValidationService validationService) {
-        this.validationService = validationService;
-    }
-
-    @Autowired
-    public void setSigningService(HashcodeContainerSigningService signingService) {
-        this.signingService = signingService;
-    }
-
-    @Autowired
-    public void setConnectionRepository(ConnectionRepository connectionRepository) {
-        this.connectionRepository = connectionRepository;
-    }
 }

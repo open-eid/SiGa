@@ -32,7 +32,14 @@ import java.util.List;
 @Profile("smartId & datafileContainer")
 public class SmartIdAsicContainerController {
 
-    private AsicContainerSigningService signingService;
+    private final AsicContainerSigningService signingService;
+    private final RequestValidator validator;
+
+    @Autowired
+    public SmartIdAsicContainerController(AsicContainerSigningService signingService, RequestValidator validator) {
+        this.signingService = signingService;
+        this.validator = validator;
+    }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_INIT)
     @PostMapping(value = "/containers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -41,8 +48,8 @@ public class SmartIdAsicContainerController {
             @RequestBody CreateContainerSmartIdCertificateChoiceRequest certificateChoiceRequest) {
 
         SmartIdInformation smartIdInformation = getSmartIdInformation(certificateChoiceRequest);
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSmartIdInformationForCertChoice(smartIdInformation);
+        validator.validateContainerId(containerId);
+        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
 
         String certificateId = signingService.initSmartIdCertificateChoice(containerId, smartIdInformation);
         CreateContainerSmartIdCertificateChoiceResponse response = new CreateContainerSmartIdCertificateChoiceResponse();
@@ -56,8 +63,8 @@ public class SmartIdAsicContainerController {
             @PathVariable(value = "containerId") String containerId,
             @PathVariable(value = "certificateId") String certificateId) {
 
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateCertificateId(certificateId);
+        validator.validateContainerId(containerId);
+        validator.validateCertificateId(certificateId);
         SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
 
         CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId, smartIdInformation);
@@ -70,17 +77,17 @@ public class SmartIdAsicContainerController {
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_INIT)
     @PostMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerSmartIdSigningResponse createContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerSmartIdSigningRequest createSmartIdSigningRequest) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
+        validator.validateContainerId(containerId);
+        validator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createSmartIdSigningRequest.getRoles();
-        RequestValidator.validateRoles(roles);
+        validator.validateRoles(roles);
         String signatureProfile = createSmartIdSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createSmartIdSigningRequest.getSignatureProductionPlace();
 
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
-        RequestValidator.validateSmartIdInformationForSigning(smartIdInformation);
+        validator.validateSmartIdInformationForSigning(smartIdInformation);
 
         SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
@@ -93,8 +100,8 @@ public class SmartIdAsicContainerController {
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGNING_STATUS)
     @GetMapping(value = "/containers/{containerId}/smartidsigning/{signatureId}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
-        RequestValidator.validateContainerId(containerId);
-        RequestValidator.validateSignatureId(signatureId);
+        validator.validateContainerId(containerId);
+        validator.validateSignatureId(signatureId);
         SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
         String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
 
@@ -113,8 +120,4 @@ public class SmartIdAsicContainerController {
                 null, request.getPersonIdentifier());
     }
 
-    @Autowired
-    public void setSigningService(AsicContainerSigningService signingService) {
-        this.signingService = signingService;
-    }
 }

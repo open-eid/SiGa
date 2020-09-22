@@ -13,4 +13,27 @@ public class PhoneNumberUtil {
     public static boolean isPhoneNumberValid(String phoneNumber) {
         return pattern.matcher(phoneNumber).matches();
     }
+
+    public enum CountryCallingCode {
+        EE("+372"),
+        LT("+370");
+
+        private final String prefix;
+
+
+        CountryCallingCode(String prefix) {
+            this.prefix = prefix;
+        }
+
+        public static CountryCallingCode getCountryByPrefix(String prefix) {
+            CountryCallingCode[] values = CountryCallingCode.values();
+            for (CountryCallingCode value : values) {
+                if (value.prefix.equals(prefix)) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+    }
 }
