@@ -64,8 +64,7 @@ public class MobileIdHashcodeContainerController {
     public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        MobileIdInformation mobileIdInformation = RequestTransformer.transformMobileIdInformation();
-        String status = signingService.processMobileStatus(containerId, signatureId, mobileIdInformation);
+        String status = signingService.processMobileStatus(containerId, signatureId);
 
         GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

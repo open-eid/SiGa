@@ -55,7 +55,6 @@ public class RequestValidatorTest {
 
     private static MobileIdInformation getMobileInformationRequest() {
         return MobileIdInformation.builder()
-                .relyingPartyName("Testimiseks")
                 .phoneNo("+37253410832")
                 .personIdentifier("3489348234")
                 .language("EST")
@@ -622,8 +621,6 @@ public class RequestValidatorTest {
                 .messageToDisplay("test message")
                 .documentNumber("PNOEE-12345678912-QRTS")
                 .personIdentifier("12345678912")
-                .relyingPartyName("name")
-                .relyingPartyUuid("uuid")
                 .build();
     }
 }

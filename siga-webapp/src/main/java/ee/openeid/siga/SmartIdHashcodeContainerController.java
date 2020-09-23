@@ -62,9 +62,8 @@ public class SmartIdHashcodeContainerController {
 
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
 
-        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId, smartIdInformation);
+        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId);
         GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = new GetHashcodeContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
@@ -104,8 +103,7 @@ public class SmartIdHashcodeContainerController {
             @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
-        String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
+        String status = signingService.processSmartIdStatus(containerId, signatureId);
 
         GetHashcodeContainerSmartIdSigningStatusResponse response = new GetHashcodeContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);

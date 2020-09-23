@@ -65,9 +65,8 @@ public class SmartIdAsicContainerController {
 
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
 
-        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId, smartIdInformation);
+        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId);
         GetContainerSmartIdCertificateChoiceStatusResponse response = new GetContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
@@ -102,8 +101,8 @@ public class SmartIdAsicContainerController {
     public GetContainerSmartIdSigningStatusResponse getSmartIdSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        SmartIdInformation smartIdInformation = RequestTransformer.transformSmartIdInformation();
-        String status = signingService.processSmartIdStatus(containerId, signatureId, smartIdInformation);
+
+        String status = signingService.processSmartIdStatus(containerId, signatureId);
 
         GetContainerSmartIdSigningStatusResponse response = new GetContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);

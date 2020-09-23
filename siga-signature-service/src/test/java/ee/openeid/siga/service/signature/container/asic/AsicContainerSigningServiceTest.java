@@ -129,7 +129,7 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     public void noSessionFoundMobileSigning() {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
-        signingService.processMobileStatus(CONTAINER_ID, "someUnknownSignatureId", RequestUtil.createMobileInformation());
+        signingService.processMobileStatus(CONTAINER_ID, "someUnknownSignatureId");
     }
 
     @Test

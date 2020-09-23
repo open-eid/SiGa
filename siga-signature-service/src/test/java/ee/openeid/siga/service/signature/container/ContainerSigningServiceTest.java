@@ -1,7 +1,9 @@
 package ee.openeid.siga.service.signature.container;
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.model.SmartIdInformation;
@@ -28,6 +30,7 @@ import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -127,11 +130,12 @@ public abstract class ContainerSigningServiceTest {
     }
 
     protected void assertSuccessfulMobileIdSigning() throws IOException {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         InitMidSignatureResponse initMidSignatureResponse = new InitMidSignatureResponse();
         initMidSignatureResponse.setSessionCode("sessionCode");
         initMidSignatureResponse.setChallengeId("1234");
-        Mockito.when(mobileIdClient.initMobileSigning(any(), any())).thenReturn(initMidSignatureResponse);
-        Mockito.when(mobileIdClient.getCertificate(any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
+        Mockito.when(mobileIdClient.initMobileSigning(any(), any(), any())).thenReturn(initMidSignatureResponse);
+        Mockito.when(mobileIdClient.getCertificate(any(), any())).thenReturn(pkcs12Esteid2018SignatureToken.getCertificate());
 
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
@@ -139,6 +143,7 @@ public abstract class ContainerSigningServiceTest {
     }
 
     protected void assertSuccessfulMobileIdSignatureProcessing() throws IOException, URISyntaxException {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
@@ -152,20 +157,21 @@ public abstract class ContainerSigningServiceTest {
         Mockito.when(mobileIdClient.getStatus(any(), any())).thenReturn(response);
 
         mockMobileIdSessionHolder(dataToSign);
-        String status = getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), RequestUtil.createMobileInformation());
+        String status = getSigningService().processMobileStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
         Assert.assertEquals("SIGNATURE", status);
     }
 
     protected void assertSuccessfulCertificateChoice() {
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
-        Mockito.when(smartIdClient.initiateCertificateChoice(smartIdInformation)).thenReturn(SMART_ID_SESSION_ID);
+        Mockito.when(smartIdClient.initiateCertificateChoice(any(), any())).thenReturn(SMART_ID_SESSION_ID);
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         String sessionId = getSigningService().initSmartIdCertificateChoice(CONTAINER_ID, smartIdInformation);
         Mockito.verify(sessionService, Mockito.times(1)).update(eq(CONTAINER_ID), any());
         Assert.assertEquals(36, sessionId.length());
     }
 
-    protected void assertSuccessfulCertificateChoiceProcessing(){
-        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
+    protected void assertSuccessfulCertificateChoiceProcessing() {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
 
         SmartIdCertificate smartIdCertificate = new SmartIdCertificate();
         smartIdCertificate.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
@@ -176,22 +182,23 @@ public abstract class ContainerSigningServiceTest {
                 .smartIdCertificate(smartIdCertificate)
                 .build();
         Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
-        CertificateStatus status = getSigningService().processSmartIdCertificateStatus(CONTAINER_ID, CERTIFICATE_ID, smartIdInformation);
+        CertificateStatus status = getSigningService().processSmartIdCertificateStatus(CONTAINER_ID, CERTIFICATE_ID);
         Assert.assertEquals("CERTIFICATE", status.getStatus());
         Assert.assertEquals(DOCUMENT_NUMBER, status.getDocumentNumber());
         Mockito.verify(sessionService, Mockito.times(1)).update(eq(CONTAINER_ID), any());
     }
 
     protected void assertSuccessfulSmartIdSigningWithoutSessionCert() {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         InitSmartIdSignatureResponse initSmartIdSignatureResponse = new InitSmartIdSignatureResponse();
         initSmartIdSignatureResponse.setSessionCode("sessionCode");
         initSmartIdSignatureResponse.setChallengeId("1234");
-        Mockito.when(smartIdClient.initSmartIdSigning(any(), any())).thenReturn(initSmartIdSignatureResponse);
+        Mockito.when(smartIdClient.initSmartIdSigning(any(), any(), any())).thenReturn(initSmartIdSignatureResponse);
 
         SmartIdCertificate smartIdCertificate = new SmartIdCertificate();
         smartIdCertificate.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
 
-        Mockito.when(smartIdClient.getCertificate(any())).thenReturn(smartIdCertificate);
+        Mockito.when(smartIdClient.getCertificate(any(), any())).thenReturn(smartIdCertificate);
         SignatureParameters signatureParameters = createSignatureParameters(null);
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
         SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
@@ -200,10 +207,11 @@ public abstract class ContainerSigningServiceTest {
     }
 
     protected void assertSuccessfulSmartIdSigningWithSessionCert() throws IOException, URISyntaxException {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         InitSmartIdSignatureResponse initSmartIdSignatureResponse = new InitSmartIdSignatureResponse();
         initSmartIdSignatureResponse.setSessionCode("sessionCode");
         initSmartIdSignatureResponse.setChallengeId("1234");
-        Mockito.when(smartIdClient.initSmartIdSigning(any(), any())).thenReturn(initSmartIdSignatureResponse);
+        Mockito.when(smartIdClient.initSmartIdSigning(any(), any(), any())).thenReturn(initSmartIdSignatureResponse);
 
         SmartIdCertificate smartIdCertificate = new SmartIdCertificate();
         smartIdCertificate.setCertificate(pkcs12Esteid2018SignatureToken.getCertificate());
@@ -221,6 +229,7 @@ public abstract class ContainerSigningServiceTest {
 
     protected void assertSuccessfulSmartIdSignatureProcessing(SessionService sessionService,
                                                               ContainerSigningService containerSigningService) throws IOException, URISyntaxException {
+        Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
@@ -237,10 +246,8 @@ public abstract class ContainerSigningServiceTest {
         Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
 
         mockSmartIdSessionHolder(dataToSign);
-        SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
-        String status = getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(),
-                smartIdInformation);
-        Assert.assertEquals(SmartIdSessionStatus.OK.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN), status);
+        String status = getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());
+        Assert.assertEquals(SmartIdSessionStatus.OK.getSigaSigningMessage(), status);
         Mockito.verify(sessionService, Mockito.times(2)).update(eq(CONTAINER_ID), any());
         Mockito.verify(containerSigningService, Mockito.times(1)).finalizeSignature(any(), eq(CONTAINER_ID), anyString(), any());
     }
@@ -329,6 +336,18 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertNull(updatedSession.getDataToSignHolder(SIG_ID));
     }
 
+    private SigaUserDetails createDefaultUserDetails() {
+        return SigaUserDetails.builder()
+                .clientName("Client_name")
+                .serviceName("Service_name")
+                .serviceUuid("Service_uuid")
+                .skRelyingPartyName("name")
+                .skRelyingPartyUuid("uuid")
+                .smartIdRelyingPartyName("name")
+                .smartIdRelyingPartyUuid("uuid")
+                .build();
+    }
+
     protected abstract ContainerSigningService getSigningService();
 
     protected abstract String getExpectedDataToSignPrefix();
@@ -347,6 +366,7 @@ public abstract class ContainerSigningServiceTest {
 
     protected interface SimpleSessionHolderBuilder {
         SimpleSessionHolderBuilder addDataFile(String fileName, String text);
+
         Session build();
     }
 

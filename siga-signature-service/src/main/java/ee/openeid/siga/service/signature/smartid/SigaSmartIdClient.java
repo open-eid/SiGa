@@ -7,6 +7,7 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SigaSmartIdException;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.common.util.TokenGenerator;
@@ -36,7 +37,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus.SessionType.SIGN;
 
 @Component
 public class SigaSmartIdClient {
@@ -56,13 +56,13 @@ public class SigaSmartIdClient {
     private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE,
-            logParameters = {@Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "name")})},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
-    public String initiateCertificateChoice(SmartIdInformation smartIdInformation) {
+    public String initiateCertificateChoice(RelyingPartyInfo relyingPartyInfo, SmartIdInformation smartIdInformation) {
         SemanticsIdentifier semanticsIdentifier = new SemanticsIdentifier(createSemanticsIdentifier(smartIdInformation.getCountry(),
                 smartIdInformation.getPersonIdentifier()));
-        CertificateRequest certificateRequest = createCertificateRequest(smartIdInformation);
-        SmartIdConnector connector = getSmartIdConnector(smartIdInformation);
+        CertificateRequest certificateRequest = createCertificateRequest(relyingPartyInfo);
+        SmartIdConnector connector = getSmartIdConnector(relyingPartyInfo);
         try {
             return connector.getCertificate(semanticsIdentifier, certificateRequest).getSessionID();
         } catch (CertificateNotFoundException e) {
@@ -74,9 +74,9 @@ public class SigaSmartIdClient {
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_CERTIFICATE,
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
-    public SmartIdCertificate getCertificate(SmartIdInformation smartIdInformation) {
+    public SmartIdCertificate getCertificate(RelyingPartyInfo relyingPartyInfo, SmartIdInformation smartIdInformation) {
         try {
-            SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
+            SmartIdClient smartIdClient = createSmartIdClient(relyingPartyInfo);
             return smartIdClient
                     .getCertificate()
                     .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
@@ -86,22 +86,22 @@ public class SigaSmartIdClient {
         } catch (CertificateNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
         } catch (UserRefusedException e) {
-            throw new SigaSmartIdException(SmartIdSessionStatus.USER_REFUSED.getSigaMessage(SIGN));
+            throw new SigaSmartIdException(SmartIdSessionStatus.USER_REFUSED.getSigaSigningMessage());
         } catch (SessionTimeoutException e) {
-            throw new SigaSmartIdException(SmartIdSessionStatus.TIMEOUT.getSigaMessage(SIGN));
+            throw new SigaSmartIdException(SmartIdSessionStatus.TIMEOUT.getSigaSigningMessage());
         } catch (DocumentUnusableException e) {
-            throw new SigaSmartIdException(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaMessage(SIGN));
+            throw new SigaSmartIdException(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaSigningMessage());
         } catch (SmartIdException | ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_SIGN_HASH,
-            logParameters = {@Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "name")})},
             logReturnObject = {@XPath(name = "sid_session_id", xpath = "sessionCode")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
-    public InitSmartIdSignatureResponse initSmartIdSigning(SmartIdInformation smartIdInformation, DataToSign dataToSign) {
-        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
+    public InitSmartIdSignatureResponse initSmartIdSigning(RelyingPartyInfo relyingPartyInfo, SmartIdInformation smartIdInformation, DataToSign dataToSign) {
+        SmartIdClient smartIdClient = createSmartIdClient(relyingPartyInfo);
         SignableHash signableHash = createSignableHash(dataToSign);
         String challengeId = signableHash.calculateVerificationCode();
         try {
@@ -126,9 +126,9 @@ public class SigaSmartIdClient {
             logParameters = {@Param(name = "sid_session_id", index = 1)},
             logReturnObject = {@XPath(name = "sid_status", xpath = "result.endResult")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
-    public SmartIdStatusResponse getSmartIdStatus(SmartIdInformation smartIdInformation, String sessionCode) {
+    public SmartIdStatusResponse getSmartIdStatus(RelyingPartyInfo relyingPartyInfo, String sessionCode) {
         try {
-            SmartIdConnector connector = getSmartIdConnector(smartIdInformation);
+            SmartIdConnector connector = getSmartIdConnector(relyingPartyInfo);
             SessionStatus sessionStatus = connector.getSessionStatus(sessionCode);
             return mapToSmartIdStatusResponse(sessionStatus);
         } catch (SessionNotFoundException e) {
@@ -138,8 +138,8 @@ public class SigaSmartIdClient {
         }
     }
 
-    private SmartIdConnector getSmartIdConnector(SmartIdInformation smartIdInformation) {
-        SmartIdClient smartIdClient = createSmartIdClient(smartIdInformation);
+    private SmartIdConnector getSmartIdConnector(RelyingPartyInfo relyingPartyInfo) {
+        SmartIdClient smartIdClient = createSmartIdClient(relyingPartyInfo);
         SmartIdConnector connector = smartIdClient.getSmartIdConnector();
         connector.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
         return connector;
@@ -149,11 +149,11 @@ public class SigaSmartIdClient {
         return PERSON_SEMANTICS_IDENTIFIER + country + "-" + identityNumber;
     }
 
-    private CertificateRequest createCertificateRequest(SmartIdInformation smartIdInformation) {
+    private CertificateRequest createCertificateRequest(RelyingPartyInfo relyingPartyInfo) {
         CertificateRequest request = new CertificateRequest();
         request.setNonce(TokenGenerator.generateToken(30));
-        request.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
-        request.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
+        request.setRelyingPartyUUID(relyingPartyInfo.getUuid());
+        request.setRelyingPartyName(relyingPartyInfo.getName());
         request.setCertificateLevel(MINIMUM_CERTIFICATE_LEVEL);
         return request;
     }
@@ -166,12 +166,12 @@ public class SigaSmartIdClient {
         return signableHash;
     }
 
-    SmartIdClient createSmartIdClient(SmartIdInformation smartIdInformation) {
+    SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
         SmartIdClient client = new SmartIdClient();
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
         client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
-        client.setRelyingPartyName(smartIdInformation.getRelyingPartyName());
-        client.setRelyingPartyUUID(smartIdInformation.getRelyingPartyUuid());
+        client.setRelyingPartyName(relyingPartyInfo.getName());
+        client.setRelyingPartyUUID(relyingPartyInfo.getUuid());
         return client;
     }
 

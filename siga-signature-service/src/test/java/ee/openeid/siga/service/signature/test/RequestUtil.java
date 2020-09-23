@@ -5,6 +5,7 @@ import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
@@ -156,9 +157,14 @@ public class RequestUtil {
                 .phoneNo("+37253410832")
                 .personIdentifier("3489348234")
                 .language("EST")
-                .relyingPartyName("Testimiseks")
                 .messageToDisplay("Random display").build();
         return mobileIdInformation;
+    }
+
+    public static RelyingPartyInfo createRPInfoForMid(){
+        return RelyingPartyInfo.builder()
+                .name("Testimiseks")
+                .build();
     }
 
     public static SmartIdInformation createSmartIdInformation() {
@@ -166,9 +172,14 @@ public class RequestUtil {
                 .personIdentifier("10101010005")
                 .country("EE")
                 .documentNumber(DOCUMENT_NUMBER)
-                .relyingPartyUuid("00000000-0000-0000-0000-000000000000")
-                .relyingPartyName("DEMO")
                 .build();
         return smartIdInformation;
+    }
+
+    public static RelyingPartyInfo createRPInfoForSmartId(){
+        return RelyingPartyInfo.builder()
+                .name("DEMO")
+                .uuid("00000000-0000-0000-0000-000000000000")
+                .build();
     }
 }

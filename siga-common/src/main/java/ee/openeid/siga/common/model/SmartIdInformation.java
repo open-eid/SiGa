@@ -12,9 +12,4 @@ public class SmartIdInformation {
     private String country;
     private String messageToDisplay;
     private String personIdentifier;
-
-    @NonNull
-    private String relyingPartyName;
-    @NonNull
-    private String relyingPartyUuid;
 }

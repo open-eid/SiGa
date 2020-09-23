@@ -1,7 +1,5 @@
 package ee.openeid.siga.service.signature.mobileid.midrest;
 
-import ee.openeid.siga.common.model.MobileIdInformation;
-import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.event.LogParam;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
@@ -10,6 +8,9 @@ import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.InvalidLanguageException;
 import ee.openeid.siga.common.exception.MidException;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
+import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.service.signature.mobileid.CertificateStatus;
 import ee.openeid.siga.service.signature.mobileid.GetStatusResponse;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
@@ -61,8 +62,8 @@ public class MidRestClient implements MobileIdClient {
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
-    public X509Certificate getCertificate(MobileIdInformation mobileIdInformation) {
-        MidClient midClient = createMidRestClient(mobileIdInformation);
+    public X509Certificate getCertificate(RelyingPartyInfo relyingPartyInfo, MobileIdInformation mobileIdInformation) {
+        MidClient midClient = createMidRestClient(relyingPartyInfo);
         MidCertificateRequest request = MidCertificateRequest.newBuilder()
                 .withPhoneNumber(mobileIdInformation.getPhoneNo())
                 .withNationalIdentityNumber(mobileIdInformation.getPersonIdentifier())
@@ -82,10 +83,10 @@ public class MidRestClient implements MobileIdClient {
 
     @Override
     @SigaEventLog(eventName = SigaEventName.MID_MOBILE_SIGN_HASH,
-            logParameters = {@Param(index = 1, fields = {@XPath(name = "relying_party_name", xpath = "relyingPartyName")})},
+            logParameters = {@Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "name")})},
             logReturnObject = {@XPath(name = "mid_session_id", xpath = "sessionCode")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
-    public InitMidSignatureResponse initMobileSigning(DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
+    public InitMidSignatureResponse initMobileSigning(RelyingPartyInfo relyingPartyInfo, DataToSign dataToSign, MobileIdInformation mobileIdInformation) {
         MidHashType midHashType = getMidHashType(dataToSign);
 
         MidHashToSign hashToSign = MidHashToSign.newBuilder()
@@ -103,7 +104,7 @@ public class MidRestClient implements MobileIdClient {
                 .withLanguage(midLanguage)
                 .withDisplayText(mobileIdInformation.getMessageToDisplay())
                 .build();
-        MidClient midClient = createMidRestClient(mobileIdInformation);
+        MidClient midClient = createMidRestClient(relyingPartyInfo);
         try {
             MidSignatureResponse midSignatureResponse = midClient.getMobileIdConnector().sign(request);
 
@@ -121,8 +122,8 @@ public class MidRestClient implements MobileIdClient {
             logParameters = {@Param(name = "mid_session_id", index = 0)},
             logReturnObject = {@XPath(name = "mid_status", xpath = "status")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
-    public GetStatusResponse getStatus(String sessionCode, MobileIdInformation mobileIdInformation) {
-        MidClient midClient = createMidRestClient(mobileIdInformation);
+    public GetStatusResponse getStatus(String sessionCode, RelyingPartyInfo relyingPartyInfo) {
+        MidClient midClient = createMidRestClient(relyingPartyInfo);
         MidSessionStatusRequest request = new MidSessionStatusRequest(sessionCode, 1);
         GetStatusResponse response = new GetStatusResponse();
 
@@ -159,11 +160,11 @@ public class MidRestClient implements MobileIdClient {
         throw new IllegalArgumentException("Invalid mid hash type");
     }
 
-    private MidClient createMidRestClient(MobileIdInformation mobileIdInformation) {
+    private MidClient createMidRestClient(RelyingPartyInfo relyingPartyInfo) {
         return MidClient.newBuilder().withHostUrl(configurationProperties.getUrl())
                 .withPollingSleepTimeoutSeconds(2)
-                .withRelyingPartyName(mobileIdInformation.getRelyingPartyName())
-                .withRelyingPartyUUID(mobileIdInformation.getRelyingPartyUUID())
+                .withRelyingPartyName(relyingPartyInfo.getName())
+                .withRelyingPartyUUID(relyingPartyInfo.getUuid())
                 .build();
     }
 

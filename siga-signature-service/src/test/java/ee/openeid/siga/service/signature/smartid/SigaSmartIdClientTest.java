@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SigaSmartIdException;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
@@ -70,7 +71,7 @@ public class SigaSmartIdClientTest {
         stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
-        String sessionId = smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+        String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
 
@@ -79,7 +80,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expect(SigaSmartIdException.class);
         exceptionRule.expectMessage(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
         stubCertificateChoiceEtsiSessionResponse(404, "");
-        String sessionId = smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+        String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
 
@@ -90,7 +91,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service error");
 
         stubCertificateChoiceErrorResponse(504);
-        smartIdClient.initiateCertificateChoice(createDefaultSmartIdInformation());
+        smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
@@ -101,7 +102,7 @@ public class SigaSmartIdClientTest {
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
 
-        SmartIdCertificate response = smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        SmartIdCertificate response = smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(certificate, response.getCertificate());
     }
 
@@ -111,43 +112,43 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
 
         stubCertificateChoiceDocumentSessionResponse(404, "");
-        smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
     public void getCertificate_userRefused() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.USER_REFUSED.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
+        exceptionRule.expectMessage(SmartIdSessionStatus.USER_REFUSED.getSigaSigningMessage());
 
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED");
-        smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
     public void getCertificate_sessionTimeout() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.TIMEOUT.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
+        exceptionRule.expectMessage(SmartIdSessionStatus.TIMEOUT.getSigaSigningMessage());
 
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "TIMEOUT");
-        smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
     public void getCertificate_documentUnusable() throws CertificateEncodingException {
         exceptionRule.expect(SigaSmartIdException.class);
-        exceptionRule.expectMessage(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaMessage(SmartIdSessionStatus.SessionType.SIGN));
+        exceptionRule.expectMessage(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaSigningMessage());
 
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
-        smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
@@ -171,14 +172,14 @@ public class SigaSmartIdClientTest {
 
 
         stubCertificateChoiceDocumentSessionResponse(status, "");
-        smartIdClient.getCertificate(createDefaultSmartIdInformation());
+        smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
     }
 
     @Test
     public void initSmartIdSigning_ok() {
         stubSigningInitiationResponse(200, "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}");
 
-        InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createDefaultSmartIdInformation(),
+        InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
                 mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
         SignableHash signableHash = new SignableHash();
         signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
@@ -194,7 +195,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service error");
 
         stubSigningInitiationResponse(504, "");
-        smartIdClient.initSmartIdSigning(createDefaultSmartIdInformation(),
+        smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
                 mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
     }
 
@@ -202,7 +203,7 @@ public class SigaSmartIdClientTest {
     public void getStatus_running() {
         stubGetSessionRunning();
 
-        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.RUNNING, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -211,7 +212,7 @@ public class SigaSmartIdClientTest {
     public void getStatus_ok() throws CertificateEncodingException {
         stubGetSession("COMPLETE", "OK");
 
-        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.OK, response.getStatus());
         Assert.assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
     }
@@ -220,7 +221,7 @@ public class SigaSmartIdClientTest {
     public void getStatus_timeout() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "TIMEOUT");
 
-        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.TIMEOUT, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -229,7 +230,7 @@ public class SigaSmartIdClientTest {
     public void getStatus_userRefused() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED");
 
-        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -238,7 +239,7 @@ public class SigaSmartIdClientTest {
     public void getStatus_documentUnusable() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
 
-        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        SmartIdStatusResponse response = smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.DOCUMENT_UNUSABLE, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -249,7 +250,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service returned unexpected response");
 
         stubGetSessionOkResponseWithoutSignature("RANDOM123", "OK");
-        smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
     }
 
     @Test
@@ -258,7 +259,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service returned unexpected response");
 
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "RANDOM123");
-        smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
     }
 
     @Test
@@ -267,7 +268,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage(SmartIdErrorStatus.SESSION_NOT_FOUND.getSigaMessage());
 
         stubGetStatusErrorResponse(404);
-        smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_DOCUMENT_NUMBER);
+        smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
@@ -276,7 +277,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service error");
 
         stubGetStatusErrorResponse(504);
-        smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_DOCUMENT_NUMBER);
+        smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
@@ -285,7 +286,7 @@ public class SigaSmartIdClientTest {
         exceptionRule.expectMessage("Smart-ID service returned unexpected response");
 
         stubGetSession("COMPLETE", "OK", "12345");
-        smartIdClient.getSmartIdStatus(createDefaultSmartIdInformation(), DEFAULT_MOCK_SESSION_ID);
+        smartIdClient.getSmartIdStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
     }
 
     private void stubSigningInitiationResponse(int status, String responseBody) {
@@ -407,8 +408,13 @@ public class SigaSmartIdClientTest {
                 .messageToDisplay(DEFAULT_MOCK_DISPLAY_TEXT)
                 .country(DEFAULT_MOCK_COUNTRY)
                 .documentNumber(DEFAULT_MOCK_DOCUMENT_NUMBER)
-                .relyingPartyUuid(DEFAULT_MOCK_RELYING_PARTY_UUID)
-                .relyingPartyName(DEFAULT_MOCK_RELYING_PARTY_NAME)
+                .build();
+    }
+
+    private RelyingPartyInfo createRPInfo(){
+        return RelyingPartyInfo.builder()
+                .name(DEFAULT_MOCK_RELYING_PARTY_NAME)
+                .uuid(DEFAULT_MOCK_RELYING_PARTY_UUID)
                 .build();
     }
 }

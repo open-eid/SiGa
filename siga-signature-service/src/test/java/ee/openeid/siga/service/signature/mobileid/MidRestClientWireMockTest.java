@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.MidException;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestClient;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
 import ee.sk.mid.MidVerificationCodeCalculator;
@@ -15,7 +16,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -70,7 +75,7 @@ public class MidRestClientWireMockTest {
                 "\"cert\": \"" + Base64.getEncoder().encodeToString(certificate.getEncoded()) + "\"" +
                 "}");
 
-        X509Certificate response = midRestClient.getCertificate(createDefaultMobileIdInformation());
+        X509Certificate response = midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
         Assert.assertEquals(certificate, response);
     }
 
@@ -78,7 +83,7 @@ public class MidRestClientWireMockTest {
     public void getCertificate_midRestReturnsNotFound() {
         stubCertificateRequestOkResponse("{\"result\": \"NOT_FOUND\"}");
         try {
-            midRestClient.getCertificate(createDefaultMobileIdInformation());
+            midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
             Assert.fail("Should not reach here");
         } catch (MidException e) {
             Assert.assertEquals("NOT_FOUND", e.getMessage());
@@ -89,7 +94,7 @@ public class MidRestClientWireMockTest {
     public void getCertificate_midRestReturnsUnexpectedResult() {
         stubCertificateRequestOkResponse("{\"result\": \"INVALID_RESULT\"}");
         try {
-            midRestClient.getCertificate(createDefaultMobileIdInformation());
+            midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
             Assert.fail("Should not reach here");
         } catch (MidException e) {
             Assert.assertEquals("UNEXPECTED_STATUS", e.getMessage());
@@ -100,7 +105,7 @@ public class MidRestClientWireMockTest {
     public void getCertificate_midRestReturns400() {
         stubCertificateRequestErrorResponse(400);
         try {
-            midRestClient.getCertificate(createDefaultMobileIdInformation());
+            midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
             Assert.fail("Should not reach here");
         } catch (MidException e) {
             Assert.assertEquals("NOT_FOUND", e.getMessage());
@@ -112,7 +117,7 @@ public class MidRestClientWireMockTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubCertificateRequestErrorResponse(status.value());
             try {
-                midRestClient.getCertificate(createDefaultMobileIdInformation());
+                midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
                 Assert.fail("Should not reach here");
             } catch (ClientException e) {
                 Assert.assertEquals("Mobile-ID service error", e.getMessage());
@@ -126,7 +131,7 @@ public class MidRestClientWireMockTest {
     public void initMobileSigning_midRestReturnsValidResponse() {
         stubSigningInitiationOkResponse("{\"sessionID\": \"session-id-value\"}");
 
-        InitMidSignatureResponse response = midRestClient.initMobileSigning(mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
+        InitMidSignatureResponse response = midRestClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
         Assert.assertEquals(MidVerificationCodeCalculator.calculateMobileIdVerificationCode(DigestUtils.sha256(DEFAULT_MOCK_DATA_TO_SIGN)), response.getChallengeId());
         Assert.assertEquals("session-id-value", response.getSessionCode());
     }
@@ -136,7 +141,7 @@ public class MidRestClientWireMockTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubSigningInitiationErrorResponse(status.value());
             try {
-                midRestClient.initMobileSigning(mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
+                midRestClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
                 Assert.fail("Should not reach here");
             } catch (ClientException e) {
                 Assert.assertEquals("Mobile-ID service error", e.getMessage());
@@ -150,7 +155,7 @@ public class MidRestClientWireMockTest {
     public void getStatus_midRestReturnsRunning() {
         stubGetStatusOkResponse("{\"state\":\"RUNNING\"}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.OUTSTANDING_TRANSACTION, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -159,7 +164,7 @@ public class MidRestClientWireMockTest {
     public void getStatus_midRestReturnsUnexpectedState() {
         stubGetStatusOkResponse("{\"state\":\"SOME_INVALID_STATE\"}");
         try {
-            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
             Assert.fail("Should not reach here");
         } catch (ClientException e) {
             Assert.assertEquals("Mobile-ID service returned unexpected response", e.getMessage());
@@ -178,7 +183,7 @@ public class MidRestClientWireMockTest {
                 " }" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.SIGNATURE, response.getStatus());
         Assert.assertArrayEquals(signatureBytes, response.getSignature());
     }
@@ -190,7 +195,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"TIMEOUT\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.EXPIRED_TRANSACTION, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -202,7 +207,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"NOT_MID_CLIENT\"" +
                 "}");
         try {
-            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
             Assert.fail("Should not reach here");
         } catch (ClientException e) {
             Assert.assertEquals("Mobile-ID service returned unexpected response", e.getMessage());
@@ -216,7 +221,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"USER_CANCELLED\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.USER_CANCEL, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -228,7 +233,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"SIGNATURE_HASH_MISMATCH\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.NOT_VALID, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -240,7 +245,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"PHONE_ABSENT\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.PHONE_ABSENT, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -252,7 +257,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"DELIVERY_ERROR\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.SENDING_ERROR, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -264,7 +269,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"SIM_ERROR\"" +
                 "}");
 
-        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+        GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
         Assert.assertEquals(MidStatus.SIM_ERROR, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
@@ -276,7 +281,7 @@ public class MidRestClientWireMockTest {
                 "\"result\": \"SOME_INVALID_RESULT\"" +
                 "}");
         try {
-            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+            midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
             Assert.fail("Should not reach here");
         } catch (ClientException e) {
             Assert.assertEquals("Mobile-ID service returned unexpected response", e.getMessage());
@@ -288,7 +293,7 @@ public class MidRestClientWireMockTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubGetStatusErrorResponse(status.value());
 
-            GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createDefaultMobileIdInformation());
+            GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
             Assert.assertEquals(MidStatus.INTERNAL_ERROR, response.getStatus());
             Assert.assertNull(response.getSignature());
 
@@ -303,8 +308,13 @@ public class MidRestClientWireMockTest {
                 .phoneNo(DEFAULT_MOCK_PHONE_NUMBER)
                 .language(DEFAULT_MOCK_LANGUAGE)
                 .messageToDisplay(DEFAULT_MOCK_DISPLAY_TEXT)
-                .relyingPartyName(DEFAULT_MOCK_RELYING_PARTY_NAME)
-                .relyingPartyUUID(DEFAULT_MOCK_RELYING_PARTY_UUID.toString())
+                .build();
+    }
+
+    private RelyingPartyInfo createRPInfo() {
+        return RelyingPartyInfo.builder()
+                .name(DEFAULT_MOCK_RELYING_PARTY_NAME)
+                .uuid(DEFAULT_MOCK_RELYING_PARTY_UUID.toString())
                 .build();
     }
 

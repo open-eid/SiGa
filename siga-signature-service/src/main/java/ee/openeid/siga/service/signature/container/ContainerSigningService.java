@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.container;
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -8,6 +9,7 @@ import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.model.SigningType;
@@ -38,6 +40,7 @@ import org.digidoc4j.exceptions.TechnicalException;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -97,12 +100,12 @@ public abstract class ContainerSigningService {
     public SigningChallenge startMobileIdSigning(String containerId, MobileIdInformation mobileIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
-
-        X509Certificate certificate = mobileIdClient.getCertificate(mobileIdInformation);
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForMid();
+        X509Certificate certificate = mobileIdClient.getCertificate(relyingPartyInfo, mobileIdInformation);
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
-        InitMidSignatureResponse initMidSignatureResponse = mobileIdClient.initMobileSigning(dataToSign, mobileIdInformation);
+        InitMidSignatureResponse initMidSignatureResponse = mobileIdClient.initMobileSigning(relyingPartyInfo, dataToSign, mobileIdInformation);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
@@ -121,11 +124,12 @@ public abstract class ContainerSigningService {
                 .build();
     }
 
-    public String processMobileStatus(String containerId, String signatureId, MobileIdInformation mobileIdInformation) {
+    public String processMobileStatus(String containerId, String signatureId) {
         Session sessionHolder = getSession(containerId);
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.MOBILE_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
-        GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode(), mobileIdInformation);
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForMid();
+        GetStatusResponse getStatusResponse = mobileIdClient.getStatus(dataToSignHolder.getSessionCode(), relyingPartyInfo);
         if (getStatusResponse.getStatus() == MidStatus.SIGNATURE) {
             Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, getStatusResponse.getSignature());
 
@@ -137,26 +141,31 @@ public abstract class ContainerSigningService {
 
     public String initSmartIdCertificateChoice(String containerId, SmartIdInformation smartIdInformation) {
         Session sessionHolder = getSession(containerId);
-        String smartIdSessionId = smartIdClient.initiateCertificateChoice(smartIdInformation);
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
+        String smartIdSessionId = smartIdClient.initiateCertificateChoice(relyingPartyInfo, smartIdInformation);
         String generatedCertificateId = UUIDGenerator.generateUUID();
         sessionHolder.addCertificateSessionId(generatedCertificateId, smartIdSessionId);
         sessionService.update(containerId, sessionHolder);
         return generatedCertificateId;
     }
 
-    public CertificateStatus processSmartIdCertificateStatus(String containerId, String certificateId, SmartIdInformation smartIdInformation) {
+    public CertificateStatus processSmartIdCertificateStatus(String containerId, String certificateId) {
         Session sessionHolder = getSession(containerId);
         String smartIdSessionId = sessionHolder.getCertificateSessionId(certificateId);
-        SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(smartIdInformation, smartIdSessionId);
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
+        SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(relyingPartyInfo, smartIdSessionId);
         CertificateStatus certificateStatus = new CertificateStatus();
         if (smartIdStatusResponse.getStatus() == SmartIdSessionStatus.OK) {
             SmartIdCertificate smartIdCertificate = smartIdStatusResponse.getSmartIdCertificate();
+            if (smartIdCertificate == null) {
+                throw new IllegalArgumentException("No certificate found from Smart-id response");
+            }
             sessionHolder.addCertificate(smartIdCertificate.getDocumentNumber(), smartIdCertificate.getCertificate());
             certificateStatus.setDocumentNumber(smartIdStatusResponse.getSmartIdCertificate().getDocumentNumber());
             sessionHolder.clearCertificateSessionId(certificateId);
             sessionService.update(containerId, sessionHolder);
         }
-        certificateStatus.setStatus(smartIdStatusResponse.getStatus().getSigaMessage(SmartIdSessionStatus.SessionType.CERT));
+        certificateStatus.setStatus(smartIdStatusResponse.getStatus().getSigaCertificateMessage());
         return certificateStatus;
     }
 
@@ -165,16 +174,16 @@ public abstract class ContainerSigningService {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
         X509Certificate certificate = sessionHolder.getCertificate(smartIdInformation.getDocumentNumber());
-
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
         if (certificate == null) {
-            SmartIdCertificate certificateResponse = smartIdClient.getCertificate(smartIdInformation);
+            SmartIdCertificate certificateResponse = smartIdClient.getCertificate(relyingPartyInfo, smartIdInformation);
             certificate = certificateResponse.getCertificate();
         }
 
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = buildDataToSign(sessionHolder, signatureParameters);
 
-        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(smartIdInformation, dataToSign);
+        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdClient.initSmartIdSigning(relyingPartyInfo, smartIdInformation, dataToSign);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         DataToSignHolder dataToSignHolder = DataToSignHolder.builder()
@@ -185,6 +194,7 @@ public abstract class ContainerSigningService {
                 .build();
 
         sessionHolder.addDataToSign(generatedSignatureId, dataToSignHolder);
+        sessionHolder.clearCertificate(smartIdInformation.getDocumentNumber());
         sessionService.update(containerId, sessionHolder);
 
         return SigningChallenge.builder()
@@ -193,20 +203,22 @@ public abstract class ContainerSigningService {
                 .build();
     }
 
-    public String processSmartIdStatus(String containerId, String signatureId, SmartIdInformation smartIdInformation) {
+    public String processSmartIdStatus(String containerId, String signatureId) {
         Session sessionHolder = getSession(containerId);
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
-        SmartIdStatusResponse sessionResponse = smartIdClient.getSmartIdStatus(smartIdInformation, dataToSignHolder.getSessionCode());
-
+        RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
+        SmartIdStatusResponse sessionResponse = smartIdClient.getSmartIdStatus(relyingPartyInfo, dataToSignHolder.getSessionCode());
         if (sessionResponse.getStatus() == SmartIdSessionStatus.OK) {
+            if (sessionResponse.getSignature() == null) {
+                throw new IllegalArgumentException("No signature found from Smart-id response");
+            }
             Signature signature = finalizeSignature(sessionHolder, containerId, signatureId, sessionResponse.getSignature());
             addSignatureToSession(sessionHolder, signature, signatureId);
-            sessionHolder.clearCertificate(smartIdInformation.getDocumentNumber());
             sessionService.update(containerId, sessionHolder);
         }
 
-        return sessionResponse.getStatus().getSigaMessage(SmartIdSessionStatus.SessionType.SIGN);
+        return sessionResponse.getStatus().getSigaSigningMessage();
     }
 
     protected Signature finalizeSignature(Session session, String containerId, String signatureId, byte[] base64Decoded) {
@@ -317,6 +329,22 @@ public abstract class ContainerSigningService {
         if (signingType != dataToSignHolder.getSigningType()) {
             throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + " for signing type: " + dataToSignHolder.getSigningType());
         }
+    }
+
+    private RelyingPartyInfo getRPInfoForMid() {
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return RelyingPartyInfo.builder()
+                .name(sigaUserDetails.getSkRelyingPartyName())
+                .uuid(sigaUserDetails.getSkRelyingPartyUuid())
+                .build();
+    }
+
+    private RelyingPartyInfo getRPInfoForSmartId() {
+        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return RelyingPartyInfo.builder()
+                .name(sigaUserDetails.getSmartIdRelyingPartyName())
+                .uuid(sigaUserDetails.getSmartIdRelyingPartyUuid())
+                .build();
     }
 
     public abstract DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters);

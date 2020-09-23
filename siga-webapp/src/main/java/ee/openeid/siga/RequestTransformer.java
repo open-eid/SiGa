@@ -139,35 +139,21 @@ public class RequestTransformer {
 
     }
 
-    static MobileIdInformation transformMobileIdInformation() {
-        return transformMobileIdInformation(null, null, null, null);
-    }
-
     static MobileIdInformation transformMobileIdInformation(String language, String messageToDisplay, String personIdentifier, String phoneNo) {
-        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return MobileIdInformation.builder()
                 .language(language)
                 .messageToDisplay(messageToDisplay)
                 .personIdentifier(personIdentifier)
                 .phoneNo(phoneNo)
-                .relyingPartyName(sigaUserDetails.getSkRelyingPartyName())
-                .relyingPartyUUID(sigaUserDetails.getSkRelyingPartyUuid())
                 .build();
     }
 
-    static SmartIdInformation transformSmartIdInformation() {
-        return RequestTransformer.transformSmartIdInformation(null, null, null, null);
-    }
-
     static SmartIdInformation transformSmartIdInformation(String documentNumber, String country, String messageToDisplay, String personIdentifier) {
-        SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return SmartIdInformation.builder()
                 .country(country)
                 .messageToDisplay(messageToDisplay)
                 .personIdentifier(personIdentifier)
                 .documentNumber(documentNumber)
-                .relyingPartyName(sigaUserDetails.getSmartIdRelyingPartyName())
-                .relyingPartyUuid(sigaUserDetails.getSmartIdRelyingPartyUuid())
                 .build();
     }
 

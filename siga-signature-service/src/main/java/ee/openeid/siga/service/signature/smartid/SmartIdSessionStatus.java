@@ -15,15 +15,11 @@ public enum SmartIdSessionStatus {
         this.sigaCertMessage = sigaCertMessage;
     }
 
-    public String getSigaMessage(SessionType type) {
-        if (SessionType.SIGN == type) {
-            return sigaSignMessage;
-        }
-        return sigaCertMessage;
+    public String getSigaSigningMessage() {
+        return sigaSignMessage;
     }
 
-    public enum SessionType {
-        CERT,
-        SIGN
+    public String getSigaCertificateMessage() {
+        return sigaCertMessage;
     }
 }
