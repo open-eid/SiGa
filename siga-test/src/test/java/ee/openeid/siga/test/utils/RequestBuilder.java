@@ -172,15 +172,15 @@ public class RequestBuilder {
         return request;
     }
 
-    public static JSONObject smartIdSigningRequestWithDefault(String personIdentifier, String signatureProfile) throws JSONException {
-        return smartIdSigningRequest(personIdentifier, "EE", signatureProfile, "something", null, null, null, null, null);
+    public static JSONObject smartIdSigningRequestWithDefault(String signatureProfile, String documentNumber) throws JSONException {
+        return smartIdSigningRequest("EE", signatureProfile, documentNumber, "something", null, null,null, null, null);
     }
 
-    public static JSONObject smartIdSigningRequest(String personIdentifier, String originCountry, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject smartIdSigningRequest(String originCountry, String signatureProfile, String documentNumber, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
-        request.put("personIdentifier", personIdentifier);
         request.put("country", originCountry);
         request.put("signatureProfile", signatureProfile);
+        request.put("documentNumber", documentNumber);
 
         if (messageToDisplay != null) {
             request.put("messageToDisplay", messageToDisplay);

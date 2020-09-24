@@ -2,8 +2,7 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
-import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.*;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
@@ -29,7 +28,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId);
 
@@ -43,7 +42,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdUserRefused() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010016", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010016-9RF6-Q"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response signingResponse = pollForSidSigning(flow, signatureId);
         expectSmartIdStatus(signingResponse, USER_CANCEL);
@@ -52,7 +51,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdNotFound() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("123abc", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-123abc-9RF6-Q"));
         expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
     }
 
@@ -113,7 +112,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void deleteToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -124,7 +123,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void putToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request");
@@ -135,7 +134,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void postToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request");
@@ -146,7 +145,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void headToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -157,7 +156,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void optionsToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -168,7 +167,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void patchToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -179,7 +178,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdInvalidRole() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("10101010005", "EE", "LT", null, null, null, null, null, ""));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("EE", "LT", null, null, null, null, null, "",null));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -187,7 +186,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
@@ -198,7 +197,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("10101010005", "LT"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
         addDataFile(flow, addDataFileToHashcodeRequest("file.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
