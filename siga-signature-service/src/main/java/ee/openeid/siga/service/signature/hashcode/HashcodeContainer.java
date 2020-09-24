@@ -9,6 +9,7 @@ import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.MimeType;
@@ -60,6 +61,7 @@ public class HashcodeContainer {
         }
 
         validateDataFiles();
+        validateManifest();
         addMimeTypes();
     }
 
@@ -79,6 +81,12 @@ public class HashcodeContainer {
         if (!signatures.isEmpty())
             throw new SignatureExistsException("Unable to add data file when signature exists");
         dataFiles.add(dataFile);
+    }
+
+    private void validateManifest() {
+        if (manifest == null || manifest.isEmpty()) {
+            throw new InvalidContainerException("Container must have manifest file");
+        }
     }
 
     private void validateDataFiles() {
@@ -141,6 +149,8 @@ public class HashcodeContainer {
                 HashcodesDataFileParser parser = new HashcodesDataFileParser(inputStream.readAllBytes());
                 addDataFileEntries(parser.getEntries(), entryName);
             }
+        } catch (DSSException | NullPointerException e) {
+            throw new InvalidContainerException("Hashcode container is invalid");
         } catch (org.digidoc4j.exceptions.DuplicateDataFileException e) {
             throw new DuplicateDataFileException(e.getMessage());
         }

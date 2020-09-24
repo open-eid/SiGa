@@ -118,8 +118,8 @@ public class HashcodeContainerTest {
         hashcodeContainer.getSignatures().remove(0);
         HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
         hashcodeDataFile.setFileName("randomFile.txt");
-        hashcodeDataFile.setFileHashSha256("asdasd=");
-        hashcodeDataFile.setFileHashSha512("oasdokasdoask=");
+        hashcodeDataFile.setFileHashSha256("n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=");
+        hashcodeDataFile.setFileHashSha512("7iaw3Ur350mqGo7jwQrpkj9hiYB3Lkc/iBml1JQODbJ6wYX4oOHV+E+IvIh/1nsUNzLDBMxfqa2Ob1f1ACio/w==");
         hashcodeDataFile.setFileSize(10);
         hashcodeContainer.addDataFile(hashcodeDataFile);
 
@@ -150,7 +150,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerCreation_withOneDataFile() throws IOException, URISyntaxException{
+    public void validHashcodeContainerCreation_withOneDataFile() throws IOException {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         hashcodeDataFiles.get(0).setFileHashSha512(null);
         HashcodeContainer hashcodeContainer = new HashcodeContainer(ServiceType.PROXY);
@@ -163,6 +163,24 @@ public class HashcodeContainerTest {
             Assert.assertEquals(TestUtil.HASHCODES_SHA256_CONTENT, hashcodeContainerFilesHolder.getHashcodesSha256Content());
             Assert.assertNull(hashcodeContainerFilesHolder.getHashcodesSha512Content());
         }
+    }
+
+    @Test
+    public void validateHashcodeContainerOpening_withInvalidBase64DataFileHash() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Invalid data file hash");
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile("hashcode_with_invalid_base64_hash.asice");
+        hashcodeContainer.open(container);
+    }
+
+    @Test
+    public void validateHashcodeContainerOpening_withInvalidLengthDataFileHash() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Invalid data file hash");
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile("hashcode_with_invalid_length_hash.asice");
+        hashcodeContainer.open(container);
     }
 
 }
