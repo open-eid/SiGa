@@ -93,7 +93,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
         Response response = getSidCertificateStatus(flow, "00000000-0000-0000-0000-000000000000");
 
-        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+        expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         getSidCertificateStatus(flow, generatedCertificateId);
         Response response2 = getSidCertificateStatus(flow, generatedCertificateId);
 
-        expectError(response2, 400, SMARTID_EXCEPTION, NOT_FOUND);
+        expectError(response2, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
     @Test

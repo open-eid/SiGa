@@ -152,6 +152,9 @@ public abstract class ContainerSigningService {
     public CertificateStatus processSmartIdCertificateStatus(String containerId, String certificateId) {
         Session sessionHolder = getSession(containerId);
         String smartIdSessionId = sessionHolder.getCertificateSessionId(certificateId);
+        if (smartIdSessionId == null) {
+            throw new InvalidSessionDataException("No certificate session found with certificate Id: " + certificateId);
+        }
         RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
         SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(relyingPartyInfo, smartIdSessionId);
         CertificateStatus certificateStatus = new CertificateStatus();

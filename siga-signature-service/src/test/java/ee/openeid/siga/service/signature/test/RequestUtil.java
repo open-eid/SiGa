@@ -110,11 +110,14 @@ public class RequestUtil {
     public static HashcodeContainerSessionHolder createHashcodeSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper().get(0));
+        Map<String, String> certificateSessions = new HashMap<>();
+        certificateSessions.put(CERTIFICATE_ID, "123");
         return HashcodeContainerSessionHolder.builder()
                 .sessionId(CONTAINER_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
+                .certificateSessionHolder(certificateSessions)
                 .signatures(signatureWrappers)
                 .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
     }
@@ -123,6 +126,8 @@ public class RequestUtil {
         String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
+        Map<String, String> certificateSessions = new HashMap<>();
+        certificateSessions.put(CERTIFICATE_ID, "123");
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
         return AsicContainerSessionHolder.builder()
@@ -130,6 +135,7 @@ public class RequestUtil {
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
+                .certificateSessionHolder(certificateSessions)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
                 .container(Base64.getDecoder().decode(base64container.getBytes()))
@@ -161,7 +167,7 @@ public class RequestUtil {
         return mobileIdInformation;
     }
 
-    public static RelyingPartyInfo createRPInfoForMid(){
+    public static RelyingPartyInfo createRPInfoForMid() {
         return RelyingPartyInfo.builder()
                 .name("Testimiseks")
                 .build();
@@ -176,7 +182,7 @@ public class RequestUtil {
         return smartIdInformation;
     }
 
-    public static RelyingPartyInfo createRPInfoForSmartId(){
+    public static RelyingPartyInfo createRPInfoForSmartId() {
         return RelyingPartyInfo.builder()
                 .name("DEMO")
                 .uuid("00000000-0000-0000-0000-000000000000")

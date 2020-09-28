@@ -21,6 +21,7 @@ import ee.openeid.siga.service.signature.smartid.SmartIdStatusResponse;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.SmartIdCertificate;
+import lombok.SneakyThrows;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.Signature;
@@ -170,6 +171,7 @@ public abstract class ContainerSigningServiceTest {
         Assert.assertEquals(36, sessionId.length());
     }
 
+    @SneakyThrows
     protected void assertSuccessfulCertificateChoiceProcessing() {
         Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
 
@@ -181,6 +183,9 @@ public abstract class ContainerSigningServiceTest {
                 .status(SmartIdSessionStatus.OK)
                 .smartIdCertificate(smartIdCertificate)
                 .build();
+
+        Session sessionHolder = getSessionHolder();
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
         Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
         CertificateStatus status = getSigningService().processSmartIdCertificateStatus(CONTAINER_ID, CERTIFICATE_ID);
         Assert.assertEquals("CERTIFICATE", status.getStatus());
