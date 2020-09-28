@@ -8,13 +8,15 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.Base64Util;
 import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
+import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
+import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -25,15 +27,15 @@ import java.util.stream.Stream;
 public class RequestValidator {
 
     private final String INVALID_DATA_FILE_NAME = "Data file name is invalid";
-    @Value("${siga.sid.allowedCountries}")
-    private final List<String> smartIdAllowedCountries;
-    @Value("${siga.midrest.allowedCountries}")
-    private final List<String> midAllowedCountries;
+
+    private MidRestConfigurationProperties midRestConfigurationProperties;
+    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
     private static final String PERSON_SEMANTICS_IDENTIFIER = "PNO";
 
-    public RequestValidator(List<String> smartIdAllowedCountries, List<String> midAllowedCountries) {
-        this.smartIdAllowedCountries = smartIdAllowedCountries;
-        this.midAllowedCountries = midAllowedCountries;
+    @Autowired
+    public RequestValidator(MidRestConfigurationProperties midRestConfigurationProperties, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
+        this.midRestConfigurationProperties = midRestConfigurationProperties;
+        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
     }
 
     public void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
@@ -130,7 +132,7 @@ public class RequestValidator {
     }
 
     public void validateSmartIdInformationForCertChoice(SmartIdInformation smartIdInformation) {
-        validateCountry(smartIdInformation.getCountry(), smartIdAllowedCountries);
+        validateCountry(smartIdInformation.getCountry(), smartIdServiceConfigurationProperties.getAllowedCountries());
         validatePersonIdentifier(smartIdInformation.getPersonIdentifier());
     }
 
@@ -155,7 +157,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid phone No.");
         }
         PhoneNumberUtil.CountryCallingCode countryNumber = PhoneNumberUtil.CountryCallingCode.getCountryByPrefix(phoneNo.substring(0, 4));
-        if (countryNumber == null || !midAllowedCountries.contains(countryNumber.name())) {
+        if (countryNumber == null || !midRestConfigurationProperties.getAllowedCountries().contains(countryNumber.name())) {
             throw new RequestValidationException("Invalid international calling code");
         }
     }
@@ -193,7 +195,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid Smart-Id documentNumber");
         }
         String country = documentNumber.substring(3, 5);
-        if (!smartIdAllowedCountries.contains(country)) {
+        if (!smartIdServiceConfigurationProperties.getAllowedCountries().contains(country)) {
             throw new RequestValidationException("Invalid Smart-Id country inside documentNumber");
         }
     }

@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -21,6 +23,7 @@ public class MidRestConfigurationProperties {
     private final Environment environment;
 
     private String url;
+    private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT"));
 
     @PostConstruct
     public void validateConfiguration() {

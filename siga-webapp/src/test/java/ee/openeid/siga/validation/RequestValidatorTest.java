@@ -4,6 +4,8 @@ import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
+import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
@@ -16,6 +18,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -36,7 +39,6 @@ import static java.time.Instant.now;
 
 @RunWith(MockitoJUnitRunner.class)
 @TestPropertySource(locations = "application-test.properties")
-
 public class RequestValidatorTest {
 
     public static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
@@ -44,13 +46,20 @@ public class RequestValidatorTest {
     @InjectMocks
     private RequestValidator validator;
 
+    @Mock
+    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+
+    @Mock
+    private MidRestConfigurationProperties midRestConfigurationProperties;
+
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Before
     public void setup() {
-        List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT"));
-        validator = new RequestValidator(allowedCountries, allowedCountries);
+        Mockito.when(midRestConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        Mockito.when(smartIdServiceConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        validator = new RequestValidator(midRestConfigurationProperties, smartIdServiceConfigurationProperties);
     }
 
     private static MobileIdInformation getMobileInformationRequest() {

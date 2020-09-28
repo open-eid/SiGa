@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -23,6 +25,7 @@ public class SmartIdServiceConfigurationProperties {
     private final Environment environment;
 
     private String url;
+    private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT", "LV"));
 
     private int sessionStatusResponseSocketOpenTime = 1000;
 
