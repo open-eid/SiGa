@@ -12,6 +12,7 @@ public class TestData {
     public static final String REMOTE_SIGNING = "/remotesigning";
     public static final String MID_SIGNING = "/mobileidsigning";
     public static final String SMARTID_SIGNING = "/smartidsigning";
+    public static final String CERTIFICATE_CHOICE = "/certificatechoice";
     public static final String STATUS = "/status";
     public static final String SIGNATURES = "/signatures";
     public static final String DATAFILES = "/datafiles";

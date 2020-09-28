@@ -90,6 +90,18 @@ public abstract class TestBase {
         return response;
     }
 
+    @Step("Start Smart-ID certificate choice")
+    protected Response postSidCertificateChoice(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
+        return post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow, request.toString());
+    }
+
+    @Step("Get Smart-ID certificate selection status")
+    protected Response getSidCertificateStatus(SigaApiFlow flow, String generatedCertificateId) throws InvalidKeyException, NoSuchAlgorithmException {
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
+        flow.setSidStatus(response);
+        return response;
+    }
+
     @Step("Start Smart-ID signing")
     protected Response postSmartIdSigningInSession(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING, flow, request.toString());

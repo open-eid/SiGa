@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SmartIdSigningHashcodeContainerT extends TestBase {
@@ -23,6 +23,108 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Before
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
+    }
+
+    @Test
+    public void signWithSmartIdWithCertificateChoiceSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = getSidCertificateStatus(flow, generatedCertificateId);
+        String documentNumber = response2.as(GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+
+        Response response3 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber));
+        String generatedSignatureId = response3.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, generatedSignatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void invalidSmartIdSigningStatusRequestAfterSuccessfulFinalization() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = getSidCertificateStatus(flow, generatedCertificateId);
+        String documentNumber = response2.as(GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+
+        Response response3 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber));
+        String generatedSignatureId = response3.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, generatedSignatureId);
+
+        Response response4 = getSmartIdSigningInSession(flow, generatedSignatureId);
+
+        expectError(response4, 400, INVALID_DATA);
+    }
+
+    @Test
+    public void postWithSmartIdCertificateChoiceInvalidPersonIdentifier() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("P!NO-23a.31,23", "EE"));
+
+        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+    }
+
+    @Test
+    public void postWithSmartIdCertificateChoiceMissingPersonIdentifierFormat() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("", "EE"));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postWithSmartIdCertificateChoiceInvalidCountry() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "ee"));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void getSmartIdCertificateChoiceInvalidCertificateId() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response response = getSidCertificateStatus(flow, "00000000-0000-0000-0000-000000000000");
+
+        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+    }
+
+    @Test
+    public void signSmartIdCertificateChoiceInvalidDocumentNumber() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010006-Z1B2-Q"));
+
+        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+    }
+
+    @Test
+    public void getSmartIdSidStatusCertificateReturned() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        Response response2 = getSidCertificateStatus(flow, generatedCertificateId);
+        String sidCertificateStatus1 = response2.as(GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class).getSidStatus();
+
+        assertThat(sidCertificateStatus1, is("CERTIFICATE"));
+    }
+
+    @Test
+    public void getSmartIdSidStatusErrorOnSecondRequest() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        getSidCertificateStatus(flow, generatedCertificateId);
+        Response response2 = getSidCertificateStatus(flow, generatedCertificateId);
+
+        expectError(response2, 400, SMARTID_EXCEPTION, NOT_FOUND);
     }
 
     @Test
@@ -110,6 +212,60 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void deleteToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow, "request");
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void getToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void optionsToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow);
+
+        assertThat(response.statusCode(), equalTo(405));
+    }
+
+    @Test
+    public void patchToStartCertificateChoice() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow);
+
+        expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
     public void deleteToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
@@ -173,6 +329,72 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
 
         expectError(response, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void deleteToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
+
+        expectError(response2, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void putToHashcodeSmartIdSCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow, "request");
+
+        expectError(response2, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void postToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow, "request");
+
+        expectError(response2, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void headToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
+
+        assertThat(response2.statusCode(), equalTo(200));
+    }
+
+    @Test
+    public void optionsToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
+
+        expectError(response2, 405, INVALID_REQUEST);
+    }
+
+    @Test
+    public void patchToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response1 =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        String generatedCertificateId = response1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+
+        Response response2 = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
+
+        expectError(response2, 405, INVALID_REQUEST);
     }
 
     @Test

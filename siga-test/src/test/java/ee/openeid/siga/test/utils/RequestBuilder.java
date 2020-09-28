@@ -172,6 +172,14 @@ public class RequestBuilder {
         return request;
     }
 
+    public static JSONObject smartIdCertificateChoiceRequest(String personIdentifier, String country) throws JSONException {
+        JSONObject request = new JSONObject();
+        request.put("personIdentifier", personIdentifier);
+        request.put("country", country);
+
+        return request;
+        }
+
     public static JSONObject smartIdSigningRequestWithDefault(String signatureProfile, String documentNumber) throws JSONException {
         return smartIdSigningRequest("EE", signatureProfile, documentNumber, "something", null, null,null, null, null);
     }
