@@ -31,6 +31,7 @@ import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -67,7 +68,7 @@ public class SigaSmartIdClient {
             return connector.getCertificate(semanticsIdentifier, certificateRequest).getSessionID();
         } catch (CertificateNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
-        } catch (SmartIdException | ServerErrorException e) {
+        } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -91,7 +92,7 @@ public class SigaSmartIdClient {
             throw new SigaSmartIdException(SmartIdSessionStatus.TIMEOUT.getSigaSigningMessage());
         } catch (DocumentUnusableException e) {
             throw new SigaSmartIdException(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaSigningMessage());
-        } catch (SmartIdException | ServerErrorException e) {
+        } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -117,7 +118,7 @@ public class SigaSmartIdClient {
             initSmartIdSignatureResponse.setSessionCode(sessionCode);
             initSmartIdSignatureResponse.setChallengeId(challengeId);
             return initSmartIdSignatureResponse;
-        } catch (SmartIdException | ServerErrorException e) {
+        } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -133,7 +134,7 @@ public class SigaSmartIdClient {
             return mapToSmartIdStatusResponse(sessionStatus);
         } catch (SessionNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.SESSION_NOT_FOUND.getSigaMessage());
-        } catch (ServerErrorException e) {
+        } catch (ServerErrorException | ClientErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
