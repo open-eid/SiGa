@@ -88,6 +88,14 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void mobileIdInvalidInternationalCallingCode() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019947", "+37107110066", "LT"));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void mobileIdUserCancel() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019950", "+37201100266", "LT"));
