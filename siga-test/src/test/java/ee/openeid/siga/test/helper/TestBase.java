@@ -98,7 +98,7 @@ public abstract class TestBase {
     @Step("Get Smart-ID certificate selection status")
     protected Response getSidCertificateStatus(SigaApiFlow flow, String generatedCertificateId) throws InvalidKeyException, NoSuchAlgorithmException {
         Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
-        flow.setSidStatus(response);
+        flow.setSidCertificateStatus(response);
         return response;
     }
 
@@ -166,6 +166,26 @@ public abstract class TestBase {
         };
     }
 
+    protected Response pollForSidCertificateStatus(SigaApiFlow flow, String generatedCertificateId) {
+        return pollForSidCertificateStatusWithPollParameters(3500, 16000, flow, generatedCertificateId);
+    }
+
+    @Step("Poll for Smart-ID certificate status response")
+    protected Response pollForSidCertificateStatusWithPollParameters(Integer pollTimeInMillis, Integer pollLengthInMillis, SigaApiFlow flow, String generatedCertificateId) {
+        with().pollInterval(pollTimeInMillis, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(pollLengthInMillis, MILLISECONDS)
+                .await("Smart-ID certificate choice result")
+                .until(isSidCertificateStatusFinished(flow, generatedCertificateId));
+
+        return flow.getSidCertificateStatus();
+    }
+
+    private Callable<Boolean> isSidCertificateStatusFinished(SigaApiFlow flow, String generatedCertificateId) {
+        return new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return !"OUTSTANDING_TRANSACTION".equals(getSidCertificateStatus(flow, generatedCertificateId).getBody().path(SMARTID_STATUS));
+            }
+        };
+    }
 
     protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) {
            return pollForSidSigningWithPollParameters(3500,16000, flow, signatureId);
