@@ -287,6 +287,16 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         expectSmartIdStatus(signingResponse, USER_CANCEL);
     }
 
+    @Ignore
+    @Test
+    public void signWithSmartIdUserTimeout() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010027-TFPR-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigningWithPollParameters(10000, 120000,  flow, signatureId);
+        expectSmartIdStatus(signingResponse, EXPIRED_TRANSACTION);
+    }
+
     @Test
     public void signWithSmartIdNotFound() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
