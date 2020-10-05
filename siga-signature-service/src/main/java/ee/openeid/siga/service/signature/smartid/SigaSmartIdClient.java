@@ -29,6 +29,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.spi.DSSUtils;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ClientErrorException;
@@ -56,7 +57,15 @@ public class SigaSmartIdClient {
             "DOCUMENT_UNUSABLE", SmartIdSessionStatus.DOCUMENT_UNUSABLE
     );
 
-    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    private final ResourceLoader resourceLoader;
+    private final SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+
+
+    @Autowired
+    public SigaSmartIdClient(ResourceLoader resourceLoader, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
+        this.resourceLoader = resourceLoader;
+        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
+    }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE,
             logParameters = {@Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "name")})},
@@ -194,10 +203,7 @@ public class SigaSmartIdClient {
     private KeyStore getSidTruststore() {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = SigaSmartIdClient.class.getClassLoader().getResourceAsStream(smartIdServiceConfigurationProperties.getTruststorePath());
-            if (is == null) {
-                throw new IllegalArgumentException("Unable to find Smart-id truststore file");
-            }
+            InputStream is = resourceLoader.getResource(smartIdServiceConfigurationProperties.getTruststorePath()).getInputStream();
             keyStore.load(is, smartIdServiceConfigurationProperties.getTruststorePassword().toCharArray());
             return keyStore;
         } catch (Exception e) {
@@ -270,9 +276,4 @@ public class SigaSmartIdClient {
         }
     }
 
-    @Autowired
-    public void setSmartIdServiceConfigurationProperties(SmartIdServiceConfigurationProperties
-                                                                 smartIdServiceConfigurationProperties) {
-        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
-    }
 }

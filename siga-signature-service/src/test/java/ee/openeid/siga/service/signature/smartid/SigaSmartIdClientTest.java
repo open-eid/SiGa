@@ -26,11 +26,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ResourceUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SigaSmartIdClientTest {
@@ -52,15 +61,20 @@ public class SigaSmartIdClientTest {
     public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @Mock
     private SmartIdServiceConfigurationProperties configurationProperties;
+    @Mock
+    private ResourceLoader resourceLoader;
 
     @InjectMocks
     private SigaSmartIdClient smartIdClient;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
+        Resource mockResource = Mockito.mock(Resource.class);
+        Mockito.when(mockResource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("sid_truststore.p12").openStream());
+        Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(mockResource);
     }
 
     @After

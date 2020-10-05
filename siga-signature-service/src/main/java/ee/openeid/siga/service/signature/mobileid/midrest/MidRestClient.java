@@ -31,6 +31,7 @@ import ee.sk.mid.rest.dao.response.MidSignatureResponse;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ServerErrorException;
@@ -55,10 +56,12 @@ public class MidRestClient implements MobileIdClient {
     );
 
     private final MidRestConfigurationProperties configurationProperties;
+    private final ResourceLoader resourceLoader;
 
     @Autowired
-    public MidRestClient(MidRestConfigurationProperties configurationProperties) {
+    public MidRestClient(MidRestConfigurationProperties configurationProperties, ResourceLoader resourceLoader) {
         this.configurationProperties = configurationProperties;
+        this.resourceLoader = resourceLoader;
     }
 
     @Override
@@ -174,10 +177,7 @@ public class MidRestClient implements MobileIdClient {
     private KeyStore getMidTruststore() {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = MidRestClient.class.getClassLoader().getResourceAsStream(configurationProperties.getTruststorePath());
-            if (is == null) {
-                throw new IllegalArgumentException("Unable to find Mid-rest truststore file");
-            }
+            InputStream is = resourceLoader.getResource(configurationProperties.getTruststorePath()).getInputStream();
             keyStore.load(is, configurationProperties.getTruststorePassword().toCharArray());
             return keyStore;
         } catch (Exception e) {

@@ -11,6 +11,7 @@ import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestClient;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
+import ee.openeid.siga.service.signature.smartid.SigaSmartIdClientTest;
 import ee.sk.mid.MidVerificationCodeCalculator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.DataToSign;
@@ -26,8 +27,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -54,13 +58,19 @@ public class MidRestClientWireMockTest {
     private MidRestConfigurationProperties configurationProperties;
     @InjectMocks
     private MidRestClient midRestClient;
-
+    @Mock
+    private ResourceLoader resourceLoader;
+    @Mock
+    private Resource resource;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
+
+        Mockito.when(resource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
+        Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(resource);
     }
 
     @After
@@ -119,9 +129,10 @@ public class MidRestClientWireMockTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubCertificateRequestErrorResponse(status.value());
             try {
+                Mockito.when(resource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 midRestClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
                 Assert.fail("Should not reach here");
-            } catch (ClientException e) {
+            } catch (ClientException | IOException e) {
                 Assert.assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
@@ -143,9 +154,10 @@ public class MidRestClientWireMockTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubSigningInitiationErrorResponse(status.value());
             try {
+                Mockito.when(resource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 midRestClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
                 Assert.fail("Should not reach here");
-            } catch (ClientException e) {
+            } catch (ClientException | IOException e) {
                 Assert.assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
@@ -294,7 +306,11 @@ public class MidRestClientWireMockTest {
     public void getStatus_midRestReturns5XX() {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubGetStatusErrorResponse(status.value());
-
+            try {
+                Mockito.when(resource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            }
             GetStatusResponse response = midRestClient.getStatus(DEFAULT_MOCK_SESSION_CODE, createRPInfo());
             Assert.assertEquals(MidStatus.INTERNAL_ERROR, response.getStatus());
             Assert.assertNull(response.getSignature());
