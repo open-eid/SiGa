@@ -33,6 +33,8 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
@@ -181,11 +183,26 @@ public class SigaSmartIdClient {
 
     SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
         SmartIdClient client = new SmartIdClient();
+        client.loadSslCertificatesFromKeystore(getSidTruststore());
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
         client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
         client.setRelyingPartyName(relyingPartyInfo.getName());
         client.setRelyingPartyUUID(relyingPartyInfo.getUuid());
         return client;
+    }
+
+    private KeyStore getSidTruststore() {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            InputStream is = SigaSmartIdClient.class.getClassLoader().getResourceAsStream(smartIdServiceConfigurationProperties.getTruststorePath());
+            if (is == null) {
+                throw new IllegalArgumentException("Unable to find Smart-id truststore file");
+            }
+            keyStore.load(is, smartIdServiceConfigurationProperties.getTruststorePassword().toCharArray());
+            return keyStore;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private SmartIdStatusResponse mapToSmartIdStatusResponse(SessionStatus sessionStatus) {

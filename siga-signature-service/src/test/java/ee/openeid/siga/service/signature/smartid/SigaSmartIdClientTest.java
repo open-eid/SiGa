@@ -59,6 +59,8 @@ public class SigaSmartIdClientTest {
     @Before
     public void setUp() {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
+        Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
+        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
     }
 
     @After

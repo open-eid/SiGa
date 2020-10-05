@@ -59,6 +59,8 @@ public class MidRestClientWireMockTest {
     @Before
     public void setUp() {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
+        Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
+        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
     }
 
     @After

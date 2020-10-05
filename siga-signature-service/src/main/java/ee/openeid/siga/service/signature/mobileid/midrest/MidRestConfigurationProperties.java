@@ -21,6 +21,8 @@ public class MidRestConfigurationProperties {
 
     @Getter(AccessLevel.NONE)
     private final Environment environment;
+    private String truststorePath;
+    private String truststorePassword;
 
     private String url;
     private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT"));
@@ -29,12 +31,26 @@ public class MidRestConfigurationProperties {
     public void validateConfiguration() {
         if (List.of(environment.getActiveProfiles()).contains("mobileId")) {
             validateUrl();
+            validateTruststorePath();
+            validateTruststorePassword();
         }
     }
 
     private void validateUrl() {
         if (StringUtils.isBlank(url)) {
             throw new IllegalStateException("siga.midrest.url property must be set");
+        }
+    }
+
+    private void validateTruststorePath(){
+        if (StringUtils.isBlank(truststorePath)) {
+            throw new IllegalStateException("siga.midrest.truststorePath property must be set");
+        }
+    }
+
+    private void validateTruststorePassword(){
+        if (StringUtils.isBlank(truststorePassword)) {
+            throw new IllegalStateException("siga.midrest.truststorePassword property must be set");
         }
     }
 }

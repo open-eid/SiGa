@@ -34,6 +34,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ServerErrorException;
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
@@ -162,10 +164,25 @@ public class MidRestClient implements MobileIdClient {
 
     private MidClient createMidRestClient(RelyingPartyInfo relyingPartyInfo) {
         return MidClient.newBuilder().withHostUrl(configurationProperties.getUrl())
+                .withTrustStore(getMidTruststore())
                 .withPollingSleepTimeoutSeconds(2)
                 .withRelyingPartyName(relyingPartyInfo.getName())
                 .withRelyingPartyUUID(relyingPartyInfo.getUuid())
                 .build();
+    }
+
+    private KeyStore getMidTruststore() {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            InputStream is = MidRestClient.class.getClassLoader().getResourceAsStream(configurationProperties.getTruststorePath());
+            if (is == null) {
+                throw new IllegalArgumentException("Unable to find Mid-rest truststore file");
+            }
+            keyStore.load(is, configurationProperties.getTruststorePassword().toCharArray());
+            return keyStore;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private static MidStatus mapToMidStatus(String state, String result) {

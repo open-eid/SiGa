@@ -23,7 +23,8 @@ public class SmartIdServiceConfigurationProperties {
 
     @Getter(AccessLevel.NONE)
     private final Environment environment;
-
+    private String truststorePath;
+    private String truststorePassword;
     private String url;
     private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT", "LV"));
 
@@ -33,12 +34,26 @@ public class SmartIdServiceConfigurationProperties {
     public void validateConfiguration() {
         if (List.of(environment.getActiveProfiles()).contains("smartId")) {
             validateUrl();
+            validateTruststorePath();
+            validateTruststorePassword();
         }
     }
 
     private void validateUrl() {
         if (StringUtils.isBlank(url)) {
             throw new IllegalStateException("siga.sid.url property must be set");
+        }
+    }
+
+    private void validateTruststorePath(){
+        if (StringUtils.isBlank(truststorePath)) {
+            throw new IllegalStateException("siga.sid.truststorePath property must be set");
+        }
+    }
+
+    private void validateTruststorePassword(){
+        if (StringUtils.isBlank(truststorePassword)) {
+            throw new IllegalStateException("siga.sid.truststorePassword property must be set");
         }
     }
 }
