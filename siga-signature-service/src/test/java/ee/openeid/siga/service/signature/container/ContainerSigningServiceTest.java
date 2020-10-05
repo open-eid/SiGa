@@ -186,7 +186,7 @@ public abstract class ContainerSigningServiceTest {
 
         Session sessionHolder = getSessionHolder();
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
-        Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
+        Mockito.when(smartIdClient.getSmartIdCertificateStatus(any(), any())).thenReturn(statusResponse);
         CertificateStatus status = getSigningService().processSmartIdCertificateStatus(CONTAINER_ID, CERTIFICATE_ID);
         Assert.assertEquals("CERTIFICATE", status.getStatus());
         Assert.assertEquals(DOCUMENT_NUMBER, status.getDocumentNumber());
@@ -248,7 +248,7 @@ public abstract class ContainerSigningServiceTest {
                 .signature(signature)
                 .build();
 
-        Mockito.when(smartIdClient.getSmartIdStatus(any(), any())).thenReturn(statusResponse);
+        Mockito.when(smartIdClient.getSmartIdSigningStatus(any(), any())).thenReturn(statusResponse);
 
         mockSmartIdSessionHolder(dataToSign);
         String status = getSigningService().processSmartIdStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId());

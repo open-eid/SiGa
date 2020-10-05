@@ -123,11 +123,23 @@ public class SigaSmartIdClient {
         }
     }
 
-    @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_STATUS,
+    @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_SIGN_HASH_STATUS,
             logParameters = {@Param(name = "sid_session_id", index = 1)},
             logReturnObject = {@XPath(name = "sid_status", xpath = "status")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
-    public SmartIdStatusResponse getSmartIdStatus(RelyingPartyInfo relyingPartyInfo, String sessionCode) {
+    public SmartIdStatusResponse getSmartIdSigningStatus(RelyingPartyInfo relyingPartyInfo, String sessionCode) {
+        return getSmartIdStatus(relyingPartyInfo, sessionCode);
+    }
+
+    @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_SIGN_HASH_STATUS,
+            logParameters = {@Param(name = "sid_session_id", index = 1)},
+            logReturnObject = {@XPath(name = "sid_status", xpath = "status")},
+            logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
+    public SmartIdStatusResponse getSmartIdCertificateStatus(RelyingPartyInfo relyingPartyInfo, String sessionCode) {
+        return getSmartIdStatus(relyingPartyInfo, sessionCode);
+    }
+
+    private SmartIdStatusResponse getSmartIdStatus(RelyingPartyInfo relyingPartyInfo, String sessionCode) {
         try {
             SmartIdConnector connector = getSmartIdConnector(relyingPartyInfo);
             SessionStatus sessionStatus = connector.getSessionStatus(sessionCode);

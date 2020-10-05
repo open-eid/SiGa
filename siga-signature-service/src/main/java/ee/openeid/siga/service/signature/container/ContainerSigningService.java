@@ -156,7 +156,7 @@ public abstract class ContainerSigningService {
             throw new InvalidSessionDataException("No certificate session found with certificate Id: " + certificateId);
         }
         RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
-        SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdStatus(relyingPartyInfo, smartIdSessionId);
+        SmartIdStatusResponse smartIdStatusResponse = smartIdClient.getSmartIdCertificateStatus(relyingPartyInfo, smartIdSessionId);
         CertificateStatus certificateStatus = new CertificateStatus();
         if (smartIdStatusResponse.getStatus() == SmartIdSessionStatus.OK) {
             SmartIdCertificate smartIdCertificate = smartIdStatusResponse.getSmartIdCertificate();
@@ -211,7 +211,7 @@ public abstract class ContainerSigningService {
         validateMobileDeviceSession(sessionHolder.getDataToSignHolder(signatureId), signatureId, SigningType.SMART_ID);
         DataToSignHolder dataToSignHolder = sessionHolder.getDataToSignHolder(signatureId);
         RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
-        SmartIdStatusResponse sessionResponse = smartIdClient.getSmartIdStatus(relyingPartyInfo, dataToSignHolder.getSessionCode());
+        SmartIdStatusResponse sessionResponse = smartIdClient.getSmartIdSigningStatus(relyingPartyInfo, dataToSignHolder.getSessionCode());
         if (sessionResponse.getStatus() == SmartIdSessionStatus.OK) {
             if (sessionResponse.getSignature() == null) {
                 throw new IllegalArgumentException("No signature found from Smart-id response");
