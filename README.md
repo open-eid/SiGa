@@ -129,12 +129,12 @@ More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Qu
 
 Applicable if `mobileId` profile is active.
 
-| Parameter                       | Mandatory | Description                           | Example                           |
-| ------------------------------- | --------- | ------------------------------------- | --------------------------------- |
-| siga.midrest.url                | Y         | MID REST service URL.                 | `https://tsp.demo.sk.ee/mid-api`  |
-| siga.midrest.allowedCountries   | N         | MID REST allowed countries.           | `EE, LT`                          |
-| siga.midrest.truststorePath     | Y         | MID REST PKCS12 truststore path       | `sid_truststore.p12`              |
-| siga.midrest.truststorePassword | Y         | MID REST PKCS12 truststore password   | `parool`                          |
+| Parameter                        | Mandatory | Description                           | Example                           |
+| -------------------------------- | --------- | ------------------------------------- | --------------------------------- |
+| siga.midrest.url                 | Y         | MID REST service URL.                 | `https://tsp.demo.sk.ee/mid-api`  |
+| siga.midrest.allowed-countries   | N         | MID REST allowed countries.           | `EE, LT`                          |
+| siga.midrest.truststore-path     | Y         | MID REST PKCS12 truststore path       | `sid_truststore.p12`              |
+| siga.midrest.truststore-password | Y         | MID REST PKCS12 truststore password   | `parool`                          |
 
 
 **NB:** MID REST relying party name and UUID are registered per [service](#siga_service).
@@ -143,13 +143,13 @@ Applicable if `mobileId` profile is active.
 
 Applicable if `smartId` profile is active.
 
-| Parameter                                          | Mandatory | Description                                                                                                                                                                     | Example                                   |
-| -------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| siga.sid.url                                       | Y         | Smart-ID service URL.                                                                                                                                                           | `https://sid.demo.sk.ee/smart-id-rp/v1/`  |
-| siga.sid.session-status-response-socket-open-time  | N         | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `40`.  | `40`                                      |
-| siga.sid.allowedCountries                          | N         | Smart-ID allowed countries.                                                                                                                                                     | `EE, LT`                                  |
-| siga.sid.truststorePath                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                 | `mid_truststore.p12`                      |
-| siga.sid.truststorePassword                        | Y         | Smart-ID PKCS12 truststore password                                                                                                                                             | `parool`                                  |
+| Parameter                                           | Mandatory | Description                                                                                                                                                                     | Example                                   |
+| --------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| siga.sid.url                                        | Y         | Smart-ID service URL.                                                                                                                                                           | `https://sid.demo.sk.ee/smart-id-rp/v1/`  |
+| siga.sid.session-status-response-socket-open-time   | N         | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `40`.  | `40`                                      |
+| siga.sid.allowed-countries                          | N         | Smart-ID allowed countries.                                                                                                                                                     | `EE, LT`                                  |
+| siga.sid.truststore-path                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                 | `mid_truststore.p12`                      |
+| siga.sid.truststore-password                        | Y         | Smart-ID PKCS12 truststore password                                                                                                                                             | `parool`                                  |
 
 **NB:** Smart-ID relying party name and UUID are registered per [service](#siga_service).
 
