@@ -142,7 +142,7 @@ public class SigaSmartIdClient {
         return getSmartIdStatus(relyingPartyInfo, sessionCode);
     }
 
-    @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_SIGN_HASH_STATUS,
+    @SigaEventLog(eventName = SigaEventName.SMART_ID_GET_CERTIFICATE_STATUS,
             logParameters = {@Param(name = "sid_session_id", index = 1)},
             logReturnObject = {@XPath(name = "sid_status", xpath = "status")},
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.sid.url}")})
