@@ -178,6 +178,16 @@ public class SigaSmartIdClientTest {
     }
 
     @Test
+    public void getCertificate_notSuitableAccount() {
+        expectGetCertificateGenericErrorForHttpCode(471);
+    }
+
+    @Test
+    public void getCertificate_problemWithAccount() {
+        expectGetCertificateGenericErrorForHttpCode(472);
+    }
+
+    @Test
     public void getCertificate_clientNotSupported() {
         expectGetCertificateGenericErrorForHttpCode(480);
     }
@@ -207,10 +217,34 @@ public class SigaSmartIdClientTest {
 
     @Test
     public void initSmartIdSigning_serverError() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(504);
+    }
+
+    @Test
+    public void initSmartIdSigning_serverMaintenance() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(580);
+    }
+
+    @Test
+    public void initSmartIdSigning_notSuitableAccount() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(471);
+    }
+
+    @Test
+    public void initSmartIdSigning_problemWithAccount() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(472);
+    }
+
+    @Test
+    public void initSmartIdSigning_clientNotSupported() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(480);
+    }
+
+    private void expectInitSmartIdSigningGenericErrorForHttpCode(int status) {
         exceptionRule.expect(ClientException.class);
         exceptionRule.expectMessage("Smart-ID service error");
 
-        stubSigningInitiationResponse(504, "");
+
         smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
                 mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
     }
@@ -289,11 +323,27 @@ public class SigaSmartIdClientTest {
 
     @Test
     public void getStatus_serverError() {
-        exceptionRule.expect(ClientException.class);
-        exceptionRule.expectMessage("Smart-ID service error");
+        expectGetStatusGenericErrorForHttpCode(504);
+    }
 
-        stubGetStatusErrorResponse(504);
-        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
+    @Test
+    public void getStatus_serverMaintenance() {
+        expectGetStatusGenericErrorForHttpCode(580);
+    }
+
+    @Test
+    public void getStatus_notSuitableAccount() {
+        expectGetStatusGenericErrorForHttpCode(471);
+    }
+
+    @Test
+    public void getStatus_problemWithAccount() {
+        expectGetStatusGenericErrorForHttpCode(472);
+    }
+
+    @Test
+    public void getStatus_clientNotSupported() {
+        expectGetStatusGenericErrorForHttpCode(480);
     }
 
     @Test
@@ -303,6 +353,15 @@ public class SigaSmartIdClientTest {
 
         stubGetSession("COMPLETE", "OK", "12345");
         smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+    }
+
+    private void expectGetStatusGenericErrorForHttpCode(int status) {
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Smart-ID service error");
+
+
+        stubGetStatusErrorResponse(status);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     private void stubSigningInitiationResponse(int status, String responseBody) {
