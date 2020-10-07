@@ -79,7 +79,10 @@ public class SigaSmartIdClient {
             return connector.getCertificate(semanticsIdentifier, certificateRequest).getSessionID();
         } catch (CertificateNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
-        } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
+        } catch (ClientErrorException e) {
+            verifyClientError(e.getResponse().getStatus());
+            throw new ClientException(SMART_ID_SERVICE_ERROR, e);
+        } catch (SmartIdException | ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -103,7 +106,10 @@ public class SigaSmartIdClient {
             throw new SigaSmartIdException(SmartIdSessionStatus.TIMEOUT.getSigaSigningMessage());
         } catch (DocumentUnusableException e) {
             throw new SigaSmartIdException(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaSigningMessage());
-        } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
+        } catch (ClientErrorException e) {
+            verifyClientError(e.getResponse().getStatus());
+            throw new ClientException(SMART_ID_SERVICE_ERROR, e);
+        } catch (SmartIdException | ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -157,7 +163,10 @@ public class SigaSmartIdClient {
             return mapToSmartIdStatusResponse(sessionStatus);
         } catch (SessionNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.SESSION_NOT_FOUND.getSigaMessage());
-        } catch (ServerErrorException | ClientErrorException e) {
+        } catch (ClientErrorException e) {
+            verifyClientError(e.getResponse().getStatus());
+            throw new ClientException(SMART_ID_SERVICE_ERROR, e);
+        } catch (ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -190,7 +199,7 @@ public class SigaSmartIdClient {
         return signableHash;
     }
 
-    SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
+    private SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
         SmartIdClient client = new SmartIdClient();
         client.loadSslCertificatesFromKeystore(getSidTruststore());
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
@@ -273,6 +282,14 @@ public class SigaSmartIdClient {
         } catch (Exception e) {
             throw new ClientException(SMART_ID_SERVICE_UNEXPECTED_RESPONSE,
                     new IllegalStateException("Unable to extract certificate from Smart-ID service response: ", e));
+        }
+    }
+
+    private void verifyClientError(int status) {
+        if (status == 471) {
+            throw new ClientException("No suitable account of requested type found, but user has some other accounts");
+        } else if (status == 472) {
+            throw new ClientException("Person should view app or self-service portal now");
         }
     }
 

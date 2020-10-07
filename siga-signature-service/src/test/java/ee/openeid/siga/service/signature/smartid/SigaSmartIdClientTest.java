@@ -179,12 +179,20 @@ public class SigaSmartIdClientTest {
 
     @Test
     public void getCertificate_notSuitableAccount() {
-        expectGetCertificateGenericErrorForHttpCode(471);
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("No suitable account of requested type found, but user has some other accounts");
+
+        stubGetStatusErrorResponse(471);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
     public void getCertificate_problemWithAccount() {
-        expectGetCertificateGenericErrorForHttpCode(472);
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Person should view app or self-service portal now");
+
+        stubGetStatusErrorResponse(472);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
@@ -333,12 +341,18 @@ public class SigaSmartIdClientTest {
 
     @Test
     public void getStatus_notSuitableAccount() {
-        expectGetStatusGenericErrorForHttpCode(471);
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("No suitable account of requested type found, but user has some other accounts");
+        stubGetStatusErrorResponse(471);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
     public void getStatus_problemWithAccount() {
-        expectGetStatusGenericErrorForHttpCode(472);
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Person should view app or self-service portal now");
+        stubGetStatusErrorResponse(472);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
