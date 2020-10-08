@@ -7,4 +7,8 @@ COPY ./target/*.war /usr/local/tomcat/webapps/siga.war
 COPY ./src/main/resources/docker/setenv.sh /usr/local/tomcat/bin/setenv.sh
 COPY ./src/main/resources/docker/server.xml /usr/local/tomcat/conf/server.xml
 COPY ./src/main/resources/siga.p12 /usr/local/tomcat/conf/siga.p12
+COPY ./src/test/resources/mid_truststore.p12 /usr/local/tomcat/conf/mid_truststore.p12
+COPY ./src/test/resources/sid_truststore.p12 /usr/local/tomcat/conf/sid_truststore.p12
+COPY ./src/main/resources/docker/application.properties /usr/local/tomcat/conf/application.properties
+
 CMD ["catalina.sh","run"]
