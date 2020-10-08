@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
     public ErrorResponse genericException(Exception exception) {
         log.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorMessage("General service error");
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
