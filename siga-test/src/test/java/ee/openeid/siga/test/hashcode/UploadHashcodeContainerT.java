@@ -35,7 +35,6 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    @Ignore("Should manifest be required?")
     public void uploadHashcodeContainerWithoutManifest() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingManifest.asice"));
 
@@ -73,7 +72,7 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutDatafiles() throws Exception {
+    public void uploadHashcodeContainerWithoutDatafilesInDatafileXml() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutDataFiles.asice"));
 
         expectError(response, 400, INVALID_CONTAINER);
@@ -207,6 +206,37 @@ public class UploadHashcodeContainerT extends TestBase {
     public void uploadContainerWithDuplicateDataFilesInSignature() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode_duplicate_data_files_in_signature.asice"));
         expectError(response, 400, DUPLICATE_DATA_FILE);
+    }
+
+    @Test
+    public void uploadContainerWithInvalidDatafileXmlStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWrongFileStructureInDatafileDescriptorFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadContainerWithInvalidBase64InDatafileXmlStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidBase64InDatafileDescriptorFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadContainerWithInvalidDatafileSizeInDatafileXmlStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidDatafileSizeInDatafileDescriptorFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Test
+    public void uploadContainerWithInvalidBase64LengthInDatafileXmlStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidBase64LengthInDatafileDescriptorFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
+    }
+
+    @Ignore ("SIGA-264")
+    @Test
+    public void uploadContainerWithExtraDatafileInDatafileXmlStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNotSignedDatafilesInDatafileDescriptorFile.asice"));
+        expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Override
