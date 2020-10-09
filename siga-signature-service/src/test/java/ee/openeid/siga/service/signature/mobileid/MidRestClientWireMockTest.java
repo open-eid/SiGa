@@ -67,7 +67,7 @@ public class MidRestClientWireMockTest {
     public void setUp() throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
-        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
+        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
 
         Mockito.when(resource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
         Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(resource);

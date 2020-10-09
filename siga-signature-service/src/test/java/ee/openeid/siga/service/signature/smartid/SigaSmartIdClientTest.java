@@ -71,7 +71,7 @@ public class SigaSmartIdClientTest {
     public void setUp() throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
-        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("parool");
+        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
         Resource mockResource = Mockito.mock(Resource.class);
         Mockito.when(mockResource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("sid_truststore.p12").openStream());
         Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(mockResource);
