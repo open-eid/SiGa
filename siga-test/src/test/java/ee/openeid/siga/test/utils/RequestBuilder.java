@@ -181,12 +181,11 @@ public class RequestBuilder {
         }
 
     public static JSONObject smartIdSigningRequestWithDefault(String signatureProfile, String documentNumber) throws JSONException {
-        return smartIdSigningRequest("EE", signatureProfile, documentNumber, "something", null, null,null, null, null);
+        return smartIdSigningRequest(signatureProfile, documentNumber, "something", null, null,null, null, null);
     }
 
-    public static JSONObject smartIdSigningRequest(String originCountry, String signatureProfile, String documentNumber, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
+    public static JSONObject smartIdSigningRequest(String signatureProfile, String documentNumber, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
-        request.put("country", originCountry);
         request.put("signatureProfile", signatureProfile);
         request.put("documentNumber", documentNumber);
 
