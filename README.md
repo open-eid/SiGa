@@ -7,10 +7,11 @@ Signature Gateway is a web service for creating, signing and validating ASIC-E a
 ## External services used by SiGa
 
 * [Signature Validation Service](http://open-eid.github.io/SiVa/) for validating signatures.
-* [MID REST service](https://github.com/SK-EID/MID/wiki) for signing with Mobile-ID (depending on the configuration).
-* [Smart-ID service](https://github.com/SK-EID/smart-id-documentation)* for signing with Smart-ID (if enabled in configuration).
-
-\* Smart-ID support is not currently production ready. Use at your own risk.
+* [MID REST service](https://github.com/SK-EID/MID/wiki) for signing with Mobile-ID (if enabled in configuration).
+* [Smart-ID service](https://github.com/SK-EID/smart-id-documentation) for signing with Smart-ID (if enabled in configuration).
+* TimeStamping service (based on configuration)
+* (AIA) OCSP service (based on configuration)
+* LOTL and national TSL services
 
 ## How to build
 
@@ -85,13 +86,11 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 | digidoc4jPerf      | Use DD4J test mode (without AIA-OCSP)                   |
 | mobileId           | Enable endpoints for signing with Mobile-ID             |
 | smartId            | Enable endpoints for signing with Smart-ID*             |
-| datafileContainer  | Enable datafile container endpoints**                   |
+| datafileContainer  | Enable datafile container endpoints*                   |
 
 **NB:** exactly one of `digidoc4jProd`, `digidoc4jTest` and `digidoc4jPerf` must be active!
 
-\* Smart-ID support is not currently production ready. Use at your own risk.
-
-\** Datafile containers support is not currently production ready. Use at your own risk.
+\* Datafile containers support has not been thoroughly performance tested. Use at your own risk.
 
 ## SiGa configuration
 
