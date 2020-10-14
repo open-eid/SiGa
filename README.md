@@ -133,7 +133,7 @@ Applicable if `mobileId` profile is active.
 | -------------------------------- | --------- | ------------------------------------- | --------------------------------- |
 | siga.midrest.url                 | Y         | MID REST service URL.                 | `https://tsp.demo.sk.ee/mid-api`  |
 | siga.midrest.allowed-countries   | N         | MID REST allowed countries.           | `EE, LT`                          |
-| siga.midrest.truststore-path     | Y         | MID REST PKCS12 truststore path       | `sid_truststore.p12`              |
+| siga.midrest.truststore-path     | Y         | MID REST PKCS12 truststore path       | `mid_truststore.p12`              |
 | siga.midrest.truststore-password | Y         | MID REST PKCS12 truststore password   | `changeIt`                          |
 
 
@@ -147,8 +147,8 @@ Applicable if `smartId` profile is active.
 | --------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | siga.sid.url                                        | Y         | Smart-ID service URL.                                                                                                                                                           | `https://sid.demo.sk.ee/smart-id-rp/v1/`  |
 | siga.sid.session-status-response-socket-open-time   | N         | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `40`.  | `40`                                      |
-| siga.sid.allowed-countries                          | N         | Smart-ID allowed countries.                                                                                                                                                     | `EE, LT`                                  |
-| siga.sid.truststore-path                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                 | `mid_truststore.p12`                      |
+| siga.sid.allowed-countries                          | N         | Smart-ID allowed countries.                                                                                                                                                     | `EE, LV, LT`                                  |
+| siga.sid.truststore-path                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                 | `sid_truststore.p12`                      |
 | siga.sid.truststore-password                        | Y         | Smart-ID PKCS12 truststore password                                                                                                                                             | `changeIt`                                  |
 
 **NB:** Smart-ID relying party name and UUID are registered per [service](#siga_service).
