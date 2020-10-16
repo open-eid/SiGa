@@ -57,6 +57,20 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
+    public void signNewHashcodeContainerMultipleSignaturesPerContainerSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        CreateHashcodeContainerRemoteSigningResponse dataToSignResponse2 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse2.getDataToSign(), dataToSignResponse2.getDigestAlgorithm())), dataToSignResponse2.getGeneratedSignatureId());
+        Response response = getValidationReportForContainerInSession(flow);
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2))
+                .body("validationConclusion.signaturesCount", equalTo(2));
+    }
+
+    @Test
     public void signNewHashcodeContainerRemotelyWithCertInHex() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM_HEX, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);

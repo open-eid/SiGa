@@ -90,6 +90,35 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void signWithSmartIdCertificateChoiceMultipleSignaturesPerContainerSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "LT"));
+        String generatedCertificateId1 = certificateChoice1.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        pollForSidCertificateStatus(flow, generatedCertificateId1);
+
+        String documentNumber1 = flow.getSidCertificateStatus().as(GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber1));
+        String signatureId1 = signingRequest1.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId1);
+
+        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "LT"));
+        String generatedCertificateId2 = certificateChoice2.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        pollForSidCertificateStatus(flow, generatedCertificateId2);
+
+        String documentNumber2 = flow.getSidCertificateStatus().as(GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber2));
+        String signatureId2 = signingRequest2.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId2);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
+    }
+
+    @Test
     public void smartIdSigningStatusRequestAfterSuccessfulFinalization() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
@@ -258,6 +287,23 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         validationResponse.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void signWithSmartIdMultipleSignaturesPerContainerSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        String signatureId1 = signingRequest1.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        String signatureId2 = signingRequest2.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId1);
+        pollForSidSigning(flow, signatureId2);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(2));
     }
 
     @Ignore
