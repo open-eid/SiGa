@@ -126,6 +126,35 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void signWithSmartIdCertificateChoiceRetryAfterUserCancel() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010016", "LT"));
+        String generatedCertificateId1 = certificateChoice1.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        pollForSidCertificateStatus(flow, generatedCertificateId1);
+
+        String documentNumber1 = flow.getSidCertificateStatus().as(GetContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber1));
+        String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId1);
+
+        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "LT"));
+        String generatedCertificateId2 = certificateChoice2.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
+        pollForSidCertificateStatus(flow, generatedCertificateId2);
+
+        String documentNumber2 = flow.getSidCertificateStatus().as(GetContainerSmartIdCertificateChoiceStatusResponse.class).getDocumentNumber();
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", documentNumber2));
+        String signatureId2 = signingRequest2.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId2);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
     public void smartIdSigningStatusRequestAfterSuccessfulFinalization() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
@@ -311,6 +340,23 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         validationResponse.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2));
+    }
+
+    @Test
+    public void signWithSmartIdRetryAfterUserCancel() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010016-9RF6-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        String signatureId2 = signingRequest2.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId1);
+        pollForSidSigning(flow, signatureId2);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
     @Ignore

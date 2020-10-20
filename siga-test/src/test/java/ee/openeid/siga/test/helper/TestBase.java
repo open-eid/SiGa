@@ -188,7 +188,7 @@ public abstract class TestBase {
     }
 
     protected Response pollForSidSigning(SigaApiFlow flow, String signatureId) {
-           return pollForSidSigningWithPollParameters(3500,16000, flow, signatureId);
+           return pollForSidSigningWithPollParameters(3500,18000, flow, signatureId);
     }
 
     @Step("Poll for Smart-ID signing response")

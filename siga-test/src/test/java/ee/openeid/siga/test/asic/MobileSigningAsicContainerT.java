@@ -4,7 +4,6 @@ import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
-import ee.openeid.siga.webapp.json.GetContainerMobileIdSigningStatusResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
@@ -16,8 +15,6 @@ import java.security.NoSuchAlgorithmException;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -65,20 +62,40 @@ public class MobileSigningAsicContainerT extends TestBase {
     public void signWithMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
-        Response responseSigningDelay5s = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        Response responseSigningDelay7s = postMidSigningInSession(flow, midSigningRequestWithDefault("60001018800", "+37200000566", "LT"));
+        Response responseSigning1 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+        Response responseSigning2 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001018800", "+37200000566", "LT"));
 
-        String signatureId5s = responseSigningDelay5s.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-        String signatureId7s = responseSigningDelay7s.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        String signatureId1 = responseSigning1.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        String signatureId2 = responseSigning2.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
 
-        await().atMost(16, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId5s).body().as(GetContainerMobileIdSigningStatusResponse.class).getMidStatus()));
-        await().atMost(16, SECONDS).with().pollInterval(5, SECONDS).until(() -> "SIGNATURE".equals(pollForMidSigning(flow, signatureId7s).body().as(GetContainerMobileIdSigningStatusResponse.class).getMidStatus()));
+        pollForMidSigning(flow, signatureId1);
+        pollForMidSigning(flow, signatureId2);
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
         validationResponse.then()
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(2));
+    }
+
+    @Test
+    public void signWithMultipleSignaturesPerContainerInvalidAndValidSignature() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response responseSigning1 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019961", "+37200000666", "LT"));
+        Response responseSigning2 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+
+        String signatureId1 = responseSigning1.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        String signatureId2 = responseSigning2.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+
+        pollForMidSigning(flow, signatureId1);
+        pollForMidSigning(flow, signatureId2);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
     @Test

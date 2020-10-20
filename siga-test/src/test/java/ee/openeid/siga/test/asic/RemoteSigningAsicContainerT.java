@@ -65,6 +65,22 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void signNewAsicContainerValidAndInvalidSignatureValue() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        CreateContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+        CreateContainerRemoteSigningResponse dataToSignResponse2 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse1.getDataToSign(), dataToSignResponse1.getDigestAlgorithm())), dataToSignResponse1.getGeneratedSignatureId());
+        putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest("yW9mTV2U+Hfl5EArvg9evTgb0BSHp/p9brr1K5bBIsE="), dataToSignResponse2.getGeneratedSignatureId());
+
+        Response response = getValidationReportForContainerInSession(flow);
+
+        response.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1))
+                .body("validationConclusion.signaturesCount", equalTo(1));
+    }
+
+    @Test
     public void signNewAsicContainerRemotelyWithCertInHex() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM_HEX, "LT")).as(CreateContainerRemoteSigningResponse.class);
