@@ -55,6 +55,48 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void signHashcodeContainerWithMidUser1PairOfRsaCertificatesSuccessfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("39901019992", "+37200001566", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void signHashcodeContainerWithMidUserOver21Successfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("45001019980", "+37200001466", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void signHashcodeContainerWithMidUserUnder18Successfully() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("61001019985", "+37200001366", "LT"));
+        String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
+        pollForMidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
     public void signWithMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
