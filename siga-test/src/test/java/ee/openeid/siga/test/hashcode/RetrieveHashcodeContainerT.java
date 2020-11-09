@@ -185,15 +185,6 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void postToGetHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId(), flow, "");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
     public void headToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
@@ -201,24 +192,6 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200);
-    }
-
-    @Test
-    public void optionsToGetHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void patchToGetHashcodeContainer() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
-
-        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override

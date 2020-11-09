@@ -208,49 +208,6 @@ public class CreateHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
-    @Test
-    public void deleteToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException {
-        Response response = delete(HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = put(HASHCODE_CONTAINERS, flow, hashcodeContainersDataRequestWithDefault().toString());
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void getToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = get(HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-
-    @Test
-    public void headToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = head(HASHCODE_CONTAINERS, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void optionsToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = options(HASHCODE_CONTAINERS, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToCreateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = patch(HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;

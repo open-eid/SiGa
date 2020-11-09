@@ -139,49 +139,6 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToUploadHashcodeContainer() throws Exception {
-        Response response = delete(UPLOAD + HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToUploadHashcodeContainer() throws Exception {
-        Response response = put(UPLOAD + HASHCODE_CONTAINERS, flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER).toString());
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void getToUploadHashcodeContainer() throws Exception {
-        Response response = get(UPLOAD + HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void headToUploadHashcodeContainer() throws Exception {
-        Response response = head(UPLOAD + HASHCODE_CONTAINERS, flow);
-
-        response.then()
-                .statusCode(405);
-    }
-
-    @Test
-    public void optionsToUploadHashcodeContainer() throws Exception {
-        Response response = options(UPLOAD + HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void patchToUploadHashcodeContainer() throws Exception {
-        Response response = patch(UPLOAD + HASHCODE_CONTAINERS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
     public void uploadHashcodeContainer_storedAlgoWithDataDescriptor() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeStoredAlgoWithDataDescriptor.asice"));
 

@@ -150,92 +150,12 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void putToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = put(getContainerEndpoint() + VALIDATIONREPORT, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test //SIGA handles this as DELETE to containerId
-    public void getToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = get(getContainerEndpoint() + VALIDATIONREPORT, flow);
-
-        assertThat(response.statusCode(), equalTo(400));
-    }
-
-    @Test
-    public void headToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = head(getContainerEndpoint() + VALIDATIONREPORT, flow);
-
-        assertThat(response.statusCode(), equalTo(400));
-    }
-
-    @Test
-    public void optionsToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = options(getContainerEndpoint() + VALIDATIONREPORT, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        Response response = patch(getContainerEndpoint() + VALIDATIONREPORT, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void deleteToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
-
-        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
-
-        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void postToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
-
-        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
     public void headToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
 
         assertThat(response.statusCode(), equalTo(200));
-    }
-
-    @Test
-    public void optionsToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override

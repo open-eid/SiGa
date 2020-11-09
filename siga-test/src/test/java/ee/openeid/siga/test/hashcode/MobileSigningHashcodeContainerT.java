@@ -362,93 +362,6 @@ public class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void getToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void headToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void optionsToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToStartHashcodeMidSigning() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void deleteToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        String signatureId = startResponse.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
-        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        String signatureId = startResponse.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
-        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void postToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        String signatureId = startResponse.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
-        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
     public void headToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
@@ -457,28 +370,6 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
 
         assertThat(response.statusCode(), equalTo(200));
-    }
-
-    @Test
-    public void optionsToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        String signatureId = startResponse.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToHashcodeMidSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        String signatureId = startResponse.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + MID_SIGNING + "/" + signatureId + STATUS, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override

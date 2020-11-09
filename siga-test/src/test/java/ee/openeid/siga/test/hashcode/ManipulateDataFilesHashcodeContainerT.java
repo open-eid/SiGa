@@ -256,102 +256,12 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
-
-        Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
     public void headToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
 
         assertThat(response.statusCode(), equalTo(200));
-    }
-
-    @Test
-    public void optionsToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void getToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void putToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void postToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow, "request");
-
-        expectError(response, 405, INVALID_REQUEST);
-    }
-
-    @Test
-    public void headToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void optionsToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
-
-        assertThat(response.statusCode(), equalTo(405));
-    }
-
-    @Test
-    public void patchToHashcodeDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
-        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
-
-        Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
-
-        expectError(response, 405, INVALID_REQUEST);
     }
 
     @Override
