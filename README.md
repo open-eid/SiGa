@@ -85,7 +85,7 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 | digidoc4jTest      | Use DD4J test mode (prefer AIA-OCSP)                    |
 | digidoc4jPerf      | Use DD4J test mode (without AIA-OCSP)                   |
 | mobileId           | Enable endpoints for signing with Mobile-ID             |
-| smartId            | Enable endpoints for signing with Smart-ID*             |
+| smartId            | Enable endpoints for signing with Smart-ID             |
 | datafileContainer  | Enable datafile container endpoints*                   |
 
 **NB:** exactly one of `digidoc4jProd`, `digidoc4jTest` and `digidoc4jPerf` must be active!
