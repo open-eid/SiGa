@@ -1,6 +1,5 @@
 package ee.openeid.siga;
 
-import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.HashcodeDataFile;
@@ -14,7 +13,6 @@ import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.exceptions.InvalidSignatureException;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -108,6 +106,7 @@ public class RequestTransformer {
                 .map(e -> tryToCreateX509Certificate(e.decode(signingCertificate)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(c -> CertificateUtil.isCertificateActive(c) && CertificateUtil.isSigningCertificate(c))
                 .findFirst()
                 .orElseThrow(() -> new InvalidCertificateException("Invalid signing certificate"));
 
