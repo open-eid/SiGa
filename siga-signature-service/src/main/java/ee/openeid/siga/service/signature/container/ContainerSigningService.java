@@ -35,7 +35,9 @@ import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.ValidationResult;
 import org.digidoc4j.X509Cert;
+import org.digidoc4j.exceptions.CertificateValidationException;
 import org.digidoc4j.exceptions.NetworkException;
+import org.digidoc4j.exceptions.OCSPRequestFailedException;
 import org.digidoc4j.exceptions.TechnicalException;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
@@ -236,12 +238,20 @@ public abstract class ContainerSigningService {
             signature = dataToSign.finalize(base64Decoded);
             validateFinalizedSignature(signature, startEvent);
             logEndEvent(startEvent, signature);
-        } catch (TechnicalException e) {
-            log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
-            logExceptionEvent(startEvent, e);
-            throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE);
+        } catch (CertificateValidationException | TechnicalException e) {
+            logSignatureFinalizationException(startEvent, e);
+            throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". " + e.getMessage());
+        } catch (OCSPRequestFailedException e) {
+            logSignatureFinalizationException(startEvent, e);
+            throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". OCSP request failed. Issuing certificate may not be trusted.");
         }
+
         return signature;
+    }
+
+    private void logSignatureFinalizationException(SigaEvent startEvent, Exception e) {
+        log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
+        logExceptionEvent(startEvent, e);
     }
 
     private void validateContainerDataFilesUnchanged(Session session, String containerId, String signatureId) {
@@ -296,7 +306,7 @@ public abstract class ContainerSigningService {
         endEvent.addEventParameter(SIGNATURE_ID, signature.getId());
     }
 
-    private void logExceptionEvent(SigaEvent startEvent, TechnicalException e) {
+    private void logExceptionEvent(SigaEvent startEvent, Exception e) {
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
 
         if (e instanceof NetworkException) {

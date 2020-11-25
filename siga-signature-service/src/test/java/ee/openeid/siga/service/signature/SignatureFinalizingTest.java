@@ -265,11 +265,11 @@ public class SignatureFinalizingTest {
         try {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
             fail("Should not reach here!");
-        } catch (OCSPRequestFailedException e) {
-            assertEquals("OCSP request failed. Please check GitHub Wiki for more information: https://github.com/open-eid/digidoc4j/wiki/Questions-&-Answers#if-ocsp-request-has-failed", e.getMessage());
+        } catch (SignatureCreationException e) {
+            assertEquals("Unable to finalize signature. OCSP request failed. Issuing certificate may not be trusted.", e.getMessage());
         }
         sigaEventLogger.logEvents();
-        assertFalse(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
+        assertTrue(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
         assertNotNull(tsaRequestEvent);
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
