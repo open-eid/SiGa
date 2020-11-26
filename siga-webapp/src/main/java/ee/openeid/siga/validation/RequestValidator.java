@@ -20,17 +20,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Component
 public class RequestValidator {
 
-    private final String INVALID_DATA_FILE_NAME = "Data file name is invalid";
-
     private MidRestConfigurationProperties midRestConfigurationProperties;
     private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
-    private static final String PERSON_SEMANTICS_IDENTIFIER = "PNO";
+
+    private static final Pattern VALID_PERSON_IDENTIFIER_PATTERN = Pattern.compile("^([0-9]{11}|[0-9-]{12})$");
+    private static final Pattern VALID_DOCUMENT_NUMBER = Pattern.compile("^(PNO)[A-Z]{2}-[0-9A-Z*\\-]{1,40}-[0-9A-Z]{4}-(NQ|Q)$");
+    private static final String INVALID_DATA_FILE_NAME = "Data file name is invalid";
+    private static final List<String> MOBILE_ID_LANGUAGES = Arrays.asList("EST", "ENG", "RUS", "LIT");
 
     @Autowired
     public RequestValidator(MidRestConfigurationProperties midRestConfigurationProperties, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
@@ -147,7 +151,7 @@ public class RequestValidator {
     }
 
     private void validatePersonIdentifier(String personIdentifier) {
-        if (StringUtils.isBlank(personIdentifier) || personIdentifier.length() > 30) {
+        if (StringUtils.isBlank(personIdentifier) || !VALID_PERSON_IDENTIFIER_PATTERN.matcher(personIdentifier).matches()) {
             throw new RequestValidationException("Invalid person identifier");
         }
     }
@@ -163,7 +167,7 @@ public class RequestValidator {
     }
 
     private void validateLanguage(String language) {
-        if (StringUtils.isBlank(language) || language.length() != 3) {
+        if (!MOBILE_ID_LANGUAGES.contains(language)) {
             throw new RequestValidationException("Invalid Mobile-Id language");
         }
     }
@@ -190,8 +194,7 @@ public class RequestValidator {
     }
 
     private void validateDocumentNumber(String documentNumber) {
-        if (StringUtils.isBlank(documentNumber) || documentNumber.length() > 40
-                || documentNumber.length() < 10 || !documentNumber.startsWith(PERSON_SEMANTICS_IDENTIFIER)) {
+        if (StringUtils.isBlank(documentNumber) || !VALID_DOCUMENT_NUMBER.matcher(documentNumber).matches()) {
             throw new RequestValidationException("Invalid Smart-Id documentNumber");
         }
         String country = documentNumber.substring(3, 5);

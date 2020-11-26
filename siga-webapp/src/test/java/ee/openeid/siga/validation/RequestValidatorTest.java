@@ -65,7 +65,7 @@ public class RequestValidatorTest {
     private static MobileIdInformation getMobileInformationRequest() {
         return MobileIdInformation.builder()
                 .phoneNo("+37253410832")
-                .personIdentifier("3489348234")
+                .personIdentifier("34893482349")
                 .language("EST")
                 .messageToDisplay("Random display").build();
     }
@@ -328,6 +328,15 @@ public class RequestValidatorTest {
     }
 
     @Test
+    public void languageNotInTheAllowedList(){
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid Mobile-Id language");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setLanguage("ESP");
+        validator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
     public void invalidMessageToDisplay() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id message to display");
@@ -407,11 +416,27 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidPersonIdentifier() {
+    public void invalidPersonIdentifierTooLong() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
+        mobileIdInformation.setPersonIdentifier(StringUtils.repeat("1", 13));
+        validator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void invalidPersonIdentifierContainsLetter() {
+        exceptionRule.expect(RequestValidationException.class);
+        exceptionRule.expectMessage("Invalid person identifier");
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 11));
+        validator.validateMobileIdInformation(mobileIdInformation);
+    }
+
+    @Test
+    public void latvianPersonIdentifier() {
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setPersonIdentifier("111111-11111");
         validator.validateMobileIdInformation(mobileIdInformation);
     }
 
@@ -602,7 +627,7 @@ public class RequestValidatorTest {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
-        smartIdInformation.setDocumentNumber("PNKEE-12345678");
+        smartIdInformation.setDocumentNumber("PNKEE-12345678-ZOKS-Q");
         validator.validateSmartIdInformationForSigning(smartIdInformation);
     }
 
@@ -611,7 +636,7 @@ public class RequestValidatorTest {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Smart-Id country inside documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
-        smartIdInformation.setDocumentNumber("PNOLV-12345678");
+        smartIdInformation.setDocumentNumber("PNOLV-12345678-ZOKS-Q");
         validator.validateSmartIdInformationForSigning(smartIdInformation);
     }
 
@@ -620,7 +645,7 @@ public class RequestValidatorTest {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Smart-Id country inside documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
-        smartIdInformation.setDocumentNumber("PNOWW-12345678");
+        smartIdInformation.setDocumentNumber("PNOWW-12345678-ZOKS-Q");
         validator.validateSmartIdInformationForSigning(smartIdInformation);
     }
 
@@ -628,7 +653,7 @@ public class RequestValidatorTest {
         return SmartIdInformation.builder()
                 .country("EE")
                 .messageToDisplay("test message")
-                .documentNumber("PNOEE-12345678912-QRTS")
+                .documentNumber("PNOEE-12345678912-QRTS-Q")
                 .personIdentifier("12345678912")
                 .build();
     }
