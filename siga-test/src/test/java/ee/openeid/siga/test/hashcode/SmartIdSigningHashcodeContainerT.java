@@ -170,7 +170,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest(".!:", "EE"));
 
-        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -249,7 +249,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE.10101010005-Z1B2-Q"));
 
-        expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
@@ -384,7 +384,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     public void signWithSmartIdNotFound() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-123abc-9RF6-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-49101290235-9RF6-Q"));
 
         expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
     }
