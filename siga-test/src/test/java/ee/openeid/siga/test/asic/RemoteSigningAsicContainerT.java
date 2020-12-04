@@ -131,7 +131,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerReturnsDigestToSign() throws Exception {
+    public void startAsicRemoteSigningContainerReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT"));
@@ -143,7 +143,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerWithHexEncodedCertificateReturnsDigestToSign() throws Exception {
+    public void startAsicRemoteSigningContainerWithHexEncodedCertificateReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM_HEX, "LT"));
@@ -155,7 +155,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerWithAllParamsReturnsDigestToSign() throws Exception {
+    public void startAsicRemoteSigningContainerWithAllParamsReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia"));
@@ -167,7 +167,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
+    public void sartAsicRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
@@ -179,7 +179,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerWithLocationReturnsDigestToSign() throws Exception {
+    public void startAsicRemoteSigningContainerWithLocationReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", null, "Tallinn", null, null, null));
@@ -191,7 +191,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerEmptyBody() throws Exception {
+    public void startAsicRemoteSigningContainerEmptyBody() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
@@ -201,7 +201,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerMissingSigningCertificate() throws Exception {
+    public void startAsicRemoteSigningContainerMissingSigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
@@ -212,7 +212,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerMissingProfile() throws Exception {
+    public void startAsicRemoteSigningContainerMissingProfile() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         JSONObject request = new JSONObject();
@@ -223,7 +223,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerEmptySigningCertificate() throws Exception {
+    public void startAsicRemoteSigningContainerEmptySigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("", "LT"));
@@ -232,7 +232,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerEmptyProfile() throws Exception {
+    public void startAsicRemoteSigningContainerEmptyProfile() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, ""));
@@ -241,7 +241,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidSigningCertificate() throws Exception {
+    public void startAsicRemoteSigningContainerInvalidSigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("-&32%", "LT"));
@@ -250,7 +250,43 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidBase64EncodedSigningCertificate() throws Exception {
+    public void startAsicRemoteSigningContainerAuthenticationCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(AUTH_CERT_PEM, "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startAsicRemoteSigningContainerHexEncodedAuthenticationCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(AUTH_CERT_PEM_HEX, "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startAsicRemoteSigningContainerExpiredSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_EXPIRED_PEM, "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startAsicRemoteSigningContainerHexEncodedExpiredSigningCertificate() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_EXPIRED_PEM_HEX, "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startAsicRemoteSigningContainerInvalidBase64EncodedSigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("Y2VydA==", "LT"));
@@ -259,7 +295,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidHexEncodedSigningCertificate() throws Exception {
+    public void startAsicRemoteSigningContainerInvalidHexEncodedSigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault("435254", "LT"));
@@ -268,7 +304,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidProfileFormat() throws Exception {
+    public void startAsicRemoteSigningContainerInvalidProfileFormat() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "123"));
@@ -277,7 +313,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidProfile() throws Exception {
+    public void startAsicRemoteSigningContainerInvalidProfile() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "B_BES"));
@@ -286,7 +322,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void StartAsicRemoteSigningContainerInvalidRole() throws Exception {
+    public void startAsicRemoteSigningContainerInvalidRole() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "", null, null, null, null));
