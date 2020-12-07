@@ -32,9 +32,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.SIGNATURE_FILE_PREFIX;
+import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.ZIP_ENTRY_MIMETYPE;
 
 public class HashcodeContainer {
     private static final int MAX_FILE_SIZE = 500000;
+    private static final String META_INF_DIRECTORY = "META-INF";
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
     private Map<String, ManifestEntry> manifest;
@@ -91,7 +93,7 @@ public class HashcodeContainer {
 
     private void validateDataFiles() {
         if (dataFiles.isEmpty()) {
-            throw new InvalidContainerException("Container must have data files");
+            throw new InvalidContainerException("Container must have data file hashes");
         }
         dataFiles.forEach(dataFile -> {
             if (StringUtils.isBlank(dataFile.getFileHashSha256())) {
@@ -148,6 +150,8 @@ public class HashcodeContainer {
             } else if (entryName.startsWith(HashcodesDataFile.HASHCODES_PREFIX)) {
                 HashcodesDataFileParser parser = new HashcodesDataFileParser(inputStream.readAllBytes());
                 addDataFileEntries(parser.getEntries(), entryName);
+            } else if (!entryName.startsWith(META_INF_DIRECTORY) && !entryName.equals(ZIP_ENTRY_MIMETYPE)) {
+                throw new InvalidContainerException("Invalid hashcode container. Invalid file or directory in root level. Only mimetype file and META-INF directory allowed");
             }
         } catch (DSSException | NullPointerException e) {
             throw new InvalidContainerException("Hashcode container is invalid");
