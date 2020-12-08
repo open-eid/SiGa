@@ -76,7 +76,7 @@ public class HashcodeContainerTest {
     @Test
     public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
         expectedEx.expect(InvalidContainerException.class);
-        expectedEx.expectMessage("Container must have data files");
+        expectedEx.expectMessage("Container must have data file hashes");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             hashcodeContainer.save(outputStream);
@@ -180,6 +180,24 @@ public class HashcodeContainerTest {
         expectedEx.expectMessage("Invalid data file hash");
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile("hashcode_with_invalid_length_hash.asice");
+        hashcodeContainer.open(container);
+    }
+
+    @Test
+    public void invalidStructureHashcodeContainer() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Invalid hashcode container. Invalid file or directory in root level. Only mimetype file and META-INF directory allowed");
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile("hashcode_invalid_structure.asice");
+        hashcodeContainer.open(container);
+    }
+
+    @Test
+    public void openRegularAsicContainerWithDataFiles() throws IOException, URISyntaxException {
+        expectedEx.expect(InvalidContainerException.class);
+        expectedEx.expectMessage("Invalid hashcode container. Invalid file or directory in root level. Only mimetype file and META-INF directory allowed");
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile("test.asice");
         hashcodeContainer.open(container);
     }
 
