@@ -228,6 +228,38 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
+    public void startRemoteSigningHashcodeContainerAuthenticationCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(AUTH_CERT_PEM, "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerHexEncodedAuthenticationCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(AUTH_CERT_PEM_HEX, "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerExpiredSigningCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_EXPIRED_PEM, "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
+    public void startRemoteSigningHashcodeContainerHexEncodedExpiredSigningCertificate() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_EXPIRED_PEM_HEX, "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
+    }
+
+    @Test
     public void startRemoteSigningHashcodeContainerInvalidBase64EncodedSigningCertificate() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 

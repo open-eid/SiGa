@@ -66,14 +66,14 @@ public class SignatureCorrectnessT extends TestBase {
     }
 
     @Test
-    public void signatureWithLtaProfileSucceeds() throws Exception {
+    public void signatureHashcodeContainerWithLtaProfileReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LTA")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
 
         response.then()
-                .statusCode(200)
-                .body("result", equalTo(Result.OK.name()));
+                .statusCode(400)
+                .body("errorCode", equalTo(INVALID_SIGNATURE));
     }
 
     @Override
