@@ -26,7 +26,8 @@ public class CertificateUtil {
         if (certificate.getNotAfter() == null) {
             return false;
         }
-        return certificate.getNotAfter().after(new Date());
+        Date currentDate = new Date();
+        return certificate.getNotAfter().after(currentDate) && certificate.getNotBefore().before(currentDate);
     }
 
     public static boolean isSigningCertificate(X509Certificate certificate) {
