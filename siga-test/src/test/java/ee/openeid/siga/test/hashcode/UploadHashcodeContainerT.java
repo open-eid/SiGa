@@ -166,6 +166,12 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void uploadContainerWithInvalidStructure() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode_invalid_structure.asice"));
+        expectError(response, 400, INVALID_CONTAINER_EXCEPTION);
+    }
+
+    @Test
     public void uploadContainerWithInvalidDatafileXmlStructure() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWrongFileStructureInDatafileDescriptorFile.asice"));
         expectError(response, 400, INVALID_CONTAINER);
