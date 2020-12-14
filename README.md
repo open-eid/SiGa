@@ -13,6 +13,10 @@ Signature Gateway is a web service for creating, signing and validating ASIC-E a
 * (AIA) OCSP service (based on configuration)
 * LOTL and national TSL services
 
+### SiGa component model
+
+![SiGa component model](docs/img/siga_component_model.png)
+
 ## How to build
 
 ### Using Maven Wrapper
