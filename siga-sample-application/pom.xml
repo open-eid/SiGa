@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.digidoc4j</groupId>
             <artifactId>digidoc4j</artifactId>
-            <version>4.1.0-RC.1</version>
+            <version>4.1.0</version>
         </dependency>
         <!-- Override vulnerable version of transitive DigiDoc4J dependency -->
         <dependency>
