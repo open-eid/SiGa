@@ -1,11 +1,19 @@
 package ee.openeid.siga.common.util;
 
 import ee.openeid.siga.common.exception.InvalidCertificateException;
+import eu.europa.esig.dss.utils.Utils;
+import lombok.SneakyThrows;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.PolicyInformation;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class CertificateUtil {
 
@@ -35,5 +43,26 @@ public class CertificateUtil {
             return false;
         }
         return certificate.getKeyUsage()[1];
+    }
+
+    @SneakyThrows
+    public static boolean hasProhibitedPolicies(X509Certificate certificate, List<String> policies) {
+
+        byte[] extensionValue = certificate.getExtensionValue(
+                Extension.certificatePolicies.getId()
+        );
+        if (Utils.isArrayEmpty(extensionValue)) {
+            return false;
+        }
+        CertificatePolicies certificatePolicies = CertificatePolicies.getInstance(JcaX509ExtensionUtils.parseExtensionValue(extensionValue));
+        for (PolicyInformation policyInformation : certificatePolicies.getPolicyInformation()) {
+            if (policyInformation == null || policyInformation.getPolicyIdentifier() == null) {
+                continue;
+            }
+            if (policies.contains(policyInformation.getPolicyIdentifier().getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,9 +1,12 @@
 package ee.openeid.siga.validation;
 
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
 import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
@@ -12,7 +15,6 @@ import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,22 +22,26 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.valueOf;
-import static java.time.Instant.now;
 
 @RunWith(MockitoJUnitRunner.class)
 @TestPropertySource(locations = "application-test.properties")
@@ -52,6 +58,9 @@ public class RequestValidatorTest {
     @Mock
     private MidRestConfigurationProperties midRestConfigurationProperties;
 
+    @Mock
+    private SecurityConfigurationProperties securityConfigurationProperties;
+
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
@@ -59,7 +68,7 @@ public class RequestValidatorTest {
     public void setup() {
         Mockito.when(midRestConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
         Mockito.when(smartIdServiceConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        validator = new RequestValidator(midRestConfigurationProperties, smartIdServiceConfigurationProperties);
+        validator = new RequestValidator(midRestConfigurationProperties, smartIdServiceConfigurationProperties, securityConfigurationProperties);
     }
 
     private static MobileIdInformation getMobileInformationRequest() {
@@ -232,48 +241,75 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulRemoteSigningWithBase64Certificate() {
-        validator.validateRemoteSigning("dGVzdCBoYXNo", "LT");
+    public void validSigningCertificateWithBase64Certificate() {
+        validator.validateSigningCertificate("dGVzdCBoYXNo");
     }
 
     @Test
-    public void successfulRemoteSigningWithHexCertificate() {
-        validator.validateRemoteSigning("1237ABCDEF", "LT");
+    public void validSigningCertificateWithHexCertificate() {
+        validator.validateSigningCertificate("1237ABCDEF");
     }
 
     @Test
     public void invalidSigningCertificate() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signing certificate");
-        validator.validateRemoteSigning("+=?!%", "LT");
+        validator.validateSigningCertificate("+=?!%");
     }
 
     @Test
     public void emptySigningCertificate() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signing certificate");
-        validator.validateRemoteSigning("", "LT");
+        validator.validateSigningCertificate("");
+    }
+
+    @Test
+    public void remoteSigning_authCertificateNotAllowed() throws IOException {
+        exceptionRule.expect(InvalidCertificateException.class);
+        exceptionRule.expectMessage("Invalid signing certificate");
+        Path documentPath = Paths.get(new ClassPathResource("mari-liis_auth.cer").getURI());
+        InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
+        validator.validateRemoteSigning(CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes())), "LT");
+    }
+
+    @Test
+    public void remoteSigning_smartIdCertificateNotAllowed() throws IOException {
+        exceptionRule.expect(InvalidCertificateException.class);
+        exceptionRule.expectMessage("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate");
+        Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.17.2", "1.3.6.1.4.1.10015.3.1.3"));
+        X509Certificate certificate = readCertificate("smart-id.cer");
+        validator.validateRemoteSigning(certificate, "LT");
+    }
+
+    @Test
+    public void remoteSigning_mobileIdCertificateNotAllowed() throws IOException {
+        exceptionRule.expect(InvalidCertificateException.class);
+        exceptionRule.expectMessage("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate");
+        Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.1.3"));
+        X509Certificate certificate = readCertificate("mobile-id.cer");
+        validator.validateRemoteSigning(certificate, "LT");
     }
 
     @Test
     public void oldSignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning("dGVzdCBoYXNo", "B_BES");
+        validator.validateRemoteSigning(null, "B_BES");
     }
 
     @Test
     public void invalidSignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning("dGVzdCBoYXNo", "TL");
+        validator.validateRemoteSigning(null, "TL");
     }
 
     @Test
     public void emptySignatureProfile() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning("dGVzdCBoYXNo", "");
+        validator.validateRemoteSigning(null, "");
     }
 
     @Test
@@ -328,7 +364,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void languageNotInTheAllowedList(){
+    public void languageNotInTheAllowedList() {
         exceptionRule.expect(RequestValidationException.class);
         exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
@@ -647,6 +683,12 @@ public class RequestValidatorTest {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOWW-12345678-ZOKS-Q");
         validator.validateSmartIdInformationForSigning(smartIdInformation);
+    }
+
+    private X509Certificate readCertificate(String fileName) throws IOException {
+        Path documentPath = Paths.get(new ClassPathResource(fileName).getURI());
+        InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
+        return CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes()));
     }
 
     private SmartIdInformation getDefaultSmartIdInformation() {

@@ -97,20 +97,9 @@ public class RequestTransformer {
         return dataFiles;
     }
 
-    static SignatureParameters transformRemoteRequest(String signingCertificate, String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
+    static SignatureParameters transformRemoteRequest(X509Certificate signingCertificate, String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {
         SignatureParameters signatureParameters = new SignatureParameters();
-
-        X509Certificate x509Certificate = Stream
-                .of(SupportedCertificateEncoding.values())
-                .filter(e -> e.isDecodable(signingCertificate))
-                .map(e -> tryToCreateX509Certificate(e.decode(signingCertificate)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(c -> CertificateUtil.isCertificateActive(c) && CertificateUtil.isSigningCertificate(c))
-                .findFirst()
-                .orElseThrow(() -> new InvalidCertificateException("Invalid signing certificate"));
-
-        signatureParameters.setSigningCertificate(x509Certificate);
+        signatureParameters.setSigningCertificate(signingCertificate);
         SignatureProfile signatureProfile = SignatureProfile.findByProfile(requestSignatureProfile);
         signatureParameters.setSignatureProfile(signatureProfile);
         if (signatureProductionPlace != null) {
@@ -121,6 +110,17 @@ public class RequestTransformer {
         }
         signatureParameters.setRoles(roles);
         return signatureParameters;
+    }
+
+    static X509Certificate transformCertificate(String signingCertificate){
+        return Stream
+                .of(SupportedCertificateEncoding.values())
+                .filter(e -> e.isDecodable(signingCertificate))
+                .map(e -> tryToCreateX509Certificate(e.decode(signingCertificate)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseThrow(() -> new InvalidCertificateException("Invalid signing certificate"));
     }
 
     static SignatureParameters transformSignatureParameters(String requestSignatureProfile, SignatureProductionPlace signatureProductionPlace, List<String> roles) {

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 
@@ -100,15 +101,18 @@ public class HashcodeContainerController {
     @PostMapping(value = "/hashcodecontainers/{containerId}/remotesigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerRemoteSigningResponse prepareRemoteSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerRemoteSigningRequest createRemoteSigningRequest) {
         validator.validateContainerId(containerId);
-        validator.validateRemoteSigning(createRemoteSigningRequest.getSigningCertificate(), createRemoteSigningRequest.getSignatureProfile());
 
         String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
+        validator.validateSigningCertificate(signingCertificate);
+        X509Certificate certificate = RequestTransformer.transformCertificate(signingCertificate);
+        validator.validateRemoteSigning(certificate, createRemoteSigningRequest.getSignatureProfile());
+
         String signatureProfile = createRemoteSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createRemoteSigningRequest.getSignatureProductionPlace();
         List<String> roles = createRemoteSigningRequest.getRoles();
         validator.validateRoles(roles);
 
-        SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(signingCertificate, signatureProfile, signatureProductionPlace, roles);
+        SignatureParameters signatureParameters = RequestTransformer.transformRemoteRequest(certificate, signatureProfile, signatureProductionPlace, roles);
         DataToSignWrapper dataToSignWrapper = signingService.createDataToSign(containerId, signatureParameters);
         DataToSign dataToSign = dataToSignWrapper.getDataToSign();
 

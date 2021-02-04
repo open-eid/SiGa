@@ -10,12 +10,16 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @ConfigurationProperties(prefix = "siga.security")
 @Validated
 @Getter
 @Setter
 public class SecurityConfigurationProperties {
+    private List<String> prohibitedPoliciesForRemoteSigning = new ArrayList<>(Arrays.asList("1.3.6.1.4.1.10015.1.3", "1.3.6.1.4.1.10015.18.1", "1.3.6.1.4.1.10015.17.2", "1.3.6.1.4.1.10015.17.1"));
 
     private int maxFileSize = 4194304; //4mb
     @Valid

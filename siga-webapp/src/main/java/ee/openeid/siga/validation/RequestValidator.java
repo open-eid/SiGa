@@ -1,11 +1,14 @@
 package ee.openeid.siga.validation;
 
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.Base64Util;
+import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
 import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
@@ -20,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -28,8 +32,9 @@ import java.util.stream.Stream;
 @Component
 public class RequestValidator {
 
-    private MidRestConfigurationProperties midRestConfigurationProperties;
-    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    private final MidRestConfigurationProperties midRestConfigurationProperties;
+    private final SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    private final SecurityConfigurationProperties securityConfigurationProperties;
 
     private static final Pattern VALID_PERSON_IDENTIFIER_PATTERN = Pattern.compile("^([0-9]{11}|[0-9-]{12})$");
     private static final Pattern VALID_DOCUMENT_NUMBER = Pattern.compile("^(PNO)[A-Z]{2}-[0-9A-Z*\\-]{1,40}-[0-9A-Z]{4}-(NQ|Q)$");
@@ -37,9 +42,10 @@ public class RequestValidator {
     private static final List<String> MOBILE_ID_LANGUAGES = Arrays.asList("EST", "ENG", "RUS", "LIT");
 
     @Autowired
-    public RequestValidator(MidRestConfigurationProperties midRestConfigurationProperties, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties) {
+    public RequestValidator(MidRestConfigurationProperties midRestConfigurationProperties, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties, SecurityConfigurationProperties securityConfigurationProperties) {
         this.midRestConfigurationProperties = midRestConfigurationProperties;
         this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
+        this.securityConfigurationProperties = securityConfigurationProperties;
     }
 
     public void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
@@ -103,11 +109,21 @@ public class RequestValidator {
         validateBase64(dataFile.getFileContent());
     }
 
-    public void validateRemoteSigning(String signingCertificate, String signatureProfile) {
+    public void validateSigningCertificate(String signingCertificate) {
         if (StringUtils.isBlank(signingCertificate) || Stream.of(SupportedCertificateEncoding.values()).noneMatch(e -> e.isDecodable(signingCertificate))) {
             throw new RequestValidationException("Invalid signing certificate");
         }
+    }
+
+    public void validateRemoteSigning(X509Certificate signingCertificate, String signatureProfile) {
         validateSignatureProfile(signatureProfile);
+        if (signingCertificate == null || !CertificateUtil.isCertificateActive(signingCertificate) || !CertificateUtil.isSigningCertificate(signingCertificate)) {
+            throw new InvalidCertificateException("Invalid signing certificate");
+        }
+
+        if (CertificateUtil.hasProhibitedPolicies(signingCertificate, securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning())) {
+            throw new InvalidCertificateException("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate");
+        }
     }
 
     public void validateSignatureProfile(String signatureProfile) {

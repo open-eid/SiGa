@@ -159,12 +159,13 @@ Applicable if `smartId` profile is active.
 
 #### SiGa security configuration
 
-| Parameter                             | Mandatory | Description                                                                                                                                                                                | Example                              |
-| ------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| siga.security.hmac.expiration         | Y         | Maximum amount of time from signing timestamp after which the request is considered expired, in seconds. Validation takes into account clock skew. Must be greater than or equal to `-1`.  | `5`                                  |
-| siga.security.hmac.clock-skew         | Y         | Maximum clock skew between SiGa server and service provider machines, in seconds. Must be greater than or equal to `0`.                                                                    | `2`                                  |
-| siga.security.jasypt.encryption-algo  | Y         | Algorithm that is used to encrypt service signing key values in service database.                                                                                                          | `PBEWITHSHA-256AND256BITAES-CBC-BC`  |
-| siga.security.jasypt.encryption-key   | Y         | Secret key that is used to encrypt/decrypt service signing key values in service database.                                                                                                 | `encryptorKey`                       |
+| Parameter                                           | Mandatory | Description                                                                                                                                                                                | Example                                         |
+| --------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| siga.security.hmac.expiration                       | Y         | Maximum amount of time from signing timestamp after which the request is considered expired, in seconds. Validation takes into account clock skew. Must be greater than or equal to `-1`.  | `5`                                             |
+| siga.security.hmac.clock-skew                       | Y         | Maximum clock skew between SiGa server and service provider machines, in seconds. Must be greater than or equal to `0`.                                                                    | `2`                                             |
+| siga.security.jasypt.encryption-algo                | Y         | Algorithm that is used to encrypt service signing key values in service database.                                                                                                          | `PBEWITHSHA-256AND256BITAES-CBC-BC`             |
+| siga.security.jasypt.encryption-key                 | Y         | Secret key that is used to encrypt/decrypt service signing key values in service database.                                                                                                 | `encryptorKey`                                  |
+| siga.security.prohibitedPoliciesForRemoteSigning    | N         | Prohibited certificate policy OIDs for remote signing endpoint.                                                                                                                            | `1.3.6.1.4.1.10015.1.3, 1.3.6.1.4.1.10015.17.2` |
 
 #### SiGa database configuration
 
