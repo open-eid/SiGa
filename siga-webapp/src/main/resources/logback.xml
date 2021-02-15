@@ -17,6 +17,7 @@
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
                 <expression>return message.contains("request_uri=/actuator/health");</expression>
+                <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
@@ -35,6 +36,7 @@
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
                 <expression>return message.contains("request_uri=/actuator/health");</expression>
+                <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
