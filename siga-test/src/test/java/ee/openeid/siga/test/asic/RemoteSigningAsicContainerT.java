@@ -167,7 +167,7 @@ public class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    public void sartAsicRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
+    public void startAsicRemoteSigningContainerWithRoleReturnsDigestToSign() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "Member of board", null, null, null, null));
@@ -328,6 +328,14 @@ public class RemoteSigningAsicContainerT extends TestBase {
         Response response = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_PEM, "LT", "", null, null, null, null));
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
+    public void startAsicRemoteSigningContainerMidCertificate() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_MID_PEM, "LT"));
+
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION, MID_SID_CERT_REMOTE_SIGNING);
     }
 
     @Test
