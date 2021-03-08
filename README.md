@@ -189,6 +189,20 @@ spring.datasource.username=user
 spring.datasource.password=password
 ```
 
+#### SiGa health and heartbeat configuration
+
+SiGa has built-in health endpoint for an overview of system related service statuses. The endpoint can be reached at `{host}/actuator/health`. An example configuration for health endpoint:
+```
+management.endpoint.health.show-details=ALWAYS
+management.health.defaults.enabled=false
+management.health.db.enabled=true
+```
+To add a heartbeat endpoint, the following configuration should be added to `configuration.properties`:
+
+`management.endpoints.web.exposure.include=heartbeat,health`
+
+The heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`.
+
 ## SiGa database
 
 ### Data model
