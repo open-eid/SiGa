@@ -96,6 +96,14 @@ public class ValidateAsicContainerT extends TestBase {
     }
 
     @Test
+    public void validateAsicContainerSignedWithExpiredOcsp() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("esteid2018signerAiaOcspLT.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].indication"), equalTo("INDETERMINATE"));
+    }
+
+    @Test
     public void validateAsicContainerWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
