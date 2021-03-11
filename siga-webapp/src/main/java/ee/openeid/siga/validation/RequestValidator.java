@@ -16,6 +16,8 @@ import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProp
 import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
@@ -30,23 +32,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Component
+@RequiredArgsConstructor
 public class RequestValidator {
 
+    @NonNull
     private final MidRestConfigurationProperties midRestConfigurationProperties;
+    @NonNull
     private final SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    @NonNull
     private final SecurityConfigurationProperties securityConfigurationProperties;
 
     private static final Pattern VALID_PERSON_IDENTIFIER_PATTERN = Pattern.compile("^([0-9]{11}|[0-9-]{12})$");
     private static final Pattern VALID_DOCUMENT_NUMBER = Pattern.compile("^(PNO)[A-Z]{2}-[0-9A-Z*\\-]{1,40}-[0-9A-Z]{4}-(NQ|Q)$");
     private static final String INVALID_DATA_FILE_NAME = "Data file name is invalid";
     private static final List<String> MOBILE_ID_LANGUAGES = Arrays.asList("EST", "ENG", "RUS", "LIT");
-
-    @Autowired
-    public RequestValidator(MidRestConfigurationProperties midRestConfigurationProperties, SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties, SecurityConfigurationProperties securityConfigurationProperties) {
-        this.midRestConfigurationProperties = midRestConfigurationProperties;
-        this.smartIdServiceConfigurationProperties = smartIdServiceConfigurationProperties;
-        this.securityConfigurationProperties = securityConfigurationProperties;
-    }
 
     public void validateHashcodeDataFiles(List<HashcodeDataFile> dataFiles) {
         if (CollectionUtils.isEmpty(dataFiles)) {
