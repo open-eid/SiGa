@@ -1,6 +1,7 @@
 package ee.openeid.siga.auth.properties;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 public class SecurityConfigurationProperties {
-    private List<String> prohibitedPoliciesForRemoteSigning = new ArrayList<>(Arrays.asList("1.3.6.1.4.1.10015.1.3", "1.3.6.1.4.1.10015.18.1", "1.3.6.1.4.1.10015.17.2", "1.3.6.1.4.1.10015.17.1"));
+    private List<@NonNull String> prohibitedPoliciesForRemoteSigning = new ArrayList<>(Arrays.asList("1.3.6.1.4.1.10015.1.3", "1.3.6.1.4.1.10015.18.1", "1.3.6.1.4.1.10015.17.2", "1.3.6.1.4.1.10015.17.1"));
 
     private int maxFileSize = 4194304; //4mb
     @Valid

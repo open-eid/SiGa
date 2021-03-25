@@ -1,24 +1,22 @@
 package ee.openeid.siga.monitoring;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.HealthIndicatorRegistry;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Optional;
 
-@ConditionalOnExpression("'${management.endpoints.web.exposure.include}'.contains('heartbeat')")
+@RequiredArgsConstructor
+@Component
 @Endpoint(id = "heartbeat", enableByDefault = false)
 public class HeartbeatEndpoint {
 
-    private HealthIndicatorRegistry healthIndicatorRegistry;
-
-    public HeartbeatEndpoint(HealthIndicatorRegistry healthIndicatorRegistry) {
-        this.healthIndicatorRegistry = healthIndicatorRegistry;
-    }
+    private final HealthIndicatorRegistry healthIndicatorRegistry;
 
     @ReadOperation
     public Status heartbeat() {
@@ -35,6 +33,5 @@ public class HeartbeatEndpoint {
                 .findAny();
         return anyNotUp.isPresent() ? Status.DOWN : Status.UP;
     }
-
 
 }

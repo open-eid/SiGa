@@ -1,25 +1,25 @@
 package ee.openeid.siga.common.util;
 
 import ee.openeid.siga.common.exception.InvalidCertificateException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.utils.Utils;
-import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.x509.CertificatePolicies;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
+@UtilityClass
 public class CertificateUtil {
-
-    private CertificateUtil() {
-        throw new IllegalStateException("Utility class");
-    }
 
     public static X509Certificate createX509Certificate(byte[] certificate) {
         try {
@@ -45,16 +45,13 @@ public class CertificateUtil {
         return certificate.getKeyUsage()[1];
     }
 
-    @SneakyThrows
-    public static boolean hasProhibitedPolicies(X509Certificate certificate, List<String> policies) {
 
-        byte[] extensionValue = certificate.getExtensionValue(
-                Extension.certificatePolicies.getId()
-        );
+    public static boolean hasProhibitedPolicies(X509Certificate certificate, List<String> policies) {
+        byte[] extensionValue = certificate.getExtensionValue(Extension.certificatePolicies.getId());
         if (Utils.isArrayEmpty(extensionValue)) {
             return false;
         }
-        CertificatePolicies certificatePolicies = CertificatePolicies.getInstance(JcaX509ExtensionUtils.parseExtensionValue(extensionValue));
+        CertificatePolicies certificatePolicies = parseCertificatePolicies(extensionValue);
         for (PolicyInformation policyInformation : certificatePolicies.getPolicyInformation()) {
             if (policyInformation == null || policyInformation.getPolicyIdentifier() == null) {
                 continue;
@@ -64,5 +61,14 @@ public class CertificateUtil {
             }
         }
         return false;
+    }
+
+    private static CertificatePolicies parseCertificatePolicies(byte[] extensionValue) {
+        try {
+            return CertificatePolicies.getInstance(JcaX509ExtensionUtils.parseExtensionValue(extensionValue));
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new TechnicalException("Could not parse certificate extension value");
+        }
     }
 }
