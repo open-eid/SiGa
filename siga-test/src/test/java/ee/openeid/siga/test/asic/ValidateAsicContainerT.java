@@ -107,8 +107,8 @@ public class ValidateAsicContainerT extends TestBase {
     public void validateAsicContainerWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
-        assertThat(validationResponse.statusCode(), equalTo(400));
-        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
     }
 
     @Test
@@ -117,18 +117,18 @@ public class ValidateAsicContainerT extends TestBase {
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
-        assertThat(validationResponse.statusCode(), equalTo(400));
-        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
     }
 
     @Test
-    public void createAsicContainerWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void createAsicContainerWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 
-        assertThat(validationResponse.statusCode(), equalTo(400));
-        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
     }
 
     @Test
