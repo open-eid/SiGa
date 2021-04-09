@@ -276,6 +276,14 @@ public class RemoteSigningHachcodeContainerT extends TestBase {
     }
 
     @Test
+    public void startAsicRemoteSigningContainerMidCertificate() throws Exception {
+        postCreateContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_MID_PEM, "LT"));
+        expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION, MID_SID_CERT_REMOTE_SIGNING);
+    }
+
+    @Test
     public void startRemoteSigningHashcodeContainerInvalidProfileFormat() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 

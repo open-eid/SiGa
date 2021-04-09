@@ -8,8 +8,8 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -99,18 +99,17 @@ public class MobileSigningAsicContainerT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
-
+    @Ignore("Test uses Lithuanian test MID number for second signature.")
     @Test
     public void signWithMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response responseSigning1 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
-        Response responseSigning2 = postMidSigningInSession(flow, midSigningRequestWithDefault("60001018800", "+37200000566", "LT"));
-
         String signatureId1 = responseSigning1.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-        String signatureId2 = responseSigning2.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
-
         pollForMidSigning(flow, signatureId1);
+
+        Response responseSigning2 = postMidSigningInSession(flow, midSigningRequestWithDefault("50001018865", "+37060000666", "LT"));
+        String signatureId2 = responseSigning2.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId2);
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
