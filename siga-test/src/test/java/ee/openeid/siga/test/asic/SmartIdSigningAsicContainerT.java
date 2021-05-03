@@ -37,7 +37,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdWithCertificateChoiceSuccessfullyEstonia() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -58,7 +58,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdWithCertificateChoiceSuccessfullyLatvia() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("010101-10006", "LV"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("030303-10012", "LV"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -79,7 +79,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdWithCertificateChoiceSuccessfullyLithuania() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "LT"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "LT"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -100,7 +100,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     public void signWithSmartIdCertificateChoiceMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
-        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId1 = certificateChoice1.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId1);
 
@@ -109,7 +109,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
 
-        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId2 = certificateChoice2.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId2);
 
@@ -129,7 +129,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     public void signWithSmartIdCertificateChoiceRetryAfterUserCancel() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
-        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010016", "EE"));
+        Response certificateChoice1 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30403039917", "EE"));
         String generatedCertificateId1 = certificateChoice1.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId1);
 
@@ -138,7 +138,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
 
-        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice2 = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId2 = certificateChoice2.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId2);
 
@@ -157,7 +157,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void smartIdSigningStatusRequestAfterSuccessfulFinalization() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -205,7 +205,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         JSONObject request = new JSONObject();
-        request.put("personIdentifier", "10101010005");
+        request.put("personIdentifier", "30303039914");
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow, request.toString());
 
@@ -218,7 +218,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         JSONObject request = new JSONObject();
-        request.put("personIdentifier", "10101010016");
+        request.put("personIdentifier", "30403039917");
         request.put("country", "LV");
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE, flow, request.toString());
@@ -237,7 +237,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void postWithSmartIdCertificateChoiceInvalidCountry() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "ee"));
+        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "ee"));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -245,7 +245,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void getSmartIdCertificateChoiceInvalidCertificateId() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         Response response = pollForSidCertificateStatus(flow, "00000000-0000-0000-0000-000000000000");
 
         expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
@@ -254,7 +254,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signSmartIdInvalidFormatDocumentNumber() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE.10101010005-Z1B2-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE.30303039914-Z1B2-Q"));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -282,7 +282,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void getSmartIdSidStatusCertificateReturned() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response certificateStatus = pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -294,7 +294,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void getSmartIdSidStatusErrorOnSecondRequest() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId);
         Response certificateStatus = getSidCertificateStatus(flow, generatedCertificateId);
@@ -314,7 +314,21 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        pollForSidSigning(flow, signatureId);
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        validationResponse.then()
+                .statusCode(200)
+                .body("validationConclusion.validSignaturesCount", equalTo(1));
+    }
+
+    @Test
+    public void signWithSmartIdSuccessfullyUserHasOtherActiveAccount() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039816-MD2B-Q"));
         String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId);
 
@@ -328,8 +342,8 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
-        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         String signatureId2 = signingRequest2.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
@@ -345,8 +359,8 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdRetryAfterUserCancel() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010016-9RF6-Q"));
-        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039917-905H-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId1 = signingRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         String signatureId2 = signingRequest2.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
@@ -371,7 +385,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdUserRefused() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010016-9RF6-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039917-905H-Q"));
         String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response signingResponse = pollForSidSigning(flow, signatureId);
         expectSmartIdStatus(signingResponse, USER_CANCEL);
@@ -381,7 +395,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void signWithSmartIdUserTimeout() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010027-TFPR-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039983-5NFT-Q"));
         String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response signingResponse = pollForSidSigningWithPollParameters(10000, 120000,  flow, signatureId);
         expectSmartIdStatus(signingResponse, EXPIRED_TRANSACTION);
@@ -414,7 +428,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
         String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
@@ -425,7 +439,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
         String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
@@ -544,7 +558,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void deleteToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -555,7 +569,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void putToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request");
@@ -566,7 +580,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void postToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request");
@@ -577,7 +591,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void headToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -588,7 +602,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void optionsToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -599,7 +613,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void patchToAsicSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-10101010005-Z1B2-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-5QSV-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -610,7 +624,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void deleteToAsicSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
@@ -621,7 +635,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void putToAsicSmartIdSCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow, "request");
@@ -632,7 +646,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void postToAsicSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow, "request");
@@ -643,7 +657,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void headToAsicSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
@@ -654,7 +668,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void optionsToAsicSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
@@ -665,7 +679,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     @Test
     public void patchToAsicSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101010005", "EE"));
+        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);

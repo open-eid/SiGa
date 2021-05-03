@@ -175,7 +175,7 @@ public class RequestUtil {
 
     public static SmartIdInformation createSmartIdInformation() {
         SmartIdInformation smartIdInformation = SmartIdInformation.builder()
-                .personIdentifier("10101010005")
+                .personIdentifier("30303039914")
                 .country("EE")
                 .documentNumber(DOCUMENT_NUMBER)
                 .build();
