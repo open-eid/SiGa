@@ -107,7 +107,7 @@ public class MainController {
     @PostMapping(value = "/smartid-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public SmartIdSigningRequest startSmartIdSigning(@RequestBody SmartIdSigningRequest request) {
-        log.info("Mobile signing request: {}", request);
+        log.info("Smart-ID signing request: {}", request);
         sigaApiClientService.startSmartIdSigningFlow(request);
         return request;
     }
