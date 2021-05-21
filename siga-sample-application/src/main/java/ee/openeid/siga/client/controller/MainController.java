@@ -1,11 +1,7 @@
 package ee.openeid.siga.client.controller;
 
 import ee.openeid.siga.client.hashcode.HashcodeContainer;
-import ee.openeid.siga.client.model.AsicContainerWrapper;
-import ee.openeid.siga.client.model.FinalizeRemoteSigningRequest;
-import ee.openeid.siga.client.model.HashcodeContainerWrapper;
-import ee.openeid.siga.client.model.MobileSigningRequest;
-import ee.openeid.siga.client.model.PrepareRemoteSigningRequest;
+import ee.openeid.siga.client.model.*;
 import ee.openeid.siga.client.service.ContainerService;
 import ee.openeid.siga.client.service.SigaApiClientService;
 import lombok.SneakyThrows;
@@ -16,17 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.util.Base64;
 import java.util.Map;
 
 
@@ -112,6 +101,14 @@ public class MainController {
     public MobileSigningRequest startMobileSigning(@RequestBody MobileSigningRequest request) {
         log.info("Mobile signing request: {}", request);
         sigaApiClientService.startMobileSigningFlow(request);
+        return request;
+    }
+
+    @PostMapping(value = "/smartid-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public SmartIdSigningRequest startSmartIdSigning(@RequestBody SmartIdSigningRequest request) {
+        log.info("Mobile signing request: {}", request);
+        sigaApiClientService.startSmartIdSigningFlow(request);
         return request;
     }
 

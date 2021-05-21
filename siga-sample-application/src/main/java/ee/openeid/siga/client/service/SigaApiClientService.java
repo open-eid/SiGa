@@ -31,9 +31,7 @@ import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.SSLContext;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,7 +40,10 @@ import java.util.Map;
 import static ee.openeid.siga.client.hashcode.HashcodesDataFileCreator.createHashcodeDataFile;
 import static java.text.MessageFormat.format;
 import static org.apache.tomcat.util.codec.binary.Base64.encodeBase64String;
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.HttpStatus.Series.SUCCESSFUL;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
@@ -105,6 +106,18 @@ public class SigaApiClientService {
             startHashcodeMobileIdSigningFlow(mobileSigningRequest);
         } else {
             startAsicMobileIdSigningFlow(mobileSigningRequest);
+        }
+    }
+
+    @Async
+    @SneakyThrows
+    public void startSmartIdSigningFlow(SmartIdSigningRequest smartIdSigningRequest) {
+        setUpClientNotificationChannel(smartIdSigningRequest.getContainerId());
+
+        if (MobileSigningRequest.ContainerType.HASHCODE == smartIdSigningRequest.getContainerType()) {
+            startHashcodeSmartIdSigningFlow(smartIdSigningRequest);
+        } else {
+            throw new Exception("Not Implemented!");
         }
     }
 
@@ -417,6 +430,102 @@ public class SigaApiClientService {
         request.setLanguage("EST");
         request.setPhoneNo(mobileSigningRequest.getPhoneNr());
         return request;
+    }
+
+    private void startHashcodeSmartIdSigningFlow(SmartIdSigningRequest smartIdSigningRequest) {
+        String containerId = smartIdSigningRequest.getContainerId();
+
+        getSignatureList(HASHCODE_ENDPOINT, containerId, GetHashcodeContainerSignaturesResponse.class);
+        CreateHashcodeContainerSmartIdCertificateChoiceRequest smartIdRequest = createHashcodeSmartIdRequest(smartIdSigningRequest);
+        CreateHashcodeContainerSmartIdCertificateChoiceResponse smartIdResponse = prepareSmartIdCertificateSelection(containerId, smartIdRequest);
+
+        String generatedCertificateId = smartIdResponse.getGeneratedCertificateId();
+        if (StringUtils.isNotBlank(generatedCertificateId)) {
+            startHashcodeSmartIdSigning(containerId, generatedCertificateId);
+        }
+    }
+
+    private CreateHashcodeContainerSmartIdCertificateChoiceRequest createHashcodeSmartIdRequest(SmartIdSigningRequest smartIdSigningRequest) {
+        CreateHashcodeContainerSmartIdCertificateChoiceRequest request = new CreateHashcodeContainerSmartIdCertificateChoiceRequest();
+        request.setPersonIdentifier(smartIdSigningRequest.getPersonIdentifier());
+        request.setCountry(smartIdSigningRequest.getCountry());
+        return request;
+    }
+
+    private CreateHashcodeContainerSmartIdCertificateChoiceResponse prepareSmartIdCertificateSelection(String containerId, Object request) {
+        String endpoint = getSigaApiUri(HASHCODE_ENDPOINT, containerId, "smartidsigning/certificatechoice");
+        CreateHashcodeContainerSmartIdCertificateChoiceResponse response = restTemplate.postForObject(endpoint, request, CreateHashcodeContainerSmartIdCertificateChoiceResponse.class);
+        sendStatus(POST, endpoint, request, response);
+        return response;
+    }
+
+    private void startHashcodeSmartIdSigning(String containerId, String generatedCertificateId) {
+        SmartIdCertificateChoiceStatusResponseWrapper wrapper = getSmartIdCertificateSelectionStatus(containerId, generatedCertificateId);
+        if (!wrapper.isPollingSuccess()) {
+            return;
+        }
+
+        String documentNumber = wrapper.getResponse().getDocumentNumber();
+        CreateHashcodeContainerSmartIdSigningRequest smartIdSignatureSigningRequest = createHashcodeSmartIdSigningRequest(documentNumber);
+        CreateHashcodeContainerSmartIdSigningResponse smartIdSignatureSigningResponse = prepareSmartIdSignatureSigning(containerId, smartIdSignatureSigningRequest);
+        String generatedSignatureId = smartIdSignatureSigningResponse.getGeneratedSignatureId();
+
+        if (StringUtils.isNotBlank(generatedSignatureId)) {
+            if (getSmartIdSigningStatus(containerId, generatedSignatureId)) {
+                endHashcodeContainerFlow(containerId);
+            }
+        }
+    }
+
+    @SneakyThrows
+    private SmartIdCertificateChoiceStatusResponseWrapper getSmartIdCertificateSelectionStatus(String containerId, String generatedSignatureId) {
+        String endpoint = getSigaApiUri(HASHCODE_ENDPOINT, containerId, "smartidsigning/certificatechoice", generatedSignatureId, "status");
+        SmartIdCertificateChoiceStatusResponseWrapper wrapper = new SmartIdCertificateChoiceStatusResponseWrapper();
+        GetContainerSmartIdCertificateChoiceStatusResponse response;
+        for (int i = 0; i < 18; i++) {
+            response = restTemplate.getForObject(endpoint, GetContainerSmartIdCertificateChoiceStatusResponse.class);
+            sendStatus(GET, endpoint, response);
+            if (!"CERTIFICATE".equals(response.getSidStatus())) {
+                Thread.sleep(5000);
+            } else {
+                wrapper.setPollingSuccess(true);
+                wrapper.setResponse(response);
+                return wrapper;
+            }
+        }
+        wrapper.setPollingSuccess(false);
+        return wrapper;
+    }
+
+    private CreateHashcodeContainerSmartIdSigningRequest createHashcodeSmartIdSigningRequest(String documentNumber) {
+        CreateHashcodeContainerSmartIdSigningRequest request = new CreateHashcodeContainerSmartIdSigningRequest();
+        request.setMessageToDisplay("SiGa DEMO app");
+        request.setSignatureProfile(SIGNATURE_PROFILE_LT);
+        request.setDocumentNumber(documentNumber);
+        return request;
+    }
+
+    private CreateHashcodeContainerSmartIdSigningResponse prepareSmartIdSignatureSigning(String containerId, Object request) {
+        String endpoint = getSigaApiUri(HASHCODE_ENDPOINT, containerId, "smartidsigning");
+        CreateHashcodeContainerSmartIdSigningResponse response = restTemplate.postForObject(endpoint, request, CreateHashcodeContainerSmartIdSigningResponse.class);
+        sendStatus(POST, endpoint, request, response);
+        return response;
+    }
+
+    @SneakyThrows
+    private boolean getSmartIdSigningStatus(String containerId, String generatedSignatureId) {
+        String endpoint = getSigaApiUri(HASHCODE_ENDPOINT, containerId, "smartidsigning", generatedSignatureId, "status");
+        GetContainerSmartIdSigningStatusResponse response;
+        for (int i = 0; i < 6; i++) {
+            response = restTemplate.getForObject(endpoint, GetContainerSmartIdSigningStatusResponse.class);
+            sendStatus(GET, endpoint, response);
+            if (!"SIGNATURE".equals(response.getSidStatus())) {
+                Thread.sleep(5000);
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
