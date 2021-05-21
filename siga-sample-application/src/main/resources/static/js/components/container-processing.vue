@@ -69,6 +69,27 @@
                             <b-tab title="ID-card">
                                 <b-button variant="primary" size="sm" v-on:click="onIdCardSign">Start ID-card signing</b-button>
                             </b-tab>
+                            <b-tab title="Smart-ID">
+                              <b-collapse visible>
+                                <b-container>
+                                  <b-row>
+                                    <b-col>
+                                      <b-form @submit="onSmartIdSign">
+                                        <b-form-group label="Person identifier code:" label-for="input-1" label-cols-md="3">
+                                          <b-form-input id="input-1" v-model="smartIdSigningForm.personIdentifier" type="text" required placeholder="Person identifier code"></b-form-input>
+                                        </b-form-group>
+                                        <b-form-group label="Select country:" label-for="input-3" label-cols-md="3">
+                                          <b-form-select id="input-3" v-model="smartIdSigningForm.country" :options="countryOptions"></b-form-select>
+                                        </b-form-group>
+                                        <b-form-group label-cols-md="12">
+                                          <b-button type="submit" v-b-toggle.collapse-ms variant="primary" size="sm">Start Smart-ID signing</b-button>
+                                        </b-form-group>
+                                      </b-form>
+                                    </b-col>
+                                  </b-row>
+                                </b-container>
+                              </b-collapse>
+                            </b-tab>
                         </b-tabs>
 
                         <div class="process-callout process-start" v-bind:class="{ 'process-default': item.status === 'PROCESSING', 'process-highlight': item.status === 'VALIDATION', 'process-highlight': item.status === 'CHALLENGE', 'process-result': item.status === 'RESULT', 'process-error': item.status === 'ERROR'}" v-for="(item, index) in processingSteps">
@@ -123,6 +144,12 @@
                         country: 'EE',
                         containerType: 'HASHCODE'
                     },
+                    smartIdSigningForm: {
+                      containerId: null,
+                      personIdentifier: '30303039914',
+                      country: 'EE',
+                      containerType: 'HASHCODE'
+                    },
                     countryOptions: [
                         {value: 'EE', text: 'EE'},
                         {value: 'LV', text: 'LV'},
@@ -152,6 +179,7 @@
                     this.$data.downloadHashcodeUrl = '/download/hashcode/' + response.id;
                     this.$data.downloadRegularUrl = '/download/regular/' + this.$data.mobileSigningForm.containerType + '/' + response.id;
                     this.$data.mobileSigningForm.containerId = response.id;
+                    this.$data.smartIdSigningForm.containerId = response.id;
                     this.$data.containerConverted = true;
                     let processingSteps = this.$data.processingSteps;
                     this.stompClient.subscribe('/progress/' + response.id, function (message) {
@@ -162,6 +190,11 @@
                     evt.preventDefault();
                     this.$data.downloadUnsignedContainerAllowed = false;
                     axios.post('/mobile-signing', this.$data.mobileSigningForm);
+                },
+                onSmartIdSign: function(evt) {
+                  evt.preventDefault();
+                  this.$data.downloadUnsignedContainerAllowed = false;
+                  axios.post('/smartid-signing', this.$data.smartIdSigningForm);
                 },
                 onDropzoneError: function (file, message, xhr) {
                     this.$refs.fileDropzone.removeFile(file);
