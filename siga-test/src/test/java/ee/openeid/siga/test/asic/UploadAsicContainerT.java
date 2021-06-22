@@ -54,6 +54,24 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
+    public void uploadAsicContainerWithEmptyDataFiles() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("signedContainerWithEmptyDatafiles.asice"));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
+    public void uploadAsicContainerWithEmptyDataFilesAndWithoutSignatures() throws Exception {
+        Response response = postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
     public void uploadAsicContainerWithoutDatafiles() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerNoDataFile.bdoc"));
 

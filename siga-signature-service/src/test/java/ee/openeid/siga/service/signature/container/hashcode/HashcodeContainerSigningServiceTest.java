@@ -6,7 +6,9 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
+import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.common.session.Session;
@@ -95,6 +97,17 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
+    public void emptyDataFilesInSession() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
+    }
+
+    @Test
     public void onlyRequiredSignatureParametersTest() {
         assertOnlyRequiredSignatureParameters();
     }
@@ -141,6 +154,18 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
+    public void emptyDataFilesInSessionStartMobileSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.startMobileIdSigning(CONTAINER_ID, Mockito.mock(MobileIdInformation.class),
+                createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
+    }
+
+    @Test
     public void successfulCertificateChoice(){
         assertSuccessfulCertificateChoice();
     }
@@ -163,6 +188,29 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
         assertSuccessfulSmartIdSignatureProcessing(sessionService, signingService);
+    }
+
+    @Test
+    public void emptyDataFilesInSessionInitSmartIdSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.initSmartIdCertificateChoice(CONTAINER_ID, Mockito.mock(SmartIdInformation.class));
+    }
+
+    @Test
+    public void emptyDataFilesInSessionStartSmartIdSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.startSmartIdSigning(CONTAINER_ID, Mockito.mock(SmartIdInformation.class),
+                createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
     }
 
     @Test

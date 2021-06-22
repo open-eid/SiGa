@@ -1,17 +1,20 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
+import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.AsicContainerSessionHolder;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.test.RequestUtil;
+import ee.openeid.siga.service.signature.test.TestUtil;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -43,6 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 @RunWith(MockitoJUnitRunner.class)
 public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference";
+    private static final String ASICE_CONTAINER_WITH_EMPTY_DATAFILES = "unsignedContainerWithEmptyDatafiles.asice";
 
     private final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
@@ -81,6 +85,17 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
         exceptionRule.expectMessage("container is marked non-null but is null");
         AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
         sessionHolder.setContainer(null);
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
+    }
+
+    @Test
+    public void containerWithEmptyDataFilesInSession() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
+        sessionHolder.setContainer(TestUtil.getFile(ASICE_CONTAINER_WITH_EMPTY_DATAFILES));
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
         signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
@@ -133,6 +148,18 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     }
 
     @Test
+    public void containerWithEmptyDataFilesInSessionStartMobileSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
+        sessionHolder.setContainer(TestUtil.getFile(ASICE_CONTAINER_WITH_EMPTY_DATAFILES));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.startMobileIdSigning(CONTAINER_ID, Mockito.mock(MobileIdInformation.class),
+                createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
+    }
+
+    @Test
     public void successfulCertificateChoice(){
         assertSuccessfulCertificateChoice();
     }
@@ -155,6 +182,29 @@ public class AsicContainerSigningServiceTest extends ContainerSigningServiceTest
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
         assertSuccessfulSmartIdSignatureProcessing(sessionService, signingService);
+    }
+
+    @Test
+    public void containerWithEmptyDataFilesInSessionInitSmartIdSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
+        sessionHolder.setContainer(TestUtil.getFile(ASICE_CONTAINER_WITH_EMPTY_DATAFILES));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.initSmartIdCertificateChoice(CONTAINER_ID, Mockito.mock(SmartIdInformation.class));
+    }
+
+    @Test
+    public void containerWithEmptyDataFilesInSessionStartSmartIdSigning() throws IOException, URISyntaxException {
+        exceptionRule.expect(InvalidSessionDataException.class);
+        exceptionRule.expectMessage("Unable to sign container with empty datafiles");
+        AsicContainerSessionHolder sessionHolder = RequestUtil.createAsicSessionHolder();
+        sessionHolder.setContainer(TestUtil.getFile(ASICE_CONTAINER_WITH_EMPTY_DATAFILES));
+
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+        signingService.startSmartIdSigning(CONTAINER_ID, Mockito.mock(SmartIdInformation.class),
+                createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()));
     }
 
     @Test

@@ -65,7 +65,7 @@ public class HashcodesDataFileParser {
     }
 
     private void validateSize(String size) {
-        if (!StringUtils.isNumeric(size) || Integer.parseInt(size) < 1) {
+        if (!StringUtils.isNumeric(size) || Integer.parseInt(size) < 0) {
             throw new InvalidContainerException("Hashcodes data file invalid file size");
         }
     }

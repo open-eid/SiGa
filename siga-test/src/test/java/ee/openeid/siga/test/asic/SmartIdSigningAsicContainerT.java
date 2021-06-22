@@ -173,6 +173,14 @@ public class SmartIdSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void postWithSmartIdCertificateChoiceContainerInSessionContainsEmptyDataFiles() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
+        Response response = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
+
+        expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION, "Unable to sign container with empty datafiles");
+    }
+
+    @Test
     public void postWithSmartIdCertificateChoiceSymbolsInPersonIdentifier() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest(".!:", "EE"));
@@ -249,6 +257,14 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         Response response = pollForSidCertificateStatus(flow, "00000000-0000-0000-0000-000000000000");
 
         expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @Test
+    public void signSmartIdContainerInSessionContainsEmptyDataFiles() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
+        Response signingResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-Z1B2-Q"));
+
+        expectError(signingResponse, 400, INVALID_SESSION_DATA_EXCEPTION, "Unable to sign container with empty datafiles");
     }
 
     @Test
