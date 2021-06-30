@@ -407,6 +407,60 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         expectSmartIdStatus(signingResponse, USER_CANCEL);
     }
 
+    @Test
+    public void signWithSmartIdUserRefusedDisplayTextAndPin() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039928-3ZF3-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdUserRefusedVerificationCodeChoice() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039939-SFKN-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdUserRefusedConfirmationMessage() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039946-TZSW-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdUserRefusedConfirmationMessageWithVerificationCodeChoice() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039950-XMFV-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdUserRefusedCertChoice() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039961-THFM-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_CANCEL);
+    }
+
+    @Test
+    public void signWithSmartIdUserChoosesWrongVerificationCode() throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039972-5ND9-Q"));
+        String signatureId = response.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
+        Response signingResponse = pollForSidSigning(flow, signatureId);
+        expectSmartIdStatus(signingResponse, USER_SELECTED_WRONG_VC);
+    }
+
     @Ignore
     @Test
     public void signWithSmartIdUserTimeout() throws Exception {
