@@ -110,6 +110,13 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), hasItems(
+                containsString("Data file 'empty-file-2.txt' is empty"),
+                containsString("Data file 'empty-file-4.txt' is empty")
+        ));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-1.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-3.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-5.txt"))));
     }
 
     @Test
@@ -140,6 +147,13 @@ public class ValidateHashcodeContainerT extends TestBase {
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), hasItems(
+                containsString("Data file 'empty-file-2.txt' is empty"),
+                containsString("Data file 'empty-file-4.txt' is empty")
+        ));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-1.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-3.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-5.txt"))));
     }
 
     @Test
