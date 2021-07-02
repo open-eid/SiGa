@@ -6,8 +6,9 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -36,7 +37,7 @@ public class MetaInfoHealthIndicator implements HealthIndicator {
 
     @Autowired
     public MetaInfoHealthIndicator(ManifestReader manifestReader) {
-        instanceStarted = ZonedDateTime.now();
+        instanceStarted = Instant.now().atZone(ZoneOffset.UTC);
         built = getInstanceBuilt(manifestReader);
         name = manifestReader.read(MANIFEST_PARAM_NAME);
         version = manifestReader.read(MANIFEST_PARAM_VERSION);
@@ -49,7 +50,7 @@ public class MetaInfoHealthIndicator implements HealthIndicator {
                 .withDetail(RESPONSE_PARAM_VERSION, formatValue(version))
                 .withDetail(RESPONSE_PARAM_BUILD_TIME, formatValue(getFormattedTime(built)))
                 .withDetail(RESPONSE_PARAM_START_TIME, formatValue(getFormattedTime(instanceStarted)))
-                .withDetail(RESPONSE_PARAM_CURRENT_TIME, formatValue(getFormattedTime(ZonedDateTime.now())))
+                .withDetail(RESPONSE_PARAM_CURRENT_TIME, formatValue(getFormattedTime(Instant.now().atZone(ZoneOffset.UTC))))
                 .build();
     }
 
@@ -57,32 +58,25 @@ public class MetaInfoHealthIndicator implements HealthIndicator {
         return value == null ? NOT_AVAILABLE : value;
     }
 
-    protected static String getFormattedTime(final ZonedDateTime zonedDateTime) {
-        if (zonedDateTime == null) {
-            return null;
-        }
-        return zonedDateTime.format(DEFAULT_DATE_TIME_FORMATTER);
+    private static String getFormattedTime(ZonedDateTime zonedDateTime) {
+        return (zonedDateTime != null)
+                ? zonedDateTime.format(DEFAULT_DATE_TIME_FORMATTER)
+                : null;
     }
 
     private static ZonedDateTime getInstanceBuilt(ManifestReader manifestReader) {
         String buildTime = manifestReader.read(MANIFEST_PARAM_BUILD_TIME);
-        return convertUtcToLocal(buildTime);
-    }
 
-    protected static ZonedDateTime convertUtcToLocal(final String buildTime) {
         if (buildTime == null) {
             return null;
         }
 
-        LocalDateTime date;
         try {
-            date = LocalDateTime.parse(buildTime, DEFAULT_DATE_TIME_FORMATTER);
+            return LocalDateTime.parse(buildTime, DEFAULT_DATE_TIME_FORMATTER).atZone(ZoneOffset.UTC);
         } catch (DateTimeParseException e) {
             log.error("Could not parse the build time! ", e);
             return null;
         }
-        ZonedDateTime dateTime = date.atZone(ZoneId.of("UTC"));
-        return dateTime.withZoneSameInstant(ZoneId.systemDefault());
     }
 
 }
