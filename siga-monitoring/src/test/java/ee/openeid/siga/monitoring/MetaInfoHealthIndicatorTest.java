@@ -16,7 +16,9 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ee.openeid.siga.monitoring.MetaInfoHealthIndicator.*;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_BUILD_TIME;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_NAME;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
