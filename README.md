@@ -198,11 +198,20 @@ management.endpoint.health.show-details=ALWAYS
 management.health.defaults.enabled=false
 management.health.db.enabled=true
 ```
-To add a heartbeat endpoint, the following configuration should be added to `configuration.properties`:
 
-`management.endpoints.web.exposure.include=heartbeat,health`
-
+To add a heartbeat endpoint, the following configuration should be added to `application.properties`:
+```
+management.endpoints.web.exposure.include=health,heartbeat
+management.endpoint.heartbeat.enabled=true
+```
 The heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`.
+
+To add version information endpoint, the following configuration should be added to `application.properties`:
+```
+management.endpoints.web.exposure.include=health,version
+management.endpoint.version.enabled=true
+```
+The version information endpoint can be accessed at `{host}/actuator/version`.
 
 ## SiGa database
 
