@@ -31,6 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logback-classic.version>1.2.3</logback-classic.version>
         <jackson.version>2.12.3</jackson.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
         <spring-security.version>5.3.10.RELEASE</spring-security.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>

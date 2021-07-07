@@ -60,11 +60,15 @@
             <groupId>org.digidoc4j</groupId>
             <artifactId>digidoc4j</artifactId>
             <version>4.2.0</version>
-            <!-- TODO: remove this after pdfbox version in DSS has been updated above 2.0.23! -->
             <exclusions>
                 <exclusion>
+                    <!-- TODO: remove this after pdfbox version in DSS has been updated above 2.0.23! -->
                     <groupId>org.apache.pdfbox</groupId>
                     <artifactId>pdfbox</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -78,6 +82,16 @@
             <groupId>org.apache.santuario</groupId>
             <artifactId>xmlsec</artifactId>
             <version>2.1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <!-- TODO: remove this after pdfbox version in DSS has been updated above 2.0.23! -->
         <dependency>
