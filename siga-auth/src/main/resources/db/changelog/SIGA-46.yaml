@@ -60,6 +60,9 @@ databaseChangeLog:
             tableName: siga_service
             columnDataType: VARCHAR(128)
             validate: true
+      validCheckSum:
+        - 8:226f2dd6baa51c973267292c6ef6bd22
+        - 8:58cc34a462109f08d5db61d7d82f8a6b
 
   - changeSet:
       id: 1576491824643-4
