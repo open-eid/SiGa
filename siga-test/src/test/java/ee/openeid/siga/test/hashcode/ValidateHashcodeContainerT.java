@@ -104,6 +104,31 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void validateHashcodeContainerWithZeroFileSizeDataFiles() throws Exception {
+        Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeSignedContainerWithEmptyDatafiles.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), hasItems(
+                containsString("Data file 'empty-file-2.txt' is empty"),
+                containsString("Data file 'empty-file-4.txt' is empty")
+        ));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-1.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-3.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-5.txt"))));
+    }
+
+    @Test
+    public void validateHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignatures() throws Exception {
+        Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeUnsignedContainerWithEmptyDatafiles.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.getBody().path(ERROR_MESSAGE), equalTo("Missing signatures"));
+    }
+
+    @Test
     public void uploadHashcodeContainerWithoutSignaturesAndValidateInSession() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
@@ -111,6 +136,35 @@ public class ValidateHashcodeContainerT extends TestBase {
 
         assertThat(validationResponse.statusCode(), equalTo(400));
         assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithZeroFileSizeDataFilesAndValidateInSession() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeSignedContainerWithEmptyDatafiles.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), hasItems(
+                containsString("Data file 'empty-file-2.txt' is empty"),
+                containsString("Data file 'empty-file-4.txt' is empty")
+        ));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-1.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-3.txt"))));
+        assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-5.txt"))));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignaturesAndValidateInSession() throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeUnsignedContainerWithEmptyDatafiles.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(400));
+        assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
+        assertThat(validationResponse.getBody().path(ERROR_MESSAGE), equalTo("Missing signatures"));
     }
 
     @Test

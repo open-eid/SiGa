@@ -6,11 +6,17 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_BUILD_TIME;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_NAME;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_VERSION;
+import static ee.openeid.siga.monitoring.ApplicationInfoConstants.NOT_AVAILABLE;
 
 @Component
 @Slf4j
@@ -22,21 +28,19 @@ public class MetaInfoHealthIndicator implements HealthIndicator {
     protected static final String RESPONSE_PARAM_START_TIME = "startTime";
     protected static final String RESPONSE_PARAM_CURRENT_TIME = "currentTime";
     protected static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    private static final String NOT_AVAILABLE = "N/A";
-    protected static final String MANIFEST_PARAM_NAME = "SiGa-Webapp-Name";
-    protected static final String MANIFEST_PARAM_VERSION = "SiGa-Webapp-Version";
-    protected static final String MANIFEST_PARAM_BUILD_TIME = "SiGa-Webapp-Build-Time";
-    private ZonedDateTime instanceStarted = null;
-    private ZonedDateTime built = null;
-    private String name = null;
-    private String version = null;
+    protected static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT);
 
-    private final ManifestReader manifestReader;
+    private final ZonedDateTime instanceStarted;
+    private final ZonedDateTime built;
+    private final String name;
+    private final String version;
 
     @Autowired
     public MetaInfoHealthIndicator(ManifestReader manifestReader) {
-        this.manifestReader = manifestReader;
-        setIndicators();
+        instanceStarted = Instant.now().atZone(ZoneOffset.UTC);
+        built = getInstanceBuilt(manifestReader);
+        name = manifestReader.read(MANIFEST_PARAM_NAME);
+        version = manifestReader.read(MANIFEST_PARAM_VERSION);
     }
 
     @Override
@@ -46,47 +50,33 @@ public class MetaInfoHealthIndicator implements HealthIndicator {
                 .withDetail(RESPONSE_PARAM_VERSION, formatValue(version))
                 .withDetail(RESPONSE_PARAM_BUILD_TIME, formatValue(getFormattedTime(built)))
                 .withDetail(RESPONSE_PARAM_START_TIME, formatValue(getFormattedTime(instanceStarted)))
-                .withDetail(RESPONSE_PARAM_CURRENT_TIME, formatValue(getFormattedTime(ZonedDateTime.now())))
+                .withDetail(RESPONSE_PARAM_CURRENT_TIME, formatValue(getFormattedTime(Instant.now().atZone(ZoneOffset.UTC))))
                 .build();
     }
 
-    private Object formatValue(final String value) {
+    private static Object formatValue(final String value) {
         return value == null ? NOT_AVAILABLE : value;
     }
 
-    protected static String getFormattedTime(final ZonedDateTime zonedDateTime) {
-        if (zonedDateTime == null) {
-            return null;
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT);
-        return zonedDateTime.format(formatter);
+    private static String getFormattedTime(ZonedDateTime zonedDateTime) {
+        return (zonedDateTime != null)
+                ? zonedDateTime.format(DEFAULT_DATE_TIME_FORMATTER)
+                : null;
     }
 
-    private void setIndicators() {
-        instanceStarted = ZonedDateTime.now();
-        built = getInstanceBuilt();
-        name = manifestReader.read(MANIFEST_PARAM_NAME);
-        version = manifestReader.read(MANIFEST_PARAM_VERSION);
-    }
+    private static ZonedDateTime getInstanceBuilt(ManifestReader manifestReader) {
+        String buildTime = manifestReader.read(MANIFEST_PARAM_BUILD_TIME);
 
-    private ZonedDateTime getInstanceBuilt() {
-        return convertUtcToLocal(manifestReader.read(MANIFEST_PARAM_BUILD_TIME));
-    }
-
-    protected static ZonedDateTime convertUtcToLocal(final String buildTime) {
         if (buildTime == null) {
             return null;
         }
 
-        LocalDateTime date;
         try {
-            date = LocalDateTime.parse(buildTime, DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT));
+            return LocalDateTime.parse(buildTime, DEFAULT_DATE_TIME_FORMATTER).atZone(ZoneOffset.UTC);
         } catch (DateTimeParseException e) {
             log.error("Could not parse the build time! ", e);
             return null;
         }
-        ZonedDateTime dateTime = date.atZone(ZoneId.of("UTC"));
-        return dateTime.withZoneSameInstant(ZoneId.systemDefault());
     }
 
 }

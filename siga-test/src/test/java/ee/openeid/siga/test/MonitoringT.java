@@ -5,6 +5,7 @@ import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import org.junit.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
@@ -15,9 +16,24 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class MonitoringT extends TestBase {
 
+    private static final String ACCEPT_HEADER_V2 = "application/vnd.spring-boot.actuator.v2+json";
+
     @Test
-    public void getMonitoringStatusAndCheckComponentStatus() throws Exception {
-        Response response = getMonitoringStatus();
+    public void getMonitoringStatusAndCheckComponentStatusCurrent() throws Exception {
+        Response response = getMonitoringStatus(null);
+
+        response.then()
+                .statusCode(200)
+                .body("status", equalTo("UP"))
+                .body("components.ignite.status", equalTo("UP"))
+                .body("components.metaInfo.status", equalTo("UP"))
+                .body("components.siva.status", equalTo("UP"))
+                .body("components.db.status", equalTo("UP"));
+    }
+
+    @Test
+    public void getMonitoringStatusAndCheckComponentStatusV2() throws Exception {
+        Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
                 .statusCode(200)
@@ -29,8 +45,30 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckStructure() throws Exception {
-        Response response = getMonitoringStatus();
+    public void getMonitoringStatusAndCheckStructureCurrent() throws Exception {
+        Response response = getMonitoringStatus(null);
+
+        response.then()
+                .statusCode(200)
+                .body("status", notNullValue())
+                .body("components.ignite.status", notNullValue())
+                .body("components.ignite.status", notNullValue())
+                .body("components.ignite.details.igniteActiveContainers", notNullValue())
+                .body("components.db.status", notNullValue())
+                .body("components.db.details.database", notNullValue())
+                .body("components.db.details.validationQuery", notNullValue())
+                .body("components.metaInfo.status", notNullValue())
+                .body("components.metaInfo.details.webappName", notNullValue())
+                .body("components.metaInfo.details.version", notNullValue())
+                .body("components.metaInfo.details.buildTime", notNullValue())
+                .body("components.metaInfo.details.startTime", notNullValue())
+                .body("components.metaInfo.details.currentTime", notNullValue())
+                .body("components.siva.status", notNullValue());
+    }
+
+    @Test
+    public void getMonitoringStatusAndCheckStructureV2() throws Exception {
+        Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
                 .statusCode(200)
@@ -40,7 +78,7 @@ public class MonitoringT extends TestBase {
                 .body("details.ignite.details.igniteActiveContainers", notNullValue())
                 .body("details.db.status", notNullValue())
                 .body("details.db.details.database", notNullValue())
-                .body("details.db.details.hello", notNullValue())
+                .body("details.db.details.validationQuery", notNullValue())
                 .body("details.metaInfo.status", notNullValue())
                 .body("details.metaInfo.details.webappName", notNullValue())
                 .body("details.metaInfo.details.version", notNullValue())
@@ -51,12 +89,15 @@ public class MonitoringT extends TestBase {
     }
 
     @Step("HTTP GET Monitoring status {0}")
-    protected Response getMonitoringStatus() {
-        return given()
+    protected Response getMonitoringStatus(String accept) {
+        RequestSpecification requestSpecification =  given()
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .log().all()
-                .contentType(ContentType.JSON)
-                .when()
+                .contentType(ContentType.JSON);
+        if (accept != null) {
+            requestSpecification = requestSpecification.accept(accept);
+        }
+        return requestSpecification.when()
                 .get(createUrl(getContainerEndpoint()))
                 .then()
                 .log().all()

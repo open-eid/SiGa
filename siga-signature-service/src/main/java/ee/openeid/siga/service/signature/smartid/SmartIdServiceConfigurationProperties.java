@@ -27,6 +27,7 @@ public class SmartIdServiceConfigurationProperties {
     private String truststorePassword;
     private String url;
     private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT", "LV"));
+    private SmartIdInteractionType interactionType = SmartIdInteractionType.DISPLAY_TEXT_AND_PIN;
 
     private int sessionStatusResponseSocketOpenTime = 1000;
 
@@ -36,6 +37,7 @@ public class SmartIdServiceConfigurationProperties {
             validateUrl();
             validateTruststorePath();
             validateTruststorePassword();
+            validateInteractionType();
         }
     }
 
@@ -54,6 +56,12 @@ public class SmartIdServiceConfigurationProperties {
     private void validateTruststorePassword(){
         if (StringUtils.isBlank(truststorePassword)) {
             throw new IllegalStateException("siga.sid.truststorePassword property must be set");
+        }
+    }
+
+    private void validateInteractionType() {
+        if (interactionType == null) {
+            throw new IllegalStateException("siga.sid.interactionType property must be set");
         }
     }
 }

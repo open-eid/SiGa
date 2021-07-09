@@ -112,8 +112,46 @@ public class ValidateAsicContainerT extends TestBase {
     }
 
     @Test
+    public void validateAsicContainerWithEmptyDataFiles() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("signedContainerWithEmptyDatafiles.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        // TODO: when SiVa version is at least 3.5.0, then verify empty datafiles warnings
+    }
+
+    @Test
+    public void validateAsicContainerWithEmptyDataFilesAndWithoutSignatures() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response validationResponse = postContainerValidationReport(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
+    }
+
+    @Test
     public void uploadAsicContainerWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(0));
+    }
+
+    @Test
+    public void uploadAsicContainerWithEmptyDataFilesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile("signedContainerWithEmptyDatafiles.asice"));
+
+        Response validationResponse = getValidationReportForContainerInSession(flow);
+
+        assertThat(validationResponse.statusCode(), equalTo(200));
+        assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        // TODO: when SiVa version is at least 3.5.0, then verify empty datafiles warnings
+    }
+
+    @Test
+    public void uploadAsicContainerWithEmptyDataFilesAndWithoutSignaturesAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
 

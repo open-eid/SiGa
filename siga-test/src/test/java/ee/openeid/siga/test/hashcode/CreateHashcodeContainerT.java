@@ -173,6 +173,12 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void createHashcodeContainerZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void createHashcodeContainerInvalidHash256() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, "+-KZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);

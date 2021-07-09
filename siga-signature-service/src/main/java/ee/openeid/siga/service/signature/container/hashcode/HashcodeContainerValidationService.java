@@ -10,12 +10,16 @@ import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
+import ee.openeid.siga.webapp.json.SignatureScope;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import ee.openeid.siga.webapp.json.Warning;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 public class HashcodeContainerValidationService implements HashcodeSessionHolder {
@@ -69,7 +73,29 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     }
 
     private ValidationConclusion createHashcodeContainerValidationConclusion(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
-        return sivaClient.validateHashcodeContainer(signatureWrappers, dataFiles);
+        ValidationConclusion validationConclusion = sivaClient.validateHashcodeContainer(signatureWrappers, dataFiles);
+        validateHashcodeContainerDataFileSizes(validationConclusion, dataFiles);
+        return validationConclusion;
+    }
+
+    private static void validateHashcodeContainerDataFileSizes(final ValidationConclusion validationConclusion, List<HashcodeDataFile> hashcodeDataFiles) {
+        hashcodeDataFiles.forEach(hashcodeDataFile -> {
+            if (hashcodeDataFile.getFileSize() == null || hashcodeDataFile.getFileSize() > 0) {
+                return;
+            }
+
+            final String fileName = hashcodeDataFile.getFileName();
+            final Predicate<SignatureScope> dataFileMatcher = signatureScope -> StringUtils.equals(signatureScope.getName(), fileName);
+
+            validationConclusion.getSignatures().forEach(signature -> {
+                if (signature.getSignatureScopes().stream().noneMatch(dataFileMatcher)) {
+                    return;
+                }
+                Warning warning = new Warning();
+                warning.setContent(String.format("Data file '%s' is empty", fileName));
+                signature.getWarnings().add(warning);
+            });
+        });
     }
 
     private ValidationConclusion createDDOCHashcodeContainerValidationConclusion(String container) {

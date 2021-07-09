@@ -9,7 +9,6 @@ import org.digidoc4j.ContainerBuilder;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
-
 public class ContainerUtil {
 
     private ContainerUtil() {
@@ -26,7 +25,10 @@ public class ContainerUtil {
     }
 
     public static Container createContainer(byte[] container, Configuration configuration) {
-        return ContainerBuilder.aContainer().withConfiguration(configuration).fromStream(new ByteArrayInputStream(container)).build();
-
+        return ContainerBuilder
+                .aContainer(Container.DocumentType.BDOC)
+                .withConfiguration(configuration)
+                .fromStream(new ByteArrayInputStream(container))
+                .build();
     }
 }

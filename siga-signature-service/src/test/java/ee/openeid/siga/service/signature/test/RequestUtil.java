@@ -15,6 +15,7 @@ import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import eu.europa.esig.dss.model.MimeType;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -107,6 +108,16 @@ public class RequestUtil {
         return hashcodeDataFiles;
     }
 
+    public static HashcodeDataFile createHashcodeDataFileFrom(String name, String mimetype, byte... content) {
+        HashcodeDataFile hashcodeDataFile = new HashcodeDataFile();
+        hashcodeDataFile.setFileHashSha256(org.apache.commons.codec.binary.Base64.encodeBase64String(DigestUtils.sha256(content)));
+        hashcodeDataFile.setFileHashSha512(org.apache.commons.codec.binary.Base64.encodeBase64String(DigestUtils.sha512(content)));
+        hashcodeDataFile.setFileSize(content.length);
+        hashcodeDataFile.setMimeType(mimetype);
+        hashcodeDataFile.setFileName(name);
+        return hashcodeDataFile;
+    }
+
     public static HashcodeContainerSessionHolder createHashcodeSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper().get(0));
@@ -175,7 +186,7 @@ public class RequestUtil {
 
     public static SmartIdInformation createSmartIdInformation() {
         SmartIdInformation smartIdInformation = SmartIdInformation.builder()
-                .personIdentifier("10101010005")
+                .personIdentifier("30303039914")
                 .country("EE")
                 .documentNumber(DOCUMENT_NUMBER)
                 .build();

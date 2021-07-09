@@ -61,7 +61,9 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
 
     @Override
     public void verifySigningObjectExistence(Session session) {
-        verifyDataFileExistence((HashcodeContainerSessionHolder) session);
+        HashcodeContainerSessionHolder hashcodeSession = (HashcodeContainerSessionHolder) session;
+        verifyDataFileExistence(hashcodeSession);
+        verifyNoEmptyDataFiles(hashcodeSession);
     }
 
     @Override
@@ -134,10 +136,20 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
         return Base64.getDecoder().decode(fileHash.getBytes());
     }
 
-    private void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {
+    private static void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {
         if (sessionHolder.getDataFiles().isEmpty()) {
             throw new InvalidSessionDataException("Unable to create signature. Data files must be added to container");
         }
+    }
+
+    private static void verifyNoEmptyDataFiles(HashcodeContainerSessionHolder sessionHolder) {
+        if (sessionHolder.getDataFiles().stream().anyMatch(HashcodeContainerSigningService::isHashcodeDataFileEmpty)) {
+            throw new InvalidSessionDataException("Unable to sign container with empty datafiles");
+        }
+    }
+
+    private static boolean isHashcodeDataFileEmpty(HashcodeDataFile hashcodeDataFile) {
+        return (hashcodeDataFile.getFileSize() == null) || (hashcodeDataFile.getFileSize() < 1);
     }
 
     @Autowired

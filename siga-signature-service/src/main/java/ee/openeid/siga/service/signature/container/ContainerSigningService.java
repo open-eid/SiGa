@@ -143,6 +143,7 @@ public abstract class ContainerSigningService {
 
     public String initSmartIdCertificateChoice(String containerId, SmartIdInformation smartIdInformation) {
         Session sessionHolder = getSession(containerId);
+        verifySigningObjectExistence(sessionHolder);
         RelyingPartyInfo relyingPartyInfo = getRPInfoForSmartId();
         String smartIdSessionId = smartIdClient.initiateCertificateChoice(relyingPartyInfo, smartIdInformation);
         String generatedCertificateId = UUIDGenerator.generateUUID();

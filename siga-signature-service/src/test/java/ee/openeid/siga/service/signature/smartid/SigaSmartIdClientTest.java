@@ -1,9 +1,10 @@
 package ee.openeid.siga.service.signature.smartid;
 
-
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.matching.ContentPattern;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SigaSmartIdException;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
@@ -28,18 +29,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.ResourceUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SigaSmartIdClientTest {
@@ -72,6 +67,7 @@ public class SigaSmartIdClientTest {
         Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
+        Mockito.when(configurationProperties.getInteractionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
         Resource mockResource = Mockito.mock(Resource.class);
         Mockito.when(mockResource.getInputStream()).thenReturn(SigaSmartIdClientTest.class.getClassLoader().getResource("sid_truststore.p12").openStream());
         Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(mockResource);
@@ -85,8 +81,32 @@ public class SigaSmartIdClientTest {
     @Test
     public void initiateCertificateChoice_ok() {
         stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
-                "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
+                "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
+        String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+    }
+
+    @Test
+    public void initiateCertificateChoice_excessFieldsInResponse_ok() {
+        stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
+                "    \"excessText\": \"text\",\n" +
+                "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\",\n" +
+                "    \"excessNumber\": 7.3,\n" +
+                "    \"excessBoolean\": true,\n" +
+                "    \"excessObject\": {\n" +
+                "        \"field\": \"value\"\n" +
+                "    }\n" +
+                "}");
+        String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+    }
+
+    @Test
+    public void initiateCertificateChoice_forbidden() {
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Smart-ID service error");
+        stubCertificateChoiceEtsiSessionResponse(403, "");
         String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
@@ -99,7 +119,6 @@ public class SigaSmartIdClientTest {
         String sessionId = smartIdClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
-
 
     @Test
     public void initiateCertificateChoice_serverError() {
@@ -115,6 +134,24 @@ public class SigaSmartIdClientTest {
         X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
+                "}");
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
+
+        SmartIdCertificate response = smartIdClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
+        Assert.assertEquals(certificate, response.getCertificate());
+    }
+
+    @Test
+    public void getCertificate_excessFieldsInResponse_ok() throws Exception {
+        X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
+        stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
+                "    \"excessText\": \"text\",\n" +
+                "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\",\n" +
+                "    \"excessNumber\": 7.3,\n" +
+                "    \"excessBoolean\": true,\n" +
+                "    \"excessObject\": {\n" +
+                "        \"field\": \"value\"\n" +
+                "    }\n" +
                 "}");
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
 
@@ -210,8 +247,23 @@ public class SigaSmartIdClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_ok() {
-        stubSigningInitiationResponse(200, "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}");
+    public void initSmartIdSigning_displayTextAndPin_ok() {
+        Mockito.doReturn(SmartIdInteractionType.DISPLAY_TEXT_AND_PIN).when(configurationProperties).getInteractionType();
+        stubSigningInitiationResponse(
+                WireMock.equalToJson("{\n" +
+                                "    \"allowedInteractionsOrder\": [\n" +
+                                "        {\n" +
+                                "            \"type\": \"displayTextAndPIN\",\n" +
+                                "            \"displayText60\": \"This is display text.\"\n" +
+                                "        }\n" +
+                                "    ]\n" +
+                                "}",
+                        true,
+                        true
+                ),
+                200,
+                "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}"
+        );
 
         InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
                 mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
@@ -224,13 +276,64 @@ public class SigaSmartIdClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_serverError() {
-        expectInitSmartIdSigningGenericErrorForHttpCode(504);
+    public void initSmartIdSigning_verificationCodeChoice_ok() {
+        Mockito.doReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE).when(configurationProperties).getInteractionType();
+        stubSigningInitiationResponse(
+                WireMock.equalToJson("{\n" +
+                                "    \"allowedInteractionsOrder\": [\n" +
+                                "        {\n" +
+                                "            \"type\": \"verificationCodeChoice\",\n" +
+                                "            \"displayText60\": \"This is display text.\"\n" +
+                                "        }\n" +
+                                "    ]\n" +
+                                "}",
+                        true,
+                        true
+                ),
+                200,
+                "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}"
+        );
+
+        InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
+                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
+        SignableHash signableHash = new SignableHash();
+        signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
+        signableHash.setHashType(HashType.SHA512);
+        String challengeId = signableHash.calculateVerificationCode();
+        Assert.assertEquals(challengeId, response.getChallengeId());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
     }
 
     @Test
-    public void initSmartIdSigning_serverMaintenance() {
-        expectInitSmartIdSigningGenericErrorForHttpCode(580);
+    public void initSmartIdSigning_excessFieldsInResponse_ok() {
+        stubSigningInitiationResponse(200, "{\n" +
+                "    \"excessText\": \"text\",\n" +
+                "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\",\n" +
+                "    \"excessNumber\": 7.3,\n" +
+                "    \"excessBoolean\": true,\n" +
+                "    \"excessObject\": {\n" +
+                "        \"field\": \"value\"\n" +
+                "    }\n" +
+                "}");
+
+        InitSmartIdSignatureResponse response = smartIdClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
+                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN));
+        SignableHash signableHash = new SignableHash();
+        signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
+        signableHash.setHashType(HashType.SHA512);
+        String challengeId = signableHash.calculateVerificationCode();
+        Assert.assertEquals(challengeId, response.getChallengeId());
+        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
+    }
+
+    @Test
+    public void initSmartIdSigning_forbidden() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(403);
+    }
+
+    @Test
+    public void initSmartIdSigning_notFound() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(404);
     }
 
     @Test
@@ -248,6 +351,16 @@ public class SigaSmartIdClientTest {
         expectInitSmartIdSigningGenericErrorForHttpCode(480);
     }
 
+    @Test
+    public void initSmartIdSigning_serverError() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(504);
+    }
+
+    @Test
+    public void initSmartIdSigning_serverMaintenance() {
+        expectInitSmartIdSigningGenericErrorForHttpCode(580);
+    }
+
     private void expectInitSmartIdSigningGenericErrorForHttpCode(int status) {
         exceptionRule.expect(ClientException.class);
         exceptionRule.expectMessage("Smart-ID service error");
@@ -259,7 +372,26 @@ public class SigaSmartIdClientTest {
 
     @Test
     public void getStatus_running() {
-        stubGetSessionRunning();
+        stubGetSession(200, "{\n" +
+                "    \"state\": \"RUNNING\"\n" +
+                "}");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.RUNNING, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_excessFieldsInResponse_running() {
+        stubGetSession(200, "{\n" +
+                "    \"excessText\": \"text\",\n" +
+                "    \"excessNumber\": 7.3,\n" +
+                "    \"state\": \"RUNNING\",\n" +
+                "    \"excessBoolean\": true,\n" +
+                "    \"excessObject\": {\n" +
+                "        \"field\": \"value\"\n" +
+                "    }\n" +
+                "}");
 
         SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.RUNNING, response.getStatus());
@@ -269,6 +401,40 @@ public class SigaSmartIdClientTest {
     @Test
     public void getStatus_ok() throws CertificateEncodingException {
         stubGetSession("COMPLETE", "OK");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.OK, response.getStatus());
+        Assert.assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
+    }
+
+    @Test
+    public void getStatus_excessFieldsInResponse_ok() throws CertificateEncodingException {
+        stubGetSession(200, "{\n" +
+                "    \"excessText\": \"text\",\n" +
+                "    \"state\": \"COMPLETE\",\n" +
+                "    \"excessNumber\": 7.3,\n" +
+                "    \"result\": {\n" +
+                "            \"endResult\": \"OK\",\n" +
+                "            \"excessText\": \"text\",\n" +
+                "            \"documentNumber\": \"" + DEFAULT_MOCK_DOCUMENT_NUMBER + "\"\n" +
+                "    },\n" +
+                "    \"excessBoolean\": true,\n" +
+                "    \"signature\": {\n" +
+                "        \"excessNumber\": 0,\n" +
+                "        \"value\": \"" + DEFAULT_MOCK_SIGNATURE_BASE_64 + "\",\n" +
+                "        \"algorithm\": \"sha512WithRSAEncryption\"\n" +
+                "    },\n" +
+                "    \"excessArray\": [ 1.2 ],\n" +
+                "    \"cert\": {\n" +
+                "        \"value\": \"" + new String(Base64.encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())) + "\",\n" +
+                "        \"assuranceLevel\": \"http://eidas.europa.eu/LoA/substantial\",\n" +
+                "        \"certificateLevel\": \"ADVANCED\",\n" +
+                "        \"excessBoolean\": false\n" +
+                "    },\n" +
+                "    \"excessObject\": {\n" +
+                "        \"field\": \"value\"\n" +
+                "    }\n" +
+                "}");
 
         SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.OK, response.getStatus());
@@ -294,11 +460,74 @@ public class SigaSmartIdClientTest {
     }
 
     @Test
+    public void getStatus_userRefusedCertChoice() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CERT_CHOICE");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CERT_CHOICE, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_userRefusedConfirmationMessage() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_userRefusedConfirmationMessageWithVerificationCodeChoice() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_userRefusedDisplayTextAndPin() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_DISPLAYTEXTANDPIN");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_DISPLAYTEXTANDPIN, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_userRefusedVerificationCodeChoice() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_VC_CHOICE");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_VC_CHOICE, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_userChoseWrongVerificationCode() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "WRONG_VC");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.WRONG_VC, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
     public void getStatus_documentUnusable() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
 
         SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
         Assert.assertEquals(SmartIdSessionStatus.DOCUMENT_UNUSABLE, response.getStatus());
+        Assert.assertNull(response.getSignature());
+    }
+
+    @Test
+    public void getStatus_notSupportedByApp() throws CertificateEncodingException {
+        stubGetSessionOkResponseWithoutSignature("COMPLETE", "REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP");
+
+        SmartIdStatusResponse response = smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+        Assert.assertEquals(SmartIdSessionStatus.REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP, response.getStatus());
         Assert.assertNull(response.getSignature());
     }
 
@@ -318,6 +547,15 @@ public class SigaSmartIdClientTest {
 
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "RANDOM123");
         smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
+    }
+
+    @Test
+    public void getStatus_forbidden() {
+        exceptionRule.expect(ClientException.class);
+        exceptionRule.expectMessage("Smart-ID service error");
+
+        stubGetStatusErrorResponse(403);
+        smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
     @Test
@@ -378,6 +616,17 @@ public class SigaSmartIdClientTest {
         smartIdClient.getSmartIdCertificateStatus(createRPInfo(), DEFAULT_MOCK_DOCUMENT_NUMBER);
     }
 
+    private void stubSigningInitiationResponse(ContentPattern<?> requestBody, int status, String responseBody) {
+        WireMock.stubFor(
+                WireMock.post("/signature/document/" + DEFAULT_MOCK_DOCUMENT_NUMBER)
+                        .withRequestBody(requestBody)
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(status)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseBody))
+        );
+    }
+
     private void stubSigningInitiationResponse(int status, String responseBody) {
         WireMock.stubFor(
                 WireMock.post("/signature/document/" + DEFAULT_MOCK_DOCUMENT_NUMBER)
@@ -423,23 +672,18 @@ public class SigaSmartIdClientTest {
     }
 
     private void stubGetSessionOkResponseWithoutSignature(String state, String result) throws CertificateEncodingException {
-        WireMock.stubFor(
-                WireMock.get("/session/" + DEFAULT_MOCK_SESSION_ID)
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody("{\n" +
-                                        "    \"state\": \"" + state + "\",\n" +
-                                        "\t\"result\": {\n" +
-                                        "            \"endResult\": \"" + result + "\",\n" +
-                                        "            \"documentNumber\": \"" + DEFAULT_MOCK_DOCUMENT_NUMBER + "\"\n" +
-                                        "    },\n" +
-                                        "    \"cert\": {\n" +
-                                        "        \"value\": \"" + new String(Base64.encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())) + "\",\n" +
-                                        "        \"assuranceLevel\": \"http://eidas.europa.eu/LoA/substantial\",\n" +
-                                        "\t\t\"certificateLevel\": \"ADVANCED\"\n" +
-                                        "    }\n" +
-                                        "}"))
+        stubGetSession(200, "{\n" +
+                "    \"state\": \"" + state + "\",\n" +
+                "    \"result\": {\n" +
+                "            \"endResult\": \"" + result + "\",\n" +
+                "            \"documentNumber\": \"" + DEFAULT_MOCK_DOCUMENT_NUMBER + "\"\n" +
+                "    },\n" +
+                "    \"cert\": {\n" +
+                "        \"value\": \"" + new String(Base64.encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())) + "\",\n" +
+                "        \"assuranceLevel\": \"http://eidas.europa.eu/LoA/substantial\",\n" +
+                "        \"certificateLevel\": \"ADVANCED\"\n" +
+                "    }\n" +
+                "}"
         );
     }
 
@@ -448,40 +692,32 @@ public class SigaSmartIdClientTest {
     }
 
     private void stubGetSession(String state, String result, String signature) throws CertificateEncodingException {
-        WireMock.stubFor(
-                WireMock.get("/session/" + DEFAULT_MOCK_SESSION_ID)
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody("{\n" +
-                                        "    \"state\": \"" + state + "\",\n" +
-                                        "\t\"result\": {\n" +
-                                        "            \"endResult\": \"" + result + "\",\n" +
-                                        "            \"documentNumber\": \"" + DEFAULT_MOCK_DOCUMENT_NUMBER + "\"\n" +
-                                        "    },\n" +
-                                        "    \"signature\": {\n" +
-                                        "        \"value\": \"" + signature + "\",\n" +
-                                        "        \"algorithm\": \"sha512WithRSAEncryption\"\n" +
-                                        "    },\n" +
-                                        "    \"cert\": {\n" +
-                                        "        \"value\": \"" + new String(Base64.encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())) + "\",\n" +
-                                        "        \"assuranceLevel\": \"http://eidas.europa.eu/LoA/substantial\",\n" +
-                                        "\t\t\"certificateLevel\": \"ADVANCED\"\n" +
-                                        "    }\n" +
-                                        "}"))
+        stubGetSession(200, "{\n" +
+                "    \"state\": \"" + state + "\",\n" +
+                "    \"result\": {\n" +
+                "            \"endResult\": \"" + result + "\",\n" +
+                "            \"documentNumber\": \"" + DEFAULT_MOCK_DOCUMENT_NUMBER + "\"\n" +
+                "    },\n" +
+                "    \"signature\": {\n" +
+                "        \"value\": \"" + signature + "\",\n" +
+                "        \"algorithm\": \"sha512WithRSAEncryption\"\n" +
+                "    },\n" +
+                "    \"cert\": {\n" +
+                "        \"value\": \"" + new String(Base64.encode(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded())) + "\",\n" +
+                "        \"assuranceLevel\": \"http://eidas.europa.eu/LoA/substantial\",\n" +
+                "        \"certificateLevel\": \"ADVANCED\"\n" +
+                "    }\n" +
+                "}"
         );
     }
 
-    private void stubGetSessionRunning() {
+    private void stubGetSession(int status, String responseBody) {
         WireMock.stubFor(
                 WireMock.get("/session/" + DEFAULT_MOCK_SESSION_ID)
                         .willReturn(WireMock.aResponse()
-                                .withStatus(200)
+                                .withStatus(status)
                                 .withHeader("Content-Type", "application/json")
-                                .withBody("{\n" +
-                                        "    \"state\": \"RUNNING\",\n" +
-                                        "    \"result\": {}\n" +
-                                        "}"))
+                                .withBody(responseBody))
         );
     }
 

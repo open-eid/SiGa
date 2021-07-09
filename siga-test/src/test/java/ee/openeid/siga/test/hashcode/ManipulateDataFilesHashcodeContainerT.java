@@ -180,6 +180,15 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void uploadHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+
+        Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void createHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
@@ -244,6 +253,15 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
             String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
             Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (2 + i) + "].@manifest:media-type"));
         }
+    }
+
+    @Test
+    public void createHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
+
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

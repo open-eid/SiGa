@@ -190,6 +190,15 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
+    public void uploadAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+
+        Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", ""));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @Test
     public void createAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
@@ -250,6 +259,15 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
             String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
             Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (2 + i) + "].@manifest:media-type"));
         }
+    }
+
+    @Test
+    public void createAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", ""));
+
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

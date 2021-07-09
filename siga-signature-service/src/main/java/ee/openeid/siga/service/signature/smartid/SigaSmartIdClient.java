@@ -15,18 +15,20 @@ import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;
 import ee.sk.smartid.SmartIdClient;
-import ee.sk.smartid.exception.CertificateNotFoundException;
-import ee.sk.smartid.exception.DocumentUnusableException;
 import ee.sk.smartid.exception.SessionNotFoundException;
-import ee.sk.smartid.exception.SessionTimeoutException;
 import ee.sk.smartid.exception.SmartIdException;
-import ee.sk.smartid.exception.UserRefusedException;
+import ee.sk.smartid.exception.useraccount.DocumentUnusableException;
+import ee.sk.smartid.exception.useraccount.UserAccountNotFoundException;
+import ee.sk.smartid.exception.useraction.SessionTimeoutException;
+import ee.sk.smartid.exception.useraction.UserRefusedException;
 import ee.sk.smartid.rest.SmartIdConnector;
 import ee.sk.smartid.rest.dao.CertificateRequest;
+import ee.sk.smartid.rest.dao.Interaction;
 import ee.sk.smartid.rest.dao.SemanticsIdentifier;
 import ee.sk.smartid.rest.dao.SessionStatus;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.spi.DSSUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.DataToSign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
@@ -38,6 +40,9 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -50,12 +55,23 @@ public class SigaSmartIdClient {
     private static final String SMART_ID_SERVICE_UNEXPECTED_RESPONSE = "Smart-ID service returned unexpected response";
     private static final String PERSON_SEMANTICS_IDENTIFIER = "PNO";
     private static final String MINIMUM_CERTIFICATE_LEVEL = "QSCD";
-    private static final Map<String, SmartIdSessionStatus> COMPLETE_STATE_STATUS_MAPPINGS = Map.of(
-            "OK", SmartIdSessionStatus.OK,
-            "USER_REFUSED", SmartIdSessionStatus.USER_REFUSED,
-            "TIMEOUT", SmartIdSessionStatus.TIMEOUT,
-            "DOCUMENT_UNUSABLE", SmartIdSessionStatus.DOCUMENT_UNUSABLE
-    );
+    private static final Map<String, SmartIdSessionStatus> COMPLETE_STATE_STATUS_MAPPINGS;
+
+    static {
+        LinkedHashMap<String, SmartIdSessionStatus> statuses = new LinkedHashMap<>();
+        statuses.put("OK", SmartIdSessionStatus.OK);
+        statuses.put("USER_REFUSED", SmartIdSessionStatus.USER_REFUSED);
+        statuses.put("USER_REFUSED_CERT_CHOICE", SmartIdSessionStatus.USER_REFUSED_CERT_CHOICE);
+        statuses.put("USER_REFUSED_CONFIRMATIONMESSAGE", SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE);
+        statuses.put("USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE", SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE);
+        statuses.put("USER_REFUSED_DISPLAYTEXTANDPIN", SmartIdSessionStatus.USER_REFUSED_DISPLAYTEXTANDPIN);
+        statuses.put("USER_REFUSED_VC_CHOICE", SmartIdSessionStatus.USER_REFUSED_VC_CHOICE);
+        statuses.put("WRONG_VC", SmartIdSessionStatus.WRONG_VC);
+        statuses.put("TIMEOUT", SmartIdSessionStatus.TIMEOUT);
+        statuses.put("DOCUMENT_UNUSABLE", SmartIdSessionStatus.DOCUMENT_UNUSABLE);
+        statuses.put("REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP", SmartIdSessionStatus.REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP);
+        COMPLETE_STATE_STATUS_MAPPINGS = Collections.unmodifiableMap(statuses);
+    }
 
     private final ResourceLoader resourceLoader;
     private final SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
@@ -77,7 +93,7 @@ public class SigaSmartIdClient {
         SmartIdConnector connector = getSmartIdConnector(relyingPartyInfo);
         try {
             return connector.getCertificate(semanticsIdentifier, certificateRequest).getSessionID();
-        } catch (CertificateNotFoundException e) {
+        } catch (UserAccountNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
         } catch (ClientErrorException e) {
             verifyClientError(e.getResponse().getStatus());
@@ -98,7 +114,7 @@ public class SigaSmartIdClient {
                     .withDocumentNumber(smartIdInformation.getDocumentNumber())
                     .withNonce(TokenGenerator.generateToken(30))
                     .fetch();
-        } catch (CertificateNotFoundException e) {
+        } catch (UserAccountNotFoundException e) {
             throw new SigaSmartIdException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
         } catch (UserRefusedException e) {
             throw new SigaSmartIdException(SmartIdSessionStatus.USER_REFUSED.getSigaSigningMessage());
@@ -121,13 +137,14 @@ public class SigaSmartIdClient {
     public InitSmartIdSignatureResponse initSmartIdSigning(RelyingPartyInfo relyingPartyInfo, SmartIdInformation smartIdInformation, DataToSign dataToSign) {
         SmartIdClient smartIdClient = createSmartIdClient(relyingPartyInfo);
         SignableHash signableHash = createSignableHash(dataToSign);
+        List<Interaction> allowedInteractionsOrder = createAllowedInteractionsOrder(smartIdInformation.getMessageToDisplay());
         String challengeId = signableHash.calculateVerificationCode();
         try {
             String sessionCode = smartIdClient
                     .createSignature()
                     .withDocumentNumber(smartIdInformation.getDocumentNumber())
                     .withSignableHash(signableHash)
-                    .withDisplayText(smartIdInformation.getMessageToDisplay())
+                    .withAllowedInteractionsOrder(allowedInteractionsOrder)
                     .withNonce(TokenGenerator.generateToken(30))
                     .withCertificateLevel(SMART_ID_CERTIFICATE_LEVEL)
                     .initiateSigning();
@@ -199,9 +216,25 @@ public class SigaSmartIdClient {
         return signableHash;
     }
 
+    private List<Interaction> createAllowedInteractionsOrder(String messageToDisplay) {
+        if (messageToDisplay == null) {
+            messageToDisplay = StringUtils.EMPTY; // Smart-ID client library does not allow null string
+        }
+        switch (smartIdServiceConfigurationProperties.getInteractionType()) {
+            case DISPLAY_TEXT_AND_PIN:
+                return List.of(Interaction.displayTextAndPIN(messageToDisplay));
+            case VERIFICATION_CODE_CHOICE:
+                return List.of(Interaction.verificationCodeChoice(messageToDisplay));
+            default:
+                throw new IllegalStateException("Unsupported Smart-ID interaction type: " +
+                        smartIdServiceConfigurationProperties.getInteractionType()
+                );
+        }
+    }
+
     private SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
         SmartIdClient client = new SmartIdClient();
-        client.loadSslCertificatesFromKeystore(getSidTruststore());
+        client.setTrustStore(getSidTruststore());
         client.setHostUrl(smartIdServiceConfigurationProperties.getUrl());
         client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdServiceConfigurationProperties.getSessionStatusResponseSocketOpenTime());
         client.setRelyingPartyName(relyingPartyInfo.getName());

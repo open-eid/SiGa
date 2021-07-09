@@ -65,6 +65,24 @@ public class UploadHashcodeContainerT extends TestBase {
     }
 
     @Test
+    public void uploadHashcodeContainerWithEmptyDataFiles() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeSignedContainerWithEmptyDatafiles.asice"));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
+    public void uploadHashcodeContainerWithEmptyDataFilesAndWithoutSignatures() throws Exception {
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeUnsignedContainerWithEmptyDatafiles.asice"));
+
+        response.then()
+                .statusCode(200)
+                .body(CONTAINER_ID + ".length()", equalTo(36));
+    }
+
+    @Test
     public void uploadHashcodeContainerWithDatafilesInFolder() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeFolder.asice"));
 

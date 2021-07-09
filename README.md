@@ -147,13 +147,14 @@ Applicable if `mobileId` profile is active.
 
 Applicable if `smartId` profile is active.
 
-| Parameter                                           | Mandatory | Description                                                                                                                                                                     | Example                                   |
-| --------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| siga.sid.url                                        | Y         | Smart-ID service URL.                                                                                                                                                           | `https://sid.demo.sk.ee/smart-id-rp/v1/`  |
-| siga.sid.session-status-response-socket-open-time   | N         | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `40`.  | `40`                                      |
-| siga.sid.allowed-countries                          | N         | Smart-ID allowed countries.                                                                                                                                                     | `EE, LV, LT`                                  |
-| siga.sid.truststore-path                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                 | `sid_truststore.p12`                      |
-| siga.sid.truststore-password                        | Y         | Smart-ID PKCS12 truststore password                                                                                                                                             | `changeIt`                                  |
+| Parameter                                           | Mandatory | Description                                                                                                                                                                       | Example                                   |
+| --------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| siga.sid.url                                        | Y         | Smart-ID service URL.                                                                                                                                                             | `https://sid.demo.sk.ee/smart-id-rp/v2/`  |
+| siga.sid.session-status-response-socket-open-time   | N         | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `1000`.  | `40`                                      |
+| siga.sid.allowed-countries                          | N         | Smart-ID allowed countries. Defaults to `EE, LT, LV`.                                                                                                                             | `EE, LV, LT`                              |
+| siga.sid.interaction-type                           | N         | Smart-ID [interaction](https://github.com/SK-EID/smart-id-documentation#31-uc-x-interaction-choice-realization) to be requested to be performed by the Smart-ID app. Supported options: `DISPLAY_TEXT_AND_PIN`, `VERIFICATION_CODE_CHOICE`. Defaults to `DISPLAY_TEXT_AND_PIN`.  | `VERIFICATION_CODE_CHOICE`  |
+| siga.sid.truststore-path                            | Y         | Smart-ID PKCS12 truststore path                                                                                                                                                   | `sid_truststore.p12`                      |
+| siga.sid.truststore-password                        | Y         | Smart-ID PKCS12 truststore password                                                                                                                                               | `changeIt`                                |
 
 **NB:** Smart-ID relying party name and UUID are registered per [service](#siga_service).
 
@@ -197,11 +198,20 @@ management.endpoint.health.show-details=ALWAYS
 management.health.defaults.enabled=false
 management.health.db.enabled=true
 ```
-To add a heartbeat endpoint, the following configuration should be added to `configuration.properties`:
 
-`management.endpoints.web.exposure.include=heartbeat,health`
-
+To add a heartbeat endpoint, the following configuration should be added to `application.properties`:
+```
+management.endpoints.web.exposure.include=health,heartbeat
+management.endpoint.heartbeat.enabled=true
+```
 The heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`.
+
+To add version information endpoint, the following configuration should be added to `application.properties`:
+```
+management.endpoints.web.exposure.include=health,version
+management.endpoint.version.enabled=true
+```
+The version information endpoint can be accessed at `{host}/actuator/version`.
 
 ## SiGa database
 

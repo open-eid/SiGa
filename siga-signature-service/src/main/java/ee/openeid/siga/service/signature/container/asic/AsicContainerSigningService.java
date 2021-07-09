@@ -60,6 +60,7 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
         AsicContainerSessionHolder sessionHolder = (AsicContainerSessionHolder) session;
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         verifyContainerExistence(container);
+        verifyContainerContainsNoEmptyDataFiles(container);
     }
 
     @Override
@@ -90,9 +91,15 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
         return builder;
     }
 
-    private void verifyContainerExistence(Container container) {
+    private static void verifyContainerExistence(Container container) {
         if (container == null) {
             throw new InvalidSessionDataException("Unable to create signature. Container must exist");
+        }
+    }
+
+    private static void verifyContainerContainsNoEmptyDataFiles(Container container) {
+        if (container.getDataFiles().stream().anyMatch(DataFile::isFileEmpty)) {
+            throw new InvalidSessionDataException("Unable to sign container with empty datafiles");
         }
     }
 

@@ -131,6 +131,13 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
             dd4jSignature = builder.openAdESSignature(signatureWrapper.getSignature());
         } catch (DigiDoc4JException e) {
             throw new InvalidSignatureException(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            // TODO: Since Spring Boot was upgraded to version 2.3.X, parsing an invalid signature began to throw
+            //  an IllegalArgumentException through DSS and from org.apache.commons.codec.binary.Base64.validateCharacter:
+            //  "Last encoded character (before the paddings if any) is a valid base 64 alphabet but not a possible value.
+            //  Expected the discarded bits to be zero."
+            //  This might need a revisit after DD4J/DSS has been updated.
+            throw new InvalidSignatureException("Failed to parse detached XAdES signature: " + e.getMessage());
         }
         signature.setId(dd4jSignature.getId());
         signature.setGeneratedSignatureId(signatureWrapper.getGeneratedSignatureId());

@@ -237,6 +237,14 @@ public class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
+    public void containerInSessionContainsEmptyDataFiles() throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
+
+        expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION, "Unable to sign container with empty datafiles");
+    }
+
+    @Test
     public void missingPersonIdentifier() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("", "+37200000766", "LT"));

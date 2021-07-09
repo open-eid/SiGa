@@ -18,6 +18,7 @@
             <evaluator>
                 <expression>return message.contains("request_uri=/actuator/health");</expression>
                 <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
+                <expression>return message.contains("request_uri=/actuator/version");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
@@ -37,6 +38,7 @@
             <evaluator>
                 <expression>return message.contains("request_uri=/actuator/health");</expression>
                 <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
+                <expression>return message.contains("request_uri=/actuator/version");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
