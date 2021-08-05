@@ -19,7 +19,7 @@ public class MonitoringT extends TestBase {
     private static final String ACCEPT_HEADER_V2 = "application/vnd.spring-boot.actuator.v2+json";
 
     @Test
-    public void getMonitoringStatusAndCheckComponentStatusCurrent() throws Exception {
+    public void getMonitoringStatusAndCheckComponentStatusCurrent() {
         Response response = getMonitoringStatus(null);
 
         response.then()
@@ -32,7 +32,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckComponentStatusV2() throws Exception {
+    public void getMonitoringStatusAndCheckComponentStatusV2() {
         Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
@@ -45,7 +45,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckStructureCurrent() throws Exception {
+    public void getMonitoringStatusAndCheckStructureCurrent() {
         Response response = getMonitoringStatus(null);
 
         response.then()
@@ -67,7 +67,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckStructureV2() throws Exception {
+    public void getMonitoringStatusAndCheckStructureV2() {
         Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
@@ -88,6 +88,15 @@ public class MonitoringT extends TestBase {
                 .body("details.siva.status", notNullValue());
     }
 
+    @Test
+    public void getVersionInfoStatus() {
+        Response response = getVersionInfo();
+
+        response.then()
+                .statusCode(200)
+                .body("version", notNullValue());
+    }
+
     @Step("HTTP GET Monitoring status {0}")
     protected Response getMonitoringStatus(String accept) {
         RequestSpecification requestSpecification =  given()
@@ -99,6 +108,20 @@ public class MonitoringT extends TestBase {
         }
         return requestSpecification.when()
                 .get(createUrl(getContainerEndpoint()))
+                .then()
+                .log().all()
+                .extract()
+                .response();
+    }
+
+    @Step("HTTP GET version info {0}")
+    protected Response getVersionInfo() {
+        return given()
+                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
+                .log().all()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(createUrl(VERSION))
                 .then()
                 .log().all()
                 .extract()
