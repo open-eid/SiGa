@@ -48,7 +48,7 @@
 
         <!-- NB: Override any vulnerable log4j2 dependencies present in Spring Boot! -->
         <!-- TODO: Remove if not relevant any more! -->
-        <log4j2.version>2.15.0</log4j2.version>
+        <log4j2.version>2.16.0</log4j2.version>
     </properties>
     <dependencies>
         <dependency>
