@@ -53,7 +53,7 @@ Lists of 81 third-party dependencies.
      (BSD Licence 3) Java Hamcrest (org.hamcrest:java-hamcrest:2.0.0.0 - http://hamcrest.org/JavaHamcrest/)
      (The JSON License) JSON in Java (org.json:json:20210307 - https://github.com/douglascrockford/JSON-java)
      (Apache License, Version 2.0) Liquibase Core (org.liquibase:liquibase-core:3.8.9 - http://www.liquibase.org/liquibase-core)
-     (BSD-2-Clause) PostgreSQL JDBC Driver - JDBC 4.2 (org.postgresql:postgresql:42.2.16 - https://github.com/pgjdbc/pgjdbc)
+     (BSD-2-Clause) PostgreSQL JDBC Driver - JDBC 4.2 (org.postgresql:postgresql:42.2.24 - https://github.com/pgjdbc/pgjdbc)
      (The MIT License) Project Lombok (org.projectlombok:lombok:1.18.20 - https://projectlombok.org)
      (Apache License, Version 2.0) Spring Web (org.springframework:spring-web:5.2.15.RELEASE - https://github.com/spring-projects/spring-framework)
      (Apache License, Version 2.0) Spring Web MVC (org.springframework:spring-webmvc:5.2.15.RELEASE - https://github.com/spring-projects/spring-framework)
