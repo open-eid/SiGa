@@ -33,6 +33,7 @@
         <jackson.version>2.12.3</jackson.version>
         <bouncycastle.version>1.69</bouncycastle.version>
         <spring-security.version>5.3.10.RELEASE</spring-security.version>
+        <h2.version>2.0.206</h2.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
@@ -54,7 +55,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>${h2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
