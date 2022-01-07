@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
@@ -66,9 +67,9 @@ public class SmartIdApplicationTests extends TestBase {
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
-        CertificateStatus certificateStatus = getHashcodeCertificateChoiceStatus(containerId, certificateId);
-        Assert.assertEquals("CERTIFICATE", certificateStatus.getStatus());
-        String signatureId = startHashcodeSmartIdSigning(containerId, certificateStatus.getDocumentNumber());
+        AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
+        await().atMost(25, SECONDS).until(isHashcodeSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
+        String signatureId = startHashcodeSmartIdSigning(containerId, certificateStatusHolder.get().getDocumentNumber());
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
     }
@@ -86,9 +87,9 @@ public class SmartIdApplicationTests extends TestBase {
         List<DataFile> dataFiles = getDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
         String certificateId = startSmartIdCertificateChoice(containerId);
-        CertificateStatus certificateStatus = getCertificateChoiceStatus(containerId, certificateId);
-        Assert.assertEquals("CERTIFICATE", certificateStatus.getStatus());
-        String signatureId = startSmartIdSigning(containerId, certificateStatus.getDocumentNumber());
+        AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
+        await().atMost(25, SECONDS).until(isSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
+        String signatureId = startSmartIdSigning(containerId, certificateStatusHolder.get().getDocumentNumber());
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
     }

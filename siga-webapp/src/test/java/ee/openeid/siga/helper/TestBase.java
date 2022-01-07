@@ -31,12 +31,16 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public abstract class TestBase {
+
+    protected static final String CERTIFICATE = "CERTIFICATE";
+    protected static final String SIGNATURE = "SIGNATURE";
 
     protected final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
     private final static String DEFAULT_HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
@@ -386,28 +390,48 @@ public abstract class TestBase {
     protected Callable<Boolean> isHashcodeMobileIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String mobileStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-            return "SIGNATURE".equals(mobileStatus);
+            return SIGNATURE.equals(mobileStatus);
         };
     }
 
     protected Callable<Boolean> isMobileIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String mobileStatus = getMobileIdStatus(containerId, signatureId);
-            return "SIGNATURE".equals(mobileStatus);
+            return SIGNATURE.equals(mobileStatus);
+        };
+    }
+
+    protected Callable<Boolean> isSmartIdCertificateChoiceSuccessful(AtomicReference<CertificateStatus> resultHolder, String containerId, String certificateId) {
+        return () -> {
+            CertificateStatus certificateStatus = getCertificateChoiceStatus(containerId, certificateId);
+            if (resultHolder != null) {
+                resultHolder.set(certificateStatus);
+            }
+            return CERTIFICATE.equals(certificateStatus.getStatus());
+        };
+    }
+
+    protected Callable<Boolean> isHashcodeSmartIdCertificateChoiceSuccessful(AtomicReference<CertificateStatus> resultHolder, String containerId, String certificateId) {
+        return () -> {
+            CertificateStatus certificateStatus = getHashcodeCertificateChoiceStatus(containerId, certificateId);
+            if (resultHolder != null) {
+                resultHolder.set(certificateStatus);
+            }
+            return CERTIFICATE.equals(certificateStatus.getStatus());
         };
     }
 
     protected Callable<Boolean> isSmartIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String smartIdStatus = getSmartIdStatus(containerId, signatureId);
-            return "SIGNATURE".equals(smartIdStatus);
+            return SIGNATURE.equals(smartIdStatus);
         };
     }
 
     protected Callable<Boolean> isHashcodeSmartIdResponseSuccessful(String containerId, String signatureId) {
         return () -> {
             String smartIdStatus = getHashcodeSmartIdStatus(containerId, signatureId);
-            return "SIGNATURE".equals(smartIdStatus);
+            return SIGNATURE.equals(smartIdStatus);
         };
     }
 
