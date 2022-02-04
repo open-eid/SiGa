@@ -6,7 +6,7 @@ Libraries license information was obtained using below command:
 ./mvnw license:aggregate-add-third-party
 ```
 
-Lists of 81 third-party dependencies.
+Lists of 78 third-party dependencies.
 
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.2.10 - http://logback.qos.ch/logback-classic)
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.2.10 - http://logback.qos.ch/logback-core)
@@ -47,9 +47,6 @@ Lists of 81 third-party dependencies.
      (The Apache Software License, Version 2.0) Apache Groovy (org.codehaus.groovy:groovy-all:2.5.15 - https://groovy-lang.org)
      (BSD-3-Clause) janino (org.codehaus.janino:janino:3.1.6 - http://janino-compiler.github.io/janino/)
      (GNU Lesser General Public License, Version 2.1) DigiDoc4j (org.digidoc4j:digidoc4j:4.3.0 - https://github.com/open-eid/digidoc4j)
-     (The Apache Software License, Version 2.0) server (org.elasticsearch:elasticsearch:7.9.3 - https://github.com/elastic/elasticsearch)
-     (The Apache Software License, Version 2.0) transport (org.elasticsearch.client:transport:7.9.3 - https://github.com/elastic/elasticsearch)
-     (The Apache Software License, Version 2.0) transport-netty4 (org.elasticsearch.plugin:transport-netty4-client:7.9.3 - https://github.com/elastic/elasticsearch)
      (Eclipse Distribution License - v 1.0) JAXB Runtime (org.glassfish.jaxb:jaxb-runtime:3.0.2 - https://eclipse-ee4j.github.io/jaxb-ri/)
      (BSD License 3) Hamcrest (org.hamcrest:hamcrest:2.2 - http://hamcrest.org/JavaHamcrest/)
      (The JSON License) JSON in Java (org.json:json:20211205 - https://github.com/douglascrockford/JSON-java)

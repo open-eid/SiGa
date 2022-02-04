@@ -120,25 +120,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>7.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
-            <version>7.9.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.plugin</groupId>
-            <artifactId>transport-netty4-client</artifactId>
-            <version>7.9.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-rest-assured</artifactId>
             <version>${allure.version}</version>
