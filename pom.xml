@@ -42,20 +42,28 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.69</bouncycastle.version>
-        <h2.version>2.0.206</h2.version>
+        <awaitility.version>4.1.1</awaitility.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
+        <commons-compress.version>1.21</commons-compress.version>
+        <digidoc4j.version>4.3.0</digidoc4j.version>
+        <guava.version>31.0.1-jre</guava.version>
+        <h2.version>2.1.210</h2.version>
+        <ignite.version>2.8.1</ignite.version>
+        <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
+        <jaxb-runtime.version>3.0.2</jaxb-runtime.version>
+        <json.version>20211205</json.version>
         <logback-classic.version>1.2.10</logback-classic.version>
+
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <cxf-wadl2java-plugin.version>3.5.0</cxf-wadl2java-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     </properties>
+
     <dependencies>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>1.18.22</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -70,7 +78,7 @@
         <dependency>
             <groupId>co.elastic.logging</groupId>
             <artifactId>logback-ecs-encoder</artifactId>
-            <version>0.5.2</version>
+            <version>1.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,6 +86,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -91,7 +100,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
                         --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
@@ -106,7 +115,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <id>jacoco-initializ</id>
@@ -118,6 +127,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
