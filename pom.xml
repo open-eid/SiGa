@@ -57,6 +57,10 @@
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <cxf-wadl2java-plugin.version>3.5.0</cxf-wadl2java-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+
+        <!-- Override vulnerable Tomcat version in Spring Boot -->
+        <!-- TODO: remove this when Spring Boot is updated! -->
+        <tomcat.version>9.0.58</tomcat.version>
     </properties>
 
     <dependencies>
