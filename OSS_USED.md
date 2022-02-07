@@ -6,7 +6,7 @@ Libraries license information was obtained using below command:
 ./mvnw license:aggregate-add-third-party
 ```
 
-Lists of 78 third-party dependencies.
+Lists of 79 third-party dependencies.
 
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.2.10 - http://logback.qos.ch/logback-classic)
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.2.10 - http://logback.qos.ch/logback-core)
@@ -39,8 +39,9 @@ Lists of 78 third-party dependencies.
      (Eclipse Public License 1.0) JUnit (junit:junit:4.13.2 - http://junit.org)
      (Apache License, Version 2.0) Apache Commons Compress (org.apache.commons:commons-compress:1.21 - https://commons.apache.org/proper/commons-compress/)
      (Apache License, Version 2.0) Apache Commons Text (org.apache.commons:commons-text:1.9 - https://commons.apache.org/proper/commons-text)
-     (The Apache Software License, Version 2.0) ignite-core (org.apache.ignite:ignite-core:2.8.1 - http://ignite.apache.org)
-     (The Apache Software License, Version 2.0) ignite-spring (org.apache.ignite:ignite-spring:2.8.1 - http://ignite.apache.org)
+     (The Apache Software License, Version 2.0) ignite-core (org.apache.ignite:ignite-core:2.12.0 - http://ignite.apache.org)
+     (The Apache Software License, Version 2.0) ignite-spring (org.apache.ignite:ignite-spring:2.12.0 - http://ignite.apache.org)
+     (The Apache Software License, Version 2.0) ignite-spring-cache-ext (org.apache.ignite:ignite-spring-cache-ext:1.0.0 - http://ignite.apache.org)
      (Apache 2.0) Awaitility (org.awaitility:awaitility:4.1.1 - http://awaitility.org)
      (Bouncy Castle Licence) Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk15on:1.70 - https://www.bouncycastle.org/java.html)
      (Bouncy Castle Licence) Bouncy Castle Provider (org.bouncycastle:bcprov-jdk15on:1.70 - https://www.bouncycastle.org/java.html)

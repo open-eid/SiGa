@@ -48,7 +48,7 @@
         <digidoc4j.version>4.3.0</digidoc4j.version>
         <guava.version>31.0.1-jre</guava.version>
         <h2.version>2.1.210</h2.version>
-        <ignite.version>2.8.1</ignite.version>
+        <ignite.version>2.12.0</ignite.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <jaxb-runtime.version>3.0.2</jaxb-runtime.version>
         <json.version>20211205</json.version>
