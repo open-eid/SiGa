@@ -1,1 +1,1 @@
-FROM apacheignite/ignite:2.8.1
+FROM apacheignite/ignite:2.12.0

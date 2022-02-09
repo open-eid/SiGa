@@ -16,9 +16,7 @@
         <encoder class="co.elastic.logging.logback.EcsEncoder"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health");</expression>
-                <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
-                <expression>return message.contains("request_uri=/actuator/version");</expression>
+                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
@@ -36,9 +34,7 @@
         </filter>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health");</expression>
-                <expression>return message.contains("request_uri=/actuator/heartbeat");</expression>
-                <expression>return message.contains("request_uri=/actuator/version");</expression>
+                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>

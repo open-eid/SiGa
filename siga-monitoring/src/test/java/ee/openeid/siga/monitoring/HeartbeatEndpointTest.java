@@ -1,56 +1,92 @@
 package ee.openeid.siga.monitoring;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.actuate.health.DefaultHealthIndicatorRegistry;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicatorRegistry;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
+import org.springframework.boot.actuate.health.HealthComponent;
+import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.health.Status;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.stream.Stream;
+
+@ExtendWith(MockitoExtension.class)
 public class HeartbeatEndpointTest {
 
-    private HeartbeatEndpoint endpoint;
-
-    private final HealthIndicatorRegistry healthIndicatorRegistry = new DefaultHealthIndicatorRegistry();
+    @Mock
+    private HealthEndpoint healthEndpoint;
+    @InjectMocks
+    private HeartbeatEndpoint heartbeatEndpoint;
 
     @Mock
-    private IgniteHealthIndicator igniteHealthIndicator;
-    @Mock
-    private SivaHealthIndicator sivaHealthIndicator;
+    private HealthComponent healthComponent;
 
-    @Before
-    public void beforeTests() {
-        healthIndicatorRegistry.register("ignite", igniteHealthIndicator);
-        healthIndicatorRegistry.register("siva", sivaHealthIndicator);
-        endpoint = new HeartbeatEndpoint(healthIndicatorRegistry);
-        Mockito.when(igniteHealthIndicator.health()).thenReturn(Health.up().build());
-        Mockito.when(sivaHealthIndicator.health()).thenReturn(Health.up().build());
+    @ParameterizedTest
+    @MethodSource("allStatuses")
+    public void testHealthEndpointIsPolledForStatus(Status status) {
+        mockHealthEndpointToReturnStatus(status);
+
+        Status returnedStatus = heartbeatEndpoint.heartbeat();
+
+        Assertions.assertSame(status, returnedStatus);
+        assertHealthEndpointReturnedStatus(Mockito.times(1));
     }
 
-    @Test
-    public void allApplicationAreWorking() {
-        Assert.assertEquals(2, healthIndicatorRegistry.getAll().values().size());
-        Status status = endpoint.heartbeat();
-        Assert.assertEquals(Status.UP, status);
+    @ParameterizedTest
+    @MethodSource("combinationsOfAllStatusesTwice")
+    public void testHealthEndpointIsPolledSecondTime(Status status1, Status status2) {
+        mockHealthEndpointToReturnStatuses(status1, status2);
+
+        Status returnedStatus1 = heartbeatEndpoint.heartbeat();
+
+        Assertions.assertSame(status1, returnedStatus1);
+        assertHealthEndpointReturnedStatus(Mockito.times(1));
+
+        Status returnedStatus2 = heartbeatEndpoint.heartbeat();
+
+        Assertions.assertSame(status2, returnedStatus2);
+        assertHealthEndpointReturnedStatus(Mockito.times(2));
     }
 
-    @Test
-    public void cacheIsDown() {
-        Mockito.when(igniteHealthIndicator.health()).thenReturn(Health.down().build());
-        Status status = endpoint.heartbeat();
-        Assert.assertEquals(Status.DOWN, status);
+    private static Stream<Arguments> combinationsOfAllStatusesTwice() {
+        return allStatuses()
+                .flatMap(status1 -> allStatuses()
+                        .map(status2 -> Arguments.of(status1, status2))
+                );
     }
 
-    @Test
-    public void sivaIsDown() {
-        Mockito.when(sivaHealthIndicator.health()).thenReturn(Health.down().build());
-        Status status = endpoint.heartbeat();
-        Assert.assertEquals(Status.DOWN, status);
+    private void mockHealthEndpointToReturnStatus(Status status) {
+        Mockito.doReturn(healthComponent).when(healthEndpoint).health();
+        Mockito.doReturn(status).when(healthComponent).getStatus();
     }
+
+    private void mockHealthEndpointToReturnStatuses(Status... statuses) {
+        Object firstStatus = statuses[0];
+        Object[] nextStatuses = new Object[statuses.length - 1];
+        System.arraycopy(statuses, 1, nextStatuses, 0, nextStatuses.length);
+        Mockito.doReturn(firstStatus, nextStatuses).when(healthComponent).getStatus();
+        Mockito.doReturn(healthComponent).when(healthEndpoint).health();
+    }
+
+    private void assertHealthEndpointReturnedStatus(VerificationMode verificationMode) {
+        Mockito.verify(healthEndpoint, verificationMode).health();
+        Mockito.verify(healthComponent, verificationMode).getStatus();
+        Mockito.verifyNoMoreInteractions(healthEndpoint, healthComponent);
+    }
+
+    private static Stream<Status> allStatuses() {
+        return Stream.of(
+                Status.DOWN,
+                Status.OUT_OF_SERVICE,
+                Status.UNKNOWN,
+                Status.UP
+        );
+    }
+
 }
