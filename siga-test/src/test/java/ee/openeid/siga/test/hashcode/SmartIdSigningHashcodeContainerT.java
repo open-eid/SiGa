@@ -323,7 +323,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdSuccessfully() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-D961-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId);
 
@@ -351,8 +351,8 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void signWithSmartIdMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-D961-Q"));
-        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-D961-Q"));
+        Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
         String signatureId1 = signingRequest1.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         String signatureId2 = signingRequest2.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
@@ -369,7 +369,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     public void signWithSmartIdRetryAfterUserCancel() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response signingRequest1 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039917-905H-Q"));
-        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-D961-Q"));
+        Response signingRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
         String signatureId1 = signingRequest1.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         String signatureId2 = signingRequest2.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, signatureId1);
@@ -476,7 +476,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void headToHashcodeSmartIdSigningStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-D961-Q"));
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"));
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow);
@@ -506,7 +506,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void containerDataFilesChangedBeforeFinalizeReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-D961-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"));
         deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
@@ -517,7 +517,7 @@ public class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     public void containerDataFilesAddedBeforeFinalizeReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-D961-Q"));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"));
         addDataFile(flow, addDataFileToHashcodeRequest("file.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         Response pollResponse = pollForSidSigning(flow, signatureId);
