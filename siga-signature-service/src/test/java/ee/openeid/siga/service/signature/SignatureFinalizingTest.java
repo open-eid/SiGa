@@ -20,7 +20,6 @@ import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
-import org.digidoc4j.exceptions.OCSPRequestFailedException;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -270,10 +269,19 @@ public class SignatureFinalizingTest {
         }
         sigaEventLogger.logEvents();
         assertTrue(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
-        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        Optional<SigaEvent> event = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH);
+        assertTrue(event.isPresent());
+        SigaEvent tsaRequestEvent = event.get();
         assertNotNull(tsaRequestEvent);
+        assertEquals(SUCCESS, tsaRequestEvent.getResultType());
+        assertNull(tsaRequestEvent.getErrorCode());
+        assertNull(tsaRequestEvent.getErrorMessage());
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
         assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        event = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH);
+        assertTrue(event.isPresent());
+        SigaEvent finalizeSignatureEvent = event.get();
+        assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
     }
 
     private Pair<String, String> createSignature(PKCS12SignatureToken signatureToken, SignatureProfile signatureProfile) throws IOException, URISyntaxException {

@@ -250,11 +250,6 @@ public abstract class ContainerSigningService {
         return signature;
     }
 
-    private void logSignatureFinalizationException(SigaEvent startEvent, Exception e) {
-        log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
-        logExceptionEvent(startEvent, e);
-    }
-
     private void validateContainerDataFilesUnchanged(Session session, String containerId, String signatureId) {
         DataToSignHolder dataToSignHolder = session.getDataToSignHolder(signatureId);
 
@@ -307,7 +302,9 @@ public abstract class ContainerSigningService {
         endEvent.addEventParameter(SIGNATURE_ID, signature.getId());
     }
 
-    private void logExceptionEvent(SigaEvent startEvent, Exception e) {
+    private void logSignatureFinalizationException(SigaEvent startEvent, Exception e) {
+        log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
+
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
 
         if (e instanceof NetworkException) {
@@ -321,7 +318,7 @@ public abstract class ContainerSigningService {
                 requestEventFromDigidoc.setResultType(EXCEPTION);
             });
         } else {
-            sigaEventLogger.logExceptionEventForIntermediateEvents(startEvent, SIGNATURE_FINALIZING_ERROR, errorMessage);
+            sigaEventLogger.logExceptionEventFor(startEvent, SIGNATURE_FINALIZING_ERROR, errorMessage);
         }
     }
 
