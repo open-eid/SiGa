@@ -76,11 +76,14 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
     }
 
     private DetachedXadesSignatureBuilder buildDetachedXadesSignatureBuilder(List<HashcodeDataFile> dataFiles, SignatureParameters signatureParameters) {
-        DigestAlgorithm digestAlgorithm = determineDigestAlgorithm();
+        DigestAlgorithm signatureDigestAlgorithm = determineDigestAlgorithm();
+        DigestAlgorithm dataFileDigestAlgorithm = determineDataFileDigestAlgorithm(dataFiles, signatureParameters);
+
         DetachedXadesSignatureBuilder builder = DetachedXadesSignatureBuilder.withConfiguration(configuration)
                 .withSigningCertificate(signatureParameters.getSigningCertificate())
                 .withSignatureProfile(signatureParameters.getSignatureProfile())
-                .withSignatureDigestAlgorithm(digestAlgorithm)
+                .withSignatureDigestAlgorithm(signatureDigestAlgorithm)
+                .withDataFileDigestAlgorithm(dataFileDigestAlgorithm)
                 .withCountry(signatureParameters.getCountry())
                 .withStateOrProvince(signatureParameters.getStateOrProvince())
                 .withCity(signatureParameters.getCity())
@@ -102,6 +105,21 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
             return DigestAlgorithm.SHA256;
         }
         return DigestAlgorithm.SHA512;
+    }
+
+    private static DigestAlgorithm determineDataFileDigestAlgorithm(List<HashcodeDataFile> dataFiles, SignatureParameters signatureParameters) {
+        if (signatureParameters.getDataFileDigestAlgorithm() == null) {
+            if (dataFiles.stream().noneMatch(df -> StringUtils.isBlank(df.getFileHashSha512()))) {
+                return DigestAlgorithm.SHA512;
+            } else if (dataFiles.stream().noneMatch(df -> StringUtils.isBlank(df.getFileHashSha256()))) {
+                return DigestAlgorithm.SHA256;
+            }
+        }
+        /*
+            If null value is returned, then digidoc4j DATAFILE_DIGEST_ALGORITHM configuration value or default
+            digest algorithm SHA256 is used in downstream signing logic.
+         */
+        return signatureParameters.getDataFileDigestAlgorithm();
     }
 
     private HashcodeSignatureWrapper createSignatureWrapper(String signatureId, byte[] signature) {

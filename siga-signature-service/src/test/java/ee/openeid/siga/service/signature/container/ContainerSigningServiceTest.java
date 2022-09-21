@@ -84,7 +84,7 @@ public abstract class ContainerSigningServiceTest {
     protected void assertSignAndValidateSignature() {
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         setSigningServiceParameters();
-        signatureParameters.setDigestAlgorithm(DigestAlgorithm.SHA512);
+        signatureParameters.setSignatureDigestAlgorithm(DigestAlgorithm.SHA512);
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         Signature signature = dataToSign.finalize(signatureRaw);

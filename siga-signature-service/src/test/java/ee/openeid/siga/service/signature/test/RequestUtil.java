@@ -16,11 +16,7 @@ import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import eu.europa.esig.dss.model.MimeType;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.digidoc4j.Configuration;
-import org.digidoc4j.Container;
-import org.digidoc4j.ContainerBuilder;
-import org.digidoc4j.SignatureParameters;
-import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -161,6 +157,7 @@ public class RequestUtil {
         SignatureParameters signatureParameters = new SignatureParameters();
         signatureParameters.setSigningCertificate(certificate);
         signatureParameters.setSignatureProfile(signatureProfile);
+        signatureParameters.setDataFileDigestAlgorithm(DigestAlgorithm.SHA512);
         signatureParameters.setCountry("Estonia");
         signatureParameters.setStateOrProvince("Harjumaa");
         signatureParameters.setCity("Tallinn");

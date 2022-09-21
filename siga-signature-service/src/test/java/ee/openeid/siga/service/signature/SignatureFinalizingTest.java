@@ -13,7 +13,6 @@ import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.model.DSSException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
@@ -48,7 +47,9 @@ import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 import static ee.openeid.siga.common.event.SigaEventName.*;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -147,108 +148,102 @@ public class SignatureFinalizingTest {
         }
     }
 
-    @Test(expected = DSSException.class)
-    public void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() throws IOException, URISyntaxException {
-        try {
+    @Test
+    public void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() {
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
             Pair<String, String> signature = createSignature(EXPIRED_PKCS12_Esteid2011, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        } catch (DSSException e) {
-            assertThat(e.getMessage(), containsString("is not in certificate validity range"));
-            assertNull(sigaEventLogger.getEvent(0));
-            throw e;
-        }
+        });
+
+        assertThat(e.getMessage(), matchesPattern("The signing certificate \\(notBefore : Fri Apr 08 16:35:52 " +
+                "EEST 2011, notAfter : Mon Apr 07 23:59:59 EEST 2014\\) is expired at signing time .*"));
+        assertNull(sigaEventLogger.getEvent(0));
     }
 
-    @Test(expected = SignatureCreationException.class)
-    public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() throws IOException, URISyntaxException {
+    @Test
+    public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() {
         when(configuration.getTspSource()).thenReturn("http://demo.invalid.url.sk.ee/tsa");
-        try {
+
+        Exception e = assertThrows(SignatureCreationException.class, () -> {
             Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        } catch (SignatureCreationException e) {
-            assertThat(e.getMessage(), containsString("Unable to finalize signature"));
-            sigaEventLogger.logEvents();
-            SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
-            SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        });
 
-            assertNotNull(finalizeSignatureEvent);
-            assertNotNull(tsaRequestEvent);
-            assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
-
-            assertEquals("http://demo.invalid.url.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-            assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
-            assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
-            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), finalizeSignatureEvent.getErrorCode());
-            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), tsaRequestEvent.getErrorCode());
-            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", finalizeSignatureEvent.getErrorMessage());
-            assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", tsaRequestEvent.getErrorMessage());
-            throw e;
-        }
+        assertThat(e.getMessage(), containsString("Unable to finalize signature"));
+        sigaEventLogger.logEvents();
+        SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        assertNotNull(finalizeSignatureEvent);
+        assertNotNull(tsaRequestEvent);
+        assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
+        assertEquals("http://demo.invalid.url.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
+        assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
+        assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), finalizeSignatureEvent.getErrorCode());
+        assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), tsaRequestEvent.getErrorCode());
+        assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", finalizeSignatureEvent.getErrorMessage());
+        assertEquals("Failed to connect to TSP service <http://demo.invalid.url.sk.ee/tsa>. Service is down or URL is invalid.", tsaRequestEvent.getErrorMessage());
     }
 
-    @Test(expected = SignatureCreationException.class)
-    public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() throws IOException, URISyntaxException {
+    @Test
+    public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() {
         configuration.setPreferAiaOcsp(false);
         when(configuration.getOcspSource()).thenReturn("http://aia.invalid.url.sk.ee/esteid2018");
-        try {
+
+        Exception e = assertThrows(SignatureCreationException.class, () -> {
             Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
-            Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        } catch (SignatureCreationException e) {
-            assertThat(e.getMessage(), containsString("Unable to finalize signature"));
-            sigaEventLogger.logEvents();
-            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
-            SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
-            SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+        });
 
-            assertNotNull(ocspEvent);
-            assertNotNull(tsaRequestEvent);
-            assertNotNull(ocspRequestEvent);
-            assertEquals(SUCCESS, tsaRequestEvent.getResultType());
-            assertNull(tsaRequestEvent.getErrorCode());
-            assertNull(tsaRequestEvent.getErrorMessage());
-            assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-            assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
-            assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
-            assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>. Service is down or URL is invalid.", ocspRequestEvent.getErrorMessage());
-            throw e;
-        }
-
+        assertThat(e.getMessage(), containsString("Unable to finalize signature"));
+        sigaEventLogger.logEvents();
+        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
+        assertNotNull(ocspEvent);
+        assertNotNull(tsaRequestEvent);
+        assertNotNull(ocspRequestEvent);
+        assertEquals(SUCCESS, tsaRequestEvent.getResultType());
+        assertNull(tsaRequestEvent.getErrorCode());
+        assertNull(tsaRequestEvent.getErrorMessage());
+        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
+        assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
+        assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>. Service is down or URL is invalid.", ocspRequestEvent.getErrorMessage());
     }
 
     /**
      * No certificate to test with
      */
     @Ignore
-    @Test(expected = TechnicalException.class)
-    public void shouldRequest_TSA_OCSP_WithRevokedCertificate() throws IOException, URISyntaxException {
+    @Test
+    public void shouldRequest_TSA_OCSP_WithRevokedCertificate() {
         configuration.setPreferAiaOcsp(true);
-        try {
+
+        Exception e = assertThrows(TechnicalException.class, () -> {
             Pair<String, String> signature = createSignature(REVOKED_PKCS12_Esteid2018, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        } catch (TechnicalException e) {
-            assertEquals("Unable to finalize signature", e.getMessage());
-            sigaEventLogger.logEvents();
-            SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
-            SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
-            SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        });
 
-            assertNotNull(ocspEvent);
-            assertNotNull(ocspRequestEvent);
-            assertNotNull(tsaRequestEvent);
-            assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-            assertEquals("http://aia.demo.sk.ee/esteid2018", ocspRequestEvent.getEventParameter(REQUEST_URL));
-            assertEquals(EXCEPTION, ocspEvent.getResultType());
-            assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
-            assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
-            assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspEvent.getErrorCode());
-            assertEquals(SIGNATURE_FINALIZING_ERROR.name(), tsaRequestEvent.getErrorCode());
-            assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspRequestEvent.getErrorCode());
-            assertEquals("Revoked certificate detected", ocspEvent.getErrorMessage());
-            assertEquals("Revoked certificate detected", tsaRequestEvent.getErrorMessage());
-            assertEquals("Revoked certificate detected", ocspRequestEvent.getErrorMessage());
-
-            throw e;
-        }
+        assertEquals("Unable to finalize signature", e.getMessage());
+        sigaEventLogger.logEvents();
+        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
+        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        assertNotNull(ocspEvent);
+        assertNotNull(ocspRequestEvent);
+        assertNotNull(tsaRequestEvent);
+        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://aia.demo.sk.ee/esteid2018", ocspRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals(EXCEPTION, ocspEvent.getResultType());
+        assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
+        assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
+        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspEvent.getErrorCode());
+        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), tsaRequestEvent.getErrorCode());
+        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspRequestEvent.getErrorCode());
+        assertEquals("Revoked certificate detected", ocspEvent.getErrorMessage());
+        assertEquals("Revoked certificate detected", tsaRequestEvent.getErrorMessage());
+        assertEquals("Revoked certificate detected", ocspRequestEvent.getErrorMessage());
     }
 
     /**
@@ -261,12 +256,12 @@ public class SignatureFinalizingTest {
     public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT);
-        try {
+
+        Exception e = assertThrows(SignatureCreationException.class, () -> {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-            fail("Should not reach here!");
-        } catch (SignatureCreationException e) {
-            assertEquals("Unable to finalize signature. OCSP request failed. Issuing certificate may not be trusted.", e.getMessage());
-        }
+        });
+
+        assertEquals("Unable to finalize signature. OCSP request failed. Issuing certificate may not be trusted.", e.getMessage());
         sigaEventLogger.logEvents();
         assertTrue(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
         Optional<SigaEvent> event = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH);
