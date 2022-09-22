@@ -4,7 +4,6 @@ import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.SignatureCreationException;
-import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningType;
@@ -14,14 +13,9 @@ import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSig
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.apache.commons.lang3.tuple.Pair;
-import org.digidoc4j.Configuration;
-import org.digidoc4j.DataToSign;
-import org.digidoc4j.DigestAlgorithm;
-import org.digidoc4j.SignatureParameters;
-import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -47,16 +41,17 @@ import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 import static ee.openeid.siga.common.event.SigaEventName.*;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SignatureFinalizingTest {
     private final PKCS12SignatureToken VALID_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
-    private final PKCS12SignatureToken REVOKED_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
-    private final PKCS12SignatureToken UNKNOWN_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/unknown_issuer_DEV_of_ESTEID2018.p12", "1234".toCharArray());
+    private final PKCS12SignatureToken REVOKED_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_revoked_state_ESTEID2018.p12", "1234".toCharArray());
+    private final PKCS12SignatureToken UNKNOWN_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_state_ESTEID2018.p12", "1234".toCharArray());
+    private final PKCS12SignatureToken UNKNOWN_ISSUER_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_issuer_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken EXPIRED_PKCS12_Esteid2011 = new PKCS12SignatureToken("src/test/resources/p12/expired_signer_ESTEID-SK 2011.p12", "test".toCharArray());
 
     @InjectMocks
@@ -96,7 +91,6 @@ public class SignatureFinalizingTest {
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
 
-
     @Test
     public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
@@ -106,7 +100,6 @@ public class SignatureFinalizingTest {
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
-
 
     @Test
     public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
@@ -212,38 +205,64 @@ public class SignatureFinalizingTest {
         assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>. Service is down or URL is invalid.", ocspRequestEvent.getErrorMessage());
     }
 
-    /**
-     * No certificate to test with
-     */
-    @Ignore
     @Test
-    public void shouldRequest_TSA_OCSP_WithRevokedCertificate() {
-        configuration.setPreferAiaOcsp(true);
+    public void shouldRequest_TSA_and_OCSP_WithRevokedCertificate() {
+        configuration.setPreferAiaOcsp(false);
 
-        Exception e = assertThrows(TechnicalException.class, () -> {
-            Pair<String, String> signature = createSignature(REVOKED_PKCS12_Esteid2018, SignatureProfile.LT);
+        SignatureCreationException e = assertThrows(SignatureCreationException.class, () -> {
+            Pair<String, String> signature = createSignature(REVOKED_STATE_PKCS12_Esteid2018, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         });
 
-        assertEquals("Unable to finalize signature", e.getMessage());
+        assertEquals("Unable to finalize signature. Certificate status is revoked", e.getMessage());
         sigaEventLogger.logEvents();
-        SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
-        assertNotNull(ocspEvent);
+        assertNotNull(finalizeSignatureEvent);
         assertNotNull(ocspRequestEvent);
         assertNotNull(tsaRequestEvent);
         assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
-        assertEquals("http://aia.demo.sk.ee/esteid2018", ocspRequestEvent.getEventParameter(REQUEST_URL));
-        assertEquals(EXCEPTION, ocspEvent.getResultType());
-        assertEquals(EXCEPTION, tsaRequestEvent.getResultType());
+        assertEquals("http://demo.sk.ee/ocsp", ocspRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
+        assertEquals(SUCCESS, tsaRequestEvent.getResultType());
+        assertEquals(SUCCESS, ocspRequestEvent.getResultType());
+        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), finalizeSignatureEvent.getErrorCode());
+        assertNull(tsaRequestEvent.getErrorCode());
+        assertNull(ocspRequestEvent.getErrorCode());
+        assertEquals("Certificate status is revoked", finalizeSignatureEvent.getErrorMessage());
+        assertNull(tsaRequestEvent.getErrorMessage());
+        assertNull(ocspRequestEvent.getErrorMessage());
+    }
+
+    @Test
+    public void shouldRequest_TSA_and_OCSP_WithUnknownCertificate() {
+        configuration.setPreferAiaOcsp(false);
+
+        SignatureCreationException e = assertThrows(SignatureCreationException.class, () -> {
+            Pair<String, String> signature = createSignature(UNKNOWN_STATE_PKCS12_Esteid2018, SignatureProfile.LT);
+            signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+        });
+
+        assertEquals("Unable to finalize signature. Certificate is unknown", e.getMessage());
+        sigaEventLogger.logEvents();
+        SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
+        SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
+        SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
+        assertNotNull(finalizeSignatureEvent);
+        assertNotNull(ocspRequestEvent);
+        assertNotNull(tsaRequestEvent);
+        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://demo.sk.ee/ocsp", ocspRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
+        assertEquals(SUCCESS, tsaRequestEvent.getResultType());
         assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
-        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspEvent.getErrorCode());
-        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), tsaRequestEvent.getErrorCode());
+        assertEquals(SIGNATURE_FINALIZING_ERROR.name(), finalizeSignatureEvent.getErrorCode());
+        assertNull(tsaRequestEvent.getErrorCode());
         assertEquals(SIGNATURE_FINALIZING_ERROR.name(), ocspRequestEvent.getErrorCode());
-        assertEquals("Revoked certificate detected", ocspEvent.getErrorMessage());
-        assertEquals("Revoked certificate detected", tsaRequestEvent.getErrorMessage());
-        assertEquals("Revoked certificate detected", ocspRequestEvent.getErrorMessage());
+        assertEquals("Certificate is unknown", finalizeSignatureEvent.getErrorMessage());
+        assertNull(tsaRequestEvent.getErrorMessage());
+        assertEquals("Certificate is unknown", ocspRequestEvent.getErrorMessage());
     }
 
     /**
@@ -251,11 +270,10 @@ public class SignatureFinalizingTest {
      *
      * @see <a href="https://jira.ria.ee/browse/DD4J-416">Jira task DD4J-416</a>
      */
-
     @Test
     public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
-        configuration.setPreferAiaOcsp(true);
-        Pair<String, String> signature = createSignature(UNKNOWN_PKCS12_Esteid2018, SignatureProfile.LT);
+        configuration.setPreferAiaOcsp(false);
+        Pair<String, String> signature = createSignature(UNKNOWN_ISSUER_PKCS12_Esteid2018, SignatureProfile.LT);
 
         Exception e = assertThrows(SignatureCreationException.class, () -> {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());

@@ -7,13 +7,7 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.model.CertificateStatus;
-import ee.openeid.siga.common.model.DataToSignWrapper;
-import ee.openeid.siga.common.model.MobileIdInformation;
-import ee.openeid.siga.common.model.RelyingPartyInfo;
-import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.common.model.SigningChallenge;
-import ee.openeid.siga.common.model.SigningType;
-import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.common.model.*;
 import ee.openeid.siga.common.session.DataToSignHolder;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.util.UUIDGenerator;
@@ -29,12 +23,9 @@ import ee.openeid.siga.session.SessionService;
 import ee.sk.smartid.SmartIdCertificate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.digidoc4j.DataToSign;
 import org.digidoc4j.ServiceType;
 import org.digidoc4j.Signature;
-import org.digidoc4j.SignatureParameters;
-import org.digidoc4j.ValidationResult;
-import org.digidoc4j.X509Cert;
+import org.digidoc4j.*;
 import org.digidoc4j.exceptions.CertificateValidationException;
 import org.digidoc4j.exceptions.NetworkException;
 import org.digidoc4j.exceptions.OCSPRequestFailedException;
@@ -58,9 +49,8 @@ import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
 public abstract class ContainerSigningService {
 
     private static final String UNABLE_TO_FINALIZE_SIGNATURE = "Unable to finalize signature";
-
-    private SigaEventLogger sigaEventLogger;
     protected SessionService sessionService;
+    private SigaEventLogger sigaEventLogger;
     private MobileIdClient mobileIdClient;
     private SigaSmartIdClient smartIdClient;
 
@@ -175,7 +165,6 @@ public abstract class ContainerSigningService {
         return certificateStatus;
     }
 
-
     public SigningChallenge startSmartIdSigning(String containerId, SmartIdInformation smartIdInformation, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
         verifySigningObjectExistence(sessionHolder);
@@ -238,12 +227,12 @@ public abstract class ContainerSigningService {
         try (ServiceAccessScope ignored = new ServiceAccessScope(listener)) {
             signature = dataToSign.finalize(base64Decoded);
             validateFinalizedSignature(signature, startEvent);
-            logEndEvent(startEvent, signature);
+            logSignatureFinalizationEndEvent(startEvent, signature);
         } catch (CertificateValidationException | TechnicalException e) {
-            logSignatureFinalizationException(startEvent, e);
+            logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". " + e.getMessage());
         } catch (OCSPRequestFailedException e) {
-            logSignatureFinalizationException(startEvent, e);
+            logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". OCSP request failed. Issuing certificate may not be trusted.");
         }
 
@@ -285,7 +274,7 @@ public abstract class ContainerSigningService {
         }
     }
 
-    private void logEndEvent(SigaEvent startEvent, Signature signature) {
+    private void logSignatureFinalizationEndEvent(SigaEvent startEvent, Signature signature) {
         X509Cert tstCert = signature.getTimeStampTokenCertificate();
         if (tstCert != null) {
             sigaEventLogger.getLastMachingEvent(e -> SigaEventName.TSA_REQUEST.equals(e.getEventName())).ifPresent(e ->
@@ -302,24 +291,33 @@ public abstract class ContainerSigningService {
         endEvent.addEventParameter(SIGNATURE_ID, signature.getId());
     }
 
-    private void logSignatureFinalizationException(SigaEvent startEvent, Exception e) {
+    private void logSignatureFinalizationExceptionEvent(SigaEvent startEvent, Exception e) {
         log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
-
         String errorMessage = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
 
         if (e instanceof NetworkException) {
             NetworkException networkException = (NetworkException) e;
             String errorUrl = networkException.getServiceUrl();
+            updateRequestLoggingEvent(errorUrl, startEvent, SIGNATURE_FINALIZING_REQUEST_ERROR, errorMessage);
             sigaEventLogger.logExceptionEventFor(startEvent, SIGNATURE_FINALIZING_REQUEST_ERROR, errorMessage);
-            Predicate<SigaEvent> predicate = event -> event.containsParameterWithValue(errorUrl);
-            sigaEventLogger.getFirstMachingEventAfter(startEvent, predicate).ifPresent(requestEventFromDigidoc -> {
-                requestEventFromDigidoc.setErrorCode(SIGNATURE_FINALIZING_REQUEST_ERROR);
-                requestEventFromDigidoc.setErrorMessage(errorMessage);
-                requestEventFromDigidoc.setResultType(EXCEPTION);
-            });
+        } else if (e instanceof CertificateValidationException) {
+            CertificateValidationException certificateException = (CertificateValidationException) e;
+            if (CertificateValidationException.CertificateValidationStatus.REVOKED != certificateException.getCertificateStatus()) {
+                updateRequestLoggingEvent(certificateException.getServiceUrl(), startEvent, SIGNATURE_FINALIZING_ERROR, errorMessage);
+            }
+            sigaEventLogger.logExceptionEventFor(startEvent, SIGNATURE_FINALIZING_ERROR, errorMessage);
         } else {
             sigaEventLogger.logExceptionEventFor(startEvent, SIGNATURE_FINALIZING_ERROR, errorMessage);
         }
+    }
+
+    private void updateRequestLoggingEvent(String errorUrl, SigaEvent startEvent, SigaEventName.ErrorCode signatureFinalizingRequestError, String errorMessage) {
+        Predicate<SigaEvent> predicate = event -> event.containsParameterWithValue(errorUrl);
+        sigaEventLogger.getFirstMachingEventAfter(startEvent, predicate).ifPresent(serviceRequestEvent -> {
+            serviceRequestEvent.setErrorCode(signatureFinalizingRequestError);
+            serviceRequestEvent.setErrorMessage(errorMessage);
+            serviceRequestEvent.setResultType(EXCEPTION);
+        });
     }
 
     private void validateRemoteSession(DataToSignHolder dataToSignHolder, String signatureId) {
