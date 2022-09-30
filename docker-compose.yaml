@@ -1,6 +1,7 @@
 version: "3.7"
 
 services:
+
   siga-sample-application:
     build: siga-sample-application
     ports:
@@ -11,6 +12,7 @@ services:
           - sampleapp.docker.internal
     depends_on:
       - siga-webapp
+
   siga-webapp:
     build: siga-webapp
     ports:
@@ -19,8 +21,11 @@ services:
       siga:
         aliases:
           - siga.docker.internal
+    volumes:
+      - "siga-logs:/usr/local/tomcat/logs"
     depends_on:
       - ignite
+
   ignite:
     build:
       context: docker/docker-ignite/
@@ -33,3 +38,7 @@ services:
 networks:
   siga:
     driver: bridge
+
+volumes:
+  siga-logs:
+    name: siga-logs
