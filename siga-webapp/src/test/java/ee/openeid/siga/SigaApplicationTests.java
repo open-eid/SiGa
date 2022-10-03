@@ -2,13 +2,10 @@ package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import ee.openeid.siga.helper.TestBase;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
-import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
-import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.Container;
@@ -31,8 +28,6 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-public class SigaApplicationTests extends TestBase {
+public class SigaApplicationTests extends BaseTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -89,12 +84,10 @@ public class SigaApplicationTests extends TestBase {
 
     @Test
     public void getAnotherUserContainer() throws Exception {
-
         String containerId = uploadHashcodeContainer();
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
         String uuid = "824dcfe9-5c26-4d76-829a-e6630f434746";
         String sharedSecret = "746573745365637265744b6579303032";
         JSONObject request = new JSONObject();
@@ -106,28 +99,10 @@ public class SigaApplicationTests extends TestBase {
                 .uri("/hashcodecontainers/" + containerId)
                 .payload(request.toString().getBytes())
                 .build().getSignature(sharedSecret);
-
         MockHttpServletRequestBuilder builder = get("/hashcodecontainers/" + containerId);
+
         mockMvc.perform(buildRequest(builder, signature, request, uuid))
                 .andExpect(status().is(400));
-    }
-
-    @Test
-    public void mobileIdSigningFlow() throws Exception {
-        String containerId = uploadContainer();
-        List<Signature> signatures = getSignatures(containerId);
-        Assert.assertEquals(1, signatures.size());
-        Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
-        List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
-
-        String signatureId = startMobileSigning(containerId);
-        String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        await().atMost(16, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
-        assertSignedContainer(containerId, 2);
     }
 
     @Test
@@ -140,14 +115,17 @@ public class SigaApplicationTests extends TestBase {
         Container originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+
         assertSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
     }
 
     @Test
@@ -160,34 +138,17 @@ public class SigaApplicationTests extends TestBase {
         Container originalContainer = getContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
         String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+
         assertSignedContainer(containerId, 2);
-    }
-
-    @Test
-    public void mobileIdHashcodeSigningFlow() throws Exception {
-        String containerId = uploadHashcodeContainer();
-        List<Signature> signatures = getHashcodeSignatures(containerId);
-
-        Assert.assertEquals(1, signatures.size());
-        HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
-        List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
-
-        String signatureId = startHashcodeMobileSigning(containerId);
-        String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
-        await().atMost(16, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
-        assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
     }
 
     @Test
@@ -196,18 +157,21 @@ public class SigaApplicationTests extends TestBase {
         List<Signature> signatures = getHashcodeSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
-
         Assert.assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+
         CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+
         assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
     }
 
     @Test
@@ -216,20 +180,22 @@ public class SigaApplicationTests extends TestBase {
         List<Signature> signatures = getHashcodeSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
-
         Assert.assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+
         CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
         byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
         byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
         String signatureValue = new String(Base64.getEncoder().encode(signedData));
         finalizeRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
-        assertHashcodeSignedContainer(containerId, 2);
-    }
 
+        assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
+    }
 
     @Override
     protected ObjectMapper getObjectMapper() {
@@ -241,4 +207,3 @@ public class SigaApplicationTests extends TestBase {
         return mockMvc;
     }
 }
-

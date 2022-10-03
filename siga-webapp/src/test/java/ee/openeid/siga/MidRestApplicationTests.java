@@ -1,7 +1,6 @@
 package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.helper.TestBase;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
@@ -30,7 +29,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-public class MidRestApplicationTests extends TestBase {
+public class MidRestApplicationTests extends BaseTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -70,18 +69,19 @@ public class MidRestApplicationTests extends TestBase {
         await().atMost(15, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
 
         assertSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, .* mid_status=SIGNATURE, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2015, .* result=SUCCESS.*");
     }
 
     @Test
     public void mobileIdHashcodeSigningFlow() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-
         Assert.assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
         Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
@@ -92,5 +92,8 @@ public class MidRestApplicationTests extends TestBase {
         await().atMost(15, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
 
         assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, .* mid_status=SIGNATURE, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2015, .* result=SUCCESS.*");
     }
 }

@@ -3,7 +3,6 @@ package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.model.CertificateStatus;
-import ee.openeid.siga.helper.TestBase;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
@@ -33,7 +32,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "smartId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-public class SmartIdApplicationTests extends TestBase {
+public class SmartIdApplicationTests extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -58,20 +57,23 @@ public class SmartIdApplicationTests extends TestBase {
     public void smartIdHashcodeFlowWihCertificateChoice() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-
         Assert.assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
         Assert.assertEquals(1, originalContainer.getSignatures().size());
         Assert.assertEquals(2, originalContainer.getDataFiles().size());
-
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         Assert.assertEquals(2, dataFiles.size());
+
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
         await().atMost(25, SECONDS).until(isHashcodeSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
         String signatureId = startHashcodeSmartIdSigning(containerId, certificateStatusHolder.get().getDocumentNumber());
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
+
         assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
     }
 
     @Test
@@ -92,6 +94,9 @@ public class SmartIdApplicationTests extends TestBase {
         String signatureId = startSmartIdSigning(containerId, certificateStatusHolder.get().getDocumentNumber());
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
     }
 
     @Test
@@ -110,6 +115,9 @@ public class SmartIdApplicationTests extends TestBase {
         String signatureId = startHashcodeSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
     }
 
     @Test
@@ -128,5 +136,8 @@ public class SmartIdApplicationTests extends TestBase {
         String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
     }
 }

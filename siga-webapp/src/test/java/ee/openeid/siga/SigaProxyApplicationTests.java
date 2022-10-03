@@ -2,7 +2,6 @@ package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.model.ServiceType;
-import ee.openeid.siga.helper.TestBase;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
@@ -30,7 +29,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-public class SigaProxyApplicationTests extends TestBase {
+public class SigaProxyApplicationTests extends BaseTest {
 
     private final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303037";
     private final static String REQUESTING_SERVICE_UUID = "7dc75cb8-7076-4bed-9f06-b304f85cdccd";

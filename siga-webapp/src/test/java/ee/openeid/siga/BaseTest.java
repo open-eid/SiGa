@@ -1,4 +1,4 @@
-package ee.openeid.siga.helper;
+package ee.openeid.siga;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
@@ -37,7 +37,7 @@ import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public abstract class TestBase {
+public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected static final String CERTIFICATE = "CERTIFICATE";
     protected static final String SIGNATURE = "SIGNATURE";
@@ -228,7 +228,6 @@ public abstract class TestBase {
         CreateContainerSmartIdSigningResponse response = startSmartIdSigning("/containers/" + containerId + "/smartidsigning", documentNumber, CreateContainerSmartIdSigningResponse.class);
         return response.getGeneratedSignatureId();
     }
-
 
     protected String startHashcodeMobileSigning(String containerId) throws Exception {
         CreateHashcodeContainerMobileIdSigningResponse response = startMobileSigning("/hashcodecontainers/" + containerId + "/mobileidsigning", CreateHashcodeContainerMobileIdSigningResponse.class);
