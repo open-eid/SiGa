@@ -78,7 +78,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "DELETE to hashcode SID signing status should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"))
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", SID_EE_DEFAULT_DOCUMENT_NUMBER))
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId()
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow)
@@ -194,7 +194,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "POST to hashcode SID signing status should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"))
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT",SID_EE_DEFAULT_DOCUMENT_NUMBER))
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId()
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request")
@@ -290,7 +290,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "PUT to hashcode SID signing status should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"))
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT",SID_EE_DEFAULT_DOCUMENT_NUMBER))
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId()
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow, "request")
@@ -578,7 +578,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "OPTION to hashcode SID signing status should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"))
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT",SID_EE_DEFAULT_DOCUMENT_NUMBER))
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId()
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow)
@@ -731,7 +731,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "PATCH to hashcode SID signing status should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT","PNOEE-30303039914-FF8B-Q"))
+        Response startResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT",SID_EE_DEFAULT_DOCUMENT_NUMBER))
         String signatureId = startResponse.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId()
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + "/" + signatureId + STATUS, flow)

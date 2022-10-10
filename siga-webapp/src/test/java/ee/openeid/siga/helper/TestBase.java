@@ -197,7 +197,7 @@ public abstract class TestBase {
 
     private <T> T startSmartIdSigning(String url, String documentNumber, Class<T> responseObject) throws Exception {
         JSONObject request = new JSONObject();
-        request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-30303039914-FF8B-Q"));
+        request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-30303039914-1Q3P-Q"));
         request.put("signatureProfile", "LT");
         return postRequest(url, request, responseObject);
     }

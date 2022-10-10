@@ -43,7 +43,7 @@ public class GenericAsicSigningFlowT extends TestBase {
         String sidSignatureId1 = sidSignRequest1.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, sidSignatureId1);
 
-        Response sidSignRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
+        Response sidSignRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", SID_EE_DEFAULT_DOCUMENT_NUMBER));
         String sidSignatureId2 = sidSignRequest2.as(CreateContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, sidSignatureId2);
 

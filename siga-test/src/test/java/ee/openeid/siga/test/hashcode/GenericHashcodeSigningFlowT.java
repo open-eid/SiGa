@@ -9,8 +9,7 @@ import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
-import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -46,7 +45,7 @@ public class GenericHashcodeSigningFlowT extends TestBase {
         String sidSignatureId1 = sidSignRequest1.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, sidSignatureId1);
 
-        Response sidSignRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30303039914-FF8B-Q"));
+        Response sidSignRequest2 = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", SID_EE_DEFAULT_DOCUMENT_NUMBER));
         String sidSignatureId2 = sidSignRequest2.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
         pollForSidSigning(flow, sidSignatureId2);
 
