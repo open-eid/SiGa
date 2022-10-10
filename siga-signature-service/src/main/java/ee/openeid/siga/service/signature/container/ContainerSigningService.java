@@ -234,6 +234,14 @@ public abstract class ContainerSigningService {
         } catch (OCSPRequestFailedException e) {
             logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". OCSP request failed. Issuing certificate may not be trusted.");
+        } catch (Exception e) {
+            logSignatureFinalizationExceptionEvent(startEvent, e);
+
+            if (e instanceof IllegalArgumentException && e.getMessage().equals("XAdES-LTA requires complete binaries of signed documents! Extension with a DigestDocument is not possible.")) {
+                throw new SignatureCreationException(e.getMessage());
+            } else {
+                throw e;
+            }
         }
 
         return signature;
@@ -366,14 +374,14 @@ public abstract class ContainerSigningService {
         return sessionService;
     }
 
-    public abstract void verifySigningObjectExistence(Session session);
-
-    public abstract String generateDataFilesHash(Session session);
-
     @Autowired
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
+
+    public abstract void verifySigningObjectExistence(Session session);
+
+    public abstract String generateDataFilesHash(Session session);
 
     @Autowired
     public void setSigaEventLogger(SigaEventLogger sigaEventLogger) {
