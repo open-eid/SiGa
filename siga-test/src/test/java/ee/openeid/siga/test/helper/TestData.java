@@ -138,4 +138,7 @@ public class TestData {
     public static final List<String> TEST_FILE_EXTENSIONS = List.of(
             "xml", "html", "pkcs7", "p7s", "pdf", "asics", "scs", "asice", "sce", "bdoc", "odt", "ods", "txt", "png", "jpg", "jpeg", "tst", "unknown"
     );
+
+    //Test numbers
+    public static final String SID_EE_DEFAULT_DOCUMENT_NUMBER = "PNOEE-30303039914-1Q3P-Q";
 }
