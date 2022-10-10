@@ -240,17 +240,25 @@ public abstract class ContainerSigningService {
             validateFinalizedSignature(signature, startEvent);
             logEndEvent(startEvent, signature);
         } catch (CertificateValidationException | TechnicalException e) {
-            logSignatureFinalizationException(startEvent, e);
+            logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". " + e.getMessage());
         } catch (OCSPRequestFailedException e) {
-            logSignatureFinalizationException(startEvent, e);
+            logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". OCSP request failed. Issuing certificate may not be trusted.");
+        } catch (Exception e) {
+            logSignatureFinalizationExceptionEvent(startEvent, e);
+
+            if (e instanceof IllegalArgumentException && e.getMessage().equals("XAdES-LTA requires complete binaries of signed documents! Extension with a DigestDocument is not possible.")) {
+                throw new SignatureCreationException(e.getMessage());
+            } else {
+                throw e;
+            }
         }
 
         return signature;
     }
 
-    private void logSignatureFinalizationException(SigaEvent startEvent, Exception e) {
+    private void logSignatureFinalizationExceptionEvent(SigaEvent startEvent, Exception e) {
         log.error(UNABLE_TO_FINALIZE_SIGNATURE, e);
         logExceptionEvent(startEvent, e);
     }
@@ -371,14 +379,14 @@ public abstract class ContainerSigningService {
         return sessionService;
     }
 
-    public abstract void verifySigningObjectExistence(Session session);
-
-    public abstract String generateDataFilesHash(Session session);
-
     @Autowired
     public void setSessionService(SessionService sessionService) {
         this.sessionService = sessionService;
     }
+
+    public abstract void verifySigningObjectExistence(Session session);
+
+    public abstract String generateDataFilesHash(Session session);
 
     @Autowired
     public void setSigaEventLogger(SigaEventLogger sigaEventLogger) {
