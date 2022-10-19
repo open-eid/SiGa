@@ -4,7 +4,7 @@ import ee.openeid.siga.auth.filter.hmac.HmacHeader;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 
@@ -14,13 +14,11 @@ import java.time.Duration;
 import static java.time.Instant.ofEpochMilli;
 
 @Component
+@RequiredArgsConstructor
 public class SigaEventLoggingFilter extends AbstractRequestLoggingFilter {
-
     private static final String REQUEST_LENGTH_PARAM_NAME = "request_length";
     private static final String REQUEST_URI_PARAM_NAME = "request_uri";
-
-    @Autowired
-    private SigaEventLogger sigaEventLogger;
+    private final SigaEventLogger sigaEventLogger;
 
     @Override
     protected void beforeRequest(HttpServletRequest request, String message) {

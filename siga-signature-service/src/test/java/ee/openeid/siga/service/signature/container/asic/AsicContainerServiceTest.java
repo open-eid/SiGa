@@ -1,15 +1,15 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.ContainerInfo;
 import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.Signature;
-import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.common.exception.ResourceNotFoundException;
-import ee.openeid.siga.common.session.AsicContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -52,15 +53,18 @@ public class AsicContainerServiceTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
+    @Spy
     @InjectMocks
-    AsicContainerService containerService;
+    private AsicContainerService containerService;
 
     @Mock
     private SessionService sessionService;
 
+    @Spy
+    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
+
     @Before
     public void setUp() {
-        containerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()
                 .clientName("client1")
@@ -70,12 +74,13 @@ public class AsicContainerServiceTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+        Mockito.doReturn(CONTAINER_ID).when(containerService).generateContainerId();
+        Mockito.when(sessionService.getSessionId(CONTAINER_ID)).thenReturn(CONTAINER_SESSION_ID);
     }
 
     @Test
     public void successfulCreateContainer() {
         List<DataFile> dataFiles = createDataFileListWithOneFile();
-        containerService.setSessionService(sessionService);
 
         String containerId = containerService.createContainer("test.asice", dataFiles);
         Assert.assertFalse(StringUtils.isBlank(containerId));
@@ -109,7 +114,7 @@ public class AsicContainerServiceTest {
 
     @Test
     public void successfulGetSignature() throws IOException, URISyntaxException {
-        AsicContainerSessionHolder session = createAsicSessionHolder();
+        AsicContainerSession session = createAsicSessionHolder();
         AtomicReference<String> signatureId = new AtomicReference<>();
         session.getSignatureIdHolder().forEach((sigId, integer) -> signatureId.set(sigId));
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -139,8 +144,8 @@ public class AsicContainerServiceTest {
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AsicContainerSessionHolder session = AsicContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        AsicContainerSession session = AsicContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
@@ -168,8 +173,8 @@ public class AsicContainerServiceTest {
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AsicContainerSessionHolder session = AsicContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        AsicContainerSession session = AsicContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
@@ -194,8 +199,8 @@ public class AsicContainerServiceTest {
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AsicContainerSessionHolder session = AsicContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        AsicContainerSession session = AsicContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
@@ -245,8 +250,8 @@ public class AsicContainerServiceTest {
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AsicContainerSessionHolder session = AsicContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        AsicContainerSession session = AsicContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)

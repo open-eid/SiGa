@@ -1,11 +1,11 @@
 package ee.openeid.siga.service.signature.container.asic;
 
-import ee.openeid.siga.common.session.AsicContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -13,17 +13,17 @@ import java.util.Base64;
 
 @Service
 @Profile("datafileContainer")
+@RequiredArgsConstructor
 public class AsicContainerValidationService implements AsicSessionHolder {
-
-    private SessionService sessionService;
-    private SivaClient sivaClient;
+    private final SessionService sessionService;
+    private final SivaClient sivaClient;
 
     public ValidationConclusion validateContainer(String containerName, String container) {
         return sivaClient.validateContainer(containerName, container);
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
 
         String container = new String(Base64.getEncoder().encode(sessionHolder.getContainer()));
         return sivaClient.validateContainer(sessionHolder.getContainerName(), container);
@@ -32,16 +32,5 @@ public class AsicContainerValidationService implements AsicSessionHolder {
     @Override
     public SessionService getSessionService() {
         return sessionService;
-    }
-
-
-    @Autowired
-    protected void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-
-    @Autowired
-    public void setSivaClient(SivaClient sivaClient) {
-        this.sivaClient = sivaClient;
     }
 }

@@ -9,7 +9,7 @@ import ee.openeid.siga.common.model.ContainerInfo;
 import ee.openeid.siga.common.model.DataFile;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.Signature;
-import ee.openeid.siga.common.session.AsicContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
@@ -18,22 +18,18 @@ import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.MimeType;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.digidoc4j.Container.DocumentType.ASICE;
@@ -41,10 +37,10 @@ import static org.digidoc4j.Container.DocumentType.ASICE;
 @Slf4j
 @Service
 @Profile("datafileContainer")
+@RequiredArgsConstructor
 public class AsicContainerService implements AsicSessionHolder {
-
-    private SessionService sessionService;
-    private Configuration configuration;
+    private final SessionService sessionService;
+    private final Configuration configuration;
 
     public String createContainer(String containerName, List<DataFile> dataFiles) {
         ContainerBuilder containerBuilder = ContainerBuilder.
@@ -57,10 +53,10 @@ public class AsicContainerService implements AsicSessionHolder {
         ));
 
         Container container = containerBuilder.build();
-        String sessionId = UUIDGenerator.generateUUID();
-        Session session = transformContainerToSession(containerName, sessionId, container);
-        sessionService.update(sessionId, session);
-        return sessionId;
+        String containerId = generateContainerId();
+        Session session = transformContainerToSession(containerName, containerId, container);
+        sessionService.update(session);
+        return containerId;
     }
 
     public String uploadContainer(String containerName, String base64container) {
@@ -73,14 +69,14 @@ public class AsicContainerService implements AsicSessionHolder {
             log.error("Invalid container:", e);
             throw new InvalidContainerException("Invalid container");
         }
-        String sessionId = UUIDGenerator.generateUUID();
-        Session session = transformContainerToSession(containerName, sessionId, container);
-        sessionService.update(sessionId, session);
-        return sessionId;
+        String containerId = generateContainerId();
+        Session session = transformContainerToSession(containerName, containerId, container);
+        sessionService.update(session);
+        return containerId;
     }
 
     public ContainerInfo getContainer(String containerId) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
 
         ContainerInfo containerInfo = new ContainerInfo();
         containerInfo.setContainerName(sessionHolder.getContainerName());
@@ -89,7 +85,7 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public List<Signature> getSignatures(String containerId) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         List<Signature> signatures = new ArrayList<>();
@@ -104,7 +100,7 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get(signatureId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
@@ -119,7 +115,7 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public List<DataFile> getDataFiles(String containerId) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
 
         List<org.digidoc4j.DataFile> dataFiles = container.getDataFiles();
@@ -127,7 +123,7 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public Result addDataFiles(String containerId, List<DataFile> dataFiles) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
 
@@ -136,12 +132,12 @@ public class AsicContainerService implements AsicSessionHolder {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
         sessionHolder.setContainer(outputStream.toByteArray());
-        sessionService.update(containerId, sessionHolder);
+        sessionService.update(sessionHolder);
         return Result.OK;
     }
 
     public Result removeDataFile(String containerId, String datafileName) {
-        AsicContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
 
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         validateIfSessionMutable(container);
@@ -156,7 +152,7 @@ public class AsicContainerService implements AsicSessionHolder {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
         sessionHolder.setContainer(outputStream.toByteArray());
-        sessionService.update(containerId, sessionHolder);
+        sessionService.update(sessionHolder);
 
         return Result.OK;
     }
@@ -199,11 +195,12 @@ public class AsicContainerService implements AsicSessionHolder {
         return dataFile;
     }
 
-    private AsicContainerSessionHolder transformContainerToSession(String containerName, String sessionId, Container container) {
+    private AsicContainerSession transformContainerToSession(String containerName, String containerId, Container container) {
+        String sessionId = sessionService.getSessionId(containerId);
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         container.save(outputStream);
-        AsicContainerSessionHolder sessionHolder = AsicContainerSessionHolder.builder()
+        AsicContainerSession sessionHolder = AsicContainerSession.builder()
                 .containerName(containerName)
                 .sessionId(sessionId)
                 .clientName(authenticatedUser.getClientName())
@@ -222,14 +219,7 @@ public class AsicContainerService implements AsicSessionHolder {
         return sessionService;
     }
 
-    @Autowired
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
+    String generateContainerId() {
+        return UUIDGenerator.generateUUID();
     }
-
-    @Autowired
-    public void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-
 }

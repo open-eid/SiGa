@@ -1,6 +1,5 @@
 package ee.openeid.siga.service.signature.container.hashcode;
 
-import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
@@ -9,13 +8,20 @@ import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.common.session.DataToSignHolder;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.Session;
+import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
 import org.junit.Before;
@@ -28,18 +34,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
-import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
-import static org.mockito.ArgumentMatchers.any;
+import static ee.openeid.siga.service.signature.test.RequestUtil.*;
+import static org.mockito.ArgumentMatchers.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
@@ -51,26 +56,41 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     @InjectMocks
     private HashcodeContainerSigningService signingService;
 
-    @Mock
-    private Configuration configuration;
+    @Spy
+    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);;
     @Mock
     private SigaEventLogger sigaEventLogger;
     @Mock
     private Authentication authentication;
     @Mock
     private SecurityContext securityContext;
+    @Spy
+    private ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    @Mock
+    private Ignite ignite;
+    @Mock
+    private IgniteSemaphore igniteSemaphore;
+    @Mock
+    private MobileIdClientConfigurationProperties mobileIdConfigurationProperties;
+    @Mock
+    private SmartIdClientConfigurationProperties smartIdConfigurationProperties;
+    @Mock
+    private SessionStatusReprocessingProperties reprocessingProperties;
 
     @Before
     public void setUp() throws IOException, URISyntaxException {
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
-        SecurityContextHolder.setContext(securityContext);
-
         configuration = new Configuration(Configuration.Mode.TEST);
-        signingService.setConfiguration(configuration);
+        MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate((signingService));
+        Mockito.when(signingService.getMobileIdSigningDelegate()).thenReturn(mobileIdSigningDelegate);
+        SmartIdSigningDelegate smartIdSigningDelegate = new SmartIdSigningDelegate((signingService));
+        Mockito.when(signingService.getSmartIdSigningDelegate()).thenReturn(smartIdSigningDelegate);
         Mockito.when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createHashcodeSessionHolder());
+        taskExecutor.initialize();
+        Mockito.when(igniteSemaphore.tryAcquire()).thenReturn(true);
+        Mockito.when(igniteSemaphore.tryAcquire(anyLong(), any())).thenReturn(true);
+        Mockito.when(ignite.semaphore(anyString(),anyInt(),anyBoolean(), anyBoolean())).thenReturn(igniteSemaphore);
     }
 
     @Test
@@ -89,7 +109,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     public void noDataFilesInSession() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to create signature. Data files must be added to container");
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().clear();
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -100,7 +120,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     public void emptyDataFilesInSession() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to sign container with empty datafiles");
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -143,21 +163,21 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Test
     public void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
-        assertSuccessfulMobileIdSignatureProcessing();
+        assertSuccessfulMobileIdSignatureProcessing(signingService);
     }
 
     @Test
     public void noSessionFoundMobileSigning() {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId");
-        signingService.processMobileStatus(CONTAINER_ID, "someUnknownSignatureId");
+        signingService.getMobileIdSignatureStatus(CONTAINER_ID, "someUnknownSignatureId");
     }
 
     @Test
     public void emptyDataFilesInSessionStartMobileSigning() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to sign container with empty datafiles");
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -187,14 +207,14 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Test
     public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
-        assertSuccessfulSmartIdSignatureProcessing(sessionService, signingService);
+        assertSuccessfulSmartIdSignatureProcessing(signingService);
     }
 
     @Test
     public void emptyDataFilesInSessionInitSmartIdSigning() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to sign container with empty datafiles");
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -205,7 +225,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     public void emptyDataFilesInSessionStartSmartIdSigning() throws IOException, URISyntaxException {
         exceptionRule.expect(InvalidSessionDataException.class);
         exceptionRule.expectMessage("Unable to sign container with empty datafiles");
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
 
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -252,15 +272,10 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Override
-    protected void setSigningServiceParameters() {
-        signingService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
-    }
-
-    @Override
     protected void mockRemoteSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
-        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
-                DataToSignHolder.builder()
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.addSignatureSession(dataToSign.getSignatureParameters().getSignatureId(),
+                SignatureSession.builder()
                         .dataToSign(dataToSign)
                         .signingType(SigningType.REMOTE)
                         .dataFilesHash(signingService.generateDataFilesHash(sessionHolder))
@@ -269,29 +284,35 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Override
-    protected void mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder session = RequestUtil.createHashcodeSessionHolder();
-        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
-                DataToSignHolder.builder()
+    protected Session mockMobileIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
+        HashcodeContainerSession session = RequestUtil.createHashcodeSessionHolder();
+        session.addSignatureSession(dataToSign.getSignatureParameters().getSignatureId(),
+                SignatureSession.builder()
+                        .relyingPartyInfo(MobileIdSigningDelegate.getRelyingPartyInfo())
                         .dataToSign(dataToSign)
                         .signingType(SigningType.MOBILE_ID)
                         .sessionCode("2342384932")
                         .dataFilesHash(signingService.generateDataFilesHash(session))
                         .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
+        Mockito.when(sessionService.getContainerBySessionId(CONTAINER_SESSION_ID)).thenReturn(session);
+        return session;
     }
 
     @Override
-    protected void mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder session = RequestUtil.createHashcodeSessionHolder();
-        session.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(),
-                DataToSignHolder.builder()
+    protected Session mockSmartIdSessionHolder(DataToSign dataToSign) throws IOException, URISyntaxException {
+        HashcodeContainerSession session = RequestUtil.createHashcodeSessionHolder();
+        session.addSignatureSession(dataToSign.getSignatureParameters().getSignatureId(),
+                SignatureSession.builder()
+                        .relyingPartyInfo(SmartIdSigningDelegate.getRelyingPartyInfo())
                         .dataToSign(dataToSign)
                         .signingType(SigningType.SMART_ID)
                         .sessionCode("2342384932")
                         .dataFilesHash(signingService.generateDataFilesHash(session))
                         .build());
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(session);
+        Mockito.when(sessionService.getContainerBySessionId(CONTAINER_SESSION_ID)).thenReturn(session);
+        return session;
     }
 
     @Override
@@ -301,13 +322,13 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
 
     @Override
     protected SimpleSessionHolderBuilder getSimpleSessionHolderBuilder() {
-        return new SimpleHashcodeContainerSessionHolderBuilder();
+        return new SimpleHashcodeContainerSessionBuilder();
     }
 
-    private static class SimpleHashcodeContainerSessionHolderBuilder implements SimpleSessionHolderBuilder{
+    private static class SimpleHashcodeContainerSessionBuilder implements SimpleSessionHolderBuilder{
         private final List<HashcodeDataFile> dataFiles = new ArrayList<>();
 
-        public SimpleHashcodeContainerSessionHolderBuilder addDataFile(String fileName, String text) {
+        public SimpleHashcodeContainerSessionBuilder addDataFile(String fileName, String text) {
             HashcodeDataFile dataFile = new HashcodeDataFile();
             dataFile.setFileName(fileName);
             dataFile.setFileHashSha256(new String(DigestUtils.sha256(text)));
@@ -315,12 +336,12 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
             return this;
         }
 
-        public HashcodeContainerSessionHolder build() {
-            return HashcodeContainerSessionHolder.builder()
-                    .sessionId(RequestUtil.CONTAINER_ID)
-                    .clientName(RequestUtil.CLIENT_NAME)
-                    .serviceName(RequestUtil.SERVICE_NAME)
-                    .serviceUuid(RequestUtil.SERVICE_UUID)
+        public HashcodeContainerSession build() {
+            return HashcodeContainerSession.builder()
+                    .sessionId(CONTAINER_SESSION_ID)
+                    .clientName(CLIENT_NAME)
+                    .serviceName(SERVICE_NAME)
+                    .serviceUuid(SERVICE_UUID)
                     .dataFiles(dataFiles)
                     .build();
         }

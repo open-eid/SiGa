@@ -16,6 +16,7 @@ import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
 import ee.openeid.siga.webapp.json.GetContainerSmartIdCertificateChoiceStatusResponse;
 import ee.openeid.siga.webapp.json.GetContainerSmartIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -30,16 +31,10 @@ import java.util.List;
 
 @RestController
 @Profile("smartId & datafileContainer")
+@RequiredArgsConstructor
 public class SmartIdAsicContainerController {
-
     private final AsicContainerSigningService signingService;
     private final RequestValidator validator;
-
-    @Autowired
-    public SmartIdAsicContainerController(AsicContainerSigningService signingService, RequestValidator validator) {
-        this.signingService = signingService;
-        this.validator = validator;
-    }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_INIT)
     @PostMapping(value = "/containers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,7 +61,7 @@ public class SmartIdAsicContainerController {
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
 
-        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId);
+        CertificateStatus status = signingService.getSmartIdCertificateStatus(containerId, certificateId);
         GetContainerSmartIdCertificateChoiceStatusResponse response = new GetContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
@@ -102,7 +97,7 @@ public class SmartIdAsicContainerController {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
 
-        String status = signingService.processSmartIdStatus(containerId, signatureId);
+        String status = signingService.getSmartIdSignatureStatus(containerId, signatureId);
 
         GetContainerSmartIdSigningStatusResponse response = new GetContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);
@@ -118,5 +113,4 @@ public class SmartIdAsicContainerController {
         return RequestTransformer.transformSmartIdInformation(null, request.getCountry(),
                 null, request.getPersonIdentifier());
     }
-
 }

@@ -7,8 +7,9 @@ import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SmartIdInformation;
-import ee.openeid.siga.common.session.AsicContainerSessionHolder;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSession;
+import ee.openeid.siga.common.session.CertificateSession;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
@@ -41,6 +42,7 @@ public class RequestUtil {
     public static final String VALID_ASICE = "test.asice";
     public static final String DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
+    public static final String CONTAINER_SESSION_ID = "v1_user_name_23423423-234234234-324234-4234";
     public static final String SMART_ID_SESSION_ID = "23423423-234234234-324234-1111";
     public static final String CERTIFICATE_ID = "23423423-234234234-324234-1111";
 
@@ -114,35 +116,47 @@ public class RequestUtil {
         return hashcodeDataFile;
     }
 
-    public static HashcodeContainerSessionHolder createHashcodeSessionHolder() throws IOException, URISyntaxException {
+    public static HashcodeContainerSession createHashcodeSessionHolder() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = new ArrayList<>();
         signatureWrappers.add(RequestUtil.createSignatureWrapper().get(0));
-        Map<String, String> certificateSessions = new HashMap<>();
-        certificateSessions.put(CERTIFICATE_ID, "123");
-        return HashcodeContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        Map<String, CertificateSession> certificateSessions = new HashMap<>();
+        RelyingPartyInfo relyingPartyInfo = RelyingPartyInfo.builder()
+                .name("Testimine")
+                .uuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
+                .build();
+        certificateSessions.put(CERTIFICATE_ID, CertificateSession.builder()
+                        .relyingPartyInfo(relyingPartyInfo)
+                .sessionCode("123").build());
+        return HashcodeContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
-                .certificateSessionHolder(certificateSessions)
+                .certificateSessions(certificateSessions)
                 .signatures(signatureWrappers)
                 .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
     }
 
-    public static AsicContainerSessionHolder createAsicSessionHolder() throws IOException, URISyntaxException {
+    public static AsicContainerSession createAsicSessionHolder() throws IOException, URISyntaxException {
         String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
         Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
-        Map<String, String> certificateSessions = new HashMap<>();
-        certificateSessions.put(CERTIFICATE_ID, "123");
+        Map<String, CertificateSession> certificateSessions = new HashMap<>();
+        RelyingPartyInfo relyingPartyInfo = RelyingPartyInfo.builder()
+                .name("Testimine")
+                .uuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
+                .build();
+        certificateSessions.put(CERTIFICATE_ID, CertificateSession.builder()
+                .relyingPartyInfo(relyingPartyInfo)
+                .sessionCode("123").build());
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
-        return AsicContainerSessionHolder.builder()
-                .sessionId(CONTAINER_ID)
+        return AsicContainerSession.builder()
+                .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
                 .serviceName(SERVICE_NAME)
                 .serviceUuid(SERVICE_UUID)
-                .certificateSessionHolder(certificateSessions)
+                .certificateSessions(certificateSessions)
                 .signatureIdHolder(signatureIdHolder)
                 .containerName("test.asice")
                 .container(Base64.getDecoder().decode(base64container.getBytes()))

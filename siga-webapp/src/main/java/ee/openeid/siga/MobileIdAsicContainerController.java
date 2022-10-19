@@ -10,6 +10,7 @@ import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.GetContainerMobileIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -22,18 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Profile("mobileId & datafileContainer")
 @RestController
+@Profile("mobileId & datafileContainer")
+@RequiredArgsConstructor
 public class MobileIdAsicContainerController {
-
     private final AsicContainerSigningService signingService;
     private final RequestValidator validator;
-
-    @Autowired
-    public MobileIdAsicContainerController(AsicContainerSigningService signingService, RequestValidator validator) {
-        this.signingService = signingService;
-        this.validator = validator;
-    }
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
     @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,7 +58,7 @@ public class MobileIdAsicContainerController {
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.processMobileStatus(containerId, signatureId);
+        String status = signingService.getMobileIdSignatureStatus(containerId, signatureId);
 
         GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

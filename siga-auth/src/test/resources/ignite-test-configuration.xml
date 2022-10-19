@@ -30,8 +30,7 @@
         <property name="cacheConfiguration">
             <list>
                 <bean class="org.apache.ignite.configuration.CacheConfiguration">
-                    <property name="name" value="SIGA-AUTH-SERVICES"/>
-                    <property name="cacheMode" value="REPLICATED"/>
+                    <property name="name" value="AUTH_SERVICES"/>
                     <property name="atomicityMode" value="ATOMIC"/>
                     <property name="nearConfiguration">
                         <bean class="org.apache.ignite.configuration.NearCacheConfiguration"/>

@@ -1,0 +1,113 @@
+package ee.openeid.siga.service.signature.container.status;
+
+import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.session.*;
+import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
+import ee.openeid.siga.session.CacheName;
+import ee.openeid.siga.session.SessionService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.binary.BinaryObject;
+import org.apache.ignite.cache.query.QueryCursor;
+import org.apache.ignite.cache.query.ScanQuery;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PreDestroy;
+import java.util.Map;
+
+import static java.time.Duration.ZERO;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@EnableConfigurationProperties(SessionStatusReprocessingProperties.class)
+public class SessionStatusReprocessingService {
+    private final ThreadPoolTaskExecutor taskExecutor;
+    private final Ignite ignite;
+    private final AsicContainerSigningService asicContainerSigningService;
+    private final HashcodeContainerSigningService hashcodeContainerSigningService;
+    private final SessionService sessionService;
+    private final SessionStatusReprocessingProperties reprocessingProperties;
+
+    @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
+    public void processFailedSignatureStatusRequests() {
+        SignatureStatusRequestFilter filter = new SignatureStatusRequestFilter(reprocessingProperties.getMaxProcessingAttempts(),
+                reprocessingProperties.getProcessingTimeout(), reprocessingProperties.getExceptionTimeout());
+        ScanQuery<String, Map<String, BinaryObject>> query = new ScanQuery<>(filter);
+        try (QueryCursor<String> queryCursor = ignite.getOrCreateCache(CacheName.SIGNATURE_SESSION.name())
+                .withKeepBinary()
+                .query(query, new SessionIdQueryTransformer())) {
+            queryCursor.forEach(sessionId -> processFailedSignatureStatusRequest(filter, sessionId));
+        }
+    }
+
+    void processFailedSignatureStatusRequest(SignatureStatusRequestFilter filter, String sessionId) {
+        Session session = sessionService.getContainerBySessionId(sessionId);
+        Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
+
+        signatureSessions.entrySet().stream().filter(filter.apply()).forEach(s -> {
+            String signatureSessionId = s.getKey();
+            SignatureSession signatureSession = s.getValue();
+            log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId, signatureSession.getSessionStatus());
+            if (signatureSession.getSigningType() == SigningType.SMART_ID) {
+                if (session instanceof AsicContainerSession) {
+                    asicContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                } else if (session instanceof HashcodeContainerSession) {
+                    hashcodeContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                }
+            } else if (signatureSession.getSigningType() == SigningType.MOBILE_ID) {
+                if (session instanceof AsicContainerSession) {
+                    asicContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                } else if (session instanceof HashcodeContainerSession) {
+                    hashcodeContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                }
+            }
+        });
+    }
+
+    @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
+    public void processFailedCertificateStatusRequests() {
+        CertificateStatusRequestFilter filter = new CertificateStatusRequestFilter(reprocessingProperties.getMaxProcessingAttempts(),
+                reprocessingProperties.getProcessingTimeout(), reprocessingProperties.getExceptionTimeout());
+        ScanQuery<String, Map<String, BinaryObject>> query = new ScanQuery<>(filter);
+        try (QueryCursor<String> queryCursor = ignite.getOrCreateCache(CacheName.CERTIFICATE_SESSION.name())
+                .withKeepBinary()
+                .query(query, new SessionIdQueryTransformer())) {
+            queryCursor.forEach(sessionId -> processFailedCertificateStatusRequest(filter, sessionId));
+        }
+    }
+
+    void processFailedCertificateStatusRequest(CertificateStatusRequestFilter filter, String sessionId) {
+        Session session = sessionService.getContainerBySessionId(sessionId);
+        Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
+
+        certificateSessions.entrySet().stream().filter(filter.apply()).forEach(s -> {
+            String certificateSessionId = s.getKey();
+            if (session instanceof AsicContainerSession) {
+                asicContainerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
+            } else if (session instanceof HashcodeContainerSession) {
+                hashcodeContainerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
+            }
+        });
+    }
+
+    @PreDestroy
+    @SneakyThrows
+    public void onDestroy() {
+        long timeout = 300;
+        long currentCount = 0;
+        log.info("Graceful shutdown in progress!");
+        while (taskExecutor.getActiveCount() != 0 && currentCount++ <= timeout) {
+            log.info("Nr. of active status polling jobs left: {}. Timeout in: {}", taskExecutor.getActiveCount(), timeout - currentCount);
+            Thread.sleep(1000);
+        }
+        log.info("Continuing shutdown!");
+    }
+}

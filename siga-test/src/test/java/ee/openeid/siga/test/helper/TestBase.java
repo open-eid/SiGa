@@ -1,7 +1,6 @@
 package ee.openeid.siga.test.helper;
 
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.test.utils.RequestBuilder;
 import io.qameta.allure.Step;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
@@ -151,7 +150,7 @@ public abstract class TestBase {
 
     @Step("Poll for MID signing response")
     protected Response pollForMidSigning(SigaApiFlow flow, String signatureId) {
-        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(18000, MILLISECONDS)
+        with().pollInterval(3500, MILLISECONDS).and().with().pollDelay(0, MILLISECONDS).atMost(20000, MILLISECONDS)
                 .await("MID signing result")
                 .until(isMidFinished(flow, signatureId));
 

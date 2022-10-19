@@ -1,21 +1,14 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.common.session.AsicContainerSessionHolder;
+import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.digidoc4j.Configuration;
-import org.digidoc4j.Container;
-import org.digidoc4j.DataFile;
-import org.digidoc4j.DataToSign;
-import org.digidoc4j.DigestAlgorithm;
-import org.digidoc4j.Signature;
-import org.digidoc4j.SignatureBuilder;
-import org.digidoc4j.SignatureParameters;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.digidoc4j.*;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -26,38 +19,39 @@ import java.util.stream.Collectors;
 
 @Service
 @Profile("datafileContainer")
+@RequiredArgsConstructor
 public class AsicContainerSigningService extends ContainerSigningService implements AsicSessionHolder {
-    private Configuration configuration;
+    private final Configuration configuration;
 
     @Override
-    public DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
-        AsicContainerSessionHolder asicContainerSessionHolder = (AsicContainerSessionHolder) session;
-        Container container = ContainerUtil.createContainer(asicContainerSessionHolder.getContainer(), configuration);
+    protected DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
+        AsicContainerSession asicContainerSession = (AsicContainerSession) session;
+        Container container = ContainerUtil.createContainer(asicContainerSession.getContainer(), configuration);
 
         SignatureBuilder signatureBuilder = buildSignatureBuilder(container, signatureParameters);
         return signatureBuilder.buildDataToSign();
     }
 
     @Override
-    public Session getSession(String containerId) {
+    protected Session getSession(String containerId) {
         return getSessionHolder(containerId);
     }
 
     @Override
-    public void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
-        AsicContainerSessionHolder asicContainerSessionHolder = (AsicContainerSessionHolder) sessionHolder;
-        Container container = ContainerUtil.createContainer(asicContainerSessionHolder.getContainer(), configuration);
+    protected void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
+        AsicContainerSession asicContainerSession = (AsicContainerSession) sessionHolder;
+        Container container = ContainerUtil.createContainer(asicContainerSession.getContainer(), configuration);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         container.addSignature(signature);
         container.save(byteArrayOutputStream);
-        asicContainerSessionHolder.setContainer(byteArrayOutputStream.toByteArray());
-        asicContainerSessionHolder.addSignatureId(signatureId, Arrays.hashCode(signature.getAdESSignature()));
-        asicContainerSessionHolder.clearSigning(signatureId);
+        asicContainerSession.setContainer(byteArrayOutputStream.toByteArray());
+        asicContainerSession.addSignatureId(signatureId, Arrays.hashCode(signature.getAdESSignature()));
+        asicContainerSession.clearSigningSession(signatureId);
     }
 
     @Override
-    public void verifySigningObjectExistence(Session session) {
-        AsicContainerSessionHolder sessionHolder = (AsicContainerSessionHolder) session;
+    protected void verifySigningObjectExistence(Session session) {
+        AsicContainerSession sessionHolder = (AsicContainerSession) session;
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
         verifyContainerExistence(container);
         verifyContainerContainsNoEmptyDataFiles(container);
@@ -65,7 +59,7 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
 
     @Override
     public String generateDataFilesHash(Session session) {
-        Container container = ContainerUtil.createContainer(((AsicContainerSessionHolder) session).getContainer(), configuration);
+        Container container = ContainerUtil.createContainer(((AsicContainerSession) session).getContainer(), configuration);
         String joinedDataFiles = container.getDataFiles().stream()
                 .sorted(Comparator.comparing(DataFile::getName))
                 .map(dataFile -> dataFile.getName() + new String(dataFile.calculateDigest()))
@@ -102,11 +96,4 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
             throw new InvalidSessionDataException("Unable to sign container with empty datafiles");
         }
     }
-
-
-    @Autowired
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
 }

@@ -33,7 +33,7 @@
         <property name="cacheConfiguration">
             <list>
                 <bean class="org.apache.ignite.configuration.CacheConfiguration">
-                    <property name="name" value="CONTAINER"/>
+                    <property name="name" value="CONTAINER_SESSION"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.TouchedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
@@ -46,7 +46,33 @@
                     </property>
                 </bean>
                 <bean class="org.apache.ignite.configuration.CacheConfiguration">
-                    <property name="name" value="SIGA-AUTH-SERVICES"/>
+                    <property name="name" value="SIGNATURE_SESSION"/>
+                    <property name="expiryPolicyFactory">
+                        <bean class="javax.cache.expiry.ModifiedExpiryPolicy" factory-method="factoryOf">
+                            <constructor-arg>
+                                <bean class="javax.cache.expiry.Duration">
+                                    <constructor-arg value="SECONDS"/>
+                                    <constructor-arg value="300"/>
+                                </bean>
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="name" value="CERTIFICATE_SESSION"/>
+                    <property name="expiryPolicyFactory">
+                        <bean class="javax.cache.expiry.ModifiedExpiryPolicy" factory-method="factoryOf">
+                            <constructor-arg>
+                                <bean class="javax.cache.expiry.Duration">
+                                    <constructor-arg value="SECONDS"/>
+                                    <constructor-arg value="300"/>
+                                </bean>
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="name" value="AUTH_SERVICES"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.CreatedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>

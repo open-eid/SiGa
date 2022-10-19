@@ -7,7 +7,7 @@ import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.Signature;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -20,10 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -38,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HashcodeContainerServiceTest {
@@ -45,12 +43,15 @@ public class HashcodeContainerServiceTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
-
+    @Spy
     @InjectMocks
-    HashcodeContainerService containerService;
+    private HashcodeContainerService containerService;
 
     @Mock
     private SessionService sessionService;
+
+    @Spy
+    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
 
     @Before
     public void setUp() {
@@ -63,7 +64,8 @@ public class HashcodeContainerServiceTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        containerService.setConfiguration(Configuration.of(Configuration.Mode.TEST));
+        Mockito.doReturn(CONTAINER_ID).when(containerService).generateContainerId();
+        Mockito.when(sessionService.getSessionId(CONTAINER_ID)).thenReturn(CONTAINER_SESSION_ID);
     }
 
     @Test
@@ -129,7 +131,7 @@ public class HashcodeContainerServiceTest {
 
     @Test
     public void successfulGetSignature() throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        HashcodeContainerSession session = createHashcodeSessionHolder();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, session.getSignatures().get(0).getGeneratedSignatureId());
         Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signature.getId());
@@ -145,7 +147,7 @@ public class HashcodeContainerServiceTest {
 
     @Test
     public void successfulAddDataFile() throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        HashcodeContainerSession session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -156,7 +158,7 @@ public class HashcodeContainerServiceTest {
 
     @Test
     public void successfulRemoveDataFile() throws IOException, URISyntaxException {
-        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        HashcodeContainerSession session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -170,7 +172,7 @@ public class HashcodeContainerServiceTest {
         exceptionRule.expect(ResourceNotFoundException.class);
         exceptionRule.expectMessage("Data file named test.xml not found");
 
-        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        HashcodeContainerSession session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -214,18 +216,20 @@ public class HashcodeContainerServiceTest {
         exceptionRule.expect(DuplicateDataFileException.class);
         exceptionRule.expectMessage("Duplicate data files not allowed: test.txt");
 
-        HashcodeContainerSessionHolder session = createHashcodeSessionHolder();
+        HashcodeContainerSession session = createHashcodeSessionHolder();
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         containerService.addDataFiles(CONTAINER_ID, createHashcodeDataFileListWithOneFile());
     }
 
-    private void verifySessionServiceUpdateCalled(String expectedSessionId, Consumer<HashcodeContainerSessionHolder> sessionValidator) {
-        ArgumentCaptor<HashcodeContainerSessionHolder> sessionCaptor = ArgumentCaptor.forClass(HashcodeContainerSessionHolder.class);
-        Mockito.verify(sessionService, Mockito.times(1)).update(Mockito.eq(expectedSessionId), sessionCaptor.capture());
+    private void verifySessionServiceUpdateCalled(String expectedContainerId, Consumer<HashcodeContainerSession> sessionValidator) {
+        ArgumentCaptor<HashcodeContainerSession> sessionCaptor = ArgumentCaptor.forClass(HashcodeContainerSession.class);
+        Mockito.verify(sessionService, Mockito.times(1)).update(sessionCaptor.capture());
+        Mockito.verify(sessionService, Mockito.times(1)).getSessionId(eq(expectedContainerId));
+        HashcodeContainerSession updatedSession = sessionCaptor.getValue();
         Mockito.verifyNoMoreInteractions(sessionService);
 
-        sessionValidator.accept(sessionCaptor.getValue());
+        sessionValidator.accept(updatedSession);
     }
 
     private byte[] getFile(String fileName) throws IOException, URISyntaxException {

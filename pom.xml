@@ -47,7 +47,7 @@
         <digidoc4j.version>5.0.0</digidoc4j.version>
         <guava.version>31.1-jre</guava.version>
         <h2.version>2.1.210</h2.version>
-        <ignite.version>2.12.0</ignite.version>
+        <ignite.version>2.14.0</ignite.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <jaxb-runtime.version>3.0.2</jaxb-runtime.version>
         <json.version>20220320</json.version>
@@ -56,6 +56,8 @@
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <cxf-wadl2java-plugin.version>3.5.0</cxf-wadl2java-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <spring-boot.build-image.builder>paketobuildpacks/builder:tiny</spring-boot.build-image.builder>
+        <spring-boot.build-image.imageName>${project.artifactId}:latest</spring-boot.build-image.imageName>
     </properties>
 
     <dependencies>

@@ -4,7 +4,7 @@ import ee.openeid.siga.auth.model.SigaService;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.model.ServiceType;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,12 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CacheConfig
+@RequiredArgsConstructor
 public class SigaUserDetailsService implements UserDetailsService {
+    private final ServiceRepository serviceRepository;
 
-    @Autowired
-    private ServiceRepository serviceRepository;
-
-    @Cacheable(cacheNames = {"SIGA-AUTH-SERVICES"})
+    @Cacheable(cacheNames = {"AUTH_SERVICES"})
     @Override
     @Transactional
     public SigaUserDetails loadUserByUsername(String serviceUuid) {

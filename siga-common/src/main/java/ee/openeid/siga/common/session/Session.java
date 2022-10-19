@@ -1,6 +1,7 @@
 package ee.openeid.siga.common.session;
 
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 public interface Session {
     String getClientName();
@@ -11,21 +12,27 @@ public interface Session {
 
     String getSessionId();
 
-    void addDataToSign(String signatureId, DataToSignHolder dataToSign);
+    void addSignatureSession(String signatureId, SignatureSession signatureSession);
 
-    void addCertificateSessionId(String certificateId, String sessionId);
+    void addCertificateSession(String certificateId, CertificateSession certificateSession);
 
-    String getCertificateSessionId(String certificateId);
+    CertificateSession getCertificateSession(String certificateId);
 
     void addCertificate(String documentNumber, X509Certificate certificate);
 
     X509Certificate getCertificate(String documentNumber);
 
-    DataToSignHolder getDataToSignHolder(String signatureId);
+    SignatureSession getSignatureSession(String signatureId);
+    Map<String, SignatureSession> getSignatureSessions();
+    void setSignatureSessions(Map<String, SignatureSession> signatureSessions);
+    Map<String, CertificateSession> getCertificateSessions();
+    void setCertificateSessions(Map<String, CertificateSession> certificateSessions);
+    SessionStatus getSignatureSessionStatus(String signatureId);
 
-    DataToSignHolder clearSigning(String signatureId);
+    void clearSigningSession(String signatureId);
+    void removeSigningSession(String signatureId);
 
-    String clearCertificateSessionId(String certificateId);
+    void removeCertificateSession(String certificateId);
 
     X509Certificate clearCertificate(String documentNumber);
 }

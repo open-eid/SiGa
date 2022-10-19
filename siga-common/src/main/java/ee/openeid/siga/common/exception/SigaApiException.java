@@ -2,18 +2,18 @@ package ee.openeid.siga.common.exception;
 
 import lombok.Getter;
 
-public abstract class SigaApiException extends RuntimeException {
+public class SigaApiException extends RuntimeException {
 
     @Getter
     private final String errorCode;
 
-    public SigaApiException(String errorCode, String errorMessage, Exception cause) {
+    public SigaApiException(ErrorResponseCode errorCode, String errorMessage, Exception cause) {
         super(errorMessage, cause);
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.name();
     }
 
-    public SigaApiException(String errorCode, String errorMessage) {
+    public SigaApiException(ErrorResponseCode errorCode, String errorMessage) {
         super(errorMessage);
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.name();
     }
 }

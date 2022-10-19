@@ -15,6 +15,7 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse
 import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdCertificateChoiceStatusResponse;
 import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -28,15 +29,10 @@ import java.util.List;
 
 @RestController
 @Profile("smartId")
+@RequiredArgsConstructor
 public class SmartIdHashcodeContainerController {
-
-    private HashcodeContainerSigningService signingService;
+    private final HashcodeContainerSigningService signingService;
     private final RequestValidator validator;
-
-    public SmartIdHashcodeContainerController(HashcodeContainerSigningService signingService, RequestValidator validator) {
-        this.signingService = signingService;
-        this.validator = validator;
-    }
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_CERTIFICATE_CHOICE_INIT)
     @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,13 +59,12 @@ public class SmartIdHashcodeContainerController {
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
 
-        CertificateStatus status = signingService.processSmartIdCertificateStatus(containerId, certificateId);
+        CertificateStatus status = signingService.getSmartIdCertificateStatus(containerId, certificateId);
         GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = new GetHashcodeContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
         return response;
     }
-
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_SIGNING_INIT)
     @PostMapping(value = "/hashcodecontainers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,7 +98,7 @@ public class SmartIdHashcodeContainerController {
             @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.processSmartIdStatus(containerId, signatureId);
+        String status = signingService.getSmartIdSignatureStatus(containerId, signatureId);
 
         GetHashcodeContainerSmartIdSigningStatusResponse response = new GetHashcodeContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);
@@ -119,5 +114,4 @@ public class SmartIdHashcodeContainerController {
         return RequestTransformer.transformSmartIdInformation(null, request.getCountry(),
                 null, request.getPersonIdentifier());
     }
-
 }

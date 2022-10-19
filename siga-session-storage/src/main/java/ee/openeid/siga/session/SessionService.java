@@ -1,64 +1,81 @@
 package ee.openeid.siga.session;
 
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
+import ee.openeid.siga.common.session.CertificateSession;
 import ee.openeid.siga.common.session.Session;
+import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.session.configuration.SessionConfigurationProperties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CachePeekMode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.cache.Cache;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-@EnableConfigurationProperties({SessionConfigurationProperties.class})
 @Component
+@EnableConfigurationProperties({SessionConfigurationProperties.class})
+@RequiredArgsConstructor
 public class SessionService {
-    Ignite ignite;
-    private SessionConfigurationProperties sessionConfigurationProperties;
+    private final Ignite ignite;
+    private final SessionConfigurationProperties sessionConfigurationProperties;
 
     public Session getContainer(String containerId) {
         String sessionId = getSessionId(containerId);
-        Session container = Optional.ofNullable(getContainerConfigCache().get(sessionId))
+        return getContainerBySessionId(sessionId);
+    }
+
+    public Session getContainerBySessionId(String sessionId) {
+        Session container = Optional.ofNullable(getContainerCache().get(sessionId))
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        log.info("Found container with container ID [{}]", containerId);
+        log.info("Found container with container ID [{}]", container.getSessionId());
+        Map<String, SignatureSession> signatureSessions = getSignatureSessionCache().get(sessionId);
+        container.setSignatureSessions(signatureSessions);
+        Map<String, CertificateSession> certificateSessions = getCertificateSessionCache().get(sessionId);
+        container.setCertificateSessions(certificateSessions);
         return container;
     }
 
-    public void update(String containerId, Session session) {
-        String sessionId = getSessionId(containerId);
-        getContainerConfigCache().put(sessionId, session);
+    public void update(Session session) {
+        getContainerCache().put(session.getSessionId(), session);
+        getSignatureSessionCache().put(session.getSessionId(), session.getSignatureSessions());
+        getCertificateSessionCache().put(session.getSessionId(), session.getCertificateSessions());
     }
 
     public void remove(String containerId) {
         String sessionId = getSessionId(containerId);
-        getContainerConfigCache().remove(sessionId);
+        removeBySessionId(sessionId);
     }
 
-    private Cache<String, Session> getContainerConfigCache() {
-        return ignite.getOrCreateCache(CacheName.CONTAINER.name());
+    public void removeBySessionId(String sessionId) {
+        getContainerCache().remove(sessionId);
+        getSignatureSessionCache().remove(sessionId);
+        getCertificateSessionCache().remove(sessionId);
+    }
+
+    private Cache<String, Session> getContainerCache() {
+        return ignite.getOrCreateCache(CacheName.CONTAINER_SESSION.name());
+    }
+
+    private Cache<String, Map<String, SignatureSession>> getSignatureSessionCache() {
+        return ignite.getOrCreateCache(CacheName.SIGNATURE_SESSION.name());
+    }
+
+    private Cache<String, Map<String, CertificateSession>> getCertificateSessionCache() {
+        return ignite.getOrCreateCache(CacheName.CERTIFICATE_SESSION.name());
     }
 
     public int getCacheSize() {
-        return ignite.cache(CacheName.CONTAINER.name()).size(CachePeekMode.ALL);
+        return ignite.cache(CacheName.CONTAINER_SESSION.name()).size(CachePeekMode.ALL);
     }
 
-    private String getSessionId(String containerId) {
+    public String getSessionId(String containerId) {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return sessionConfigurationProperties.getApplicationCacheVersion() + "_" + user + "_" + containerId;
-    }
-
-    @Autowired
-    protected void setIgnite(Ignite ignite) {
-        this.ignite = ignite;
-    }
-
-    @Autowired
-    protected void setSessionConfigurationProperties(SessionConfigurationProperties sessionConfigurationProperties) {
-        this.sessionConfigurationProperties = sessionConfigurationProperties;
     }
 }

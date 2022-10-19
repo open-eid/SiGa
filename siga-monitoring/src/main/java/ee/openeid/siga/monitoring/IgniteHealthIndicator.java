@@ -1,22 +1,17 @@
 package ee.openeid.siga.monitoring;
 
 import ee.openeid.siga.session.SessionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class IgniteHealthIndicator implements HealthIndicator {
-
     private final SessionService sessionService;
-
-    @Autowired
-    public IgniteHealthIndicator(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
 
     @Override
     public Health health() {

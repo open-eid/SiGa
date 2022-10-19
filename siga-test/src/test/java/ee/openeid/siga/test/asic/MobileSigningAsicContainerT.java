@@ -177,7 +177,7 @@ public class MobileSigningAsicContainerT extends TestBase {
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         response = pollForMidSigning(flow, signatureId);
 
-        expectMidStatus(response, SIM_ERROR);
+        expectMidStatus(response, SENDING_ERROR);
     }
 
     @Test

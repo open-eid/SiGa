@@ -6,24 +6,18 @@ import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.ServiceType;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.digidoc4j.Configuration;
-import org.digidoc4j.DataToSign;
-import org.digidoc4j.DetachedXadesSignatureBuilder;
-import org.digidoc4j.DigestAlgorithm;
-import org.digidoc4j.DigestDataFile;
-import org.digidoc4j.Signature;
-import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.*;
 import org.digidoc4j.exceptions.TechnicalException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -35,40 +29,40 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class HashcodeContainerSigningService extends ContainerSigningService implements HashcodeSessionHolder {
-
-    private Configuration configuration;
+    private final Configuration configuration;
 
     @Override
-    public DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
-        HashcodeContainerSessionHolder sessionHolder = (HashcodeContainerSessionHolder) session;
+    protected DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {
+        HashcodeContainerSession sessionHolder = (HashcodeContainerSession) session;
         DetachedXadesSignatureBuilder signatureBuilder = buildDetachedXadesSignatureBuilder(sessionHolder.getDataFiles(), signatureParameters);
         return signatureBuilder.buildDataToSign();
     }
 
     @Override
-    public Session getSession(String containerId) {
+    protected Session getSession(String containerId) {
         return getSessionHolder(containerId);
     }
 
     @Override
-    public void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
+    protected void addSignatureToSession(Session sessionHolder, Signature signature, String signatureId) {
         HashcodeSignatureWrapper signatureWrapper = createSignatureWrapper(signatureId, signature.getAdESSignature());
-        HashcodeContainerSessionHolder hashcodeContainerSessionHolder = (HashcodeContainerSessionHolder) sessionHolder;
-        hashcodeContainerSessionHolder.getSignatures().add(signatureWrapper);
-        hashcodeContainerSessionHolder.clearSigning(signatureId);
+        HashcodeContainerSession hashcodeContainerSession = (HashcodeContainerSession) sessionHolder;
+        hashcodeContainerSession.getSignatures().add(signatureWrapper);
+        hashcodeContainerSession.clearSigningSession(signatureId);
     }
 
     @Override
-    public void verifySigningObjectExistence(Session session) {
-        HashcodeContainerSessionHolder hashcodeSession = (HashcodeContainerSessionHolder) session;
+    protected void verifySigningObjectExistence(Session session) {
+        HashcodeContainerSession hashcodeSession = (HashcodeContainerSession) session;
         verifyDataFileExistence(hashcodeSession);
         verifyNoEmptyDataFiles(hashcodeSession);
     }
 
     @Override
     public String generateDataFilesHash(Session session) {
-        String joinedDataFiles = ((HashcodeContainerSessionHolder) session).getDataFiles().stream()
+        String joinedDataFiles = ((HashcodeContainerSession) session).getDataFiles().stream()
                 .sorted(Comparator.comparing(HashcodeDataFile::getFileName))
                 .map(dataFile -> dataFile.getFileName() + dataFile.getFileHashSha256())
                 .collect(Collectors.joining());
@@ -154,13 +148,13 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
         return Base64.getDecoder().decode(fileHash.getBytes());
     }
 
-    private static void verifyDataFileExistence(HashcodeContainerSessionHolder sessionHolder) {
+    private static void verifyDataFileExistence(HashcodeContainerSession sessionHolder) {
         if (sessionHolder.getDataFiles().isEmpty()) {
             throw new InvalidSessionDataException("Unable to create signature. Data files must be added to container");
         }
     }
 
-    private static void verifyNoEmptyDataFiles(HashcodeContainerSessionHolder sessionHolder) {
+    private static void verifyNoEmptyDataFiles(HashcodeContainerSession sessionHolder) {
         if (sessionHolder.getDataFiles().stream().anyMatch(HashcodeContainerSigningService::isHashcodeDataFileEmpty)) {
             throw new InvalidSessionDataException("Unable to sign container with empty datafiles");
         }
@@ -169,10 +163,4 @@ public class HashcodeContainerSigningService extends ContainerSigningService imp
     private static boolean isHashcodeDataFileEmpty(HashcodeDataFile hashcodeDataFile) {
         return (hashcodeDataFile.getFileSize() == null) || (hashcodeDataFile.getFileSize() < 1);
     }
-
-    @Autowired
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
 }

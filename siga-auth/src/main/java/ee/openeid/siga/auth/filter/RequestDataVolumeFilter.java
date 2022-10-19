@@ -4,14 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.HttpServletFilterResponseWrapper;
 import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.model.SigaService;
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -27,18 +29,16 @@ import java.util.Optional;
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SERVICE_UUID;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class RequestDataVolumeFilter extends OncePerRequestFilter {
-    private int maxRequestSize;
-    private ServiceRepository serviceRepository;
-    private ConnectionRepository connectionRepository;
     private static final long LIMITLESS = -1;
     private static final String OBSERVABLE_HTTP_METHOD = "POST";
     private static final String ASIC_CONTAINERS_ENDPOINT = "/containers/";
     private static final String HASHCODE_CONTAINERS_ENDPOINT = "/hashcodecontainers/";
-
-    public RequestDataVolumeFilter(int maxRequestSize) {
-        this.maxRequestSize = maxRequestSize;
-    }
+    private final ServiceRepository serviceRepository;
+    private final ConnectionRepository connectionRepository;
+    private final SecurityConfigurationProperties configurationProperties;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -95,7 +95,7 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     }
 
     private boolean validateRequestSize(long requestSize, HttpServletResponse response) throws IOException {
-        if (requestSize > maxRequestSize) {
+        if (requestSize > configurationProperties.getMaxFileSize()) {
             log.warn("Request max size exceeded. Request size:{}", requestSize);
             throwError(response, "Request max size exceeded", ErrorResponseCode.REQUEST_SIZE_LIMIT_EXCEPTION);
             return false;
@@ -205,20 +205,5 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             return false;
         }
         return true;
-    }
-
-    @Autowired
-    public void setServiceRepository(ServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
-    }
-
-    @Autowired
-    public void setConnectionRepository(ConnectionRepository connectionRepository) {
-        this.connectionRepository = connectionRepository;
-    }
-
-
-    public void setMaxRequestSize(int maxRequestSize) {
-        this.maxRequestSize = maxRequestSize;
     }
 }

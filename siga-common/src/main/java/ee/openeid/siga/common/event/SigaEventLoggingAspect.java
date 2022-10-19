@@ -1,6 +1,7 @@
 package ee.openeid.siga.common.event;
 
 import ee.openeid.siga.common.exception.SigaApiException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jxpath.ClassFunctions;
 import org.apache.commons.jxpath.JXPathContext;
@@ -10,7 +11,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,13 +28,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Slf4j
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class SigaEventLoggingAspect {
-
-    @Autowired
-    private SigaEventLogger sigaEventLogger;
-
-    @Autowired
-    private ConfigurableBeanFactory configurableBeanFactory;
+    private final SigaEventLogger sigaEventLogger;
+    private final ConfigurableBeanFactory configurableBeanFactory;
 
     @Pointcut("@annotation(sigaEventLog)")
     public void callAt(SigaEventLog sigaEventLog) {
@@ -96,7 +93,7 @@ public class SigaEventLoggingAspect {
                 boolean parameterIsPrimitiveType = param.fields().length == 0;
                 if (parameterIsPrimitiveType) {
                     String parameterName = isBlank(param.name()) ? "parameter_" + i : param.name();
-                    startEvent.addEventParameter(parameterName, arg.toString());
+                    startEvent.addEventParameter(parameterName, arg != null ? arg.toString() : "");
                 } else {
                     logObject(param.fields(), arg, startEvent, endEvent);
                 }
@@ -120,7 +117,7 @@ public class SigaEventLoggingAspect {
                 }
             }
         } catch (JXPathException e) {
-            log.error("XPath not found when logging method execution: ", e.getMessage());
+            log.error("XPath not found when logging method execution: {}", e.getMessage());
         }
     }
 

@@ -10,8 +10,8 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.GetHashcodeContainerMobileIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,18 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Profile("mobileId")
 @RestController
+@Profile("mobileId")
+@RequiredArgsConstructor
 public class MobileIdHashcodeContainerController {
-
     private final HashcodeContainerSigningService signingService;
     private final RequestValidator validator;
-
-    @Autowired
-    public MobileIdHashcodeContainerController(HashcodeContainerSigningService signingService, RequestValidator validator) {
-        this.signingService = signingService;
-        this.validator = validator;
-    }
 
     @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_INIT)
     @PostMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,7 +58,7 @@ public class MobileIdHashcodeContainerController {
     public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.processMobileStatus(containerId, signatureId);
+        String status = signingService.getMobileIdSignatureStatus(containerId, signatureId);
 
         GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

@@ -5,22 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -40,18 +38,18 @@ public class SivaClientTest {
     public ExpectedException exceptionRule = ExpectedException.none();
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
+    @InjectMocks
+    private SivaClient sivaClient;
+    @Spy
+    private RestTemplate restTemplate = new RestTemplate();
     @Mock
     private SivaClientConfigurationProperties sivaConfigurationProperties;
-    private SivaClient sivaClient;
     private String requestUrl;
 
     @Before
     public void setUp() {
         requestUrl = "http://localhost:" + wireMockRule.port();
         when(sivaConfigurationProperties.getUrl()).thenReturn(requestUrl);
-        sivaClient = new SivaClient();
-        sivaClient.setRestTemplate(new RestTemplate());
-        sivaClient.setConfigurationProperties(sivaConfigurationProperties);
     }
 
     @After
@@ -78,7 +76,7 @@ public class SivaClientTest {
         exceptionRule.expectMessage("SIVA service error");
         RestTemplate restTemplate = mock(RestTemplate.class);
         when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));
-        sivaClient.setRestTemplate(restTemplate);
+        sivaClient = new SivaClient(restTemplate, sivaConfigurationProperties);
         sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
     }
 

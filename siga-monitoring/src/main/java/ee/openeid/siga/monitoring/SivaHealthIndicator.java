@@ -2,28 +2,21 @@ package ee.openeid.siga.monitoring;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-@Component
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class SivaHealthIndicator implements HealthIndicator {
     private static final String HEALTH_ENDPOINT = "/monitoring/health";
-
     private final RestTemplate restTemplate;
     private final SivaClientConfigurationProperties configProperties;
-
-    @Autowired
-    public SivaHealthIndicator(RestTemplate restTemplate, SivaClientConfigurationProperties configProperties) {
-        this.restTemplate = restTemplate;
-        this.configProperties = configProperties;
-    }
-
     @Override
     public Health health() {
         return createSivaHealthBuilder().build();

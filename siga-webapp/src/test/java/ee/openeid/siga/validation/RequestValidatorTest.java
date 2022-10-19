@@ -7,8 +7,8 @@ import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.CertificateUtil;
-import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
-import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.webapp.json.CreateContainerRequest;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
@@ -53,10 +53,10 @@ public class RequestValidatorTest {
     private RequestValidator validator;
 
     @Mock
-    private SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    private SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
 
     @Mock
-    private MidRestConfigurationProperties midRestConfigurationProperties;
+    private MobileIdClientConfigurationProperties mobileIdClientConfigurationProperties;
 
     @Mock
     private SecurityConfigurationProperties securityConfigurationProperties;
@@ -66,9 +66,9 @@ public class RequestValidatorTest {
 
     @Before
     public void setup() {
-        Mockito.when(midRestConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        Mockito.when(smartIdServiceConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        validator = new RequestValidator(midRestConfigurationProperties, smartIdServiceConfigurationProperties, securityConfigurationProperties);
+        Mockito.when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        Mockito.when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        validator = new RequestValidator(mobileIdClientConfigurationProperties, smartIdClientConfigurationProperties, securityConfigurationProperties);
     }
 
     private static MobileIdInformation getMobileInformationRequest() {

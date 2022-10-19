@@ -5,7 +5,7 @@ import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.ServiceType;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.service.signature.client.SivaClient;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
@@ -13,8 +13,8 @@ import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.webapp.json.SignatureScope;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import ee.openeid.siga.webapp.json.Warning;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Service
+@RequiredArgsConstructor
 public class HashcodeContainerValidationService implements HashcodeSessionHolder {
 
     private static final String XML_BEGINNING_TAG = "<?xml";
     private static final String HASHCODE_CONTENT_TYPE = "ContentType=\"HASHCODE\"";
     private static final String DDOC_CONTAINER_NAME = "container.ddoc";
-    private SivaClient sivaClient;
-    private SessionService sessionService;
+    private final SivaClient sivaClient;
+    private final SessionService sessionService;
 
     public ValidationConclusion validateContainer(String container, ServiceType serviceType) {
         byte[] decodedContainer = Base64.getDecoder().decode(container.getBytes());
@@ -51,7 +52,7 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
     }
 
     public ValidationConclusion validateExistingContainer(String containerId) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         validateContainerSignatures(sessionHolder.getSignatures());
         return createHashcodeContainerValidationConclusion(sessionHolder.getSignatures(), sessionHolder.getDataFiles());
     }
@@ -102,18 +103,8 @@ public class HashcodeContainerValidationService implements HashcodeSessionHolder
         return sivaClient.validateContainer(DDOC_CONTAINER_NAME, container);
     }
 
-    @Autowired
-    protected void setSivaClient(SivaClient sivaClient) {
-        this.sivaClient = sivaClient;
-    }
-
     @Override
     public SessionService getSessionService() {
         return sessionService;
-    }
-
-    @Autowired
-    public void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
     }
 }

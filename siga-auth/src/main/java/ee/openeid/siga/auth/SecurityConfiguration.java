@@ -7,7 +7,7 @@ import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEventLogger;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -36,25 +36,17 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @EnableJpaRepositories
 @EnableConfigurationProperties(SecurityConfigurationProperties.class)
+@RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(new AntPathRequestMatcher("/siga.wadl"), new AntPathRequestMatcher("/siga.xsd"),
             new AntPathRequestMatcher("/actuator/health"), new AntPathRequestMatcher("/actuator/heartbeat"), new AntPathRequestMatcher("/actuator/version"));
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
-
-    @Autowired
-    private SecurityConfigurationProperties configurationProperties;
-
-    @Autowired
-    private HmacAuthenticationProvider hmacAuthenticationProvider;
-
-    @Autowired
-    private MethodFilter methodFilter;
-
-    @Autowired
-    private SigaEventLoggingFilter eventsLoggingFilter;
-
-    @Autowired
-    private SigaEventLogger sigaEventLogger;
+    private final SecurityConfigurationProperties configurationProperties;
+    private final HmacAuthenticationProvider hmacAuthenticationProvider;
+    private final MethodFilter methodFilter;
+    private final SigaEventLoggingFilter eventsLoggingFilter;
+    private final SigaEventLogger sigaEventLogger;
+    private final RequestDataVolumeFilter requestDataVolumeFilter;
 
     @Override
     public void configure(final WebSecurity web) {
@@ -79,7 +71,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
                 .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(requestDataVolumeFilter(), SecurityContextHolderAwareRequestFilter.class)
+                .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PUBLIC_URLS).permitAll()
@@ -99,14 +91,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    FilterRegistrationBean disableAutoRegistration(final HmacAuthenticationFilter filter) {
-        final FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+    FilterRegistrationBean<HmacAuthenticationFilter> disableAutoRegistration(final HmacAuthenticationFilter filter) {
+        final FilterRegistrationBean<HmacAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
-    }
-
-    @Bean
-    RequestDataVolumeFilter requestDataVolumeFilter(){
-        return new RequestDataVolumeFilter(configurationProperties.getMaxFileSize());
     }
 }

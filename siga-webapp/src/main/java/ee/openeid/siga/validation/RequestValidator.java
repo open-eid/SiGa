@@ -11,8 +11,8 @@ import ee.openeid.siga.common.util.Base64Util;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.common.util.FileUtil;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
-import ee.openeid.siga.service.signature.mobileid.midrest.MidRestConfigurationProperties;
-import ee.openeid.siga.service.signature.smartid.SmartIdServiceConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +35,9 @@ import java.util.stream.Stream;
 public class RequestValidator {
 
     @NonNull
-    private final MidRestConfigurationProperties midRestConfigurationProperties;
+    private final MobileIdClientConfigurationProperties mobileIdClientConfigurationProperties;
     @NonNull
-    private final SmartIdServiceConfigurationProperties smartIdServiceConfigurationProperties;
+    private final SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
     @NonNull
     private final SecurityConfigurationProperties securityConfigurationProperties;
 
@@ -151,7 +150,7 @@ public class RequestValidator {
     }
 
     public void validateSmartIdInformationForCertChoice(SmartIdInformation smartIdInformation) {
-        validateCountry(smartIdInformation.getCountry(), smartIdServiceConfigurationProperties.getAllowedCountries());
+        validateCountry(smartIdInformation.getCountry(), smartIdClientConfigurationProperties.getAllowedCountries());
         validatePersonIdentifier(smartIdInformation.getPersonIdentifier());
     }
 
@@ -176,7 +175,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid phone No.");
         }
         PhoneNumberUtil.CountryCallingCode countryNumber = PhoneNumberUtil.CountryCallingCode.getCountryByPrefix(phoneNo.substring(0, 4));
-        if (countryNumber == null || !midRestConfigurationProperties.getAllowedCountries().contains(countryNumber.name())) {
+        if (countryNumber == null || !mobileIdClientConfigurationProperties.getAllowedCountries().contains(countryNumber.name())) {
             throw new RequestValidationException("Invalid international calling code");
         }
     }
@@ -213,7 +212,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid Smart-Id documentNumber");
         }
         String country = documentNumber.substring(3, 5);
-        if (!smartIdServiceConfigurationProperties.getAllowedCountries().contains(country)) {
+        if (!smartIdClientConfigurationProperties.getAllowedCountries().contains(country)) {
             throw new RequestValidationException("Invalid Smart-Id country inside documentNumber");
         }
     }

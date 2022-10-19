@@ -181,7 +181,7 @@ public class MobileSigningHashcodeContainerT extends TestBase {
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         response = pollForMidSigning(flow, signatureId);
 
-        expectMidStatus(response, SIM_ERROR);
+        expectMidStatus(response, SENDING_ERROR);
     }
 
     @Test

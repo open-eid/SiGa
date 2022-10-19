@@ -136,18 +136,16 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected CertificateStatus getHashcodeCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
         GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class);
-        CertificateStatus status = new CertificateStatus();
-        status.setStatus(response.getSidStatus());
-        status.setDocumentNumber(response.getDocumentNumber());
-        return status;
+        return CertificateStatus.builder()
+                .status(response.getSidStatus())
+                .documentNumber(response.getDocumentNumber()).build();
     }
 
     protected CertificateStatus getCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
         GetContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/containers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetContainerSmartIdCertificateChoiceStatusResponse.class);
-        CertificateStatus status = new CertificateStatus();
-        status.setStatus(response.getSidStatus());
-        status.setDocumentNumber(response.getDocumentNumber());
-        return status;
+        return CertificateStatus.builder()
+                .status(response.getSidStatus())
+                .documentNumber(response.getDocumentNumber()).build();
     }
 
     protected String getHashcodeSmartIdStatus(String containerId, String signatureId) throws Exception {

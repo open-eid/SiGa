@@ -1,10 +1,10 @@
 package ee.openeid.siga.common.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -16,14 +16,11 @@ import org.springframework.web.client.RestTemplate;
 import javax.net.ssl.SSLContext;
 
 @Configuration
-@EnableConfigurationProperties({
-        SivaClientConfigurationProperties.class
-})
+@EnableConfigurationProperties({SivaClientConfigurationProperties.class})
+@RequiredArgsConstructor
 public class SivaClientConfiguration {
-
-    private SivaClientConfigurationProperties sivaClientConfigurationProperties;
-
-    private ResourceLoader resourceLoader;
+    private final SivaClientConfigurationProperties sivaClientConfigurationProperties;
+    private final ResourceLoader resourceLoader;
 
     @Bean
     public RestTemplate restTemplate() throws Exception {
@@ -36,15 +33,5 @@ public class SivaClientConfiguration {
 
         return restTemplateBuilder
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(httpClient)).build();
-    }
-
-    @Autowired
-    public void setSivaClientConfigurationProperties(SivaClientConfigurationProperties sivaClientConfigurationProperties) {
-        this.sivaClientConfigurationProperties = sivaClientConfigurationProperties;
-    }
-
-    @Autowired
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
     }
 }

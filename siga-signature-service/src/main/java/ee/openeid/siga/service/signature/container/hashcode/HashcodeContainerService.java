@@ -9,16 +9,16 @@ import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.Signature;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.model.MimeType;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;
 import org.digidoc4j.exceptions.DigiDoc4JException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class HashcodeContainerService implements HashcodeSessionHolder {
-
-    private SessionService sessionService;
-    private Configuration configuration;
+    private final SessionService sessionService;
+    private final Configuration configuration;
 
     public String createContainer(List<HashcodeDataFile> dataFiles) {
 
@@ -42,22 +42,22 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
             hashcodeContainer.addDataFile(dataFile);
         });
 
-        String sessionId = UUIDGenerator.generateUUID();
-        sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
-        return sessionId;
+        String containerId = generateContainerId();
+        sessionService.update(transformContainerToSession(containerId, hashcodeContainer));
+        return containerId;
     }
 
     public String uploadContainer(String container) {
-        String sessionId = UUIDGenerator.generateUUID();
+        String containerId = generateContainerId();
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         HashcodeContainer hashcodeContainer = new HashcodeContainer(sigaUserDetails.getServiceType());
         hashcodeContainer.open(Base64.getDecoder().decode(container.getBytes()));
-        sessionService.update(sessionId, transformContainerToSession(sessionId, hashcodeContainer));
-        return sessionId;
+        sessionService.update(transformContainerToSession(containerId, hashcodeContainer));
+        return containerId;
     }
 
     public String getContainer(String containerId) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         sessionHolder.getSignatures().forEach(signatureWrapper -> hashcodeContainer.getSignatures().add(signatureWrapper));
@@ -77,14 +77,14 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     }
 
     public List<Signature> getSignatures(String containerId) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         List<Signature> signatures = new ArrayList<>();
         sessionHolder.getSignatures().forEach(signatureWrapper -> signatures.add(transformSignature(signatureWrapper)));
         return signatures;
     }
 
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         Optional<HashcodeSignatureWrapper> signatureWrapper = sessionHolder.getSignatures().stream()
                 .filter(wrapper -> wrapper.getGeneratedSignatureId().equals(signatureId))
                 .findAny();
@@ -96,30 +96,30 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
     }
 
     public List<HashcodeDataFile> getDataFiles(String containerId) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         return sessionHolder.getDataFiles();
     }
 
     public Result addDataFiles(String containerId, List<HashcodeDataFile> dataFiles) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
         dataFiles.forEach(dataFile -> {
             validateNotDuplicateFile(dataFile, sessionHolder);
             updateMimeTypeIfNotSet(dataFile);
         });
         sessionHolder.getDataFiles().addAll(dataFiles);
-        sessionService.update(containerId, sessionHolder);
+        sessionService.update(sessionHolder);
         return Result.OK;
     }
 
     public Result removeDataFile(String containerId, String datafileName) {
-        HashcodeContainerSessionHolder sessionHolder = getSessionHolder(containerId);
+        HashcodeContainerSession sessionHolder = getSessionHolder(containerId);
         validateIfSessionMutable(sessionHolder);
         if (sessionHolder.getDataFiles().stream().noneMatch(dataFile -> dataFile.getFileName().equals(datafileName))) {
             throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
         }
         sessionHolder.getDataFiles().removeIf(dataFile -> dataFile.getFileName().equals(datafileName));
-        sessionService.update(containerId, sessionHolder);
+        sessionService.update(sessionHolder);
         return Result.OK;
     }
 
@@ -146,16 +146,17 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
         return signature;
     }
 
-    private void validateIfSessionMutable(HashcodeContainerSessionHolder session) {
+    private void validateIfSessionMutable(HashcodeContainerSession session) {
         if (!session.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signature(s)");
         }
     }
 
-    private HashcodeContainerSessionHolder transformContainerToSession(String sessionId, HashcodeContainer container) {
+    private HashcodeContainerSession transformContainerToSession(String containerId, HashcodeContainer container) {
+        String sessionId = sessionService.getSessionId(containerId);
         SigaUserDetails authenticatedUser = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return HashcodeContainerSessionHolder.builder()
+        return HashcodeContainerSession.builder()
                 .sessionId(sessionId)
                 .clientName(authenticatedUser.getClientName())
                 .serviceName(authenticatedUser.getServiceName())
@@ -165,7 +166,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
                 .build();
     }
 
-    private void validateNotDuplicateFile(HashcodeDataFile dataFileToAdd, HashcodeContainerSessionHolder sessionHolder) {
+    private void validateNotDuplicateFile(HashcodeDataFile dataFileToAdd, HashcodeContainerSession sessionHolder) {
         sessionHolder.getDataFiles().stream()
                 .filter(dataFile -> dataFile.getFileName().equals(dataFileToAdd.getFileName()))
                 .findFirst()
@@ -186,14 +187,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
         return sessionService;
     }
 
-    @Autowired
-    public void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
+    String generateContainerId() {
+        return UUIDGenerator.generateUUID();
     }
-
-    @Autowired
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
 }

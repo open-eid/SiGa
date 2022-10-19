@@ -2,6 +2,7 @@ package ee.openeid.siga.auth.filter;
 
 import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.model.SigaService;
+import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import org.json.JSONArray;
@@ -11,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockFilterChain;
@@ -36,6 +38,8 @@ public class RequestDataVolumeFilterTest {
     private ConnectionRepository connectionRepository;
     @Mock
     private ServiceRepository serviceRepository;
+    @Mock
+    private SecurityConfigurationProperties configurationProperties;
 
     private static final String TEST_URI = "/hashcodecontainers";
     private static final int SERVICE_ID = 1;
@@ -57,9 +61,8 @@ public class RequestDataVolumeFilterTest {
             mockResponse(response);
             response.getOutputStream();
         };
-        filter = new RequestDataVolumeFilter(250);
-        filter.setConnectionRepository(connectionRepository);
-        filter.setServiceRepository(serviceRepository);
+        Mockito.when(configurationProperties.getMaxFileSize()).thenReturn(250);
+        filter = new RequestDataVolumeFilter(serviceRepository,connectionRepository, configurationProperties);
     }
 
     @Test

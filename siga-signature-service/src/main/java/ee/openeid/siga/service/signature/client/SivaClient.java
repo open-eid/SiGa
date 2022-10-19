@@ -2,20 +2,15 @@ package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
-import ee.openeid.siga.common.exception.ClientException;
-import ee.openeid.siga.common.exception.InvalidContainerException;
-import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
-import ee.openeid.siga.common.exception.InvalidSignatureException;
-import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.exception.*;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
-
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureProfile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -31,14 +26,14 @@ import java.util.List;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SivaClient {
     private static final String HASHCODE_VALIDATION_ENDPOINT = "/validateHashcode";
     private static final String VALIDATION_ENDPOINT = "/validate";
     private static final String DOCUMENT_KEY = "document";
     private static final String SIGNATURE_KEY = "signatureFiles.signature";
-
-    private RestTemplate restTemplate;
-    private SivaClientConfigurationProperties configurationProperties;
+    private final RestTemplate restTemplate;
+    private final SivaClientConfigurationProperties configurationProperties;
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
@@ -150,15 +145,4 @@ public class SivaClient {
     private HttpEntity<?> formHttpEntity(Object object) {
         return new HttpEntity<>(object);
     }
-
-    @Autowired
-    protected void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
-    @Autowired
-    protected void setConfigurationProperties(SivaClientConfigurationProperties configurationProperties) {
-        this.configurationProperties = configurationProperties;
-    }
-
 }

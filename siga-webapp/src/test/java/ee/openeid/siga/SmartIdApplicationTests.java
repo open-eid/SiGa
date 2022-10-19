@@ -71,9 +71,9 @@ public class SmartIdApplicationTests extends BaseTest {
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
 
         assertHashcodeSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
     }
 
     @Test
@@ -94,9 +94,9 @@ public class SmartIdApplicationTests extends BaseTest {
         String signatureId = startSmartIdSigning(containerId, certificateStatusHolder.get().getDocumentNumber());
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
     }
 
     @Test
@@ -115,9 +115,9 @@ public class SmartIdApplicationTests extends BaseTest {
         String signatureId = startHashcodeSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
         assertHashcodeSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
     }
 
     @Test
@@ -136,8 +136,8 @@ public class SmartIdApplicationTests extends BaseTest {
         String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));
         assertSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, .* sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/eid2016, .* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=SMART_ID_GET_SIGN_HASH_STATUS, sid_status=OK, request_url=https://sid.demo.sk.ee/smart-id-rp/v2/,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
     }
 }

@@ -4,41 +4,130 @@ services:
 
   siga-demo-application:
     image: siga-demo-application:latest
+    environment:
+      - server.port=9443
+      - server.ssl.key-store=/etc/siga-demo/siga-demo.localhost.keystore.p12
+      - siga.api.trust-store=file:/etc/siga-demo/siga-demo.truststore.p12
     ports:
-      - "8444:8444"
+      - "9443:9443"
     networks:
-      siga:
+      default:
         aliases:
           - siga-demo.localhost
-    depends_on:
-      - siga-webapp
+    volumes:
+      - ./docker/tls/siga-demo/siga-demo.localhost.keystore.p12:/etc/siga-demo/siga-demo.localhost.keystore.p12
+      - ./docker/tls/siga-demo/siga-demo.truststore.p12:/etc/siga-demo/siga-demo.truststore.p12
 
-  siga-webapp:
-    build: siga-webapp
+  siga:
+    image: nginx:latest
     ports:
       - "8443:8443"
     networks:
-      siga:
+      default:
         aliases:
-          - siga.docker.internal
+          - siga.localhost
     volumes:
-      - "siga-logs:/usr/local/tomcat/logs"
-    depends_on:
-      - ignite
+      - ./docker/tls/siga/siga.localhost.key:/var/certs/siga.localhost.key
+      - ./docker/tls/siga/siga.localhost.crt:/var/certs/siga.localhost.crt
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 
-  ignite:
-    build:
-      context: docker/docker-ignite/
+  siga-01:
+    image: siga-webapp:latest
+    environment:
+      - server.port=7443
+      - server.ssl.key-alias=siga-01.localhost
+      - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
+      - spring.datasource.platform=postgresql
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+      - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=7000
     ports:
-      - "47500:47500"
+      - "7443:7443"
+      - "7000:7000"
     networks:
-      siga:
+      default:
         aliases:
-          - ignite.docker.internal
-networks:
-  siga:
-    driver: bridge
+          - siga-01.localhost
+    volumes:
+      - ./docker/tls/siga-01/siga-01.localhost.keystore.p12:/etc/siga/siga.localhost.keystore.p12
+      - ./docker/tls/mid/mid.truststore.p12:/etc/siga/mid.truststore.p12
+      - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
+      - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
+      - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
+      - ./docker/siga-webapp/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+      - siga-logs-01:/usr/local/tomcat/logs
+
+  siga-02:
+    image: siga-webapp:latest
+    environment:
+      - server.port=7443
+      - server.ssl.key-alias=siga-02.localhost
+      - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
+      - spring.datasource.platform=postgresql
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+      - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=6000
+    ports:
+      - "6443:6443"
+      - "6000:6000"
+    networks:
+      default:
+        aliases:
+          - siga-02.localhost
+    volumes:
+      - ./docker/tls/siga-02/siga-02.localhost.keystore.p12:/etc/siga/siga.localhost.keystore.p12
+      - ./docker/tls/mid/mid.truststore.p12:/etc/siga/mid.truststore.p12
+      - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
+      - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
+      - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
+      - ./docker/siga-webapp/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
+      - siga-logs-02:/usr/local/tomcat/logs
+
+  siga-db:
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_DB=siga_db
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/siga-db/install-extensions.sql:/docker-entrypoint-initdb.d/install-extensions.sql
+
+  ignite-01:
+    image: apacheignite/ignite:2.14.0-jdk11
+    environment:
+      - CONFIG_URI=/etc/ignite/ignite-configuration.xml
+      - JVM_OPTS=
+        -Xms512m -Xmx512m -server -XX:+AggressiveOpts -XX:+UseG1GC -XX:MaxPermSize=256m -XX:+DisableExplicitGC
+        -Djava.net.preferIPv4Stack=true
+    networks:
+      default:
+        aliases:
+          - ignite-01.localhost
+    volumes:
+      - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
+
+  ignite-02:
+    image: apacheignite/ignite:2.14.0-jdk11
+    environment:
+      - CONFIG_URI=/etc/ignite/ignite-configuration.xml
+      - JVM_OPTS=
+        -Xms512m -Xmx512m -server -XX:+AggressiveOpts -XX:+UseG1GC -XX:MaxPermSize=256m -XX:+DisableExplicitGC
+        -Djava.net.preferIPv4Stack=true
+    networks:
+      default:
+        aliases:
+          - ignite-02.localhost
+    volumes:
+      - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
 
 volumes:
-  siga-logs:
-    name: siga-logs
+  siga-logs-01:
+    name: siga-logs-01
+  siga-logs-02:
+    name: siga-logs-02

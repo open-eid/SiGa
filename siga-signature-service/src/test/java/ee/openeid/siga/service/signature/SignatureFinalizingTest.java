@@ -7,8 +7,8 @@ import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningType;
-import ee.openeid.siga.common.session.DataToSignHolder;
-import ee.openeid.siga.common.session.HashcodeContainerSessionHolder;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
+import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
@@ -17,6 +17,7 @@ import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -61,7 +62,7 @@ public class SignatureFinalizingTest {
     private SessionService sessionService;
 
     @Spy
-    private Configuration configuration = new Configuration(Configuration.Mode.TEST);
+    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);;
 
     @Spy
     private SigaEventLogger sigaEventLogger;
@@ -77,8 +78,14 @@ public class SignatureFinalizingTest {
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
         SecurityContextHolder.setContext(securityContext);
         configuration.setPreferAiaOcsp(true);
-        signingService.setConfiguration(configuration);
         when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createHashcodeSessionHolder());
+        signingService.setSessionService(sessionService);
+        signingService.setSigaEventLogger(sigaEventLogger);
+    }
+
+    @AfterEach
+    public void clearLogs() {
+        sigaEventLogger.logEvents();
     }
 
     @Test
@@ -86,7 +93,6 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        sigaEventLogger.logEvents();
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
@@ -96,7 +102,6 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        sigaEventLogger.logEvents();
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
@@ -106,7 +111,6 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        sigaEventLogger.logEvents();
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
@@ -116,7 +120,6 @@ public class SignatureFinalizingTest {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        sigaEventLogger.logEvents();
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://aia.demo.sk.ee/esteid2018");
     }
@@ -163,7 +166,6 @@ public class SignatureFinalizingTest {
         });
 
         assertThat(e.getMessage(), containsString("Unable to finalize signature"));
-        sigaEventLogger.logEvents();
         SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
         assertNotNull(finalizeSignatureEvent);
@@ -189,7 +191,6 @@ public class SignatureFinalizingTest {
         });
 
         assertThat(e.getMessage(), containsString("Unable to finalize signature"));
-        sigaEventLogger.logEvents();
         SigaEvent ocspEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
@@ -215,7 +216,6 @@ public class SignatureFinalizingTest {
         });
 
         assertEquals("Unable to finalize signature. Certificate status is revoked", e.getMessage());
-        sigaEventLogger.logEvents();
         SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
@@ -245,7 +245,6 @@ public class SignatureFinalizingTest {
         });
 
         assertEquals("Unable to finalize signature. Certificate is unknown", e.getMessage());
-        sigaEventLogger.logEvents();
         SigaEvent finalizeSignatureEvent = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).get();
         SigaEvent ocspRequestEvent = sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).get();
         SigaEvent tsaRequestEvent = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH).get();
@@ -280,7 +279,6 @@ public class SignatureFinalizingTest {
         });
 
         assertEquals("Unable to finalize signature. OCSP request failed. Issuing certificate may not be trusted.", e.getMessage());
-        sigaEventLogger.logEvents();
         assertTrue(sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH).isPresent());
         Optional<SigaEvent> event = sigaEventLogger.getFirstMachingEvent(TSA_REQUEST, FINISH);
         assertTrue(event.isPresent());
@@ -303,8 +301,8 @@ public class SignatureFinalizingTest {
         DataToSign dataToSign = dataToSignWrapper.getDataToSign();
         byte[] signatureRaw = signatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
 
-        HashcodeContainerSessionHolder sessionHolder = RequestUtil.createHashcodeSessionHolder();
-        sessionHolder.addDataToSign(dataToSign.getSignatureParameters().getSignatureId(), DataToSignHolder.builder()
+        HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
+        sessionHolder.addSignatureSession(dataToSign.getSignatureParameters().getSignatureId(), SignatureSession.builder()
                 .dataToSign(dataToSign)
                 .signingType(SigningType.REMOTE)
                 .dataFilesHash(signingService.generateDataFilesHash(sessionHolder))

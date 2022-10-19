@@ -78,7 +78,6 @@ public class HashcodeContainerValidationServiceTest {
 
     @Test
     public void successfulExistingContainerValidation() {
-        validationService.setSessionService(sessionService);
         ValidationConclusion validationConclusion = validationService.validateExistingContainer("12312312312");
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         Assert.assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
