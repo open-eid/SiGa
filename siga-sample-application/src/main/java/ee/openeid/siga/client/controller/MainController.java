@@ -6,6 +6,7 @@ import ee.openeid.siga.client.model.FinalizeRemoteSigningRequest;
 import ee.openeid.siga.client.model.HashcodeContainerWrapper;
 import ee.openeid.siga.client.model.MobileSigningRequest;
 import ee.openeid.siga.client.model.PrepareRemoteSigningRequest;
+import ee.openeid.siga.client.model.SmartIdSigningRequest;
 import ee.openeid.siga.client.service.ContainerService;
 import ee.openeid.siga.client.service.SigaApiClientService;
 import lombok.SneakyThrows;
@@ -105,6 +106,14 @@ public class MainController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(container);
+    }
+
+    @PostMapping(value = "/smartid-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public SmartIdSigningRequest startSmartIdSigning(@RequestBody SmartIdSigningRequest request) {
+        log.info("Smart-ID signing request: {}", request);
+        sigaApiClientService.startSmartIdSigningFlow(request);
+        return request;
     }
 
     @PostMapping(value = "/mobile-signing", consumes = MediaType.APPLICATION_JSON_VALUE)
