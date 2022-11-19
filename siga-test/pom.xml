@@ -48,8 +48,9 @@
 
     <properties>
         <allure.version>2.16.1</allure.version>
-        <gatling-maven-plugin>3.1.2</gatling-maven-plugin>
-        <gatling.version>3.7.4</gatling.version>
+        <gatling-maven-plugin.version>4.2.7</gatling-maven-plugin.version>
+        <scala-maven-plugin.version>4.7.2</scala-maven-plugin.version>
+        <gatling.version>3.6.0</gatling.version>
         <groovy.version>2.5.15</groovy.version>
         <rest-assured.version>4.2.1</rest-assured.version>
     </properties>
@@ -255,9 +256,33 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>${scala-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <jvmArgs>
+                                <jvmArg>-Xss100M</jvmArg>
+                            </jvmArgs>
+                            <args>
+                                <arg>-deprecation</arg>
+                                <arg>-feature</arg>
+                                <arg>-unchecked</arg>
+                                <arg>-language:implicitConversions</arg>
+                                <arg>-language:postfixOps</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>io.gatling</groupId>
                 <artifactId>gatling-maven-plugin</artifactId>
-                <version>${gatling-maven-plugin}</version>
+                <version>${gatling-maven-plugin.version}</version>
                 <configuration>
                     <configFolder>${project.basedir}/src/test/resources</configFolder>
                     <resultsFolder>${project.basedir}/target/gatling/results</resultsFolder>
