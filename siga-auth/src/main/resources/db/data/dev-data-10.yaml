@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1668077936284-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 3
+              - column:
+                  name: name
+                  value: client3
+            tableName: siga_client
+  - changeSet:
+      id: 1669359611450-1
+      author: (generated)
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 9
+              - column:
+                  name: uuid
+                  value: b2246ed8-1f6a-4db6-8e4f-e7e664259a7d
+              - column:
+                  name: signing_secret
+                  value: zXTTdPFdntdwMsN8LCBXw4Eb+BnD/YPU87mWvpOaQwp6PrFNKQZ21fP1CPY/zITFQE0BANHIP7VwRwAsa+657Q==
+              - column:
+                  name: client_id
+                  valueNumeric: 3
+              - column:
+                  name: name
+                  value: test9.service.ee
+              - column:
+                  name: sk_relying_party_name
+                  value: DEMO
+              - column:
+                  name: sk_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: smart_id_relying_party_name
+                  value: DEMO
+              - column:
+                  name: smart_id_relying_party_uuid
+                  value: 00000000-0000-0000-0000-000000000000
+              - column:
+                  name: inactive
+                  value: false
+            tableName: siga_service

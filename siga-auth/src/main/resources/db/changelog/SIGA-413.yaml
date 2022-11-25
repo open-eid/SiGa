@@ -1,0 +1,25 @@
+databaseChangeLog:
+- changeSet:
+    id: 1668072403175-1
+    author: (generated)
+    changes:
+      - dropNotNullConstraint:
+          columnName: contact_name
+          tableName: siga_client
+          columnDataType: VARCHAR(100)
+          validate: true
+      - dropNotNullConstraint:
+          columnName: contact_email
+          tableName: siga_client
+          columnDataType: VARCHAR(256)
+          validate: true
+      - dropNotNullConstraint:
+          columnName: contact_phone
+          tableName: siga_client
+          columnDataType: VARCHAR(30)
+          validate: true
+      - dropNotNullConstraint:
+          columnName: billing_email
+          tableName: siga_service
+          columnDataType: VARCHAR(128)
+          validate: true

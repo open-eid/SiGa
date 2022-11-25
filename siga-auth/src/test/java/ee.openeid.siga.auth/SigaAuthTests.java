@@ -39,7 +39,7 @@ public class SigaAuthTests {
 
     final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
     final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
-    final static String REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
+    final static String REQUESTING_SERVICE_UUID = "b2246ed8-1f6a-4db6-8e4f-e7e664259a7d";
     final static int TOKEN_EXPIRATION_IN_SECONDS = 120;
     final static int TOKEN_CLOCK_SKEW = 2;
     @Autowired

@@ -20,11 +20,8 @@ public class SigaClient {
     private String uuid;
     @NonNull
     private String name;
-    @NonNull
     private String contactName;
-    @NonNull
     private String contactEmail;
-    @NonNull
     private String contactPhone;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "client")
     @ToString.Exclude
