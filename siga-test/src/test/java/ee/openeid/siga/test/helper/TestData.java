@@ -140,5 +140,6 @@ public class TestData {
     );
 
     //Test numbers
-    public static final String SID_EE_DEFAULT_DOCUMENT_NUMBER = "PNOEE-30303039914-1Q3P-Q";
+    public static final String SID_EE_DEFAULT_DOCUMENT_NUMBER = "PNOEE-30303039914-MOCK-Q";
+    public static final String SID_EE_MULT_ACCOUNTS_DOCUMENT_NUMBER = "PNOEE-30303039816-MOCK-Q";
 }
