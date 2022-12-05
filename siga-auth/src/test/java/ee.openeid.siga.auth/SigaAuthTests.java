@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class SigaAuthTests {
 
     final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
-    final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
+    final static String HMAC_SHARED_SECRET = "326573745365637265714b6579303029";
     final static String REQUESTING_SERVICE_UUID = "b2246ed8-1f6a-4db6-8e4f-e7e664259a7d";
     final static int TOKEN_EXPIRATION_IN_SECONDS = 120;
     final static int TOKEN_CLOCK_SKEW = 2;

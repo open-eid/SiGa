@@ -16,6 +16,7 @@ databaseChangeLog:
       id: 1669359611450-1
       author: (generated)
       changes:
+        # Signing secret 326573745365637265714b6579303029 (testSecretKey009)
         - insert:
             columns:
               - column:
@@ -26,7 +27,7 @@ databaseChangeLog:
                   value: b2246ed8-1f6a-4db6-8e4f-e7e664259a7d
               - column:
                   name: signing_secret
-                  value: zXTTdPFdntdwMsN8LCBXw4Eb+BnD/YPU87mWvpOaQwp6PrFNKQZ21fP1CPY/zITFQE0BANHIP7VwRwAsa+657Q==
+                  value: rT1B4GlIgcFz1Sm13kfpJIW0h1cuT/hJoDrS5hb2xDSBLPB8CwBt6ocnsa2Xss14KNVlvXsi7XYOzTm8kQQBnA==
               - column:
                   name: client_id
                   valueNumeric: 3
