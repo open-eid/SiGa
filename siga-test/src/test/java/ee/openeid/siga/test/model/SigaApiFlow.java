@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.testgroovy.helper.ClientTestData.*;
 
 @Data
 @Builder
@@ -45,5 +46,10 @@ public class SigaApiFlow {
     @Builder(buildMethodName = "buildForTestClient2Service7")
     public static SigaApiFlow buildForTestClient2Service7() {
         return SigaApiFlow.builder().serviceUuid(SERVICE_UUID_7).serviceSecret(SERVICE_SECRET_7).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
+    }
+
+    @Builder(buildMethodName = "buildForTestClient3Service1")
+    public static SigaApiFlow buildForTestClient3Service1() {
+        return SigaApiFlow.builder().serviceUuid(CLIENT3_SERVICE_UUID_1).serviceSecret(CLIENT3_SERVICE_SECRET_1).forceSigningTime(false).hmacAlgorithm("HmacSHA256").build();
     }
 }
