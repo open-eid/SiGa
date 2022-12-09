@@ -290,7 +290,9 @@ For development and testing purposes only!
 
 Docker must be installed and running.
 
-First time  setup: 
+Before continuing, the [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
+
+First time setup: 
 
 * build this project
 
@@ -303,11 +305,6 @@ First time  setup:
 ```bash
 docker-compose up
 ```
-
-Then, open siga-sample-application
-`
-https://localhost:8444/
-`
 
 SiGa itself is accessible 
 `

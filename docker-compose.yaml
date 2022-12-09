@@ -2,14 +2,14 @@ version: "3.7"
 
 services:
 
-  siga-sample-application:
-    build: siga-sample-application
+  siga-demo-application:
+    image: siga-demo-application:latest
     ports:
       - "8444:8444"
     networks:
       siga:
         aliases:
-          - sampleapp.docker.internal
+          - siga-demo.localhost
     depends_on:
       - siga-webapp
 
