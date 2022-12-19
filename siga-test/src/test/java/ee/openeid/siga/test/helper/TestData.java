@@ -36,6 +36,10 @@ public class TestData {
     public static final String SERVICE_UUID_3 = "400ff9a2-b5fb-4fde-b764-9b519963f82e";
     public static final String SERVICE_SECRET_3 = "746573745365637265744b6579303033";
 
+    // Client 3
+    public static final String CLIENT3_SERVICE_UUID_1 = "b2246ed8-1f6a-4db6-8e4f-e7e664259a7d";
+    public static final String CLIENT3_SERVICE_SECRET_1 = "326573745365637265714b6579303029";
+
     // Connection limits set
     public static final String SERVICE_UUID_5 = "156ead6d-b884-46b1-aba5-d8cd1a573b1b";
     public static final String SERVICE_SECRET_5 = "02m5uss0zjDTjIwkME4zYTprtbT5fGnA";

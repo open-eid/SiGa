@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.testgroovy.helper.ClientTestData.*;
 
 @Data
 @Builder
