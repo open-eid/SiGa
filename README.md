@@ -300,61 +300,50 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 | created_at    | TIMESTAMP                           | Ip permission creation date                           |
 | updated_at    | TIMESTAMP                           | Ip permission update date                             |
 
-### Running SiGa with Docker
+## Running SiGa with Docker
 
-For development and testing purposes only!
+### For development and testing purposes only!
 
-Docker must be installed and running.
+#### Preconditons
+1. Docker must be installed and running.
+2. The [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
 
-Before continuing, the [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
-
-First time setup: 
-
-#### Build this project
-
+#### First time setup: 
+1. Build this project
 ```bash
 ./mvnw clean install
 ```
 
-#### Build SiGa webapp docker image 
-
+2. Build SiGa webapp docker image 
 ```bash
 ./mvnw spring-boot:build-image -pl siga-webapp
 ```
 
-#### Generate application keystores/truststores 
-
+3. Generate application keystores/truststores
 ```bash
 ./docker/tls/generate-certificates.sh
 ```
 
-#### From your project directory, start up your applications in test mode by running
-
+4. From your project directory, start up your applications in test mode by running
 ```bash
 docker-compose up
 ```
 
-SiGa itself is accessible 
-`
-https://localhost:8443/siga
-`
+Now SiGa itself is accessible `https://localhost:8443/siga` and siga-demo-application `https://siga-demo.localhost:9443/`.
 
-For updating software:
+#### For updating software:
 
-* Build the project with changes
-
+1. Build the project with changes
 ```bash
 ./mvnw clean install
 ```
 
-* Update docker image
-
+2. Update docker image
 ```bash
 docker-compose build
 ```
 
-* Run the image
-
+3. Run the image
 ```bash
 docker-compose up
 ```
