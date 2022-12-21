@@ -310,19 +310,25 @@ Before continuing, the [siga-demo-application](https://github.com/open-eid/SiGa-
 
 First time setup: 
 
-* build this project
+#### Build this project
 
 ```bash
 ./mvnw clean install
 ```
 
-* Generate application keystores/truststores 
+#### Build SiGa webapp docker image 
+
+```bash
+./mvnw spring-boot:build-image -pl siga-webapp
+```
+
+#### Generate application keystores/truststores 
 
 ```bash
 ./docker/tls/generate-certificates.sh
 ```
 
-* From your project directory, start up your applications in test mode by running
+#### From your project directory, start up your applications in test mode by running
 
 ```bash
 docker-compose up

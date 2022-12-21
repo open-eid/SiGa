@@ -14,6 +14,11 @@
     <version>2.5.5</version>
     <packaging>war</packaging>
 
+    <properties>
+        <spring-boot.build-image.builder>paketobuildpacks/builder:tiny</spring-boot.build-image.builder>
+        <spring-boot.build-image.imageName>${project.artifactId}:latest</spring-boot.build-image.imageName>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ee.openeid.siga</groupId>

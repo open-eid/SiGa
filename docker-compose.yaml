@@ -37,7 +37,7 @@ services:
       - server.port=7443
       - server.ssl.key-alias=siga-01.localhost
       - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
-      - spring.datasource.platform=postgresql
+      - spring.sql.init.platform=postgresql
       - spring.datasource.driver-class-name=org.postgresql.Driver
       - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - BPL_DEBUG_ENABLED=true
@@ -64,7 +64,7 @@ services:
       - server.port=7443
       - server.ssl.key-alias=siga-02.localhost
       - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
-      - spring.datasource.platform=postgresql
+      - spring.sql.init.platform=postgresql
       - spring.datasource.driver-class-name=org.postgresql.Driver
       - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - BPL_DEBUG_ENABLED=true
@@ -97,6 +97,30 @@ services:
       - "5432:5432"
     volumes:
       - ./docker/siga-db/install-extensions.sql:/docker-entrypoint-initdb.d/install-extensions.sql
+
+  siga-admin:
+    image: siga-admin-webapp:latest
+    profiles:
+      - siga-admin
+    environment:
+      - server.port=4443
+      - server.ssl.enabled=true
+      - server.ssl.key-store-type=PKCS12
+      - server.ssl.key-store-password=changeit
+      - server.ssl.key-store=/etc/siga-admin/siga-admin.localhost.keystore.p12
+      - server.ssl.key-alias=siga-admin.localhost
+      - spring.sql.init.platform=postgresql
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+      - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
+      - spring.profiles.active=inMemoryAuth
+    ports:
+      - "4443:4443"
+    networks:
+      default:
+        aliases:
+          - siga-admin.localhost
+    volumes:
+      - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
 
   ignite-01:
     image: apacheignite/ignite:2.14.0-jdk11

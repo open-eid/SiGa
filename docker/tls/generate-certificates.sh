@@ -12,6 +12,7 @@ rm -rf ./*/
 ./generate-certificate.sh 'siga-client-ca' 'siga-demo'
 ./generate-truststore.sh 'siga-ca' 'siga-demo' 'siga-demo.truststore.p12'
 ./generate-certificate.sh 'siga-ca' 'siga'
+./generate-certificate.sh 'siga-ca' 'siga-admin'
 ./generate-certificate.sh 'siga-ca' 'siga-01'
 ./generate-certificate.sh 'siga-ca' 'siga-02'
 ./generate-certificate.sh 'siga-ca' 'ignite-01'
