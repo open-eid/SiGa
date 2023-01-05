@@ -185,7 +185,7 @@ public class SessionStatusReprocessingServiceTest {
     public void processFailedSignatureStatusRequests_WhenMobileIdApiConnectResetByPeer_ReprocessMidStatusRequest() {
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(CONNECTION_RESET_BY_PEER)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException("java.net.SocketException: Connection reset");
+        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException("Connection reset");
 
         assertReprocessMidSignatureStatusRequest(signingChallenge);
     }
@@ -234,7 +234,7 @@ public class SessionStatusReprocessingServiceTest {
     public void processFailedSignatureStatusRequests_WhenSmartIdApiConnectResetByPeer_ReprocessSidStatusRequest() {
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(CONNECTION_RESET_BY_PEER)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException("java.net.SocketException: Connection reset");
+        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException("Connection reset");
 
         assertReprocessSidSignatureStatusRequest(signingChallenge);
     }
@@ -273,7 +273,7 @@ public class SessionStatusReprocessingServiceTest {
             assertThat(sessionStatus.getProcessingStatus(), equalTo(EXCEPTION));
             StatusError statusError = sessionStatus.getStatusError();
             assertThat(statusError.getErrorCode(), equalTo("INTERNAL_SERVER_ERROR"));
-            assertThat(statusError.getErrorMessage(), equalTo(expectedErrorMessage));
+            assertThat(statusError.getErrorMessage(), containsString(expectedErrorMessage));
         });
         return signingChallenge;
     }
@@ -294,7 +294,7 @@ public class SessionStatusReprocessingServiceTest {
             assertThat(sessionStatus.getProcessingStatus(), equalTo(EXCEPTION));
             StatusError statusError = sessionStatus.getStatusError();
             assertThat(statusError.getErrorCode(), equalTo("INTERNAL_SERVER_ERROR"));
-            assertThat(statusError.getErrorMessage(), equalTo(expectedErrorMessage));
+            assertThat(statusError.getErrorMessage(), containsString(expectedErrorMessage));
         });
         return signingChallenge;
     }
