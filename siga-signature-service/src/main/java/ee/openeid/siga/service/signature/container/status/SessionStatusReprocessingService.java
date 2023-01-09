@@ -37,39 +37,44 @@ public class SessionStatusReprocessingService {
     private final SessionStatusReprocessingProperties reprocessingProperties;
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
-    public void processFailedSignatureStatusRequests() {
+    public void processFailedStatusRequests() {
         SignatureStatusRequestFilter filter = new SignatureStatusRequestFilter(reprocessingProperties.getMaxProcessingAttempts(),
                 reprocessingProperties.getProcessingTimeout(), reprocessingProperties.getExceptionTimeout());
         ScanQuery<String, Map<String, BinaryObject>> query = new ScanQuery<>(filter);
         try (QueryCursor<String> queryCursor = ignite.getOrCreateCache(CacheName.SIGNATURE_SESSION.name())
                 .withKeepBinary()
                 .query(query, new SessionIdQueryTransformer())) {
-            queryCursor.forEach(sessionId -> processFailedSignatureStatusRequest(filter, sessionId));
+            queryCursor.forEach(sessionId -> processFailedContainerSession(filter, sessionId));
         }
     }
 
-    void processFailedSignatureStatusRequest(SignatureStatusRequestFilter filter, String sessionId) {
+    void processFailedContainerSession(SignatureStatusRequestFilter filter, String sessionId) {
         Session session = sessionService.getContainerBySessionId(sessionId);
         Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
 
         signatureSessions.entrySet().stream().filter(filter.apply()).forEach(s -> {
             String signatureSessionId = s.getKey();
             SignatureSession signatureSession = s.getValue();
-            log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId, signatureSession.getSessionStatus());
-            if (signatureSession.getSigningType() == SigningType.SMART_ID) {
-                if (session instanceof AsicContainerSession) {
-                    asicContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-                } else if (session instanceof HashcodeContainerSession) {
-                    hashcodeContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-                }
-            } else if (signatureSession.getSigningType() == SigningType.MOBILE_ID) {
-                if (session instanceof AsicContainerSession) {
-                    asicContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-                } else if (session instanceof HashcodeContainerSession) {
-                    hashcodeContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-                }
-            }
+            processFailedSignatureSession(session, signatureSessionId, signatureSession.getSigningType(), signatureSession.getSessionStatus());
         });
+    }
+
+    void processFailedSignatureSession(Session session, String signatureSessionId, SigningType signingType, SessionStatus sessionStatus) {
+        String sessionId = session.getSessionId();
+        log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId, sessionStatus);
+        if (signingType == SigningType.SMART_ID) {
+            if (session instanceof AsicContainerSession) {
+                asicContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            } else if (session instanceof HashcodeContainerSession) {
+                hashcodeContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            }
+        } else if (signingType == SigningType.MOBILE_ID) {
+            if (session instanceof AsicContainerSession) {
+                asicContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            } else if (session instanceof HashcodeContainerSession) {
+                hashcodeContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            }
+        }
     }
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")

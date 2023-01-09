@@ -175,12 +175,12 @@ public class SmartIdSigningDelegate {
     }
 
     private void processSmartIdCertificateStatusResponse(String sessionId, String certificateId, SmartIdStatusResponse statusResponse) {
-        Session sessionHolder = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
-        if (sessionHolder == null) {
+        Session session = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
+        if (session == null) {
             log.warn("Unable to process certificate status response. Container session expired: {}", sessionId);
             return;
         }
-        CertificateSession certificateSession = sessionHolder.getCertificateSession(certificateId);
+        CertificateSession certificateSession = session.getCertificateSession(certificateId);
 
         if (certificateSession != null) {
             certificateSession.setPollingStatus(RESULT);
@@ -190,12 +190,12 @@ public class SmartIdSigningDelegate {
                 if (smartIdCertificate == null) {
                     sessionStatus.setStatusError(SMARTID_EXCEPTION.name(), "No certificate found from Smart-id response");
                 } else {
-                    sessionHolder.addCertificate(smartIdCertificate.getDocumentNumber(), smartIdCertificate.getCertificate());
+                    session.addCertificate(smartIdCertificate.getDocumentNumber(), smartIdCertificate.getCertificate());
                     certificateSession.setDocumentNumber(statusResponse.getSmartIdCertificate().getDocumentNumber());
                 }
             }
             sessionStatus.setStatus(statusResponse.getStatus().getSigaCertificateMessage());
-            containerSigningService.getSessionService().update(sessionHolder);
+            containerSigningService.getSessionService().update(session);
         } else {
             log.warn("Certificate session expired! Container session id: {}, Certificate session id: {}", sessionId, certificateId);
         }
@@ -256,6 +256,10 @@ public class SmartIdSigningDelegate {
         log.debug("Status polling locked for signature id: {}", signatureId);
         Session session = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
         SignatureSession signatureSession = session.getSignatureSession(signatureId);
+        if (signatureSession == null) {
+            log.warn("Unable to poll signature status. Container {} signature session {} is expired!", sessionId, signatureId);
+            return;
+        }
         RelyingPartyInfo relyingPartyInfo = signatureSession.getRelyingPartyInfo();
         String sessionCode = signatureSession.getSessionCode();
         SmartIdStatusResponse statusResponse = containerSigningService.getSmartIdApiClient().getSignatureStatus(relyingPartyInfo, sessionCode);
@@ -272,12 +276,12 @@ public class SmartIdSigningDelegate {
 
     private void processSmartIdSignatureStatusResponse(String sessionId, String signatureId, SmartIdStatusResponse sessionResponse) {
         log.debug("Processing response for signature: {}", signatureId);
-        Session sessionHolder = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
-        if (sessionHolder == null) {
+        Session session = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
+        if (session == null) {
             log.warn("Unable to process signature status response. Container session expired: {}", sessionId);
             return;
         }
-        SignatureSession signatureSession = sessionHolder.getSignatureSession(signatureId);
+        SignatureSession signatureSession = session.getSignatureSession(signatureId);
         if (signatureSession != null && signatureSession.getDataToSign() != null) {
             signatureSession.setPollingStatus(RESULT);
             signatureSession.setSignature(sessionResponse.getSignature());
@@ -285,7 +289,7 @@ public class SmartIdSigningDelegate {
             SessionStatus sessionStatus = signatureSession.getSessionStatus();
             sessionStatus.setStatus(sidStatus.getSigaSigningMessage());
             sessionStatus.setStatusError(null);
-            containerSigningService.getSessionService().update(sessionHolder);
+            containerSigningService.getSessionService().update(session);
         } else {
             log.warn("Signature session expired! Container session id: {}, Signature session id: {}", sessionId, signatureId);
         }

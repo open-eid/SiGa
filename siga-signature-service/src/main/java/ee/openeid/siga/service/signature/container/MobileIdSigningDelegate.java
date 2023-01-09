@@ -137,6 +137,10 @@ public class MobileIdSigningDelegate {
         log.debug("Status polling locked for signature id: {}", signatureId);
         Session session = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
         SignatureSession signatureSession = session.getSignatureSession(signatureId);
+        if (signatureSession == null) {
+            log.warn("Unable to poll signature status. Container {} signature session {} is expired!", sessionId, signatureId);
+            return;
+        }
         RelyingPartyInfo relyingPartyInfo = signatureSession.getRelyingPartyInfo();
         String sessionCode = signatureSession.getSessionCode();
         MobileIdStatusResponse statusResponse = containerSigningService.getMobileIdApiClient().getSignatureStatus(relyingPartyInfo, sessionCode);
