@@ -305,8 +305,9 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 ### For development and testing purposes only!
 
 #### Preconditons
-1. Docker must be installed and running.
-2. The [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
+1. Java 11
+2. Docker must be installed and running.
+3. The [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
 
 #### First time setup: 
 1. Build this project
