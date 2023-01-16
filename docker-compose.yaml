@@ -55,7 +55,6 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
-      - ./docker/siga-webapp/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
       - siga-logs-01:/usr/local/tomcat/logs
 
   siga-02:
@@ -82,7 +81,6 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
-      - ./docker/siga-webapp/tomcat/server.xml:/usr/local/tomcat/conf/server.xml
       - siga-logs-02:/usr/local/tomcat/logs
 
   siga-db:
