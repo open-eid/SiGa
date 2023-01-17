@@ -52,7 +52,8 @@
         <scala-maven-plugin.version>4.7.2</scala-maven-plugin.version>
         <gatling.version>3.6.0</gatling.version>
         <groovy.version>2.5.15</groovy.version>
-        <rest-assured.version>4.2.1</rest-assured.version>
+        <!-- Use different property name than "rest-assured.version" to avoid conflict with Spring Boot dependency management -->
+        <rest-assured.test.version>4.2.1</rest-assured.test.version>
     </properties>
 
     <dependencies>
@@ -72,25 +73,25 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest-assured.version}</version>
+            <version>${rest-assured.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>xml-path</artifactId>
-            <version>${rest-assured.version}</version>
+            <version>${rest-assured.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>json-path</artifactId>
-            <version>${rest-assured.version}</version>
+            <version>${rest-assured.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured-common</artifactId>
-            <version>${rest-assured.version}</version>
+            <version>${rest-assured.test.version}</version>
             <scope>test</scope>
         </dependency>
 
