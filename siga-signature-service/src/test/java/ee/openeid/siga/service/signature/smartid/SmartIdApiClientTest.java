@@ -124,6 +124,20 @@ public class SmartIdApiClientTest {
     }
 
     @Test
+    public void initiateCertificateChoice_noSuitableAccount() {
+        stubCertificateChoiceEtsiSessionResponse(471, "");
+        ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
+        assertThat(exception.getMessage(), equalTo("No suitable account of requested type found, but user has some other accounts"));
+    }
+
+    @Test
+    public void initiateCertificateChoice_personShouldViewPortal() {
+        stubCertificateChoiceEtsiSessionResponse(472, "");
+        ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
+        assertThat(exception.getMessage(), equalTo("Person should view app or self-service portal now"));
+    }
+
+    @Test
     public void initiateCertificateChoice_serverError() {
         stubCertificateChoiceErrorResponse(504);
         Exception exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
@@ -158,15 +172,6 @@ public class SmartIdApiClientTest {
 
         SmartIdCertificate response = smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
         Assert.assertEquals(certificate, response.getCertificate());
-    }
-
-    @Test
-    public void getCertificate_notFound() {
-        stubCertificateChoiceDocumentSessionResponse(404, "");
-
-        RuntimeException exception = assertThrows(SmartIdApiException.class, () -> smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation()));
-
-        assertThat(exception.getMessage(), equalTo(SmartIdErrorStatus.NOT_FOUND.getSigaMessage()));
     }
 
     @Test
@@ -211,6 +216,21 @@ public class SmartIdApiClientTest {
     }
 
     @Test
+    public void getCertificate_notFound() {
+        assertGetCertificateException(404, SmartIdApiException.class, SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
+    }
+
+    @Test
+    public void getCertificate_noSuitableAccount() {
+        assertGetCertificateException(471, ClientException.class, "No suitable account of requested type found, but user has some other accounts");
+    }
+
+    @Test
+    public void getCertificate_personShouldViewPortal() {
+        assertGetCertificateException(472, ClientException.class, "Person should view app or self-service portal now");
+    }
+
+    @Test
     public void getCertificate_serverMaintenance() {
         assertGetCertificateGenericException(580);
     }
@@ -221,9 +241,13 @@ public class SmartIdApiClientTest {
     }
 
     private void assertGetCertificateGenericException(int status) {
+        assertGetCertificateException(status, ClientException.class, "Smart-ID service error");
+    }
+
+    private void assertGetCertificateException(int status, Class<? extends RuntimeException> expectedException, String expectedMessage) {
         stubCertificateChoiceDocumentSessionResponse(status, "");
-        ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation()));
-        assertThat(exception.getMessage(), equalTo("Smart-ID service error"));
+        RuntimeException exception = assertThrows(expectedException, () -> smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation()));
+        assertThat(exception.getMessage(), equalTo(expectedMessage));
     }
 
     @Test
@@ -317,13 +341,13 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_notSuitableAccount() {
-        assertInitSmartIdSigningGenericException(471);
+    public void initSmartIdSigning_noSuitableAccount() {
+        assertInitSmartIdSigningException(471, ClientException.class, "No suitable account of requested type found, but user has some other accounts");
     }
 
     @Test
-    public void initSmartIdSigning_problemWithAccount() {
-        assertInitSmartIdSigningGenericException(472);
+    public void initSmartIdSigning_personShouldViewPortal() {
+        assertInitSmartIdSigningException(472, ClientException.class, "Person should view app or self-service portal now");
     }
 
     @Test
@@ -342,12 +366,16 @@ public class SmartIdApiClientTest {
     }
 
     private void assertInitSmartIdSigningGenericException(int status) {
+        assertInitSmartIdSigningException(status, ClientException.class, "Smart-ID service error");
+    }
+
+    private void assertInitSmartIdSigningException(int status, Class<? extends RuntimeException> expectedException, String expectedMessage) {
         stubSigningInitiationResponse(status, "{\"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"}");
 
-        ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(),
-                mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN)));
+        RuntimeException exception = assertThrows(expectedException, () -> smartIdApiClient
+                .initSmartIdSigning(createRPInfo(), createDefaultSmartIdInformation(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN)));
 
-        assertThat(exception.getMessage(), equalTo("Smart-ID service error"));
+        assertThat(exception.getMessage(), equalTo(expectedMessage));
     }
 
     @Test

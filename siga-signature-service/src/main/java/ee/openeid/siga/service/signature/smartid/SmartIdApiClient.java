@@ -1,6 +1,10 @@
 package ee.openeid.siga.service.signature.smartid;
 
-import ee.openeid.siga.common.event.*;
+import ee.openeid.siga.common.event.LogParam;
+import ee.openeid.siga.common.event.Param;
+import ee.openeid.siga.common.event.SigaEventLog;
+import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SmartIdApiException;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
@@ -15,6 +19,8 @@ import ee.sk.smartid.SmartIdClient;
 import ee.sk.smartid.exception.SessionNotFoundException;
 import ee.sk.smartid.exception.SmartIdException;
 import ee.sk.smartid.exception.useraccount.DocumentUnusableException;
+import ee.sk.smartid.exception.useraccount.NoSuitableAccountOfRequestedTypeFoundException;
+import ee.sk.smartid.exception.useraccount.PersonShouldViewSmartIdPortalException;
 import ee.sk.smartid.exception.useraccount.UserAccountNotFoundException;
 import ee.sk.smartid.exception.useraction.SessionTimeoutException;
 import ee.sk.smartid.exception.useraction.UserRefusedException;
@@ -41,7 +47,11 @@ import javax.ws.rs.ServerErrorException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -54,6 +64,8 @@ public class SmartIdApiClient {
     private static final String SMART_ID_CERTIFICATE_LEVEL = "QUALIFIED";
     private static final String SMART_ID_SERVICE_ERROR = "Smart-ID service error";
     private static final String SMART_ID_SERVICE_UNEXPECTED_RESPONSE = "Smart-ID service returned unexpected response";
+    private static final String SMART_ID_SERVICE_NO_SUITABLE_ACCOUNT_FOUND = "No suitable account of requested type found, but user has some other accounts";
+    private static final String SMART_ID_SERVICE_PERSON_SHOULD_VIEW_PORTAL = "Person should view app or self-service portal now";
     private static final String PERSON_SEMANTICS_IDENTIFIER = "PNO";
     private static final String MINIMUM_CERTIFICATE_LEVEL = "QSCD";
     private static final Map<String, SmartIdSessionStatus> errorMap;
@@ -90,10 +102,11 @@ public class SmartIdApiClient {
             return connector.getCertificate(semanticsIdentifier, certificateRequest).getSessionID();
         } catch (UserAccountNotFoundException e) {
             throw new SmartIdApiException(SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
-        } catch (ClientErrorException e) {
-            verifyClientError(e.getResponse().getStatus());
-            throw new ClientException(SMART_ID_SERVICE_ERROR, e);
-        } catch (SmartIdException | ServerErrorException e) {
+        } catch (NoSuitableAccountOfRequestedTypeFoundException e) {
+            throw new ClientException(SMART_ID_SERVICE_NO_SUITABLE_ACCOUNT_FOUND);
+        } catch (PersonShouldViewSmartIdPortalException e) {
+            throw new ClientException(SMART_ID_SERVICE_PERSON_SHOULD_VIEW_PORTAL);
+        } catch (SmartIdException | ClientErrorException | ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -117,10 +130,11 @@ public class SmartIdApiClient {
             throw new SmartIdApiException(SmartIdSessionStatus.TIMEOUT.getSigaSigningMessage());
         } catch (DocumentUnusableException e) {
             throw new SmartIdApiException(SmartIdSessionStatus.DOCUMENT_UNUSABLE.getSigaSigningMessage());
-        } catch (ClientErrorException e) {
-            verifyClientError(e.getResponse().getStatus());
-            throw new ClientException(SMART_ID_SERVICE_ERROR, e);
-        } catch (SmartIdException | ServerErrorException e) {
+        } catch (NoSuitableAccountOfRequestedTypeFoundException e) {
+            throw new ClientException(SMART_ID_SERVICE_NO_SUITABLE_ACCOUNT_FOUND);
+        } catch (PersonShouldViewSmartIdPortalException e) {
+            throw new ClientException(SMART_ID_SERVICE_PERSON_SHOULD_VIEW_PORTAL);
+        } catch (SmartIdException | ClientErrorException | ServerErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
     }
@@ -147,6 +161,10 @@ public class SmartIdApiClient {
             initSmartIdSignatureResponse.setSessionCode(sessionCode);
             initSmartIdSignatureResponse.setChallengeId(challengeId);
             return initSmartIdSignatureResponse;
+        } catch (NoSuitableAccountOfRequestedTypeFoundException e) {
+            throw new ClientException(SMART_ID_SERVICE_NO_SUITABLE_ACCOUNT_FOUND);
+        } catch (PersonShouldViewSmartIdPortalException e) {
+            throw new ClientException(SMART_ID_SERVICE_PERSON_SHOULD_VIEW_PORTAL);
         } catch (SmartIdException | ServerErrorException | ClientErrorException e) {
             throw new ClientException(SMART_ID_SERVICE_ERROR, e);
         }
@@ -312,9 +330,9 @@ public class SmartIdApiClient {
 
     private void verifyClientError(int status) {
         if (status == 471) {
-            throw new ClientException("No suitable account of requested type found, but user has some other accounts");
+            throw new ClientException(SMART_ID_SERVICE_NO_SUITABLE_ACCOUNT_FOUND);
         } else if (status == 472) {
-            throw new ClientException("Person should view app or self-service portal now");
+            throw new ClientException(SMART_ID_SERVICE_PERSON_SHOULD_VIEW_PORTAL);
         }
     }
 
