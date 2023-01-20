@@ -70,9 +70,15 @@ public class MobileIdApplicationTests extends BaseTest {
 
         assertSignedContainer(containerId, 2);
 
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, mid_status=SIGNATURE,.* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa, .*result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/esteid2015,.* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, client_name=client1, " +
+                        "client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, service_name=test1.service.ee, " +
+                        "service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, mid_status=SIGNATURE,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
+                        "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
+                        "request_url=http://demo.sk.ee/tsa, .*result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
+                        "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
+                        "request_url=http://aia.demo.sk.ee/esteid2015,.* result=SUCCESS.*");
     }
 
     @Test
@@ -93,8 +99,14 @@ public class MobileIdApplicationTests extends BaseTest {
         await().atMost(15, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
 
         assertHashcodeSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, mid_status=SIGNATURE,.* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=TSA_REQUEST, .*request_url=http://demo.sk.ee/tsa,.* result=SUCCESS.*",
-                ".*event_type=FINISH, event_name=OCSP_REQUEST, .*request_url=http://aia.demo.sk.ee/esteid2015,.* result=SUCCESS.*");
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=MID_GET_MOBILE_SIGN_HASH_STATUS, client_name=client1, " +
+                        "client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, service_name=test1.service.ee, " +
+                        "service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, mid_status=SIGNATURE,.* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
+                        "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
+                        "request_url=http://demo.sk.ee/tsa, .*result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
+                        "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
+                        "request_url=http://aia.demo.sk.ee/esteid2015,.* result=SUCCESS.*");
     }
 }

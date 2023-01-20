@@ -22,6 +22,7 @@ import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.cert.X509Certificate;
@@ -114,7 +115,7 @@ public class MobileIdSigningDelegate {
     }
 
     public void pollMobileIdSignatureStatus(String sessionId, String signatureId, Duration pollingDelay) {
-        CompletableFuture.runAsync(() -> {
+        Runnable pollingRunnable = () -> {
             // If semaphore is not acquired it will be re-processed by SessionStatusReprocessingService
             IgniteSemaphore semaphore = containerSigningService.getIgnite().semaphore(signatureId, 1, true, true);
             if (semaphore.tryAcquire()) {
@@ -130,7 +131,9 @@ public class MobileIdSigningDelegate {
             } else {
                 log.debug("Status polling semaphore not acquired for signature id: {}", signatureId);
             }
-        }, delayedExecutor(pollingDelay.toMillis(), MILLISECONDS, containerSigningService.getTaskExecutor()));
+        };
+        DelegatingSecurityContextRunnable delegatingRunnable = new DelegatingSecurityContextRunnable(pollingRunnable);
+        CompletableFuture.runAsync(delegatingRunnable, delayedExecutor(pollingDelay.toMillis(), MILLISECONDS, containerSigningService.getTaskExecutor()));
     }
 
     private void pollSignatureStatus(String sessionId, String signatureId) {
