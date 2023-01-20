@@ -339,9 +339,9 @@ Now SiGa itself is accessible `https://localhost:8443/siga` and siga-demo-applic
 ./mvnw clean install
 ```
 
-2. Update docker image
+2. Build SiGa webapp docker image
 ```bash
-docker-compose build
+./mvnw spring-boot:build-image -pl siga-webapp
 ```
 
 3. Run the image
