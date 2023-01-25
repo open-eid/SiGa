@@ -56,6 +56,8 @@ services:
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
       - siga-logs-01:/usr/local/tomcat/logs
+    depends_on:
+      - siga-db
 
   siga-02:
     image: siga-webapp:latest
@@ -66,6 +68,7 @@ services:
       - spring.sql.init.platform=postgresql
       - spring.datasource.driver-class-name=org.postgresql.Driver
       - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
+      - spring.liquibase.enabled=false
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=6000
     ports:
@@ -82,6 +85,8 @@ services:
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
       - siga-logs-02:/usr/local/tomcat/logs
+    depends_on:
+      - siga-db
 
   siga-db:
     image: postgres:13
