@@ -9,7 +9,6 @@
 !generate-certificate.sh
 !generate-certificates.sh
 !generate-truststore.sh
-!openssl.cnf
 
 # ...even if they are in subdirectories
 !*/

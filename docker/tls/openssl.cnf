@@ -1,4 +1,0 @@
-authorityKeyIdentifier = keyid,issuer
-basicConstraints       = critical, CA:FALSE
-keyUsage               = digitalSignature, keyEncipherment
-subjectAltName         = $ENV::SAN

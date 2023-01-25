@@ -38,11 +38,18 @@ MSYS_NO_PATHCONV=1 \
   -subj "/CN=$host" \
   -out "$applicationName/$host.csr"
 
-# Configure subject alternate names. Passed to openssl.cnf
-export SAN="DNS:$host"
+tmpCnfFile=$(mktemp)
+trap "rm -f $tmpCnfFile" 0 2 3 15
+
+echo "
+authorityKeyIdentifier = keyid,issuer 
+basicConstraints       = critical, CA:FALSE 
+keyUsage               = digitalSignature, keyEncipherment 
+subjectAltName         = DNS:$host
+" > $tmpCnfFile
 
 # Generate CA signed certificate
-openssl x509 \
+OPENSSL_CONF="$tmpCnfFile" openssl x509 \
   -req \
   -sha512 \
   -in "$applicationName/$host.csr" \
@@ -50,7 +57,6 @@ openssl x509 \
   -CAkey "$ca/$ca.localhost.key" \
   -CAcreateserial \
   -days 363 \
-  -extfile "openssl.cnf" \
   -out "$applicationName/$host.crt"
 
 # Generate keystore from application cert and key
