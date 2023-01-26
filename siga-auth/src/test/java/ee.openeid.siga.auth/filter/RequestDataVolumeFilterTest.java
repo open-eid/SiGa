@@ -206,7 +206,7 @@ public class RequestDataVolumeFilterTest {
         request.setContent(jsonObject.toString().getBytes());
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
-        Assert.assertEquals("{\"errorCode\":\"REQUEST_SIZE_LIMIT_EXCEPTION\",\"errorMessage\":\"Request max size exceeded\"}", response.getContentAsString());
+        Assert.assertEquals("{\"errorCode\":\"REQUEST_SIZE_LIMIT_EXCEPTION\",\"errorMessage\":\"Request max size of 250 exceeded\"}", response.getContentAsString());
     }
 
     private Optional<SigaService> mockSigaService() {

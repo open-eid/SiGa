@@ -97,7 +97,8 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
     private boolean validateRequestSize(long requestSize, HttpServletResponse response) throws IOException {
         if (requestSize > configurationProperties.getMaxFileSize()) {
             log.warn("Request max size exceeded. Request size:{}", requestSize);
-            throwError(response, "Request max size exceeded", ErrorResponseCode.REQUEST_SIZE_LIMIT_EXCEPTION);
+            String errorMessage = String.format("Request max size of %d exceeded", configurationProperties.getMaxFileSize());
+            throwError(response, errorMessage, ErrorResponseCode.REQUEST_SIZE_LIMIT_EXCEPTION);
             return false;
         }
         return true;
