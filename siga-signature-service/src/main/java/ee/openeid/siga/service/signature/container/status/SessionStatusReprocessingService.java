@@ -1,15 +1,12 @@
 package ee.openeid.siga.service.signature.container.status;
 
-import ee.openeid.siga.common.model.SigningType;
-import ee.openeid.siga.common.session.*;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
-import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
-import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
-import ee.openeid.siga.session.CacheName;
-import ee.openeid.siga.session.SessionService;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import static java.time.Duration.ZERO;
+
+import java.util.Map;
+import java.util.function.Predicate;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.ignite.Ignite;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.query.QueryCursor;
@@ -19,10 +16,21 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
-import java.util.Map;
-
-import static java.time.Duration.ZERO;
+import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.session.AsicContainerSession;
+import ee.openeid.siga.common.session.CertificateSession;
+import ee.openeid.siga.common.session.HashcodeContainerSession;
+import ee.openeid.siga.common.session.Session;
+import ee.openeid.siga.common.session.SessionStatus;
+import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
+import ee.openeid.siga.session.CacheName;
+import ee.openeid.siga.session.SessionService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -38,7 +46,8 @@ public class SessionStatusReprocessingService {
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
     public void processFailedStatusRequests() {
-        SignatureStatusRequestFilter filter = new SignatureStatusRequestFilter(reprocessingProperties.getMaxProcessingAttempts(),
+        SignatureStatusRequestFilter filter = new SignatureStatusRequestFilter(
+                reprocessingProperties.getMaxProcessingAttempts(),
                 reprocessingProperties.getProcessingTimeout(), reprocessingProperties.getExceptionTimeout());
         ScanQuery<String, Map<String, BinaryObject>> query = new ScanQuery<>(filter);
         try (QueryCursor<String> queryCursor = ignite.getOrCreateCache(CacheName.SIGNATURE_SESSION.name())
@@ -52,16 +61,19 @@ public class SessionStatusReprocessingService {
         Session session = sessionService.getContainerBySessionId(sessionId);
         Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
 
-        signatureSessions.entrySet().stream().filter(filter.apply()).forEach(s -> {
+        signatureSessions.entrySet().stream().filter(applySignatureStatusRequestFilter(filter)).forEach(s -> {
             String signatureSessionId = s.getKey();
             SignatureSession signatureSession = s.getValue();
-            processFailedSignatureSession(session, signatureSessionId, signatureSession.getSigningType(), signatureSession.getSessionStatus());
+            processFailedSignatureSession(session, signatureSessionId, signatureSession.getSigningType(),
+                    signatureSession.getSessionStatus());
         });
     }
 
-    void processFailedSignatureSession(Session session, String signatureSessionId, SigningType signingType, SessionStatus sessionStatus) {
+    void processFailedSignatureSession(Session session, String signatureSessionId, SigningType signingType,
+            SessionStatus sessionStatus) {
         String sessionId = session.getSessionId();
-        log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId, sessionStatus);
+        log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId,
+                sessionStatus);
         if (signingType == SigningType.SMART_ID) {
             if (session instanceof AsicContainerSession) {
                 asicContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
@@ -79,7 +91,8 @@ public class SessionStatusReprocessingService {
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
     public void processFailedCertificateStatusRequests() {
-        CertificateStatusRequestFilter filter = new CertificateStatusRequestFilter(reprocessingProperties.getMaxProcessingAttempts(),
+        CertificateStatusRequestFilter filter = new CertificateStatusRequestFilter(
+                reprocessingProperties.getMaxProcessingAttempts(),
                 reprocessingProperties.getProcessingTimeout(), reprocessingProperties.getExceptionTimeout());
         ScanQuery<String, Map<String, BinaryObject>> query = new ScanQuery<>(filter);
         try (QueryCursor<String> queryCursor = ignite.getOrCreateCache(CacheName.CERTIFICATE_SESSION.name())
@@ -93,7 +106,7 @@ public class SessionStatusReprocessingService {
         Session session = sessionService.getContainerBySessionId(sessionId);
         Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
 
-        certificateSessions.entrySet().stream().filter(filter.apply()).forEach(s -> {
+        certificateSessions.entrySet().stream().filter(applyCertificateStatusRequestFilter(filter)).forEach(s -> {
             String certificateSessionId = s.getKey();
             if (session instanceof AsicContainerSession) {
                 asicContainerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
@@ -110,9 +123,32 @@ public class SessionStatusReprocessingService {
         long currentCount = 0;
         log.info("Graceful shutdown in progress!");
         while (taskExecutor.getActiveCount() != 0 && currentCount++ <= timeout) {
-            log.info("Nr. of active status polling jobs left: {}. Timeout in: {}", taskExecutor.getActiveCount(), timeout - currentCount);
+            log.info("Nr. of active status polling jobs left: {}. Timeout in: {}", taskExecutor.getActiveCount(),
+                    timeout - currentCount);
             Thread.sleep(1000);
         }
         log.info("Continuing shutdown!");
+    }
+
+    private static Predicate<Map.Entry<String, SignatureSession>> applySignatureStatusRequestFilter(
+            SignatureStatusRequestFilter filter) {
+        return s -> {
+            SignatureSession signatureSession = s.getValue();
+            SessionStatus sessionStatus = signatureSession.getSessionStatus();
+            return SignatureStatusRequestFilter.isApplyFilter(filter, sessionStatus.getProcessingStatus(),
+                    sessionStatus.getProcessingStatusTimestamp(),
+                    sessionStatus.getProcessingCounter());
+        };
+    }
+
+    private static Predicate<Map.Entry<String, CertificateSession>> applyCertificateStatusRequestFilter(
+            CertificateStatusRequestFilter filter) {
+        return s -> {
+            CertificateSession certificateSession = s.getValue();
+            SessionStatus sessionStatus = certificateSession.getSessionStatus();
+            return CertificateStatusRequestFilter.isApplyFilter(filter, sessionStatus.getProcessingStatus(),
+                    sessionStatus.getProcessingStatusTimestamp(),
+                    sessionStatus.getProcessingCounter());
+        };
     }
 }

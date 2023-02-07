@@ -46,7 +46,7 @@ public class SignatureSession implements Binarylizable {
         dataFilesHash = reader.readString("dataFilesHash");
         relyingPartyInfo = reader.readObject("relyingPartyInfo");
     }
-    public void setPollingStatus(SessionStatus.ProcessingStatus status) {
+    public void setPollingStatus(ProcessingStatus status) {
         sessionStatus.setProcessingStatus(status);
     }
 }

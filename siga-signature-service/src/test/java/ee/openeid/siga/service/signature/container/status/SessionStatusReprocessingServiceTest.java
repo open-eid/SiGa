@@ -50,7 +50,7 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.http.Fault.*;
-import static ee.openeid.siga.common.session.SessionStatus.ProcessingStatus.EXCEPTION;
+import static ee.openeid.siga.common.session.ProcessingStatus.EXCEPTION;
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;

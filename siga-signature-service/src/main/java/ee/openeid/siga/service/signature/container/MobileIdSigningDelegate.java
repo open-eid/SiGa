@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import static ee.openeid.siga.common.exception.ErrorResponseCode.INTERNAL_SERVER_ERROR;
 import static ee.openeid.siga.common.model.SigningType.MOBILE_ID;
-import static ee.openeid.siga.common.session.SessionStatus.ProcessingStatus.EXCEPTION;
-import static ee.openeid.siga.common.session.SessionStatus.ProcessingStatus.RESULT;
+import static ee.openeid.siga.common.session.ProcessingStatus.EXCEPTION;
+import static ee.openeid.siga.common.session.ProcessingStatus.RESULT;
 import static ee.openeid.siga.service.signature.container.ContainerSigningService.UNABLE_TO_FINALIZE_SIGNATURE;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;

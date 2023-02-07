@@ -13,7 +13,7 @@ public class CertificateSession {
     @Builder.Default
     private SessionStatus sessionStatus = SessionStatus.builder().build();
 
-    public void setPollingStatus(SessionStatus.ProcessingStatus status) {
+    public void setPollingStatus(ProcessingStatus status) {
         sessionStatus.setProcessingStatus(status);
     }
 }

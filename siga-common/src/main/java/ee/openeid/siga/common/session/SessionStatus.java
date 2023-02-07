@@ -4,8 +4,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-import static ee.openeid.siga.common.session.SessionStatus.ProcessingStatus.PROCESSING;
-import static ee.openeid.siga.common.session.SessionStatus.ProcessingStatus.RESULT;
+import static ee.openeid.siga.common.session.ProcessingStatus.PROCESSING;
+import static ee.openeid.siga.common.session.ProcessingStatus.RESULT;
 
 @Data
 @Builder
@@ -32,10 +32,6 @@ public class SessionStatus {
                 .errorCode(errorCode)
                 .errorMessage(message)
                 .build();
-    }
-
-    public enum ProcessingStatus {
-        PROCESSING, RESULT, EXCEPTION
     }
 
     @Value
