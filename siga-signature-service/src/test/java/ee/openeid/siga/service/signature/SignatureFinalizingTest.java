@@ -30,7 +30,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Optional;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
@@ -151,8 +157,17 @@ public class SignatureFinalizingTest {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         });
 
-        assertThat(e.getMessage(), matchesPattern("The signing certificate \\(notBefore : Fri Apr 08 16:35:52 " +
-                "EEST 2011, notAfter : Mon Apr 07 23:59:59 EEST 2014\\) is expired at signing time .*"));
+        assertThat(e.getMessage(), matchesPattern(String.format(
+                "The signing certificate \\(notBefore : %s, notAfter : %s\\) is expired at signing time .*",
+                Date.from(OffsetDateTime.of(
+                        LocalDate.of(2011, Month.APRIL, 8),
+                        LocalTime.of(16, 35, 52),
+                        ZoneOffset.ofHours(3)).toInstant()),
+                Date.from(OffsetDateTime.of(
+                        LocalDate.of(2014, Month.APRIL, 7),
+                        LocalTime.of(23, 59, 59),
+                        ZoneOffset.ofHours(3)).toInstant())
+        )));
         assertNull(sigaEventLogger.getEvent(0));
     }
 
