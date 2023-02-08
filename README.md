@@ -102,7 +102,7 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 
 Example `application.properties` file with DEMO parameters can be seen [here](siga-webapp/src/main/resources/application.properties).
 `application.properties` values must be changed for production mode.
-Common Spring Boot properties are described [here](https://docs.spring.io/spring-boot/docs/2.1.4.RELEASE/reference/html/common-application-properties.html).
+Common Spring Boot properties are described [here](https://docs.spring.io/spring-boot/docs/2.7.7/reference/html/application-properties.html).
 
 #### SiGa Ignite configuration
 
