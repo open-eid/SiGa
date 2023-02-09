@@ -5,7 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import ee.openeid.siga.common.auth.SigaUserDetails;
-import ee.openeid.siga.common.model.*;
+import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.common.model.MobileIdInformation;
+import ee.openeid.siga.common.model.RelyingPartyInfo;
+import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
@@ -26,7 +31,6 @@ import lombok.SneakyThrows;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,17 +50,28 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.http.Fault.*;
+import static com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER;
+import static com.github.tomakehurst.wiremock.http.Fault.MALFORMED_RESPONSE_CHUNK;
+import static com.github.tomakehurst.wiremock.http.Fault.RANDOM_DATA_THEN_CLOSE;
 import static ee.openeid.siga.common.session.ProcessingStatus.EXCEPTION;
-import static ee.openeid.siga.service.signature.test.RequestUtil.*;
+import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
+import static ee.openeid.siga.service.signature.test.RequestUtil.createHashcodeDataFileListWithOneFile;
+import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -123,9 +138,9 @@ public class SessionStatusReprocessingServiceTest {
     public void setUp() {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()
-                .clientName("client1")
-                .serviceName("Testimine")
-                .serviceUuid("a7fd7728-a3ea-4975-bfab-f240a67e894f")
+                .clientName(CLIENT_NAME)
+                .serviceName(SERVICE_NAME)
+                .serviceUuid(SERVICE_UUID)
                 .build());
         SecurityContextHolder.setContext(securityContext);
         Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
@@ -148,117 +163,170 @@ public class SessionStatusReprocessingServiceTest {
         Mockito.doReturn(sidResponse).when(smartIdApiClient).initSmartIdSigning(any(), any(), any());
     }
 
-    @After
-    public void removeTestContainer() {
-        sessionService.removeBySessionId(CONTAINER_SESSION_ID);
-    }
-
     @Test
     public void processFailedSignatureStatusRequests_WhenMaxPollingAttempts_NoMidReprocessing() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json; charset=UTF-8")
                         .withStatus(500)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
-        assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
+
+            assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+            // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
+            //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
+            Mockito.verify(mobileIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
+                    .getSignatureStatus(createDefaultRelyingPartyInfo(), MOCK_SESSION_CODE);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenMobileIdApiHttp500_ReprocessMidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json; charset=UTF-8")
                         .withStatus(500)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
-        assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
+
+            assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenMobileIdApiConnectResetByPeer_ReprocessMidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(CONNECTION_RESET_BY_PEER)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "Connection reset");
 
-        assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "Connection reset");
+
+            assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenMobileIdApiMalformedResponse_ReprocessMidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(MALFORMED_RESPONSE_CHUNK)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "java.io.IOException: Premature EOF");
 
-        assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "java.io.IOException: Premature EOF");
+
+            assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenMobileIdApiReturnsInvalidData_ReprocessMidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/mid-api/signature/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(RANDOM_DATA_THEN_CLOSE)));
-        SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "Failed to convert a response into an exception.");
 
-        assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "Failed to convert a response into an exception.");
+
+            assertReprocessMidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenMaxPollingAttempts_NoSidReprocessing() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json; charset=UTF-8")
                         .withStatus(500)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
-        assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
+
+            assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+            // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
+            //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
+            Mockito.verify(smartIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
+                    .getSignatureStatus(createDefaultRelyingPartyInfo(), MOCK_SESSION_CODE);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenSmartIdApiHttp500_ReprocessSidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json; charset=UTF-8")
                         .withStatus(500)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
-        assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
+
+            assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenSmartIdApiConnectResetByPeer_ReprocessSidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(CONNECTION_RESET_BY_PEER)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "Connection reset");
 
-        assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "Connection reset");
+
+            assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenSmartIdApiMalformedResponse_ReprocessSidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(MALFORMED_RESPONSE_CHUNK)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "java.io.IOException: Premature EOF");
 
-        assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "java.io.IOException: Premature EOF");
+
+            assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     @Test
     public void processFailedSignatureStatusRequests_WhenSmartIdApiReturnsInvalidData_ReprocessSidStatusRequest() {
-        String containerSessionId = crateContainerSession();
         mockServer.stubFor(WireMock.any(urlPathEqualTo(format("/sid-api/session/%s", MOCK_SESSION_CODE)))
                 .willReturn(aResponse().withFault(RANDOM_DATA_THEN_CLOSE)));
-        SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "Failed to convert a response into an exception.");
 
-        assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        String containerSessionId = createContainerSession();
+        try {
+            SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "Failed to convert a response into an exception.");
+
+            assertReprocessSidSignatureStatusRequest(containerSessionId, signingChallenge);
+        } finally {
+            sessionService.removeBySessionId(containerSessionId);
+        }
     }
 
     private SigningChallenge startMobileIdSigningAndAssertPollingException(String containerSessionId, String expectedErrorMessage) {
@@ -389,6 +457,12 @@ public class SessionStatusReprocessingServiceTest {
     }
 
     private void assertMaxReprocessingAttempts(String containerSessionId, SigningChallenge signingChallenge) {
+        final AtomicInteger invocationCounter = new AtomicInteger(0);
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationCounter.incrementAndGet();
+            return invocationOnMock.callRealMethod();
+        }).when(sessionStatusReprocessingService).processFailedStatusRequests();
+
         await().atMost(60, SECONDS).untilAsserted(() -> {
             HashcodeContainerSession containerSession = (HashcodeContainerSession) sessionService.getContainerBySessionId(containerSessionId);
             List<HashcodeSignatureWrapper> signatures = containerSession.getSignatures();
@@ -401,19 +475,22 @@ public class SessionStatusReprocessingServiceTest {
             assertThat(statusError, notNullValue());
             assertThat(statusError.getErrorCode(), equalTo("INTERNAL_SERVER_ERROR"));
             assertThat(signatureSession.getSignature(), nullValue());
-            assertThat(sessionStatus.getProcessingCounter(), equalTo(reprocessingProperties.getMaxProcessingAttempts()));
+            // The final reprocessing failure increments the counter to maxProcessingAttempts + 1
+            assertThat(sessionStatus.getProcessingCounter(), equalTo(reprocessingProperties.getMaxProcessingAttempts() + 1));
         });
 
-        Mockito.clearInvocations(sessionStatusReprocessingService);
-        await().atMost(60, SECONDS).untilAsserted(() ->
-                Mockito.verify(sessionStatusReprocessingService, Mockito.times(1)).processFailedStatusRequests());
-        Mockito.clearInvocations(sessionStatusReprocessingService);
-        await().atMost(60, SECONDS).untilAsserted(() ->
-                Mockito.verify(sessionStatusReprocessingService, Mockito.atLeastOnce()).processFailedStatusRequests());
-        Mockito.verify(sessionStatusReprocessingService, Mockito.never()).processFailedSignatureSession(any(), eq(signingChallenge.getGeneratedSignatureId()), any(), any());
+        // Wait for at least 10 more invocations of processFailedStatusRequests
+        final int expectedInvocationCount = invocationCounter.get() + 10;
+        await().atMost(60, SECONDS).untilAsserted(() -> Mockito
+                .verify(sessionStatusReprocessingService, Mockito.atLeast(expectedInvocationCount)).processFailedStatusRequests());
+
+        // processFailedSignatureSession might be called more times than maxProcessingAttempts if the first polling
+        //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
+        Mockito.verify(sessionStatusReprocessingService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
+                .processFailedSignatureSession(any(), eq(signingChallenge.getGeneratedSignatureId()), any(), any());
     }
 
-    private String crateContainerSession() {
+    private String createContainerSession() {
         String containerSessionId = "v1_user_name_" + UUID.randomUUID();
         sessionService.update(HashcodeContainerSession.builder()
                 .sessionId(containerSessionId)
@@ -424,7 +501,7 @@ public class SessionStatusReprocessingServiceTest {
         return containerSessionId;
     }
 
-    private SigaUserDetails createDefaultUserDetails() {
+    private static SigaUserDetails createDefaultUserDetails() {
         return SigaUserDetails.builder()
                 .clientName("Client_name")
                 .serviceName("Service_name")
@@ -433,6 +510,13 @@ public class SessionStatusReprocessingServiceTest {
                 .skRelyingPartyUuid("uuid")
                 .smartIdRelyingPartyName("name")
                 .smartIdRelyingPartyUuid("uuid")
+                .build();
+    }
+
+    private static RelyingPartyInfo createDefaultRelyingPartyInfo() {
+        return RelyingPartyInfo.builder()
+                .name("name")
+                .uuid("uuid")
                 .build();
     }
 }
