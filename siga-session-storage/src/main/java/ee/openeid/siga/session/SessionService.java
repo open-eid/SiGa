@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.cache.Cache;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,10 +35,12 @@ public class SessionService {
         Session container = Optional.ofNullable(getContainerCache().get(sessionId))
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         log.info("Found container with container ID [{}]", container.getSessionId());
-        Map<String, SignatureSession> signatureSessions = getSignatureSessionCache().get(sessionId);
-        container.setSignatureSessions(signatureSessions);
-        Map<String, CertificateSession> certificateSessions = getCertificateSessionCache().get(sessionId);
-        container.setCertificateSessions(certificateSessions);
+        container.setSignatureSessions(Optional
+                .ofNullable(getSignatureSessionCache().get(sessionId))
+                .orElseGet(HashMap::new));
+        container.setCertificateSessions(Optional
+                .ofNullable(getCertificateSessionCache().get(sessionId))
+                .orElseGet(HashMap::new));
         return container;
     }
 
