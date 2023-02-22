@@ -1,18 +1,18 @@
 package ee.openeid.siga.monitoring;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_VERSION;
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.NOT_AVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class VersionEndpointTest {
 
     private static final String TEST_VERSION = "TEST_VERSION";
@@ -26,7 +26,7 @@ public class VersionEndpointTest {
 
         Map<String, Object> result = versionEndpoint.version();
 
-        Assert.assertEquals(
+        assertEquals(
                 Map.of(VersionEndpoint.RESPONSE_PARAM_VERSION, NOT_AVAILABLE),
                 result
         );
@@ -41,7 +41,7 @@ public class VersionEndpointTest {
 
         Map<String, Object> result = versionEndpoint.version();
 
-        Assert.assertEquals(
+        assertEquals(
                 Map.of(VersionEndpoint.RESPONSE_PARAM_VERSION, TEST_VERSION),
                 result
         );

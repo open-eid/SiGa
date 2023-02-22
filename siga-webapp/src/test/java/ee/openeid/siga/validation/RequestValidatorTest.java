@@ -14,15 +14,13 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -42,8 +40,11 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(MockitoJUnitRunner.class)
+
+@ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "application-test.properties")
 public class RequestValidatorTest {
 
@@ -61,13 +62,10 @@ public class RequestValidatorTest {
     @Mock
     private SecurityConfigurationProperties securityConfigurationProperties;
 
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setup() {
-        Mockito.when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        Mockito.when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        Mockito.lenient().when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        Mockito.lenient().when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
         validator = new RequestValidator(mobileIdClientConfigurationProperties, smartIdClientConfigurationProperties, securityConfigurationProperties);
     }
 
@@ -122,122 +120,151 @@ public class RequestValidatorTest {
 
     @Test
     public void containerContentEmpty() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("File content is invalid");
-        validator.validateFileContent("");
+        RequestValidationException caughtException = assertThrows(
+                RequestValidationException.class,
+                () -> validator.validateFileContent("")
+        );
+        assertEquals("File content is invalid", caughtException.getMessage());
     }
 
     @Test
     public void containerContentNotBase64() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("File content is invalid");
-        validator.validateFileContent("?&%");
+        RequestValidationException caughtException = assertThrows(
+                RequestValidationException.class,
+                () -> validator.validateFileContent("?&%")
+        );
+        assertEquals("File content is invalid", caughtException.getMessage());
     }
 
     @Test
     public void createHashcodeContainer_NoDataFiles() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Must be at least one data file in request");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
-        validator.validateHashcodeDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateHashcodeDataFiles(request.getDataFiles())
+        );
+        assertEquals("Must be at least one data file in request", caughtException.getMessage());
+
     }
 
     @Test
     public void createContainer_NoDataFiles() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Must be at least one data file in request");
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().clear();
-        validator.validateDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
+        );
+        assertEquals("Must be at least one data file in request", caughtException.getMessage());
     }
 
     @Test
     public void createHashcodeContainer_DataFileContentIsEmpty() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Data file name is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new HashcodeDataFile());
-        validator.validateHashcodeDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateHashcodeDataFiles(request.getDataFiles())
+        );
+        assertEquals("Data file name is invalid", caughtException.getMessage());
+
     }
 
     @Test
     public void createContainer_DataFileContentIsEmpty() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Data file name is invalid");
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new DataFile());
-        validator.validateDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
+        );
+        assertEquals("Data file name is invalid", caughtException.getMessage());
+
     }
 
     @Test
     public void createHashcodeContainer_DataFileNameInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Data file name is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().add(new HashcodeDataFile());
         request.getDataFiles().get(0).setFileName("*/random.txt");
-        validator.validateHashcodeDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateHashcodeDataFiles(request.getDataFiles())
+        );
+        assertEquals("Data file name is invalid", caughtException.getMessage());
+
     }
 
     @Test
     public void createContainer_DataFileNameInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Data file name is invalid");
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().add(new DataFile());
         request.getDataFiles().get(0).setFileName("*/random.txt");
-        validator.validateDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
+        );
+        assertEquals("Data file name is invalid", caughtException.getMessage());
     }
 
     @Test
     public void createHashcodeContainer_DataFileHashIsNotBase64() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Base64 content is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
-        validator.validateHashcodeDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateHashcodeDataFiles(request.getDataFiles())
+        );
+        assertEquals("Base64 content is invalid", caughtException.getMessage());
     }
 
     @Test
     public void createContainer_DataFileHashIsNotBase64() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Base64 content is invalid");
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().get(0).setFileContent(StringUtils.repeat("a", 101));
-        validator.validateDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
+        );
+        assertEquals("Base64 content is invalid", caughtException.getMessage());
     }
 
     @Test
     public void createContainer_DataFileHashTooLong() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Base64 content is invalid");
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
-        validator.validateHashcodeDataFiles(request.getDataFiles());
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateHashcodeDataFiles(request.getDataFiles())
+        );
+        assertEquals("Base64 content is invalid", caughtException.getMessage());
     }
 
     @Test
     public void containerIdIsNull() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Container Id is invalid");
-        validator.validateContainerId(null);
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateContainerId(null)
+        );
+        assertEquals("Container Id is invalid", caughtException.getMessage());
     }
 
     @Test
     public void containerIdIsEmpty() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Container Id is invalid");
-        validator.validateContainerId("");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateContainerId("")
+        );
+        assertEquals("Container Id is invalid", caughtException.getMessage());
     }
 
     @Test
     public void containerIdIsTooLong() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Container Id is invalid");
-        validator.validateContainerId(StringUtils.repeat("a", 37));
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateContainerId(StringUtils.repeat("a", 37))
+        );
+        assertEquals("Container Id is invalid", caughtException.getMessage());
     }
 
     @Test
@@ -252,64 +279,75 @@ public class RequestValidatorTest {
 
     @Test
     public void invalidSigningCertificate() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signing certificate");
-        validator.validateSigningCertificate("+=?!%");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSigningCertificate("+=?!%")
+        );
+        assertEquals("Invalid signing certificate", caughtException.getMessage());
     }
 
     @Test
     public void emptySigningCertificate() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signing certificate");
-        validator.validateSigningCertificate("");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSigningCertificate("")
+        );
+        assertEquals("Invalid signing certificate", caughtException.getMessage());
     }
 
     @Test
     public void remoteSigning_authCertificateNotAllowed() throws IOException {
-        exceptionRule.expect(InvalidCertificateException.class);
-        exceptionRule.expectMessage("Invalid signing certificate");
         Path documentPath = Paths.get(new ClassPathResource("mari-liis_auth.cer").getURI());
         InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
-        validator.validateRemoteSigning(CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes())), "LT");
+
+        InvalidCertificateException caughtException = assertThrows(
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes())), "LT")
+        );
+        assertEquals("Invalid signing certificate", caughtException.getMessage());
     }
 
     @Test
     public void remoteSigning_smartIdCertificateNotAllowed() throws IOException {
-        exceptionRule.expect(InvalidCertificateException.class);
-        exceptionRule.expectMessage("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate");
         Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.17.2", "1.3.6.1.4.1.10015.3.1.3"));
         X509Certificate certificate = readCertificate("smart-id.cer");
-        validator.validateRemoteSigning(certificate, "LT");
+
+        InvalidCertificateException caughtException = assertThrows(
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate, "LT")
+        );
+        assertEquals("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate", caughtException.getMessage());
     }
 
     @Test
     public void remoteSigning_mobileIdCertificateNotAllowed() throws IOException {
-        exceptionRule.expect(InvalidCertificateException.class);
-        exceptionRule.expectMessage("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate");
         Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.1.3"));
         X509Certificate certificate = readCertificate("mobile-id.cer");
-        validator.validateRemoteSigning(certificate, "LT");
+
+        InvalidCertificateException caughtException = assertThrows(
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate, "LT")
+        );
+        assertEquals("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate", caughtException.getMessage());
     }
 
     @Test
     public void oldSignatureProfile() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning(null, "B_BES");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "B_BES")
+        );
+        assertEquals("Invalid signature profile", caughtException.getMessage());
     }
 
     @Test
     public void invalidSignatureProfile() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning(null, "TL");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "TL")
+        );
+        assertEquals("Invalid signature profile", caughtException.getMessage());
     }
 
     @Test
     public void emptySignatureProfile() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signature profile");
-        validator.validateRemoteSigning(null, "");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "")
+        );
+        assertEquals("Invalid signature profile", caughtException.getMessage());
     }
 
     @Test
@@ -319,16 +357,18 @@ public class RequestValidatorTest {
 
     @Test
     public void emptySignatureValue() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signature value");
-        validator.validateSignatureValue("");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSignatureValue("")
+        );
+        assertEquals("Invalid signature value", caughtException.getMessage());
     }
 
     @Test
     public void invalidSignatureValue() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid signature value");
-        validator.validateSignatureValue("+=?!%");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSignatureValue("+=?!%")
+        );
+        assertEquals("Invalid signature value", caughtException.getMessage());
     }
 
     @Test
@@ -338,47 +378,57 @@ public class RequestValidatorTest {
 
     @Test
     public void nullLanguage() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage(null);
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
 
     @Test
     public void emptyLanguage() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
 
     @Test
     public void invalidLanguage() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("ESTO");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
 
     @Test
     public void languageNotInTheAllowedList() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id language");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("ESP");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
 
     @Test
     public void invalidMessageToDisplay() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Mobile-Id message to display");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 41));
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid Mobile-Id message to display", caughtException.getMessage());
     }
 
     @Test
@@ -390,83 +440,101 @@ public class RequestValidatorTest {
 
     @Test
     public void validatePhoneNo_nullIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(null);
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid phone No.", caughtException.getMessage());
     }
 
     @Test
     public void validatePhoneNo_emptyIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid phone No.", caughtException.getMessage());
     }
 
     @Test
     public void validatePhoneNo_invalidFormat() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid phone No.");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(StringUtils.repeat("a", 21));
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid phone No.", caughtException.getMessage());
     }
 
     @Test
     public void validatePhoneNo_invalidCountryPrefix() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid international calling code");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3795394823");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid international calling code", caughtException.getMessage());
     }
 
     @Test
     public void validatePhoneNo_notAllowedCountryPrefix() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid international calling code");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3715394823");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid international calling code", caughtException.getMessage());
     }
 
     @Test
     public void nullPersonIdentifier() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(null);
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
     public void emptyPersonIdentifier() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier("");
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
     public void invalidPersonIdentifierTooLong() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("1", 13));
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
     public void invalidPersonIdentifierContainsLetter() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 11));
-        validator.validateMobileIdInformation(mobileIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
@@ -493,23 +561,26 @@ public class RequestValidatorTest {
 
     @Test
     public void validateRoles_includingNullValueIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Roles may not include blank values");
-        validator.validateRoles(Collections.singletonList(null));
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(null))
+        );
+        assertEquals("Roles may not include blank values", caughtException.getMessage());
     }
 
     @Test
     public void validateRoles_includingEmptyValueIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Roles may not include blank values");
-        validator.validateRoles(Collections.singletonList(""));
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(""))
+        );
+        assertEquals("Roles may not include blank values", caughtException.getMessage());
     }
 
     @Test
     public void validateRoles_includingBlankValueIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Roles may not include blank values");
-        validator.validateRoles(Collections.singletonList(" "));
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(" "))
+        );
+        assertEquals("Roles may not include blank values", caughtException.getMessage());
     }
 
     @Test
@@ -519,23 +590,26 @@ public class RequestValidatorTest {
 
     @Test
     public void validateCertificateId_nullIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Certificate Id is invalid");
-        validator.validateCertificateId(null);
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateCertificateId(null)
+        );
+        assertEquals("Certificate Id is invalid", caughtException.getMessage());
     }
 
     @Test
     public void validateCertificateId_emptyStringIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Certificate Id is invalid");
-        validator.validateCertificateId("");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateCertificateId("")
+        );
+        assertEquals("Certificate Id is invalid", caughtException.getMessage());
     }
 
     @Test
     public void validateCertificateId_tooLongStringIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Certificate Id is invalid");
-        validator.validateCertificateId(UUID.randomUUID().toString() + "a");
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateCertificateId(UUID.randomUUID().toString() + "a")
+        );
+        assertEquals("Certificate Id is invalid", caughtException.getMessage());
     }
 
     @Test
@@ -546,65 +620,79 @@ public class RequestValidatorTest {
 
     @Test
     public void validateSmartIdInformationForCertChoice_nullCountryIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry(null);
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_tooShortCountryIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("E");
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_countryIsNotInAllowedList() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("LV is not allowed for Smart-Id country");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("LV");
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("LV is not allowed for Smart-Id country", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_tooLongCountryIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("EEE");
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_nullPersonIdentifierIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier(null);
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_tooLongPersonIdentifierIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForCertChoice_emptyPersonIdentifierIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid person identifier");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier("");
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+        );
+        assertEquals("Invalid person identifier", caughtException.getMessage());
     }
 
     @Test
@@ -615,74 +703,90 @@ public class RequestValidatorTest {
 
     @Test
     public void validateSmartIdInformationForSigning_tooLongMessageIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id message to display");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setMessageToDisplay(StringUtils.repeat("a", 61));
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id message to display", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_nullDocumentNumberIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber(null);
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_tooLongDocumentNumberIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber(StringUtils.repeat("a", 41));
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_emptyDocumentNumberIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("");
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_tooShortDocumentNumberIsInvalid() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOEE-123");
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_documentNumberNotStartingPNOPrefix() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNKEE-12345678-ZOKS-Q");
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_documentNumberNotAllowedCountryList() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country inside documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOLV-12345678-ZOKS-Q");
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id country inside documentNumber", caughtException.getMessage());
     }
 
     @Test
     public void validateSmartIdInformationForSigning_invalidCountry() {
-        exceptionRule.expect(RequestValidationException.class);
-        exceptionRule.expectMessage("Invalid Smart-Id country inside documentNumber");
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOWW-12345678-ZOKS-Q");
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+        );
+        assertEquals("Invalid Smart-Id country inside documentNumber", caughtException.getMessage());
     }
 
     private X509Certificate readCertificate(String fileName) throws IOException {

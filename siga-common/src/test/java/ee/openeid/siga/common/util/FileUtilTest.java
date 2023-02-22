@@ -1,27 +1,29 @@
 package ee.openeid.siga.common.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileUtilTest {
 
     @Test
     public void validFileName() {
-        Assert.assertTrue(FileUtil.isFilenameValid("fi le12%&.txt"));
+        assertTrue(FileUtil.isFilenameValid("fi le12%&.txt"));
     }
 
     @Test
     public void fileNameWithoutExtension() {
-        Assert.assertTrue(FileUtil.isFilenameValid("file"));
+        assertTrue(FileUtil.isFilenameValid("file"));
     }
 
     @Test
     public void asteriskIncludedInFileName() {
-        Assert.assertFalse(FileUtil.isFilenameValid("*.txt"));
+        assertFalse(FileUtil.isFilenameValid("*.txt"));
     }
 
     @Test
     public void FileNameWithDirectory() {
-        Assert.assertFalse(FileUtil.isFilenameValid("Data/file.txt"));
+        assertFalse(FileUtil.isFilenameValid("Data/file.txt"));
     }
 }

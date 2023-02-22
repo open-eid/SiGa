@@ -13,7 +13,6 @@ import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +33,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,27 +50,27 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected void assertHashcodeSignedContainer(String containerId, int validSignatureCount) throws Exception {
         HashcodeContainer container = getHashcodeContainer(containerId);
-        Assert.assertEquals(2, container.getSignatures().size());
-        Assert.assertEquals(2, container.getDataFiles().size());
+        assertEquals(2, container.getSignatures().size());
+        assertEquals(2, container.getDataFiles().size());
 
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
-        Assert.assertEquals(2, signatures.size());
+        assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
-        Assert.assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
-        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
+        assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
+        assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
     protected void assertSignedContainer(String containerId, int validSignatureCount) throws Exception {
         Container container = getContainer(containerId);
-        Assert.assertEquals(2, container.getSignatures().size());
-        Assert.assertEquals(2, container.getDataFiles().size());
+        assertEquals(2, container.getSignatures().size());
+        assertEquals(2, container.getDataFiles().size());
         List<Signature> signatures = getSignatures(containerId);
 
-        Assert.assertEquals(2, signatures.size());
+        assertEquals(2, signatures.size());
         ValidationConclusion validationConclusion = getValidationConclusion(containerId);
-        Assert.assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
-        Assert.assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
+        assertEquals(Integer.valueOf(validSignatureCount), validationConclusion.getValidSignaturesCount());
+        assertEquals(Integer.valueOf(2), validationConclusion.getSignaturesCount());
     }
 
     protected List<HashcodeDataFile> getHashcodeDataFiles(String containerId) throws Exception {

@@ -31,10 +31,10 @@ import lombok.SneakyThrows;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,7 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Base64;
 import java.util.List;
@@ -76,7 +76,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "datafileContainer"})
 @SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT, properties = {
         "siga.security.jasypt.encryption-algo=PBEWITHSHA-256AND256BITAES-CBC-BC",
@@ -129,12 +129,12 @@ public class SessionStatusReprocessingServiceTest {
     @Autowired
     private SessionStatusReprocessingProperties reprocessingProperties;
 
-    @BeforeClass
+    @BeforeAll
     public static void startMocks() {
         mockServer.start();
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()

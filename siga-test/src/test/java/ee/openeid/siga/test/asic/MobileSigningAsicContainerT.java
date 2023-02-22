@@ -1,15 +1,14 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -20,12 +19,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MobileSigningAsicContainerT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -99,7 +95,8 @@ public class MobileSigningAsicContainerT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
-    @Ignore("Test uses Lithuanian test MID number for second signature.")
+
+    @Disabled("Test uses Lithuanian test MID number for second signature.")
     @Test
     public void signWithMultipleSignaturesPerContainerSuccessfully() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());

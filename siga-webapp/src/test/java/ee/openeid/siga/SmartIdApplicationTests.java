@@ -8,15 +8,14 @@ import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Container;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -26,9 +25,10 @@ import static java.lang.String.valueOf;
 import static java.time.Instant.now;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "smartId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
@@ -38,7 +38,7 @@ public class SmartIdApplicationTests extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
     }
@@ -57,12 +57,12 @@ public class SmartIdApplicationTests extends BaseTest {
     public void smartIdHashcodeFlowWihCertificateChoice() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
@@ -88,13 +88,13 @@ public class SmartIdApplicationTests extends BaseTest {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
         String certificateId = startSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
         await().atMost(25, SECONDS).until(isSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
@@ -118,13 +118,13 @@ public class SmartIdApplicationTests extends BaseTest {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String signatureId = startHashcodeSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
@@ -146,13 +146,13 @@ public class SmartIdApplicationTests extends BaseTest {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));

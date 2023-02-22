@@ -6,8 +6,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -27,14 +27,14 @@ public abstract class BaseTestLoggingAssertion {
 
     private ListAppender<ILoggingEvent> memoryLogAppender;
 
-    @Before
+    @BeforeEach
     public void addMemoryLogAppender() {
         memoryLogAppender = new ListAppender<>();
         ((Logger) getLogger(ROOT_LOGGER_NAME)).addAppender(memoryLogAppender);
         memoryLogAppender.start();
     }
 
-    @After
+    @AfterEach
     public void removeMemoryLogAppender() {
         ((Logger) getLogger(ROOT_LOGGER_NAME)).detachAppender(memoryLogAppender);
     }
@@ -67,7 +67,7 @@ public abstract class BaseTestLoggingAssertion {
         assertThat(reason, messages, containsInRelativeOrder(expectedMessages.stream().map(Matchers::matchesPattern).toArray(Matcher[]::new)));
         Set<String> distinct = new HashSet<>();
         List<String> duplicates = messages.stream().filter(e -> !distinct.add(e)).collect(toList());
-        assertTrue("Log contains duplicate messages: " + duplicates, duplicates.isEmpty());
+        assertTrue(duplicates.isEmpty(), "Log contains duplicate messages: " + duplicates);
         memoryLogAppender.list.removeAll(events);
         return events;
     }

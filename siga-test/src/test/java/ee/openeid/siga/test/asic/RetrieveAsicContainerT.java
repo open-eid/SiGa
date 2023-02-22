@@ -1,16 +1,13 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
@@ -19,15 +16,13 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RetrieveAsicContainerT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -43,7 +38,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
 
-        Assert.assertEquals("text/xml", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
+        assertEquals("text/xml", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test
@@ -58,7 +53,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
 
-        Assert.assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
+        assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test

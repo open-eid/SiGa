@@ -8,9 +8,8 @@ import io.restassured.response.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -22,12 +21,13 @@ import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreateHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -48,7 +48,7 @@ public class CreateHashcodeContainerT extends TestBase {
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, getContainer(flow).getBody().path(CONTAINER).toString()));
         for (int i = 0; i < TEST_FILE_EXTENSIONS.size(); ++i) {
             String expectedMimeType = MimeType.fromFileName("*." + TEST_FILE_EXTENSIONS.get(i)).getMimeTypeString();
-            Assert.assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (1 + i) + "].@manifest:media-type"));
+            assertEquals(expectedMimeType, manifest.getString("manifest:manifest.manifest:file-entry[" + (1 + i) + "].@manifest:media-type"));
         }
     }
 

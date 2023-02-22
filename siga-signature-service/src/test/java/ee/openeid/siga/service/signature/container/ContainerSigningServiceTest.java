@@ -23,8 +23,7 @@ import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -41,7 +40,7 @@ import static java.time.Duration.ZERO;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
 public abstract class ContainerSigningServiceTest {
@@ -60,17 +59,17 @@ public abstract class ContainerSigningServiceTest {
     @Mock
     private Authentication authentication;
 
-    @Before
+    @BeforeEach
     public void setUpSecurityContext() {
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
+        Mockito.lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.lenient().when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
         SecurityContextHolder.setContext(securityContext);
     }
 
     protected void assertCreateDataToSignSuccessful() {
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate())).getDataToSign();
-        Assert.assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
-        Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
+        assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
+        assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
     }
 
     protected void invalidContainerId() {
@@ -85,8 +84,8 @@ public abstract class ContainerSigningServiceTest {
         signatureParameters.setStateOrProvince(null);
         signatureParameters.setCity(null);
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
-        Assert.assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
-        Assert.assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
+        assertEquals(DigestAlgorithm.SHA512, dataToSign.getDigestAlgorithm());
+        assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
     }
 
     protected void assertSignAndValidateSignature() {
@@ -95,12 +94,12 @@ public abstract class ContainerSigningServiceTest {
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
         Signature signature = dataToSign.finalize(signatureRaw);
-        Assert.assertEquals("Tallinn", signature.getCity());
-        Assert.assertEquals("34234", signature.getPostalCode());
-        Assert.assertEquals("Harjumaa", signature.getStateOrProvince());
-        Assert.assertEquals("Estonia", signature.getCountryName());
-        Assert.assertEquals("Engineer", signature.getSignerRoles().get(0));
-        Assert.assertTrue(signature.validateSignature().isValid());
+        assertEquals("Tallinn", signature.getCity());
+        assertEquals("34234", signature.getPostalCode());
+        assertEquals("Harjumaa", signature.getStateOrProvince());
+        assertEquals("Estonia", signature.getCountryName());
+        assertEquals("Engineer", signature.getSignerRoles().get(0));
+        assertTrue(signature.validateSignature().isValid());
     }
 
     protected void assertFinalizeAndValidateSignature() throws IOException, URISyntaxException {
@@ -110,7 +109,7 @@ public abstract class ContainerSigningServiceTest {
         String base64EncodedSignature = new String(Base64.getEncoder().encode(signatureRaw));
         mockRemoteSessionHolder(dataToSign);
         Result result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
-        Assert.assertEquals(Result.OK, result);
+        assertEquals(Result.OK, result);
     }
 
     protected void noDataToSignInSession() {
@@ -130,12 +129,12 @@ public abstract class ContainerSigningServiceTest {
             getSigningService().finalizeSigning(CONTAINER_ID, "someUnknownSignatureId", base64EncodedSignature);
         } catch (InvalidSessionDataException e) {
             Result result = getSigningService().finalizeSigning(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId(), base64EncodedSignature);
-            Assert.assertEquals(Result.OK, result);
+            assertEquals(Result.OK, result);
             throw e;
         }
     }
 
-    protected void assertSuccessfulMobileIdSigning() throws IOException {
+    protected void assertSuccessfulMobileIdSigning() {
         Mockito.when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(createDefaultUserDetails());
         InitMidSignatureResponse initMidSignatureResponse = new InitMidSignatureResponse();
         initMidSignatureResponse.setSessionCode("sessionCode");
@@ -173,7 +172,7 @@ public abstract class ContainerSigningServiceTest {
         getSigningService().pollMobileIdSignatureStatus(session.getSessionId(), dataToSign.getSignatureParameters().getSignatureId(), ZERO);
 
         await().atMost(FIVE_SECONDS)
-                .untilAsserted(() -> Assert.assertEquals("SIGNATURE",
+                .untilAsserted(() -> assertEquals("SIGNATURE",
                         getSigningService().getMobileIdSignatureStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId())));
         Mockito.verify(sessionService, Mockito.times(2)).update(eq(session));
         Mockito.verify(containerSigningService, Mockito.times(1)).finalizeSignature(eq(session), anyString(), any());
@@ -188,7 +187,7 @@ public abstract class ContainerSigningServiceTest {
         Mockito.verify(sessionService, Mockito.times(1)).update(sessionCaptor.capture());
         Session updatedSession = sessionCaptor.getValue();
         MatcherAssert.assertThat(updatedSession.getSessionId(), equalTo(CONTAINER_SESSION_ID));
-        Assert.assertEquals(36, certificateSessionId.length());
+        assertEquals(36, certificateSessionId.length());
     }
 
     @SneakyThrows
@@ -209,8 +208,8 @@ public abstract class ContainerSigningServiceTest {
 
         await().atMost(FIVE_SECONDS).untilAsserted(() -> {
             CertificateStatus certificateStatus = getSigningService().getSmartIdCertificateStatus(CONTAINER_ID, CERTIFICATE_ID);
-            Assert.assertEquals(SmartIdSessionStatus.OK.getSigaCertificateMessage(), certificateStatus.getStatus());
-            Assert.assertEquals(DOCUMENT_NUMBER, certificateStatus.getDocumentNumber());
+            assertEquals(SmartIdSessionStatus.OK.getSigaCertificateMessage(), certificateStatus.getStatus());
+            assertEquals(DOCUMENT_NUMBER, certificateStatus.getDocumentNumber());
         });
         Mockito.verify(sessionService, Mockito.times(2)).update(eq(session));
     }
@@ -229,8 +228,8 @@ public abstract class ContainerSigningServiceTest {
         SignatureParameters signatureParameters = createSignatureParameters(null);
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
         SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
-        Assert.assertNotNull(signingChallenge.getChallengeId());
-        Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());
+        assertNotNull(signingChallenge.getChallengeId());
+        assertNotNull(signingChallenge.getGeneratedSignatureId());
     }
 
     protected void assertSuccessfulSmartIdSigningWithSessionCert() throws IOException, URISyntaxException {
@@ -250,8 +249,8 @@ public abstract class ContainerSigningServiceTest {
         SignatureParameters signatureParameters = createSignatureParameters(null);
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
         SigningChallenge signingChallenge = getSigningService().startSmartIdSigning(CONTAINER_ID, smartIdInformation, signatureParameters);
-        Assert.assertNotNull(signingChallenge.getChallengeId());
-        Assert.assertNotNull(signingChallenge.getGeneratedSignatureId());
+        assertNotNull(signingChallenge.getChallengeId());
+        assertNotNull(signingChallenge.getGeneratedSignatureId());
     }
 
     protected void assertSuccessfulSmartIdSignatureProcessing(ContainerSigningService containerSigningService) throws IOException, URISyntaxException {
@@ -268,7 +267,7 @@ public abstract class ContainerSigningServiceTest {
         getSigningService().pollSmartIdSignatureStatus(sessionHolder.getSessionId(), dataToSign.getSignatureParameters().getSignatureId(), ZERO);
 
         await().atMost(FIVE_SECONDS)
-                .untilAsserted(() -> Assert.assertEquals(SmartIdSessionStatus.OK.getSigaSigningMessage(),
+                .untilAsserted(() -> assertEquals(SmartIdSessionStatus.OK.getSigaSigningMessage(),
                         getSigningService().getSmartIdSignatureStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId())));
 
         ArgumentCaptor<Session> sessionCaptor = ArgumentCaptor.forClass(Session.class);
@@ -353,8 +352,8 @@ public abstract class ContainerSigningServiceTest {
 
         MatcherAssert.assertThat(e.getMessage(), equalTo("Unable to finalize signature. Container data files have been changed after signing was initiated. Repeat signing process"));
         Session updatedSession = sessionCaptor.getValue();
-        Assert.assertEquals(CONTAINER_SESSION_ID, updatedSession.getSessionId());
-        Assert.assertNull(updatedSession.getSignatureSession(SIG_ID));
+        assertEquals(CONTAINER_SESSION_ID, updatedSession.getSessionId());
+        assertNull(updatedSession.getSignatureSession(SIG_ID));
     }
 
     private SigaUserDetails createDefaultUserDetails() {

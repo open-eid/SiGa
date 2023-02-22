@@ -5,9 +5,8 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import io.restassured.path.xml.XmlPath;
 import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -18,12 +17,14 @@ import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer
 import static ee.openeid.siga.test.utils.ContainerUtil.hashcodeDataFileAsXmlPath;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HashcodeContainerStructureT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -36,11 +37,11 @@ public class HashcodeContainerStructureT extends TestBase {
 
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
-        Assert.assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(HASHCODE_SHA256, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(HASHCODE_SHA512, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
-        Assert.assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
+        assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
+        assertTrue(fileExistsInContainer(HASHCODE_SHA256, containerBase64));
+        assertTrue(fileExistsInContainer(HASHCODE_SHA512, containerBase64));
+        assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
+        assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
     }
 
     @Test
@@ -48,11 +49,11 @@ public class HashcodeContainerStructureT extends TestBase {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
-        Assert.assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(HASHCODE_SHA256, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(HASHCODE_SHA512, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
-        Assert.assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
+        assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
+        assertTrue(fileExistsInContainer(HASHCODE_SHA256, containerBase64));
+        assertTrue(fileExistsInContainer(HASHCODE_SHA512, containerBase64));
+        assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
+        assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
     }
 
     @Test
@@ -61,9 +62,9 @@ public class HashcodeContainerStructureT extends TestBase {
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         XmlPath hashcodesSha256 = hashcodeDataFileAsXmlPath(HASHCODE_SHA256, containerBase64);
 
-        Assert.assertEquals(DEFAULT_FILENAME, hashcodesSha256.getString("hashcodes.file-entry[0].@full-path"));
-        Assert.assertEquals(DEFAULT_SHA256_DATAFILE, hashcodesSha256.getString("hashcodes.file-entry[0].@hash"));
-        Assert.assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha256.getString("hashcodes.file-entry[0].@size"));
+        assertEquals(DEFAULT_FILENAME, hashcodesSha256.getString("hashcodes.file-entry[0].@full-path"));
+        assertEquals(DEFAULT_SHA256_DATAFILE, hashcodesSha256.getString("hashcodes.file-entry[0].@hash"));
+        assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha256.getString("hashcodes.file-entry[0].@size"));
     }
 
     @Test
@@ -72,9 +73,9 @@ public class HashcodeContainerStructureT extends TestBase {
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         XmlPath hashcodesSha512 = hashcodeDataFileAsXmlPath(HASHCODE_SHA512, containerBase64);
 
-        Assert.assertEquals(DEFAULT_FILENAME, hashcodesSha512.getString("hashcodes.file-entry[0].@full-path"));
-        Assert.assertEquals(DEFAULT_SHA512_DATAFILE, hashcodesSha512.getString("hashcodes.file-entry[0].@hash"));
-        Assert.assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha512.getString("hashcodes.file-entry[0].@size"));
+        assertEquals(DEFAULT_FILENAME, hashcodesSha512.getString("hashcodes.file-entry[0].@full-path"));
+        assertEquals(DEFAULT_SHA512_DATAFILE, hashcodesSha512.getString("hashcodes.file-entry[0].@hash"));
+        assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha512.getString("hashcodes.file-entry[0].@size"));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class HashcodeContainerStructureT extends TestBase {
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         String mimeType = new String(extractEntryFromContainer(MIMETYPE, containerBase64));
 
-        Assert.assertEquals("application/vnd.etsi.asic-e+zip", mimeType);
+        assertEquals("application/vnd.etsi.asic-e+zip", mimeType);
     }
 
     protected Boolean fileExistsInContainer(String fileName, String containerBase64) {

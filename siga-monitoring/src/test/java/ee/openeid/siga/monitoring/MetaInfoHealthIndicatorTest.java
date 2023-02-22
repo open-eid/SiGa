@@ -1,10 +1,10 @@
 package ee.openeid.siga.monitoring;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 
@@ -18,12 +18,9 @@ import java.util.stream.Stream;
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_BUILD_TIME;
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_NAME;
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM_VERSION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MetaInfoHealthIndicatorTest {
 
     private static final String NOT_AVAILABLE = "N/A";
@@ -113,8 +110,8 @@ public class MetaInfoHealthIndicatorTest {
         } catch (DateTimeParseException e) {
             fail("Failed to parse time: " + e.getMessage());
         }
-        assertFalse(String.format("Time (%s) must not be before %s", parsedTime, earliest), parsedTime.isBefore(earliest));
-        assertFalse(String.format("Time (%s) must not be after %s", parsedTime, latest), parsedTime.isAfter(latest));
+        assertFalse(parsedTime.isBefore(earliest), String.format("Time (%s) must not be before %s", parsedTime, earliest));
+        assertFalse(parsedTime.isAfter(latest), String.format("Time (%s) must not be after %s", parsedTime, latest));
     }
 
 }

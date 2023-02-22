@@ -5,13 +5,12 @@ import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
 import ee.openeid.siga.common.model.SigningType;
 import org.digidoc4j.DataToSign;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HashcodeContainerSessionTest {
 
@@ -20,47 +19,49 @@ public class HashcodeContainerSessionTest {
     private static final String DEFAULT_MOCK_SERVICE_UUID = "serviceUuid";
     private static final String DEFAULT_MOCK_SESSION_ID = "sessionId";
     private static final String DEFAULT_MOCK_SIGNATURE_ID = "12345_id";
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
     public void createEmptyContainerSessionHolder() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("clientName is marked non-null but is null");
-        HashcodeContainerSession.builder().build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> HashcodeContainerSession.builder().build()
+        );
+        assertEquals("clientName is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithOnlyClientName() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("serviceName is marked non-null but is null");
-        HashcodeContainerSession
-                .builder()
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> HashcodeContainerSession
+                    .builder()
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .build()
+        );
+        assertEquals("serviceName is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutServiceUuid() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("serviceUuid is marked non-null but is null");
-        HashcodeContainerSession
-                .builder()
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .serviceName(DEFAULT_MOCK_SERVICE_NAME)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> HashcodeContainerSession
+                    .builder()
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .serviceName(DEFAULT_MOCK_SERVICE_NAME)
+                    .build()
+        );
+        assertEquals("serviceUuid is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutSessionId() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("sessionId is marked non-null but is null");
-        HashcodeContainerSession
-                .builder()
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .serviceName(DEFAULT_MOCK_SERVICE_NAME)
-                .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> HashcodeContainerSession
+                    .builder()
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .serviceName(DEFAULT_MOCK_SERVICE_NAME)
+                    .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
+                    .build()
+        );
+        assertEquals("sessionId is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
@@ -73,10 +74,10 @@ public class HashcodeContainerSessionTest {
                 .sessionId(DEFAULT_MOCK_SESSION_ID)
                 .build();
 
-        Assert.assertEquals(DEFAULT_MOCK_CLIENT_NAME, sessionHolder.getClientName());
-        Assert.assertEquals(DEFAULT_MOCK_SERVICE_NAME, sessionHolder.getServiceName());
-        Assert.assertEquals(DEFAULT_MOCK_SERVICE_UUID, sessionHolder.getServiceUuid());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionHolder.getSessionId());
+        assertEquals(DEFAULT_MOCK_CLIENT_NAME, sessionHolder.getClientName());
+        assertEquals(DEFAULT_MOCK_SERVICE_NAME, sessionHolder.getServiceName());
+        assertEquals(DEFAULT_MOCK_SERVICE_UUID, sessionHolder.getServiceUuid());
+        assertEquals(DEFAULT_MOCK_SESSION_ID, sessionHolder.getSessionId());
     }
 
     @Test
@@ -90,53 +91,53 @@ public class HashcodeContainerSessionTest {
                 .dataFiles(Collections.singletonList(generateDefaultHashcodeDataFile()))
                 .build();
 
-        Assert.assertEquals(1, sessionHolder.getDataFiles().size());
+        assertEquals(1, sessionHolder.getDataFiles().size());
         HashcodeDataFile dataFile = sessionHolder.getDataFiles().get(0);
-        Assert.assertEquals("first datafile.txt", dataFile.getFileName());
-        Assert.assertEquals(Integer.valueOf(6), dataFile.getFileSize());
-        Assert.assertEquals("VKZIO4rKVcnfKjW69x2ZZd39YjRo2B1RIpvV630eHBs=", dataFile.getFileHashSha256());
-        Assert.assertEquals("hIVQtdcSnvLY9JK3VnZkKrJ41s1fHYFqzpiNFY4ZlkVeXiPL5Nu7Kd/cVXYEBuME26QIeI2q6gI7OjLIbl9SUw==", dataFile.getFileHashSha512());
-        Assert.assertEquals("mimetype", dataFile.getMimeType());
+        assertEquals("first datafile.txt", dataFile.getFileName());
+        assertEquals(Integer.valueOf(6), dataFile.getFileSize());
+        assertEquals("VKZIO4rKVcnfKjW69x2ZZd39YjRo2B1RIpvV630eHBs=", dataFile.getFileHashSha256());
+        assertEquals("hIVQtdcSnvLY9JK3VnZkKrJ41s1fHYFqzpiNFY4ZlkVeXiPL5Nu7Kd/cVXYEBuME26QIeI2q6gI7OjLIbl9SUw==", dataFile.getFileHashSha512());
+        assertEquals("mimetype", dataFile.getMimeType());
     }
 
     @Test
     public void createValidContainerSessionWithSignatures() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
-        Assert.assertEquals(1, sessionHolder.getSignatures().size());
+        assertEquals(1, sessionHolder.getSignatures().size());
         HashcodeSignatureWrapper signatureWrapper = sessionHolder.getSignatures().get(0);
-        Assert.assertEquals(DEFAULT_MOCK_SIGNATURE_ID, signatureWrapper.getGeneratedSignatureId());
-        Assert.assertEquals(signatureWrapper.getSignature(), signatureWrapper.getSignature());
-        Assert.assertEquals(1, signatureWrapper.getDataFiles().size());
-        Assert.assertEquals("first datafile.txt", signatureWrapper.getDataFiles().get(0).getFileName());
-        Assert.assertEquals("SHA512", signatureWrapper.getDataFiles().get(0).getHashAlgo());
+        assertEquals(DEFAULT_MOCK_SIGNATURE_ID, signatureWrapper.getGeneratedSignatureId());
+        assertEquals(signatureWrapper.getSignature(), signatureWrapper.getSignature());
+        assertEquals(1, signatureWrapper.getDataFiles().size());
+        assertEquals("first datafile.txt", signatureWrapper.getDataFiles().get(0).getFileName());
+        assertEquals("SHA512", signatureWrapper.getDataFiles().get(0).getHashAlgo());
     }
 
     @Test
-    public void addDataToSignToContainerSession() throws Exception {
+    public void addDataToSignToContainerSession() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();
         sessionHolder.addSignatureSession(DEFAULT_MOCK_SIGNATURE_ID, signatureSession);
 
         SignatureSession sessionSignatureSession = sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID);
-        Assert.assertEquals(signatureSession.getDataToSign(), sessionSignatureSession.getDataToSign());
-        Assert.assertEquals(SigningType.REMOTE, sessionSignatureSession.getSigningType());
-        Assert.assertNull(sessionSignatureSession.getSessionCode());
+        assertEquals(signatureSession.getDataToSign(), sessionSignatureSession.getDataToSign());
+        assertEquals(SigningType.REMOTE, sessionSignatureSession.getSigningType());
+        assertNull(sessionSignatureSession.getSessionCode());
     }
 
     @Test
-    public void addDataToSignAndThenRemoveItFromContainer() throws Exception {
+    public void addDataToSignAndThenRemoveItFromContainer() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();
         sessionHolder.addSignatureSession(DEFAULT_MOCK_SIGNATURE_ID, signatureSession);
-        Assert.assertNotNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
+        assertNotNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
         sessionHolder.clearSigningSession(DEFAULT_MOCK_SIGNATURE_ID);
-        Assert.assertNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
+        assertNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
     }
 
-    private DataToSign generateDefaultDataToSign() throws Exception {
+    private DataToSign generateDefaultDataToSign() {
         DataToSign dataToSignMock = Mockito.mock(DataToSign.class);
         Mockito.doReturn("hello".getBytes()).when(dataToSignMock).getDataToSign();
         return dataToSignMock;

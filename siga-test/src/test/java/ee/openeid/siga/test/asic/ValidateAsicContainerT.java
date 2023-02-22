@@ -1,14 +1,12 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -22,12 +20,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ValidateAsicContainerT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }

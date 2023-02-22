@@ -3,8 +3,8 @@ package ee.openeid.siga.service.signature.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.Options;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
@@ -13,31 +13,32 @@ import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import org.junit.*;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@WireMockTest
 public class SivaClientTest {
 
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @InjectMocks
     private SivaClient sivaClient;
     @Spy
@@ -46,13 +47,13 @@ public class SivaClientTest {
     private SivaClientConfigurationProperties sivaConfigurationProperties;
     private String requestUrl;
 
-    @Before
-    public void setUp() {
-        requestUrl = "http://localhost:" + wireMockRule.port();
-        when(sivaConfigurationProperties.getUrl()).thenReturn(requestUrl);
+    @BeforeEach
+    public void setUp(WireMockRuntimeInfo wireMockServer) {
+        requestUrl = "http://localhost:" + wireMockServer.getHttpPort();
+        lenient().when(sivaConfigurationProperties.getUrl()).thenReturn(requestUrl);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         WireMock.reset();
     }
@@ -66,58 +67,63 @@ public class SivaClientTest {
                         .withBody(body))
         );
         ValidationConclusion response = sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
-        Assert.assertEquals(Integer.valueOf(1), response.getSignaturesCount());
-        Assert.assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
+        assertEquals(Integer.valueOf(1), response.getSignaturesCount());
+        assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
     }
 
     @Test
-    public void invalidSivaTruststoreCertificate() throws Exception {
-        exceptionRule.expect(TechnicalException.class);
-        exceptionRule.expectMessage("SIVA service error");
+    public void invalidSivaTruststoreCertificate() {
         RestTemplate restTemplate = mock(RestTemplate.class);
         when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));
         sivaClient = new SivaClient(restTemplate, sivaConfigurationProperties);
-        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        TechnicalException caughtException = assertThrows(
+            TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("SIVA service error", caughtException.getMessage());
     }
 
     @Test
-    public void siva404NotFound() throws Exception {
-        exceptionRule.expect(TechnicalException.class);
-        exceptionRule.expectMessage("Unable to get valid response from client");
+    public void siva404NotFound() {
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(404))
         );
-        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        TechnicalException caughtException = assertThrows(
+            TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("Unable to get valid response from client", caughtException.getMessage());
     }
 
     @Test
-    public void siva500InternalServerError() throws Exception {
-        exceptionRule.expect(TechnicalException.class);
-        exceptionRule.expectMessage("Unable to get valid response from client");
+    public void siva500InternalServerError() {
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(500))
         );
-        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        TechnicalException caughtException = assertThrows(
+            TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("Unable to get valid response from client", caughtException.getMessage());
     }
 
     @Test
-    public void hashMismatch() throws Exception {
-        exceptionRule.expect(InvalidHashAlgorithmException.class);
-        exceptionRule.expectMessage("Container contains invalid hash algorithms");
-
+    public void hashMismatch() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = RequestUtil.createSignatureWrapper();
         signatureWrappers.get(0).getDataFiles().get(0).setHashAlgo("SHA386");
-        sivaClient.validateHashcodeContainer(signatureWrappers, RequestUtil.createHashcodeDataFiles());
+
+        InvalidHashAlgorithmException caughtException = assertThrows(
+            InvalidHashAlgorithmException.class, () -> sivaClient.validateHashcodeContainer(signatureWrappers, RequestUtil.createHashcodeDataFiles())
+        );
+        assertEquals("Container contains invalid hash algorithms", caughtException.getMessage());
     }
 
     @Test
-    public void sivaDocumentMalformed() throws Exception {
-        exceptionRule.expect(InvalidContainerException.class);
-        exceptionRule.expectMessage("Document malformed");
+    public void sivaDocumentMalformed() {
         String body = "{\"requestErrors\": [{\n" +
                 "    \"message\": \"Document malformed or not matching documentType\",\n" +
                 "    \"key\": \"document\"\n" +
@@ -128,13 +134,15 @@ public class SivaClientTest {
                         .withStatus(400)
                         .withBody(body))
         );
-        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        InvalidContainerException caughtException = assertThrows(
+            InvalidContainerException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("Document malformed", caughtException.getMessage());
     }
 
     @Test
-    public void sivaSignatureMalformed() throws Exception {
-        exceptionRule.expect(InvalidSignatureException.class);
-        exceptionRule.expectMessage("Signature malformed");
+    public void sivaSignatureMalformed() {
         String body = "{\"requestErrors\": [{\n" +
                 "    \"message\": \" Signature file malformed\",\n" +
                 "    \"key\": \"signatureFiles.signature\"\n" +
@@ -145,7 +153,11 @@ public class SivaClientTest {
                         .withStatus(400)
                         .withBody(body))
         );
-        sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        InvalidSignatureException caughtException = assertThrows(
+            InvalidSignatureException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(), RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("Signature malformed", caughtException.getMessage());
     }
 
     private String toJson(Object request) {

@@ -1,14 +1,15 @@
 package ee.openeid.siga.service.signature.session;
 
 import ee.openeid.siga.common.util.UUIDGenerator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UUIDGeneratorTest {
 
     @Test
     public void validSessionIdLength() {
         String sessionId = UUIDGenerator.generateUUID();
-        Assert.assertEquals(36, sessionId.length());
+        assertEquals(36, sessionId.length());
     }
 }

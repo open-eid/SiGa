@@ -7,13 +7,12 @@ import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -27,10 +26,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequestDataVolumeFilterTest {
 
     private RequestDataVolumeFilter filter;
@@ -50,7 +50,7 @@ public class RequestDataVolumeFilterTest {
     private MockHttpServletResponse response;
     private FilterChain filterChain;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         request = new MockHttpServletRequest();
         request.setMethod(DEFAULT_HTTP_METHOD);
@@ -61,7 +61,7 @@ public class RequestDataVolumeFilterTest {
             mockResponse(response);
             response.getOutputStream();
         };
-        Mockito.when(configurationProperties.getMaxFileSize()).thenReturn(250);
+        Mockito.lenient().when(configurationProperties.getMaxFileSize()).thenReturn(250);
         filter = new RequestDataVolumeFilter(serviceRepository,connectionRepository, configurationProperties);
     }
 
@@ -168,7 +168,7 @@ public class RequestDataVolumeFilterTest {
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
-        Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Number of max connections exceeded\"}", response.getContentAsString());
+        assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Number of max connections exceeded\"}", response.getContentAsString());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class RequestDataVolumeFilterTest {
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
-        Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of total connections exceeded\"}", response.getContentAsString());
+        assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of total connections exceeded\"}", response.getContentAsString());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class RequestDataVolumeFilterTest {
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
-        Assert.assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of connection exceeded\"}", response.getContentAsString());
+        assertEquals("{\"errorCode\":\"CONNECTION_LIMIT_EXCEPTION\",\"errorMessage\":\"Size of connection exceeded\"}", response.getContentAsString());
     }
 
     @Test
@@ -206,7 +206,7 @@ public class RequestDataVolumeFilterTest {
         request.setContent(jsonObject.toString().getBytes());
         filterChain = new MockFilterChain();
         filter.doFilter(request, response, filterChain);
-        Assert.assertEquals("{\"errorCode\":\"REQUEST_SIZE_LIMIT_EXCEPTION\",\"errorMessage\":\"Request max size of 250 exceeded\"}", response.getContentAsString());
+        assertEquals("{\"errorCode\":\"REQUEST_SIZE_LIMIT_EXCEPTION\",\"errorMessage\":\"Request max size of 250 exceeded\"}", response.getContentAsString());
     }
 
     private Optional<SigaService> mockSigaService() {
@@ -227,7 +227,7 @@ public class RequestDataVolumeFilterTest {
         return Optional.of(sigaConnection);
     }
 
-    private JSONObject mockCreateContainer() throws Exception {
+    private JSONObject mockCreateContainer() {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
         JSONArray dataFiles = new JSONArray();

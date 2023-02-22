@@ -1,13 +1,13 @@
 package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static java.time.Instant.now;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TokenExpirationTest {
 

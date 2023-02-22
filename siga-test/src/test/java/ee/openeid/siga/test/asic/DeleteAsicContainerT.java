@@ -1,15 +1,13 @@
 package ee.openeid.siga.test.asic;
 
 import ee.openeid.siga.common.model.Result;
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
@@ -18,12 +16,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 public class DeleteAsicContainerT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }

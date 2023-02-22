@@ -1,10 +1,6 @@
 package ee.openeid.siga.test.helper;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.AssumptionViolatedException;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +8,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 @RequiredArgsConstructor
-public class AssumingProfileActive implements TestRule {
+public class AssumingProfileActive {
 
     private static Properties properties;
 
@@ -32,20 +28,6 @@ public class AssumingProfileActive implements TestRule {
         return Arrays.stream(properties.getProperty("siga.profiles.active", "").split(","))
                 .anyMatch(profile::equals);
 
-    }
-
-    @Override
-    public Statement apply(final Statement statement, Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                if (!isProfileActive(profile)) {
-                    throw new AssumptionViolatedException("\"" + profile + "\" profile not active");
-                } else {
-                    statement.evaluate();
-                }
-            }
-        };
     }
 
 }

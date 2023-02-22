@@ -6,12 +6,12 @@ import ch.qos.logback.core.Appender;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventLoggingAspect;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
@@ -19,11 +19,13 @@ import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
 import static ee.openeid.siga.common.event.SigaEventName.REQUEST;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SigaEventLoggerTests {
 
     Logger logger = (Logger) LoggerFactory.getLogger(SigaEventLogger.class);
@@ -42,7 +44,7 @@ public class SigaEventLoggerTests {
 
     SigaEventLogAnnotatedComponentStub sigaEventLogAnnotatedComponentStub;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         logger.addAppender(appender);
         AspectJProxyFactory factory = new AspectJProxyFactory(new SigaEventLogAnnotatedComponentStub());
@@ -50,7 +52,7 @@ public class SigaEventLoggerTests {
         sigaEventLogAnnotatedComponentStub = factory.getProxy();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         logger.detachAppender(appender);
     }

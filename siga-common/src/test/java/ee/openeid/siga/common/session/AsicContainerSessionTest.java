@@ -6,13 +6,12 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DataFile;
 import org.digidoc4j.DataToSign;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AsicContainerSessionTest {
     private static final String DEFAULT_MOCK_CONTAINER_NAME = "container.asice";
@@ -21,86 +20,90 @@ public class AsicContainerSessionTest {
     private static final String DEFAULT_MOCK_SERVICE_UUID = "serviceUuid";
     private static final String DEFAULT_MOCK_SESSION_ID = "sessionId";
     private static final String DEFAULT_MOCK_SIGNATURE_ID = "12345_id";
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
     public void createEmptyContainerSessionHolder() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("containerName is marked non-null but is null");
-        AsicContainerSession.builder().build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession.builder().build()
+        );
+        assertEquals("containerName is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithOnlyContainerName() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("clientName is marked non-null but is null");
-        AsicContainerSession
-                .builder()
-                .containerName(DEFAULT_MOCK_CONTAINER_NAME)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession
+                    .builder()
+                    .containerName(DEFAULT_MOCK_CONTAINER_NAME)
+                    .build()
+        );
+        assertEquals("clientName is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutServiceName() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("serviceName is marked non-null but is null");
-        AsicContainerSession
-                .builder()
-                .containerName(DEFAULT_MOCK_CONTAINER_NAME)
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession
+                    .builder()
+                    .containerName(DEFAULT_MOCK_CONTAINER_NAME)
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .build()
+        );
+        assertEquals("serviceName is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutServiceUuid() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("serviceUuid is marked non-null but is null");
-        AsicContainerSession
-                .builder()
-                .containerName(DEFAULT_MOCK_CONTAINER_NAME)
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .serviceName(DEFAULT_MOCK_SERVICE_NAME)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession
+                    .builder()
+                    .containerName(DEFAULT_MOCK_CONTAINER_NAME)
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .serviceName(DEFAULT_MOCK_SERVICE_NAME)
+                    .build()
+        );
+        assertEquals("serviceUuid is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutSessionId() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("sessionId is marked non-null but is null");
-        AsicContainerSession
-                .builder()
-                .containerName(DEFAULT_MOCK_CONTAINER_NAME)
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .serviceName(DEFAULT_MOCK_SERVICE_NAME)
-                .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession
+                    .builder()
+                    .containerName(DEFAULT_MOCK_CONTAINER_NAME)
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .serviceName(DEFAULT_MOCK_SERVICE_NAME)
+                    .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
+                    .build()
+        );
+        assertEquals("sessionId is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createContainerSessionHolderWithoutContainer() {
-        exceptionRule.expect(NullPointerException.class);
-        exceptionRule.expectMessage("container is marked non-null but is null");
-        AsicContainerSession
-                .builder()
-                .containerName(DEFAULT_MOCK_CONTAINER_NAME)
-                .clientName(DEFAULT_MOCK_CLIENT_NAME)
-                .serviceName(DEFAULT_MOCK_SERVICE_NAME)
-                .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
-                .sessionId(DEFAULT_MOCK_SESSION_ID)
-                .build();
+        NullPointerException caughtException = assertThrows(
+            NullPointerException.class, () -> AsicContainerSession
+                    .builder()
+                    .containerName(DEFAULT_MOCK_CONTAINER_NAME)
+                    .clientName(DEFAULT_MOCK_CLIENT_NAME)
+                    .serviceName(DEFAULT_MOCK_SERVICE_NAME)
+                    .serviceUuid(DEFAULT_MOCK_SERVICE_UUID)
+                    .sessionId(DEFAULT_MOCK_SESSION_ID)
+                    .build()
+        );
+        assertEquals("container is marked non-null but is null", caughtException.getMessage());
     }
 
     @Test
     public void createValidContainerSession() throws IOException {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
 
-        Assert.assertEquals(DEFAULT_MOCK_CONTAINER_NAME, sessionHolder.getContainerName());
-        Assert.assertEquals(DEFAULT_MOCK_CLIENT_NAME, sessionHolder.getClientName());
-        Assert.assertEquals(DEFAULT_MOCK_SERVICE_NAME, sessionHolder.getServiceName());
-        Assert.assertEquals(DEFAULT_MOCK_SERVICE_UUID, sessionHolder.getServiceUuid());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionHolder.getSessionId());
-        Assert.assertNotNull(sessionHolder.getContainer());
+        assertEquals(DEFAULT_MOCK_CONTAINER_NAME, sessionHolder.getContainerName());
+        assertEquals(DEFAULT_MOCK_CLIENT_NAME, sessionHolder.getClientName());
+        assertEquals(DEFAULT_MOCK_SERVICE_NAME, sessionHolder.getServiceName());
+        assertEquals(DEFAULT_MOCK_SERVICE_UUID, sessionHolder.getServiceUuid());
+        assertEquals(DEFAULT_MOCK_SESSION_ID, sessionHolder.getSessionId());
+        assertNotNull(sessionHolder.getContainer());
     }
 
     @Test
@@ -108,7 +111,7 @@ public class AsicContainerSessionTest {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
         sessionHolder.addSignatureId("signatureID", 23894237);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get("signatureID");
-        Assert.assertEquals(Integer.valueOf(23894237), signatureHashCode);
+        assertEquals(Integer.valueOf(23894237), signatureHashCode);
     }
 
     @Test
@@ -119,9 +122,9 @@ public class AsicContainerSessionTest {
         sessionHolder.addSignatureSession(DEFAULT_MOCK_SIGNATURE_ID, signatureSession);
 
         SignatureSession sessionSignatureSession = sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID);
-        Assert.assertEquals(signatureSession.getDataToSign(), sessionSignatureSession.getDataToSign());
-        Assert.assertEquals(SigningType.REMOTE, sessionSignatureSession.getSigningType());
-        Assert.assertNull(sessionSignatureSession.getSessionCode());
+        assertEquals(signatureSession.getDataToSign(), sessionSignatureSession.getDataToSign());
+        assertEquals(SigningType.REMOTE, sessionSignatureSession.getSigningType());
+        assertNull(sessionSignatureSession.getSessionCode());
     }
 
     @Test
@@ -130,9 +133,9 @@ public class AsicContainerSessionTest {
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();
         sessionHolder.addSignatureSession(DEFAULT_MOCK_SIGNATURE_ID, signatureSession);
-        Assert.assertNotNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
+        assertNotNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
         sessionHolder.clearSigningSession(DEFAULT_MOCK_SIGNATURE_ID);
-        Assert.assertNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
+        assertNull(sessionHolder.getSignatureSession(DEFAULT_MOCK_SIGNATURE_ID));
     }
 
     private DataToSign generateDefaultDataToSign() {

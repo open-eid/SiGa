@@ -4,9 +4,8 @@ import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
 import jodd.util.Base64;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -16,12 +15,13 @@ import java.util.List;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static org.junit.Assert.assertEquals;
 
 public class ConnectionLimitsT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient2Service5();
     }
@@ -33,7 +33,7 @@ public class ConnectionLimitsT extends TestBase {
             for (int i = 1; i <= 5; i++) {
                 Response validResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
                 sessions.add(flow.getContainerId());
-                Assert.assertEquals("Max connection limit reached before configured value", 200, validResponse.getStatusCode());
+                assertEquals("Max connection limit reached before configured value", 200, validResponse.getStatusCode());
             }
             Response errorResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
             expectError(errorResponse, 400, CONNECTION_LIMIT_EXCEPTION);

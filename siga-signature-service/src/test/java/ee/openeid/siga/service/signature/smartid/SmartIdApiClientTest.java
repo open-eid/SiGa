@@ -1,8 +1,8 @@
 package ee.openeid.siga.service.signature.smartid;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.Options;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.ContentPattern;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.SmartIdApiException;
@@ -16,16 +16,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -41,9 +39,10 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@WireMockTest
 public class SmartIdApiClientTest {
 
     private static final String DEFAULT_MOCK_RELYING_PARTY_UUID = UUID.randomUUID().toString();
@@ -58,8 +57,6 @@ public class SmartIdApiClientTest {
     private static final String DEFAULT_MOCK_SESSION_ID = "de305d54-75b4-431b-adb2-eb6b9e546014";
     private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @Mock
     private SmartIdClientConfigurationProperties configurationProperties;
     @Mock
@@ -68,19 +65,19 @@ public class SmartIdApiClientTest {
     @InjectMocks
     private SmartIdApiClient smartIdApiClient;
 
-    @Before
-    public void setUp() throws IOException {
-        Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
+    @BeforeEach
+    public void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
         Mockito.when(configurationProperties.getSessionStatusResponseSocketOpenTime()).thenReturn(Duration.ofMillis(30000));
-        Mockito.when(configurationProperties.getInteractionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
+        Mockito.lenient().when(configurationProperties.getInteractionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
         Resource mockResource = Mockito.mock(Resource.class);
         Mockito.when(mockResource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("sid_truststore.p12").openStream());
         Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(mockResource);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         WireMock.reset();
     }
@@ -91,7 +88,7 @@ public class SmartIdApiClientTest {
                 "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
         String sessionId = smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+        assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
 
     @Test
@@ -106,7 +103,7 @@ public class SmartIdApiClientTest {
                 "    }\n" +
                 "}");
         String sessionId = smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
+        assertEquals(DEFAULT_MOCK_SESSION_ID, sessionId);
     }
 
     @Test
@@ -153,7 +150,7 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
 
         SmartIdCertificate response = smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
-        Assert.assertEquals(certificate, response.getCertificate());
+        assertEquals(certificate, response.getCertificate());
     }
 
     @Test
@@ -171,7 +168,7 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "OK");
 
         SmartIdCertificate response = smartIdApiClient.getCertificate(createRPInfo(), createDefaultSmartIdInformation());
-        Assert.assertEquals(certificate, response.getCertificate());
+        assertEquals(certificate, response.getCertificate());
     }
 
     @Test
@@ -275,8 +272,8 @@ public class SmartIdApiClientTest {
         signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
         signableHash.setHashType(HashType.SHA512);
         String challengeId = signableHash.calculateVerificationCode();
-        Assert.assertEquals(challengeId, response.getChallengeId());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
+        assertEquals(challengeId, response.getChallengeId());
+        assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
     }
 
     @Test
@@ -304,8 +301,8 @@ public class SmartIdApiClientTest {
         signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
         signableHash.setHashType(HashType.SHA512);
         String challengeId = signableHash.calculateVerificationCode();
-        Assert.assertEquals(challengeId, response.getChallengeId());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
+        assertEquals(challengeId, response.getChallengeId());
+        assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
     }
 
     @Test
@@ -326,8 +323,8 @@ public class SmartIdApiClientTest {
         signableHash.setHash(DigestUtils.sha512(DEFAULT_MOCK_DATA_TO_SIGN));
         signableHash.setHashType(HashType.SHA512);
         String challengeId = signableHash.calculateVerificationCode();
-        Assert.assertEquals(challengeId, response.getChallengeId());
-        Assert.assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
+        assertEquals(challengeId, response.getChallengeId());
+        assertEquals(DEFAULT_MOCK_SESSION_ID, response.getSessionCode());
     }
 
     @Test
@@ -383,8 +380,8 @@ public class SmartIdApiClientTest {
         stubGetSession("COMPLETE", "OK");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.OK, response.getStatus());
-        Assert.assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
+        assertEquals(SmartIdSessionStatus.OK, response.getStatus());
+        assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
     }
 
     @Test
@@ -417,8 +414,8 @@ public class SmartIdApiClientTest {
                 "}");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.OK, response.getStatus());
-        Assert.assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
+        assertEquals(SmartIdSessionStatus.OK, response.getStatus());
+        assertArrayEquals(DEFAULT_MOCK_SIGNATURE.getBytes(), response.getSignature());
     }
 
     @Test
@@ -426,8 +423,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "TIMEOUT");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.TIMEOUT, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.TIMEOUT, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -435,8 +432,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -444,8 +441,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CERT_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CERT_CHOICE, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED_CERT_CHOICE, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -453,8 +450,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -462,8 +459,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -471,8 +468,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_DISPLAYTEXTANDPIN");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_DISPLAYTEXTANDPIN, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED_DISPLAYTEXTANDPIN, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -480,8 +477,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_VC_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.USER_REFUSED_VC_CHOICE, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.USER_REFUSED_VC_CHOICE, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -489,8 +486,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "WRONG_VC");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.WRONG_VC, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.WRONG_VC, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -498,8 +495,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.DOCUMENT_UNUSABLE, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.DOCUMENT_UNUSABLE, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -507,8 +504,8 @@ public class SmartIdApiClientTest {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
-        Assert.assertEquals(SmartIdSessionStatus.REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(SmartIdSessionStatus.REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test

@@ -2,31 +2,23 @@ package ee.openeid.siga.test.hashcode;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import eu.europa.esig.dss.model.MimeType;
 import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.ContainerUtil.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SoapProxySpecificT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient2Service7();
     }
@@ -66,10 +58,10 @@ public class SoapProxySpecificT extends TestBase {
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, containerBase64));
         XmlPath hashcodesSha256 = hashcodeDataFileAsXmlPath(HASHCODE_SHA256, containerBase64);
 
-        Assert.assertEquals(DEFAULT_FILENAME, hashcodesSha256.getString("hashcodes.file-entry[0].@full-path"));
-        Assert.assertEquals(DEFAULT_SHA256_DATAFILE, hashcodesSha256.getString("hashcodes.file-entry[0].@hash"));
-        Assert.assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha256.getString("hashcodes.file-entry[0].@size"));
-        Assert.assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
+        assertEquals(DEFAULT_FILENAME, hashcodesSha256.getString("hashcodes.file-entry[0].@full-path"));
+        assertEquals(DEFAULT_SHA256_DATAFILE, hashcodesSha256.getString("hashcodes.file-entry[0].@hash"));
+        assertEquals(DEFAULT_FILESIZE.toString(), hashcodesSha256.getString("hashcodes.file-entry[0].@size"));
+        assertEquals("text/plain", manifest.getString("manifest:manifest.manifest:file-entry[" + (1) + "].@manifest:media-type"));
     }
 
     @Test
@@ -79,7 +71,7 @@ public class SoapProxySpecificT extends TestBase {
         Response response = getContainer(flow);
         String containerBase64 = response.path(CONTAINER).toString();
 
-        Assert.assertFalse("hashcodes-sha512.xml is present", getHashcodeSha512FilePresent(containerBase64));
+        assertFalse(getHashcodeSha512FilePresent(containerBase64), "hashcodes-sha512.xml is present");
     }
 
     @Test
@@ -90,7 +82,7 @@ public class SoapProxySpecificT extends TestBase {
         Response response = getContainer(flow);
         String containerBase64 = response.path(CONTAINER).toString();
 
-        Assert.assertFalse("hashcodes-sha512.xml is present", getHashcodeSha512FilePresent(containerBase64));
+        assertFalse(getHashcodeSha512FilePresent(containerBase64), "hashcodes-sha512.xml is present");
     }
 
     @Override

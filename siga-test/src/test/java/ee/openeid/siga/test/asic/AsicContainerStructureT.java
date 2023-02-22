@@ -1,15 +1,11 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.springframework.context.annotation.Profile;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -19,15 +15,14 @@ import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AsicContainerStructureT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -40,10 +35,10 @@ public class AsicContainerStructureT extends TestBase {
 
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
-        Assert.assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(DEFAULT_FILENAME, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
-        Assert.assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
+        assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
+        assertTrue(fileExistsInContainer(DEFAULT_FILENAME, containerBase64));
+        assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
+        assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
     }
 
     @Test
@@ -51,11 +46,11 @@ public class AsicContainerStructureT extends TestBase {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
-        Assert.assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
-        Assert.assertTrue(fileExistsInContainer(UPLOADED_FILENAME, containerBase64));
-        Assert.assertTrue(fileExistsInContainer("test.xml", containerBase64));
-        Assert.assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
-        Assert.assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
+        assertTrue(fileExistsInContainer(MANIFEST, containerBase64));
+        assertTrue(fileExistsInContainer(UPLOADED_FILENAME, containerBase64));
+        assertTrue(fileExistsInContainer("test.xml", containerBase64));
+        assertTrue(fileExistsInContainer(MIMETYPE, containerBase64));
+        assertTrue(fileExistsInContainer("META-INF/signatures0.xml", containerBase64));
     }
 
     @Test
@@ -64,7 +59,7 @@ public class AsicContainerStructureT extends TestBase {
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         String mimeType = new String(extractEntryFromContainer(MIMETYPE, containerBase64));
 
-        Assert.assertEquals("application/vnd.etsi.asic-e+zip", mimeType);
+        assertEquals("application/vnd.etsi.asic-e+zip", mimeType);
     }
 
     protected Boolean fileExistsInContainer(String fileName, String containerBase64) {

@@ -3,8 +3,8 @@ package ee.openeid.siga.service.signature.mobileid;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.Options;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.exception.MobileIdApiException;
 import ee.openeid.siga.common.model.MobileIdInformation;
@@ -16,12 +16,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
@@ -37,9 +39,10 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@WireMockTest
 public class MobileIdApiClientTest {
 
     private static final String DEFAULT_MOCK_SESSION_CODE = "mock-session-code";
@@ -52,8 +55,6 @@ public class MobileIdApiClientTest {
     private static final byte[] DEFAULT_MOCK_DATA_TO_SIGN = "Data to be signed.".getBytes(StandardCharsets.UTF_8);
     private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(Options.DYNAMIC_PORT);
     @Mock
     private MobileIdClientConfigurationProperties configurationProperties;
     @InjectMocks
@@ -63,9 +64,9 @@ public class MobileIdApiClientTest {
     @Mock
     private Resource resource;
 
-    @Before
-    public void setUp() throws IOException {
-        Mockito.doReturn("http://localhost:" + wireMockRule.port()).when(configurationProperties).getUrl();
+    @BeforeEach
+    public void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
         Mockito.when(configurationProperties.getLongPollingTimeout()).thenReturn(Duration.ofMillis(30000));
@@ -73,7 +74,7 @@ public class MobileIdApiClientTest {
         Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(resource);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         WireMock.reset();
     }
@@ -87,7 +88,7 @@ public class MobileIdApiClientTest {
                 "}");
 
         X509Certificate response = mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
-        Assert.assertEquals(certificate, response);
+        assertEquals(certificate, response);
     }
 
     @Test
@@ -95,9 +96,9 @@ public class MobileIdApiClientTest {
         stubCertificateRequestOkResponse("{\"result\": \"NOT_FOUND\"}");
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
-            Assert.fail("Should not reach here");
+            fail("Should not reach here");
         } catch (MobileIdApiException e) {
-            Assert.assertEquals("NOT_FOUND", e.getMessage());
+            assertEquals("NOT_FOUND", e.getMessage());
         }
     }
 
@@ -106,9 +107,9 @@ public class MobileIdApiClientTest {
         stubCertificateRequestOkResponse("{\"result\": \"INVALID_RESULT\"}");
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
-            Assert.fail("Should not reach here");
+            fail("Should not reach here");
         } catch (MobileIdApiException e) {
-            Assert.assertEquals("UNEXPECTED_STATUS", e.getMessage());
+            assertEquals("UNEXPECTED_STATUS", e.getMessage());
         }
     }
 
@@ -117,9 +118,9 @@ public class MobileIdApiClientTest {
         stubCertificateRequestErrorResponse(400);
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
-            Assert.fail("Should not reach here");
+            fail("Should not reach here");
         } catch (MobileIdApiException e) {
-            Assert.assertEquals("NOT_FOUND", e.getMessage());
+            assertEquals("NOT_FOUND", e.getMessage());
         }
     }
 
@@ -130,9 +131,9 @@ public class MobileIdApiClientTest {
             try {
                 Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
-                Assert.fail("Should not reach here");
+                fail("Should not reach here");
             } catch (ClientException | IOException e) {
-                Assert.assertEquals("Mobile-ID service error", e.getMessage());
+                assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
         });
@@ -143,8 +144,8 @@ public class MobileIdApiClientTest {
         stubSigningInitiationOkResponse("{\"sessionID\": \"session-id-value\"}");
 
         InitMidSignatureResponse response = mobileIdApiClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
-        Assert.assertEquals(MidVerificationCodeCalculator.calculateMobileIdVerificationCode(DigestUtils.sha256(DEFAULT_MOCK_DATA_TO_SIGN)), response.getChallengeId());
-        Assert.assertEquals("session-id-value", response.getSessionCode());
+        assertEquals(MidVerificationCodeCalculator.calculateMobileIdVerificationCode(DigestUtils.sha256(DEFAULT_MOCK_DATA_TO_SIGN)), response.getChallengeId());
+        assertEquals("session-id-value", response.getSessionCode());
     }
 
     @Test
@@ -154,9 +155,9 @@ public class MobileIdApiClientTest {
             try {
                 Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 mobileIdApiClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
-                Assert.fail("Should not reach here");
+                fail("Should not reach here");
             } catch (ClientException | IOException e) {
-                Assert.assertEquals("Mobile-ID service error", e.getMessage());
+                assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
         });
@@ -168,8 +169,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.INTERNAL_ERROR, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.INTERNAL_ERROR, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -186,8 +187,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.SIGNATURE, response.getStatus());
-        Assert.assertArrayEquals(signatureBytes, response.getSignature());
+        assertEquals(MobileIdSessionStatus.SIGNATURE, response.getStatus());
+        assertArrayEquals(signatureBytes, response.getSignature());
     }
 
     @Test
@@ -199,8 +200,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.EXPIRED_TRANSACTION, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.EXPIRED_TRANSACTION, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -212,8 +213,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.NOT_MID_CLIENT, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.NOT_MID_CLIENT, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -225,8 +226,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.USER_CANCEL, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.USER_CANCEL, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -238,8 +239,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.NOT_VALID, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.NOT_VALID, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -251,8 +252,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.PHONE_ABSENT, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.PHONE_ABSENT, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -264,8 +265,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.SENDING_ERROR, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.SENDING_ERROR, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -277,8 +278,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.SENDING_ERROR, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.SENDING_ERROR, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test
@@ -290,8 +291,8 @@ public class MobileIdApiClientTest {
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
 
-        Assert.assertEquals(MobileIdSessionStatus.INTERNAL_ERROR, response.getStatus());
-        Assert.assertNull(response.getSignature());
+        assertEquals(MobileIdSessionStatus.INTERNAL_ERROR, response.getStatus());
+        assertNull(response.getSignature());
     }
 
     @Test

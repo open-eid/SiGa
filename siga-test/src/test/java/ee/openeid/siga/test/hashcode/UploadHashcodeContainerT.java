@@ -5,9 +5,9 @@ import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
@@ -20,7 +20,7 @@ public class UploadHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -213,7 +213,7 @@ public class UploadHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_CONTAINER);
     }
 
-    @Ignore ("SIGA-264")
+    @Disabled("SIGA-264")
     @Test
     public void uploadContainerWithExtraDatafileInDatafileXmlStructure() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNotSignedDatafilesInDatafileDescriptorFile.asice"));

@@ -6,8 +6,8 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRespons
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
 import io.restassured.response.Response;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
@@ -18,7 +18,7 @@ public class GenericHashcodeSigningFlowT extends TestBase {
 
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }

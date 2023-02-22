@@ -1,16 +1,14 @@
 package ee.openeid.siga.test.asic;
 
-import ee.openeid.siga.test.helper.AssumingProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.*;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,12 +22,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SmartIdSigningAsicContainerT extends TestBase {
 
-    @ClassRule
-    public static AssumingProfileActive assumingRule = new AssumingProfileActive("datafileContainer");
-
     private SigaApiFlow flow;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
@@ -54,7 +49,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void signWithSmartIdWithCertificateChoiceSuccessfullyLatvia() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -75,7 +70,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void signWithSmartIdWithCertificateChoiceSuccessfullyLithuania() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -220,7 +215,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void postWithSmartIdCertificateChoicePersonIdentifierCountryMismatch() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -318,7 +313,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         expectError(certificateStatus, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void smartIdCertificateChoiceAdvancedCertificateLevel() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -389,7 +384,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
                 .body("validationConclusion.validSignaturesCount", equalTo(1));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void signWithSmartIdAdvancedCertificateLevel() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -461,7 +456,7 @@ public class SmartIdSigningAsicContainerT extends TestBase {
         expectSmartIdStatus(signingResponse, USER_SELECTED_WRONG_VC);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void signWithSmartIdUserTimeout() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());

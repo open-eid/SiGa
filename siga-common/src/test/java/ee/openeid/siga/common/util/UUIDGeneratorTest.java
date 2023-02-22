@@ -1,9 +1,10 @@
 package ee.openeid.siga.common.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UUIDGeneratorTest {
 
@@ -12,6 +13,6 @@ public class UUIDGeneratorTest {
     @Test
     public void generateValidUUID(){
         String uuid = UUIDGenerator.generateUUID();
-        Assert.assertTrue(pattern.matcher(uuid).matches());
+        assertTrue(pattern.matcher(uuid).matches());
     }
 }

@@ -1,22 +1,24 @@
 package ee.openeid.siga.common.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Base64UtilTest {
 
     @Test
     public void validBase64() {
-        Assert.assertTrue(Base64Util.isValidBase64("dGVzdHJhbmRvbQ=="));
+        assertTrue(Base64Util.isValidBase64("dGVzdHJhbmRvbQ=="));
     }
 
     @Test
     public void noPadding() {
-        Assert.assertFalse(Base64Util.isValidBase64("dGVzdHJhbmRvbQ"));
+        assertFalse(Base64Util.isValidBase64("dGVzdHJhbmRvbQ"));
     }
 
     @Test
     public void extraPadding() {
-        Assert.assertFalse(Base64Util.isValidBase64("dGVzdHJhbmRvbQ==="));
+        assertFalse(Base64Util.isValidBase64("dGVzdHJhbmRvbQ==="));
     }
 }

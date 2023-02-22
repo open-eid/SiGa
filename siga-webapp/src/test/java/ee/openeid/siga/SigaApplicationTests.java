@@ -11,15 +11,14 @@ import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -28,11 +27,12 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
@@ -44,7 +44,7 @@ public class SigaApplicationTests extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         xAuthorizationTimestamp = valueOf(now().getEpochSecond());
     }
@@ -53,41 +53,41 @@ public class SigaApplicationTests extends BaseTest {
     public void hashcodeModifyingContainerFlow() throws Exception {
         String containerId = createHashcodeContainerWithBothHashes();
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(0, originalContainer.getSignatures().size());
-        Assert.assertEquals(1, originalContainer.getDataFiles().size());
+        assertEquals(0, originalContainer.getSignatures().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
         addHashcodeDataFile(containerId);
         HashcodeContainer updatedContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(0, updatedContainer.getSignatures().size());
-        Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+        assertEquals(0, updatedContainer.getSignatures().size());
+        assertEquals(2, updatedContainer.getDataFiles().size());
         deleteHashcodeDataFile(containerId, updatedContainer.getDataFiles().get(0).getFileName());
         HashcodeContainer updatedContainer2 = getHashcodeContainer(containerId);
-        Assert.assertEquals(0, updatedContainer2.getSignatures().size());
-        Assert.assertEquals(1, updatedContainer2.getDataFiles().size());
+        assertEquals(0, updatedContainer2.getSignatures().size());
+        assertEquals(1, updatedContainer2.getDataFiles().size());
     }
 
     @Test
     public void dataFileModifyingContainerFlow() throws Exception {
         String containerId = createContainer();
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(0, originalContainer.getSignatures().size());
-        Assert.assertEquals(1, originalContainer.getDataFiles().size());
+        assertEquals(0, originalContainer.getSignatures().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
         addDataFile(containerId);
         Container updatedContainer = getContainer(containerId);
-        Assert.assertEquals("random text", new String(updatedContainer.getDataFiles().get(0).getBytes()));
-        Assert.assertEquals("random text", new String(updatedContainer.getDataFiles().get(1).getBytes()));
+        assertEquals("random text", new String(updatedContainer.getDataFiles().get(0).getBytes()));
+        assertEquals("random text", new String(updatedContainer.getDataFiles().get(1).getBytes()));
 
-        Assert.assertEquals(2, updatedContainer.getDataFiles().size());
+        assertEquals(2, updatedContainer.getDataFiles().size());
         deleteDataFile(containerId, updatedContainer.getDataFiles().get(0).getName());
         Container updatedContainer2 = getContainer(containerId);
-        Assert.assertEquals(1, updatedContainer2.getDataFiles().size());
+        assertEquals(1, updatedContainer2.getDataFiles().size());
     }
 
     @Test
     public void getAnotherUserContainer() throws Exception {
         String containerId = uploadHashcodeContainer();
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         String uuid = "824dcfe9-5c26-4d76-829a-e6630f434746";
         String sharedSecret = "746573745365637265744b6579303032";
         JSONObject request = new JSONObject();
@@ -110,11 +110,11 @@ public class SigaApplicationTests extends BaseTest {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        Assert.assertEquals("S0", signatureResponse.getId());
-        Assert.assertEquals(1, signatures.size());
+        assertEquals("S0", signatureResponse.getId());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
@@ -133,11 +133,11 @@ public class SigaApplicationTests extends BaseTest {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        Assert.assertEquals("S0", signatureResponse.getId());
-        Assert.assertEquals(1, signatures.size());
+        assertEquals("S0", signatureResponse.getId());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
@@ -156,11 +156,11 @@ public class SigaApplicationTests extends BaseTest {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
-        Assert.assertEquals(1, signatures.size());
+        assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
@@ -179,11 +179,11 @@ public class SigaApplicationTests extends BaseTest {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getHashcodeSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        Assert.assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
-        Assert.assertEquals(1, signatures.size());
+        assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatureResponse.getId());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateHashcodeContainerRemoteSigningResponse startRemoteSigningResponse = startHashcodeRemoteSigning(containerId, signingCertificate);
