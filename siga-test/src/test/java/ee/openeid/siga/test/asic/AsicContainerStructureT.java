@@ -6,6 +6,7 @@ import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -18,6 +19,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ActiveProfiles("datafileContainer")
 public class AsicContainerStructureT extends TestBase {
 
     private SigaApiFlow flow;

@@ -32,7 +32,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -172,10 +175,7 @@ public class HashcodeContainerServiceTest {
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
         ResourceNotFoundException caughtException = assertThrows(
-            ResourceNotFoundException.class, () -> {
-                    Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
-                    assertEquals(Result.OK, result);
-                }
+            ResourceNotFoundException.class, () -> containerService.removeDataFile(CONTAINER_ID, "test.xml")
         );
         assertEquals("Data file named test.xml not found", caughtException.getMessage());
     }

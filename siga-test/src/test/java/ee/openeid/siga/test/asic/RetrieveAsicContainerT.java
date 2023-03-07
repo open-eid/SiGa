@@ -8,6 +8,7 @@ import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
@@ -18,6 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("datafileContainer")
 public class RetrieveAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

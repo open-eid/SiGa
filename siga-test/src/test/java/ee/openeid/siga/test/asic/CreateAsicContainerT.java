@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +24,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("datafileContainer")
 public class CreateAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

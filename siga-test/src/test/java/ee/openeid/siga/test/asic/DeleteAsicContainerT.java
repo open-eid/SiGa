@@ -8,12 +8,14 @@ import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
+@ActiveProfiles("datafileContainer")
 public class DeleteAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

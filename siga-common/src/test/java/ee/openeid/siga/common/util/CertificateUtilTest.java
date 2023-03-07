@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class CertificateUtilTest {
     private static final String ROOT_CERTIFICATE = "MIIEEzCCAvugAwIBAgIQc/jtqiMEFERMtVvsSsH7sjANBgkqhkiG9w0BAQUFADB9" +

@@ -39,7 +39,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @WireMockTest

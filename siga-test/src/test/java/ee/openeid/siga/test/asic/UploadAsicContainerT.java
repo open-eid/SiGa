@@ -8,11 +8,13 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
 import static org.hamcrest.CoreMatchers.equalTo;
 
+@ActiveProfiles("datafileContainer")
 public class UploadAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

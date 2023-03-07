@@ -18,7 +18,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HashcodeContainerTest {
@@ -72,17 +74,17 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeContainerMustHaveAtLeastOneDataFile() {
+    public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] outputBytes;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            hashcodeContainer.save(outputStream);
+            outputBytes = outputStream.toByteArray();
+        }
+        HashcodeContainer newHashcodeContainer = new HashcodeContainer();
 
         InvalidContainerException caughtException = assertThrows(
-            InvalidContainerException.class, () -> {
-                try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                    hashcodeContainer.save(outputStream);
-                    HashcodeContainer newHashcodeContainer = new HashcodeContainer();
-                    newHashcodeContainer.open(outputStream.toByteArray());
-                }
-            }
+            InvalidContainerException.class, () -> newHashcodeContainer.open(outputBytes)
         );
         assertEquals("Container must have data file hashes", caughtException.getMessage());
     }

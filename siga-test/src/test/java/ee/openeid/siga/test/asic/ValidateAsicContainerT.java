@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -18,6 +19,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@ActiveProfiles("datafileContainer")
 public class ValidateAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
