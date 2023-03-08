@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
@@ -7,19 +8,31 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.ERROR_CODE;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.REPORT_SIGNATURES;
+import static ee.openeid.siga.test.helper.TestData.REPORT_SIGNATURES_COUNT;
+import static ee.openeid.siga.test.helper.TestData.REPORT_VALID_SIGNATURES_COUNT;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.VALIDATIONREPORT;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class ValidateAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

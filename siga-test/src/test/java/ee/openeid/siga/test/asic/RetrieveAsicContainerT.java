@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
@@ -8,18 +9,30 @@ import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.MANIFEST;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_SECRET_2;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_UUID_2;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class RetrieveAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

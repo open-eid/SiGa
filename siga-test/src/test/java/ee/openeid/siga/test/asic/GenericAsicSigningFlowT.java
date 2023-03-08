@@ -1,17 +1,27 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.SID_EE_DEFAULT_DOCUMENT_NUMBER;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 
+@EnabledIfSigaProfileActive("datafileContainer")
 public class GenericAsicSigningFlowT extends TestBase {
 
     private SigaApiFlow flow;

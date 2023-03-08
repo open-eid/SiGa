@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
@@ -8,13 +9,18 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER_ID;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DUPLICATE_DATA_FILE;
+import static ee.openeid.siga.test.helper.TestData.INVALID_CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.UPLOAD;
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class UploadAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

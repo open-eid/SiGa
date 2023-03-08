@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.asic;
 
 import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
@@ -9,19 +10,40 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.AUTH_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.AUTH_CERT_PEM_HEX;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DATA_TO_SIGN;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DIGEST_ALGO;
+import static ee.openeid.siga.test.helper.TestData.INVALID_CERTIFICATE_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SIGNATURE;
+import static ee.openeid.siga.test.helper.TestData.MID_SID_CERT_REMOTE_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.REMOTE_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.RESULT;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM_HEX;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_MID_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM_HEX;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class RemoteSigningAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

@@ -1,5 +1,6 @@
 package ee.openeid.siga.test;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import io.restassured.response.Response;
@@ -13,8 +14,15 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.helper.TestData.CONNECTION_LIMIT_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.REQUEST_SIZE_LIMIT_EXCEPTION;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
 import static org.junit.Assert.assertEquals;
 
 public class ConnectionLimitsT extends TestBase {
@@ -27,6 +35,7 @@ public class ConnectionLimitsT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("datafileContainer")
     public void connectionLimitReached() throws Exception {
         List<String> sessions = new ArrayList<>();
         try {
@@ -53,6 +62,7 @@ public class ConnectionLimitsT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("datafileContainer")
     public void connectionSizeReachedInTotal() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile("1385KB_file.asice"));
         Response errorResponse = addDataFile(flow, addDataFileToAsicRequestFromFile("1391KB_picture.JPG"));
@@ -61,6 +71,7 @@ public class ConnectionLimitsT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("datafileContainer")
     public void connectionsTotalSizeReached() throws Exception {
         List<String> sessions = new ArrayList<>();
         for (int i = 1; i <= 2; i++) {

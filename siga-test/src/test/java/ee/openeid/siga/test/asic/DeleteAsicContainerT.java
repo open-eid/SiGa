@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.asic;
 
 import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
@@ -8,14 +9,25 @@ import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.RESULT;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_SECRET_1;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_SECRET_2;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_UUID_1;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_UUID_2;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class DeleteAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

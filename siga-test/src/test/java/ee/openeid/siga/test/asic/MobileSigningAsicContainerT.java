@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
@@ -8,17 +9,33 @@ import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.EXPIRED_TRANSACTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.MID_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.NOT_VALID;
+import static ee.openeid.siga.test.helper.TestData.PHONE_ABSENT;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SENDING_ERROR;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_SECRET_2;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_UUID_2;
+import static ee.openeid.siga.test.helper.TestData.STATUS;
+import static ee.openeid.siga.test.helper.TestData.USER_CANCEL;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class MobileSigningAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

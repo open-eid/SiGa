@@ -1,27 +1,47 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceResponse;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.GetContainerSmartIdCertificateChoiceStatusResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.helper.TestData.CERTIFICATE_CHOICE;
+import static ee.openeid.siga.test.helper.TestData.CLIENT_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.EXPIRED_TRANSACTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_DATA;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SID_EE_DEFAULT_DOCUMENT_NUMBER;
+import static ee.openeid.siga.test.helper.TestData.SID_EE_MULT_ACCOUNTS_DOCUMENT_NUMBER;
+import static ee.openeid.siga.test.helper.TestData.SMARTID_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.SMARTID_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.STATUS;
+import static ee.openeid.siga.test.helper.TestData.USER_CANCEL;
+import static ee.openeid.siga.test.helper.TestData.USER_SELECTED_WRONG_VC;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdCertificateChoiceRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class SmartIdSigningAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

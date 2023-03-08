@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import eu.europa.esig.dss.model.MimeType;
@@ -9,22 +10,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DATAFILES;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_DATAFILE_CONTENT;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.DUPLICATE_DATA_FILE;
+import static ee.openeid.siga.test.helper.TestData.INVALID_DATA;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.MANIFEST;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.TEST_FILE_EXTENSIONS;
+import static ee.openeid.siga.test.helper.TestData.UPLOADED_FILENAME;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequestDataFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFilesToAsicRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class ManipulateDataFilesAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

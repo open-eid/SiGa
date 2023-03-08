@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.asic;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import eu.europa.esig.dss.model.MimeType;
@@ -10,21 +11,31 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER_ID;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_DATAFILE_CONTENT;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.ERROR_CODE;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.MANIFEST;
+import static ee.openeid.siga.test.helper.TestData.TEST_FILE_EXTENSIONS;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestDataFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ActiveProfiles("datafileContainer")
+@EnabledIfSigaProfileActive("datafileContainer")
 public class CreateAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
