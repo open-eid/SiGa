@@ -46,6 +46,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +176,10 @@ public class SessionStatusReprocessingServiceTest {
             SigningChallenge signingChallenge = startMobileIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+            // pollMobileIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
+            //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
+            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
+                    .pollMobileIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
             Mockito.verify(mobileIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
@@ -258,6 +263,10 @@ public class SessionStatusReprocessingServiceTest {
             SigningChallenge signingChallenge = startSmartIdSigningAndAssertPollingException(containerSessionId, "HTTP 500 Server Error");
 
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
+            // pollSmartIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
+            //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
+            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
+                    .pollSmartIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
             Mockito.verify(smartIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
@@ -483,11 +492,6 @@ public class SessionStatusReprocessingServiceTest {
         final int expectedInvocationCount = invocationCounter.get() + 10;
         await().atMost(60, SECONDS).untilAsserted(() -> Mockito
                 .verify(sessionStatusReprocessingService, Mockito.atLeast(expectedInvocationCount)).processFailedStatusRequests());
-
-        // processFailedSignatureSession might be called more times than maxProcessingAttempts if the first polling
-        //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
-        Mockito.verify(sessionStatusReprocessingService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
-                .processFailedSignatureSession(any(), eq(signingChallenge.getGeneratedSignatureId()), any(), any());
     }
 
     private String createContainerSession() {

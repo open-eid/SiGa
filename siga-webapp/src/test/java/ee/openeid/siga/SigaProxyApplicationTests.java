@@ -1,49 +1,30 @@
 package ee.openeid.siga;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static java.lang.String.valueOf;
-import static java.time.Instant.now;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
+@ActiveProfiles({"test", "digidoc4jTest", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-@AutoConfigureMockMvc
 public class SigaProxyApplicationTests extends BaseTest {
 
     private final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303037";
     private final static String REQUESTING_SERVICE_UUID = "7dc75cb8-7076-4bed-9f06-b304f85cdccd";
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Before
-    public void setup() {
-        xAuthorizationTimestamp = valueOf(now().getEpochSecond());
-    }
 
     @Test
     public void sha256SupportedCreateContainerFlow() throws Exception {
@@ -106,13 +87,4 @@ public class SigaProxyApplicationTests extends BaseTest {
         return ServiceType.PROXY;
     }
 
-    @Override
-    protected ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
-
-    @Override
-    protected MockMvc getMockMvc() {
-        return mockMvc;
-    }
 }

@@ -5,7 +5,40 @@ import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.CreateContainerResponse;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceResponse;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.DataFile;
+import ee.openeid.siga.webapp.json.GetContainerDataFilesResponse;
+import ee.openeid.siga.webapp.json.GetContainerMobileIdSigningStatusResponse;
+import ee.openeid.siga.webapp.json.GetContainerResponse;
+import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
+import ee.openeid.siga.webapp.json.GetContainerSignaturesResponse;
+import ee.openeid.siga.webapp.json.GetContainerSmartIdCertificateChoiceStatusResponse;
+import ee.openeid.siga.webapp.json.GetContainerSmartIdSigningStatusResponse;
+import ee.openeid.siga.webapp.json.GetContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerDataFilesResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerMobileIdSigningStatusResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSignaturesResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdCertificateChoiceStatusResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdSigningStatusResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
+import ee.openeid.siga.webapp.json.Signature;
+import ee.openeid.siga.webapp.json.UploadContainerResponse;
+import ee.openeid.siga.webapp.json.UploadHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.apache.commons.io.IOUtils;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
@@ -14,10 +47,14 @@ import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.ByteArrayInputStream;
@@ -33,10 +70,18 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static ee.openeid.siga.auth.filter.hmac.HmacHeader.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SERVICE_UUID;
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SIGNATURE;
+import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_TIMESTAMP;
+import static java.lang.String.valueOf;
+import static java.time.Instant.now;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
 public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected static final String CERTIFICATE = "CERTIFICATE";
@@ -46,7 +91,18 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     private final static String DEFAULT_HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
     private final static String DEFAULT_REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
     protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/sign_ESTEID2018.p12", "1234".toCharArray());
+
+    @Autowired
+    protected MockMvc mockMvc;
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     protected String xAuthorizationTimestamp;
+
+    @Before
+    public void setup() {
+        xAuthorizationTimestamp = valueOf(now().getEpochSecond());
+    }
 
     protected void assertHashcodeSignedContainer(String containerId, int validSignatureCount) throws Exception {
         HashcodeContainer container = getHashcodeContainer(containerId);
@@ -74,45 +130,72 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     }
 
     protected List<HashcodeDataFile> getHashcodeDataFiles(String containerId) throws Exception {
-        GetHashcodeContainerDataFilesResponse signaturesResponse = getRequest("/hashcodecontainers/" + containerId + "/datafiles", GetHashcodeContainerDataFilesResponse.class);
+        GetHashcodeContainerDataFilesResponse signaturesResponse = getRequest(
+                "/hashcodecontainers/" + containerId + "/datafiles",
+                GetHashcodeContainerDataFilesResponse.class
+        );
         return signaturesResponse.getDataFiles();
     }
 
     protected List<DataFile> getDataFiles(String containerId) throws Exception {
-        GetContainerDataFilesResponse signaturesResponse = getRequest("/containers/" + containerId + "/datafiles", GetContainerDataFilesResponse.class);
+        GetContainerDataFilesResponse signaturesResponse = getRequest(
+                "/containers/" + containerId + "/datafiles",
+                GetContainerDataFilesResponse.class
+        );
         return signaturesResponse.getDataFiles();
     }
 
     protected List<Signature> getHashcodeSignatures(String containerId) throws Exception {
-        GetHashcodeContainerSignaturesResponse signaturesResponse = getRequest("/hashcodecontainers/" + containerId + "/signatures", GetHashcodeContainerSignaturesResponse.class);
+        GetHashcodeContainerSignaturesResponse signaturesResponse = getRequest(
+                "/hashcodecontainers/" + containerId + "/signatures",
+                GetHashcodeContainerSignaturesResponse.class
+        );
         return signaturesResponse.getSignatures();
     }
 
     protected List<Signature> getSignatures(String containerId) throws Exception {
-        GetContainerSignaturesResponse signaturesResponse = getRequest("/containers/" + containerId + "/signatures", GetContainerSignaturesResponse.class);
+        GetContainerSignaturesResponse signaturesResponse = getRequest(
+                "/containers/" + containerId + "/signatures",
+                GetContainerSignaturesResponse.class
+        );
         return signaturesResponse.getSignatures();
     }
 
     protected GetContainerSignatureDetailsResponse getSignature(String containerId, String signatureId) throws Exception {
-        return getRequest("/containers/" + containerId + "/signatures/" + signatureId, GetContainerSignatureDetailsResponse.class);
+        return getRequest(
+                "/containers/" + containerId + "/signatures/" + signatureId,
+                GetContainerSignatureDetailsResponse.class
+        );
     }
 
     protected GetContainerSignatureDetailsResponse getHashcodeSignature(String containerId, String signatureId) throws Exception {
-        return getRequest("/hashcodecontainers/" + containerId + "/signatures/" + signatureId, GetContainerSignatureDetailsResponse.class);
+        return getRequest(
+                "/hashcodecontainers/" + containerId + "/signatures/" + signatureId,
+                GetContainerSignatureDetailsResponse.class
+        );
     }
 
     protected ValidationConclusion getHashcodeValidationConclusion(String containerId) throws Exception {
-        GetHashcodeContainerValidationReportResponse response = getRequest("/hashcodecontainers/" + containerId + "/validationreport", GetHashcodeContainerValidationReportResponse.class);
+        GetHashcodeContainerValidationReportResponse response = getRequest(
+                "/hashcodecontainers/" + containerId + "/validationreport",
+                GetHashcodeContainerValidationReportResponse.class
+        );
         return response.getValidationConclusion();
     }
 
     private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
-        GetContainerValidationReportResponse response = getRequest("/containers/" + containerId + "/validationreport", GetContainerValidationReportResponse.class);
+        GetContainerValidationReportResponse response = getRequest(
+                "/containers/" + containerId + "/validationreport",
+                GetContainerValidationReportResponse.class
+        );
         return response.getValidationConclusion();
     }
 
     protected HashcodeContainer getHashcodeContainer(String containerId) throws Exception {
-        GetHashcodeContainerResponse originalContainer = getRequest("/hashcodecontainers/" + containerId, GetHashcodeContainerResponse.class);
+        GetHashcodeContainerResponse originalContainer = getRequest(
+                "/hashcodecontainers/" + containerId,
+                GetHashcodeContainerResponse.class
+        );
 
         HashcodeContainer hashcodeContainer = new HashcodeContainer(getServiceType());
         hashcodeContainer.open(Base64.getDecoder().decode(originalContainer.getContainer()));
@@ -120,45 +203,69 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     }
 
     protected Container getContainer(String containerId) throws Exception {
-        GetContainerResponse originalContainer = getRequest("/containers/" + containerId, GetContainerResponse.class);
-        return ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer().getBytes()))).build();
+        GetContainerResponse originalContainer = getRequest(
+                "/containers/" + containerId,
+                GetContainerResponse.class
+        );
+        return ContainerBuilder.aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(originalContainer.getContainer().getBytes())))
+                .build();
     }
 
     protected String getHashcodeMobileIdStatus(String containerId, String signatureId) throws Exception {
-        GetHashcodeContainerMobileIdSigningStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/mobileidsigning/" + signatureId + "/status", GetHashcodeContainerMobileIdSigningStatusResponse.class);
+        GetHashcodeContainerMobileIdSigningStatusResponse response = getRequest(
+                "/hashcodecontainers/" + containerId + "/mobileidsigning/" + signatureId + "/status",
+                GetHashcodeContainerMobileIdSigningStatusResponse.class
+        );
         return response.getMidStatus();
     }
 
     protected String getMobileIdStatus(String containerId, String signatureId) throws Exception {
-        GetContainerMobileIdSigningStatusResponse response = getRequest("/containers/" + containerId + "/mobileidsigning/" + signatureId + "/status", GetContainerMobileIdSigningStatusResponse.class);
+        GetContainerMobileIdSigningStatusResponse response = getRequest(
+                "/containers/" + containerId + "/mobileidsigning/" + signatureId + "/status",
+                GetContainerMobileIdSigningStatusResponse.class
+        );
         return response.getMidStatus();
     }
 
     protected CertificateStatus getHashcodeCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
-        GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class);
+        GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = getRequest(
+                "/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status",
+                GetHashcodeContainerSmartIdCertificateChoiceStatusResponse.class
+        );
         return CertificateStatus.builder()
                 .status(response.getSidStatus())
                 .documentNumber(response.getDocumentNumber()).build();
     }
 
     protected CertificateStatus getCertificateChoiceStatus(String containerId, String certificateId) throws Exception {
-        GetContainerSmartIdCertificateChoiceStatusResponse response = getRequest("/containers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status", GetContainerSmartIdCertificateChoiceStatusResponse.class);
+        GetContainerSmartIdCertificateChoiceStatusResponse response = getRequest(
+                "/containers/" + containerId + "/smartidsigning/certificatechoice/" + certificateId + "/status",
+                GetContainerSmartIdCertificateChoiceStatusResponse.class
+        );
         return CertificateStatus.builder()
                 .status(response.getSidStatus())
                 .documentNumber(response.getDocumentNumber()).build();
     }
 
     protected String getHashcodeSmartIdStatus(String containerId, String signatureId) throws Exception {
-        GetHashcodeContainerSmartIdSigningStatusResponse response = getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/" + signatureId + "/status", GetHashcodeContainerSmartIdSigningStatusResponse.class);
+        GetHashcodeContainerSmartIdSigningStatusResponse response = getRequest(
+                "/hashcodecontainers/" + containerId + "/smartidsigning/" + signatureId + "/status",
+                GetHashcodeContainerSmartIdSigningStatusResponse.class
+        );
         return response.getSidStatus();
     }
 
     protected String getSmartIdStatus(String containerId, String signatureId) throws Exception {
-        GetContainerSmartIdSigningStatusResponse response = getRequest("/containers/" + containerId + "/smartidsigning/" + signatureId + "/status", GetContainerSmartIdSigningStatusResponse.class);
+        GetContainerSmartIdSigningStatusResponse response = getRequest(
+                "/containers/" + containerId + "/smartidsigning/" + signatureId + "/status",
+                GetContainerSmartIdSigningStatusResponse.class
+        );
         return response.getSidStatus();
     }
 
-    private <T> T startRemoteSigning(String url, String encodedSigningCertificate, Class<T> responseObject) throws Exception {
+    protected static JSONObject createStartRemoteSigningRequest(String encodedSigningCertificate) {
         JSONObject request = new JSONObject();
         request.put("signatureProfile", "LT");
         request.put("signingCertificate", encodedSigningCertificate);
@@ -166,86 +273,138 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         roles.put("Manager");
         roles.put("Developer");
         request.put("roles", roles);
+        return request;
+    }
+
+    private <T> T startRemoteSigning(String url, String encodedSigningCertificate, Class<T> responseObject) throws Exception {
+        JSONObject request = createStartRemoteSigningRequest(encodedSigningCertificate);
         return postRequest(url, request, responseObject);
     }
 
     protected CreateHashcodeContainerRemoteSigningResponse startHashcodeRemoteSigning(String containerId, String encodedSigningCertificate) throws Exception {
-        return startRemoteSigning("/hashcodecontainers/" + containerId + "/remotesigning", encodedSigningCertificate, CreateHashcodeContainerRemoteSigningResponse.class);
+        return startRemoteSigning(
+                "/hashcodecontainers/" + containerId + "/remotesigning",
+                encodedSigningCertificate,
+                CreateHashcodeContainerRemoteSigningResponse.class
+        );
     }
 
     protected CreateContainerRemoteSigningResponse startRemoteSigning(String containerId, String encodedSigningCertificate) throws Exception {
-        return startRemoteSigning("/containers/" + containerId + "/remotesigning", encodedSigningCertificate, CreateContainerRemoteSigningResponse.class);
+        return startRemoteSigning(
+                "/containers/" + containerId + "/remotesigning",
+                encodedSigningCertificate,
+                CreateContainerRemoteSigningResponse.class
+        );
+    }
+
+    protected static JSONObject createFinalizeRemoteSigningRequest(String signatureValue) {
+        JSONObject request = new JSONObject();
+        request.put("signatureValue", signatureValue);
+        return request;
     }
 
     protected void finalizeRemoteSigning(String url, String signatureValue) throws Exception {
-        JSONObject request = new JSONObject();
-        request.put("signatureValue", signatureValue);
+        JSONObject request = createFinalizeRemoteSigningRequest(signatureValue);
         putRequest(url, request);
     }
 
-    private <T> T startMobileSigning(String url, Class<T> responseObject) throws Exception {
+    protected static JSONObject createStartMobileSigningRequest() {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", "60001019906");
         request.put("phoneNo", "+37200000766");
         request.put("country", "EE");
         request.put("language", "EST");
         request.put("signatureProfile", "LT");
-        return postRequest(url, request, responseObject);
+        return request;
     }
 
-    private <T> T startSmartIdSigning(String url, String documentNumber, Class<T> responseObject) throws Exception {
+    protected static JSONObject createStartSmartIdSigningRequest(String documentNumber) {
         JSONObject request = new JSONObject();
         request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-30303039914-MOCK-Q"));
         request.put("signatureProfile", "LT");
-        return postRequest(url, request, responseObject);
+        return request;
     }
 
-    private <T> T startSmartIdCertificateChoice(String url, Class<T> responseObject) throws Exception {
+    protected static JSONObject createStartSmartIdCertificateChoiceRequest() {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", "30303039914");
         request.put("country", "EE");
-        return postRequest(url, request, responseObject);
+        return request;
     }
 
     protected String startHashcodeSmartIdCertificateChoice(String containerId) throws Exception {
-        CreateHashcodeContainerSmartIdCertificateChoiceResponse response = startSmartIdCertificateChoice("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice", CreateHashcodeContainerSmartIdCertificateChoiceResponse.class);
+        CreateHashcodeContainerSmartIdCertificateChoiceResponse response = postRequest(
+                "/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice",
+                createStartSmartIdCertificateChoiceRequest(),
+                CreateHashcodeContainerSmartIdCertificateChoiceResponse.class
+        );
         return response.getGeneratedCertificateId();
     }
 
     protected String startSmartIdCertificateChoice(String containerId) throws Exception {
-        CreateContainerSmartIdCertificateChoiceResponse response = startSmartIdCertificateChoice("/containers/" + containerId + "/smartidsigning/certificatechoice", CreateContainerSmartIdCertificateChoiceResponse.class);
+        CreateContainerSmartIdCertificateChoiceResponse response = postRequest(
+                "/containers/" + containerId + "/smartidsigning/certificatechoice",
+                createStartSmartIdCertificateChoiceRequest(),
+                CreateContainerSmartIdCertificateChoiceResponse.class
+        );
         return response.getGeneratedCertificateId();
     }
 
     protected String startHashcodeSmartIdSigning(String containerId, String documentNumber) throws Exception {
-        CreateHashcodeContainerSmartIdSigningResponse response = startSmartIdSigning("/hashcodecontainers/" + containerId + "/smartidsigning", documentNumber, CreateHashcodeContainerSmartIdSigningResponse.class);
+        CreateHashcodeContainerSmartIdSigningResponse response = postRequest(
+                "/hashcodecontainers/" + containerId + "/smartidsigning",
+                createStartSmartIdSigningRequest(documentNumber),
+                CreateHashcodeContainerSmartIdSigningResponse.class
+        );
         return response.getGeneratedSignatureId();
     }
 
     protected String startSmartIdSigning(String containerId, String documentNumber) throws Exception {
-        CreateContainerSmartIdSigningResponse response = startSmartIdSigning("/containers/" + containerId + "/smartidsigning", documentNumber, CreateContainerSmartIdSigningResponse.class);
+        CreateContainerSmartIdSigningResponse response = postRequest(
+                "/containers/" + containerId + "/smartidsigning",
+                createStartSmartIdSigningRequest(documentNumber),
+                CreateContainerSmartIdSigningResponse.class
+        );
         return response.getGeneratedSignatureId();
     }
 
     protected String startHashcodeMobileSigning(String containerId) throws Exception {
-        CreateHashcodeContainerMobileIdSigningResponse response = startMobileSigning("/hashcodecontainers/" + containerId + "/mobileidsigning", CreateHashcodeContainerMobileIdSigningResponse.class);
+        CreateHashcodeContainerMobileIdSigningResponse response = postRequest(
+                "/hashcodecontainers/" + containerId + "/mobileidsigning",
+                createStartMobileSigningRequest(),
+                CreateHashcodeContainerMobileIdSigningResponse.class
+        );
         return response.getGeneratedSignatureId();
     }
 
     protected String startMobileSigning(String containerId) throws Exception {
-        CreateContainerMobileIdSigningResponse response = startMobileSigning("/containers/" + containerId + "/mobileidsigning", CreateContainerMobileIdSigningResponse.class);
+        CreateContainerMobileIdSigningResponse response = postRequest(
+                "/containers/" + containerId + "/mobileidsigning",
+                createStartMobileSigningRequest(),
+                CreateContainerMobileIdSigningResponse.class
+        );
         return response.getGeneratedSignatureId();
     }
 
     protected String uploadHashcodeContainer(String containerName) throws Exception {
         String container = IOUtils.toString(getFileInputStream(containerName), Charset.defaultCharset());
-        UploadHashcodeContainerResponse containerResponse = uploadContainer(container, "/upload/hashcodecontainers", null, UploadHashcodeContainerResponse.class);
+        UploadHashcodeContainerResponse containerResponse = uploadContainer(
+                container,
+                "/upload/hashcodecontainers",
+                null,
+                UploadHashcodeContainerResponse.class
+        );
         return containerResponse.getContainerId();
     }
 
     protected ValidationConclusion getValidationConclusionByUploadingContainer(String containerName) throws Exception {
         String container = IOUtils.toString(getFileInputStream(containerName), Charset.defaultCharset());
-        CreateHashcodeContainerValidationReportResponse containerResponse = uploadContainer(container, "/hashcodecontainers/validationreport", null, CreateHashcodeContainerValidationReportResponse.class);
+        CreateHashcodeContainerValidationReportResponse containerResponse = uploadContainer(
+                container,
+                "/hashcodecontainers/validationreport",
+                null,
+                CreateHashcodeContainerValidationReportResponse.class
+        );
         return containerResponse.getValidationConclusion();
     }
 
@@ -255,16 +414,26 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected String uploadContainer() throws Exception {
         String container = IOUtils.toString(getFileInputStream("datafile.asice"), Charset.defaultCharset());
-        UploadContainerResponse containerResponse = uploadContainer(container, "/upload/containers", "datafile.asice", UploadContainerResponse.class);
+        UploadContainerResponse containerResponse = uploadContainer(
+                container,
+                "/upload/containers",
+                "datafile.asice",
+                UploadContainerResponse.class
+        );
         return containerResponse.getContainerId();
     }
 
-    private <T> T uploadContainer(String container, String url, String containerName, Class<T> responseObject) throws Exception {
+    protected static JSONObject createUploadContainerRequest(String container, String containerName) {
         JSONObject request = new JSONObject();
         if (containerName != null) {
             request.put("containerName", containerName);
         }
         request.put("container", container);
+        return request;
+    }
+
+    private <T> T uploadContainer(String container, String url, String containerName, Class<T> responseObject) throws Exception {
+        JSONObject request = createUploadContainerRequest(container, containerName);
         return postRequest(url, request, responseObject);
     }
 
@@ -287,15 +456,21 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     }
 
     protected String createHashcodeContainerWithBothHashes() throws Exception {
-        return createHashcodeContainer("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=", "vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg==");
+        return createHashcodeContainer(
+                "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=",
+                "vSsar3708Jvp9Szi2NWZZ02Bqp1qRCFpbcTZPdBhnWgs5WtNZKnvCXdhztmeD2cmW192CF5bDufKRpayrW/isg=="
+        );
     }
 
     protected String createHashcodeContainerWithSha256() throws Exception {
-        return createHashcodeContainer("K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=", null);
+        return createHashcodeContainer(
+                "K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=",
+                null
+        );
 
     }
 
-    protected String createContainer() throws Exception {
+    protected static JSONObject createCreateContainerRequest() {
         JSONObject request = new JSONObject();
         JSONObject dataFile = new JSONObject();
         JSONArray dataFiles = new JSONArray();
@@ -304,7 +479,15 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         dataFile.put("fileContent", "cmFuZG9tIHRleHQ=");
         dataFiles.put(dataFile);
         request.put("dataFiles", dataFiles);
-        CreateContainerResponse response = postRequest("/containers", request, CreateContainerResponse.class);
+        return request;
+    }
+
+    protected String createContainer() throws Exception {
+        CreateContainerResponse response = postRequest(
+                "/containers",
+                createCreateContainerRequest(),
+                CreateContainerResponse.class
+        );
         return response.getContainerId();
     }
 
@@ -345,34 +528,43 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         JSONObject request = new JSONObject();
         String signature = getSignature("DELETE", url, request.toString());
         MockHttpServletRequestBuilder builder = delete(url);
-        getMockMvc().perform(buildRequest(builder, signature, request, getServiceUuid()))
+        mockMvc.perform(buildRequest(builder, signature, request, getServiceUuid()))
                 .andExpect(status().is2xxSuccessful());
     }
 
     private <T> T postRequest(String url, JSONObject request, Class<T> responseObject) throws Exception {
+        ResultActions response = postRequest(url, request, status().is2xxSuccessful());
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    protected ResultActions postRequest(String url, JSONObject request, ResultMatcher resultMatcher) throws Exception {
         String signature = getSignature("POST", url, request.toString());
         MockHttpServletRequestBuilder builder = post(url);
 
-        ResultActions response = getMockMvc().perform(buildRequest(builder, signature, request, getServiceUuid()))
-                .andExpect(status().is2xxSuccessful());
-        return getObjectMapper().readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+        return mockMvc.perform(buildRequest(builder, signature, request, getServiceUuid())).andExpect(resultMatcher);
     }
 
     private void putRequest(String url, JSONObject request) throws Exception {
+        putRequest(url, request, status().is2xxSuccessful());
+    }
+
+    protected ResultActions putRequest(String url, JSONObject request, ResultMatcher resultMatcher) throws Exception {
         String signature = getSignature("PUT", url, request.toString());
         MockHttpServletRequestBuilder builder = put(url);
 
-        getMockMvc().perform(buildRequest(builder, signature, request, getServiceUuid()))
-                .andExpect(status().is2xxSuccessful());
+        return mockMvc.perform(buildRequest(builder, signature, request, getServiceUuid())).andExpect(resultMatcher);
     }
 
     private <T> T getRequest(String url, Class<T> responseObject) throws Exception {
+        ResultActions response = getRequest(url, status().is2xxSuccessful());
+        return objectMapper.readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+    }
+
+    protected ResultActions getRequest(String url, ResultMatcher resultMatcher) throws Exception {
         JSONObject request = new JSONObject();
         String signature = getSignature("GET", url, request.toString());
         MockHttpServletRequestBuilder builder = get(url);
-        ResultActions response = getMockMvc().perform(buildRequest(builder, signature, request, getServiceUuid()))
-                .andExpect(status().is2xxSuccessful());
-        return getObjectMapper().readValue(response.andReturn().getResponse().getContentAsString(), responseObject);
+        return mockMvc.perform(buildRequest(builder, signature, request, getServiceUuid())).andExpect(resultMatcher);
     }
 
     protected MockHttpServletRequestBuilder buildRequest(MockHttpServletRequestBuilder builder, String signature, JSONObject request, String serviceUUID) {
@@ -443,7 +635,7 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
                 .build().getSignature(getHmacSharedSecret());
     }
 
-    private InputStream getFileInputStream(String name) throws IOException {
+    protected static InputStream getFileInputStream(String name) throws IOException {
         Path documentPath = Paths.get(new ClassPathResource(name).getURI());
         return new ByteArrayInputStream(Base64.getEncoder().encode(Files.readAllBytes(documentPath)));
     }
@@ -460,7 +652,4 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         return ServiceType.REST;
     }
 
-    protected abstract ObjectMapper getObjectMapper();
-
-    protected abstract MockMvc getMockMvc();
 }
