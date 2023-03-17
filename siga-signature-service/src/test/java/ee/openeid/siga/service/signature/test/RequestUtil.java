@@ -40,6 +40,17 @@ public class RequestUtil {
     public static final String SERVICE_NAME = "Testimine";
     public static final String SIGNED_HASHCODE = "hashcode.asice";
     public static final String VALID_ASICE = "test.asice";
+    public static final String DIFFERENT_MANIFEST_FILENAME = "different_manifest_path-filename.asice";
+    public static final String DIFFERENT_SHA256_FILENAME = "different_sha256_path-filename.asice";
+    public static final String DIFFERENT_SHA512_FILENAME = "different_sha512_path-filename.asice";
+    public static final String DUPLICATE_MANIFEST_FILENAME = "duplicate_filenames_in_manifest.asice";
+    public static final String DUPLICATE_HASHCODE_FILENAME = "duplicate_filenames_in_hashcode_files.asice";
+    public static final String ADDITIONAL_SHA256_FILENAME = "additional_sha256_path-filename.asice";
+    public static final String ADDITIONAL_SHA512_FILENAME = "additional_sha512_path-filename.asice";
+    public static final String ADDITIONAL_MANIFEST_FILENAME = "additional_manifest_path-filename.asice";
+    public static final String DIFFERENT_SHA256_ORDER = "different_sha256_filename_order.asice";
+    public static final String DIFFERENT_SHA512_ORDER = "different_sha512_filename_order.asice";
+    public static final String DIFFERENT_MANIFEST_ORDER = "different_manifest_filename_order.asice";
     public static final String DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
     public static final String CONTAINER_SESSION_ID = "v1_user_name_23423423-234234234-324234-4234";

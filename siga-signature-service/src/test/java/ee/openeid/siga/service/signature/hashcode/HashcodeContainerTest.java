@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.hashcode;
 
+import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.SignatureExistsException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
@@ -17,11 +18,23 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import static ee.openeid.siga.service.signature.test.RequestUtil.ADDITIONAL_MANIFEST_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.ADDITIONAL_SHA256_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.ADDITIONAL_SHA512_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_MANIFEST_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_MANIFEST_ORDER;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA256_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA256_ORDER;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA512_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA512_ORDER;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_HASHCODE_FILENAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_MANIFEST_FILENAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HashcodeContainerTest {
 
@@ -57,6 +70,126 @@ public class HashcodeContainerTest {
         assertEquals("SHA256", signatureDataFiles.get(1).getHashAlgo());
     }
 
+    @Test
+    public void hashcodeSha256ContainsDifferentFileName() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_SHA256_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Hashcode container is missing SHA512 hash", caughtException.getMessage());
+    }
+
+    @Test
+    public void hashcodeSha512ContainsDifferentFileName() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_SHA512_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Hashcode container is missing SHA512 hash", caughtException.getMessage());
+    }
+
+    @Test
+    public void hashcodeSha256ContainsAdditionalFileName() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(ADDITIONAL_SHA256_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Hashcode container is missing SHA512 hash", caughtException.getMessage());
+    }
+
+    @Test
+    public void hashcodeSha512ContainsAdditionalFileName() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(ADDITIONAL_SHA512_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Hashcode container is missing SHA256 hash", caughtException.getMessage());
+    }
+
+    @Test
+    public void hashcodeDataFileContainsDuplicateFileNames() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DUPLICATE_HASHCODE_FILENAME);
+
+        DuplicateDataFileException caughtException = assertThrows(
+                DuplicateDataFileException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Hashcodes data file contains duplicate entry: test.txt", caughtException.getMessage());
+    }
+
+    @Test
+    public void manifestContainsDuplicateFileNames() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DUPLICATE_MANIFEST_FILENAME);
+
+        DuplicateDataFileException caughtException = assertThrows(
+                DuplicateDataFileException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("duplicate entry in manifest file: test.txt", caughtException.getMessage());
+    }
+
+    @Test
+    public void manifestAndHashcodeFilesMustContainMatchingFileNames() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_MANIFEST_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Manifest does not contain same file names as hashcode files", caughtException.getMessage());
+    }
+
+    @Test
+    public void manifestContainsAdditionalFileName() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(ADDITIONAL_MANIFEST_FILENAME);
+
+        InvalidContainerException caughtException = assertThrows(
+                InvalidContainerException.class, () -> hashcodeContainer.open(container)
+        );
+        assertEquals("Manifest does not contain same file names as hashcode files", caughtException.getMessage());
+    }
+
+    @Test
+    public void hashcodeSha256HasDifferentFileNameOrder() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_SHA256_ORDER);
+        hashcodeContainer.open(container);
+        assertEquals(3, hashcodeContainer.getDataFiles().size());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+    }
+
+    @Test
+    public void hashcodeSha512HasDifferentFileNameOrder() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_SHA512_ORDER);
+        hashcodeContainer.open(container);
+        assertEquals(3, hashcodeContainer.getDataFiles().size());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+    }
+
+    @Test
+    public void manifestHasDifferentFileNameOrder() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(DIFFERENT_MANIFEST_ORDER);
+        hashcodeContainer.open(container);
+        assertEquals(3, hashcodeContainer.getDataFiles().size());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+    }
 
     @Test
     public void couldNotAddDataFileWhenSignatureExists() throws URISyntaxException, IOException {

@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.SIGNATURE_FILE_PREFIX;
@@ -64,6 +65,7 @@ public class HashcodeContainer {
 
         validateDataFiles();
         validateManifest();
+        compareManifestFileNamesAgainstHashcodeFileNames();
         addMimeTypes();
     }
 
@@ -106,6 +108,22 @@ public class HashcodeContainer {
                 throw new InvalidContainerException("Hashcode container contains invalid file name");
             }
         });
+    }
+
+    private void compareManifestFileNamesAgainstHashcodeFileNames() {
+        if (!getHashcodeFileNames().equals(getManifestFileNames())) {
+            throw new InvalidContainerException("Manifest does not contain same file names as hashcode files");
+        }
+    }
+
+    private Set<String> getHashcodeFileNames() {
+        return dataFiles.stream()
+                .map(HashcodeDataFile::getFileName)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<String> getManifestFileNames() {
+        return manifest.keySet();
     }
 
     private boolean isValidFileName(String fileName) {
