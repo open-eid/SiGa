@@ -1,12 +1,17 @@
 package ee.openeid.siga.service.signature.container.status;
 
-import static java.time.Duration.ZERO;
-
-import java.util.Map;
-import java.util.function.Predicate;
-
-import javax.annotation.PreDestroy;
-
+import ee.openeid.siga.common.model.SigningType;
+import ee.openeid.siga.common.session.CertificateSession;
+import ee.openeid.siga.common.session.Session;
+import ee.openeid.siga.common.session.SessionStatus;
+import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.service.signature.container.ContainerSigningService;
+import ee.openeid.siga.session.CacheName;
+import ee.openeid.siga.session.SessionService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.cache.query.QueryCursor;
@@ -16,21 +21,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import ee.openeid.siga.common.model.SigningType;
-import ee.openeid.siga.common.session.AsicContainerSession;
-import ee.openeid.siga.common.session.CertificateSession;
-import ee.openeid.siga.common.session.HashcodeContainerSession;
-import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.common.session.SessionStatus;
-import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
-import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
-import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
-import ee.openeid.siga.session.CacheName;
-import ee.openeid.siga.session.SessionService;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PreDestroy;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import static java.time.Duration.ZERO;
 
 @Slf4j
 @Service
@@ -39,8 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SessionStatusReprocessingService {
     private final ThreadPoolTaskExecutor taskExecutor;
     private final Ignite ignite;
-    private final AsicContainerSigningService asicContainerSigningService;
-    private final HashcodeContainerSigningService hashcodeContainerSigningService;
+    private final ContainerSigningServiceSelector containerSigningServiceSelector;
     private final SessionService sessionService;
     private final SessionStatusReprocessingProperties reprocessingProperties;
 
@@ -59,34 +53,27 @@ public class SessionStatusReprocessingService {
 
     void processFailedContainerSession(SignatureStatusRequestFilter filter, String sessionId) {
         Session session = sessionService.getContainerBySessionId(sessionId);
-        Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
+        ContainerSigningService containerSigningService = containerSigningServiceSelector
+                .getContainerSigningServiceFor(session);
 
+        if (containerSigningService == null) {
+            log.warn("No compatible service found for reprocessing session: {}", sessionId);
+            return;
+        }
+
+        Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
         signatureSessions.entrySet().stream().filter(applySignatureStatusRequestFilter(filter)).forEach(s -> {
             String signatureSessionId = s.getKey();
-            SignatureSession signatureSession = s.getValue();
-            processFailedSignatureSession(session, signatureSessionId, signatureSession.getSigningType(),
-                    signatureSession.getSessionStatus());
-        });
-    }
+            SigningType signingType = s.getValue().getSigningType();
+            log.info("Reprocessing failed signature status request: {}, Session status: {},",
+                    signatureSessionId, s.getValue().getSessionStatus());
 
-    void processFailedSignatureSession(Session session, String signatureSessionId, SigningType signingType,
-            SessionStatus sessionStatus) {
-        String sessionId = session.getSessionId();
-        log.info("Reprocessing failed signature status request: {}, Session status: {},", signatureSessionId,
-                sessionStatus);
-        if (signingType == SigningType.SMART_ID) {
-            if (session instanceof AsicContainerSession) {
-                asicContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-            } else if (session instanceof HashcodeContainerSession) {
-                hashcodeContainerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            if (signingType == SigningType.SMART_ID) {
+                containerSigningService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+            } else if (signingType == SigningType.MOBILE_ID) {
+                containerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
             }
-        } else if (signingType == SigningType.MOBILE_ID) {
-            if (session instanceof AsicContainerSession) {
-                asicContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-            } else if (session instanceof HashcodeContainerSession) {
-                hashcodeContainerSigningService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
-            }
-        }
+        });
     }
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
@@ -104,15 +91,21 @@ public class SessionStatusReprocessingService {
 
     void processFailedCertificateStatusRequest(CertificateStatusRequestFilter filter, String sessionId) {
         Session session = sessionService.getContainerBySessionId(sessionId);
-        Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
+        ContainerSigningService containerSigningService = containerSigningServiceSelector
+                .getContainerSigningServiceFor(session);
 
+        if (containerSigningService == null) {
+            log.warn("No compatible service found for reprocessing session: {}", sessionId);
+            return;
+        }
+
+        Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
         certificateSessions.entrySet().stream().filter(applyCertificateStatusRequestFilter(filter)).forEach(s -> {
             String certificateSessionId = s.getKey();
-            if (session instanceof AsicContainerSession) {
-                asicContainerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
-            } else if (session instanceof HashcodeContainerSession) {
-                hashcodeContainerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
-            }
+            log.info("Reprocessing failed certificate status request: {}, Session status: {},",
+                    certificateSessionId, s.getValue().getSessionStatus());
+
+            containerSigningService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
         });
     }
 
