@@ -46,8 +46,6 @@ import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +74,7 @@ import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SIGNAT
 import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_TIMESTAMP;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

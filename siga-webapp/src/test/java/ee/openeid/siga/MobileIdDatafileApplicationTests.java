@@ -3,20 +3,20 @@ package ee.openeid.siga;
 import ee.openeid.siga.webapp.json.DataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import org.digidoc4j.Container;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
 public class MobileIdDatafileApplicationTests extends MobileIdBaseApplicationTests {
@@ -25,16 +25,16 @@ public class MobileIdDatafileApplicationTests extends MobileIdBaseApplicationTes
     public void mobileIdDatafileSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String signatureId = startMobileSigning(containerId);
         String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
         await().atMost(15, SECONDS).until(isMobileIdResponseSuccessful(containerId, signatureId));
 
         assertSignedContainer(containerId, 2);

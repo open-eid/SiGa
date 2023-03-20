@@ -32,13 +32,13 @@ public class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
         String certificateId = startSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
         await().atMost(25, SECONDS).until(isSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
@@ -62,13 +62,13 @@ public class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));

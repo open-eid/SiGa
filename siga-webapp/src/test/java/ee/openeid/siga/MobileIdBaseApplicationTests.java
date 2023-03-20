@@ -3,13 +3,13 @@ package ee.openeid.siga;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class MobileIdBaseApplicationTests extends BaseTest {
 
@@ -17,17 +17,17 @@ public abstract class MobileIdBaseApplicationTests extends BaseTest {
     public void mobileIdHashcodeSigningFlow() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
-        Assert.assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
+        assertEquals(2, dataFiles.size());
+        assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
 
         String signatureId = startHashcodeMobileSigning(containerId);
         String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
-        Assert.assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
+        assertEquals("OUTSTANDING_TRANSACTION", mobileFirstStatus);
         await().atMost(15, SECONDS).until(isHashcodeMobileIdResponseSuccessful(containerId, signatureId));
 
         assertHashcodeSignedContainer(containerId, 2);

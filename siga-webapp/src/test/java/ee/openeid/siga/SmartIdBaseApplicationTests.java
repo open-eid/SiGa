@@ -4,14 +4,14 @@ import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class SmartIdBaseApplicationTests extends BaseTest {
 
@@ -19,12 +19,12 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
     public void smartIdHashcodeFlowWihCertificateChoice() throws Exception {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
@@ -50,13 +50,13 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
         String containerId = uploadHashcodeContainer();
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
-        Assert.assertEquals(1, signatures.size());
+        assertEquals(1, signatures.size());
         HashcodeContainer originalContainer = getHashcodeContainer(containerId);
-        Assert.assertEquals(1, originalContainer.getSignatures().size());
-        Assert.assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getSignatures().size());
+        assertEquals(2, originalContainer.getDataFiles().size());
 
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
-        Assert.assertEquals(2, dataFiles.size());
+        assertEquals(2, dataFiles.size());
 
         String signatureId = startHashcodeSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isHashcodeSmartIdResponseSuccessful(containerId, signatureId));
