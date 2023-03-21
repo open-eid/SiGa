@@ -35,7 +35,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDef
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@EnabledIfSigaProfileActive("datafileContainer")
+@EnabledIfSigaProfileActive({"datafileContainer", "mobileId"})
 public class MobileSigningAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

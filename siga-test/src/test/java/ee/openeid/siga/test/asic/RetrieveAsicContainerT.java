@@ -126,6 +126,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void retrieveAsicContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
@@ -140,6 +141,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void retrieveAsicContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));

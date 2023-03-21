@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.hashcode;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningResponse;
@@ -112,6 +113,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void retrieveHashcodeContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
@@ -126,6 +128,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void retrieveHashcodeContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));

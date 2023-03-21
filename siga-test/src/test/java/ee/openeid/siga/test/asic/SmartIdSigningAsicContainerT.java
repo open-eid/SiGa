@@ -41,7 +41,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@EnabledIfSigaProfileActive("datafileContainer")
+@EnabledIfSigaProfileActive({"datafileContainer", "smartId"})
 public class SmartIdSigningAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;

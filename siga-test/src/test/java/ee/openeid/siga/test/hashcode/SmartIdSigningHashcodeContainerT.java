@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.hashcode;
 
+import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.*;
@@ -18,6 +19,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@EnabledIfSigaProfileActive("smartId")
 public class SmartIdSigningHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;

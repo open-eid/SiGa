@@ -103,6 +103,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void deleteAsicContainerBeforeFinishingMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
@@ -114,6 +115,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void deleteAsicContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
@@ -127,6 +129,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
+    @EnabledIfSigaProfileActive("mobileId")
     public void deleteAsicContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));

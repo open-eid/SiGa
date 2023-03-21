@@ -1,5 +1,6 @@
 package ee.openeid.siga.test.helper;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -41,10 +42,17 @@ public class EnabledIfSigaProfileActiveCondition implements ExecutionCondition {
     }
 
     private static ConditionEvaluationResult createConditionEvaluationResult(EnabledIfSigaProfileActive annotation) {
-        final String profile = annotation.value();
-        return isProfileActive(profile)
-                ? ConditionEvaluationResult.enabled(String.format("Profile '%s' is enabled", profile))
-                : ConditionEvaluationResult.disabled(String.format("Profile '%s' is not enabled", profile));
+        final String[] profiles = annotation.value();
+        if (ArrayUtils.isEmpty(profiles)) {
+            return ConditionEvaluationResult.enabled("No active profiles required");
+        }
+
+        for (String profile : profiles) {
+            if (!isProfileActive(profile)) {
+                return ConditionEvaluationResult.disabled(String.format("Required profile '%s' is not active", profile));
+            }
+        }
+        return ConditionEvaluationResult.enabled("All required profiles active: " + String.join(", ", profiles));
     }
 
 }

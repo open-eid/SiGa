@@ -11,5 +11,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(EnabledIfSigaProfileActiveCondition.class)
 public @interface EnabledIfSigaProfileActive {
-    String value();
+
+    /**
+     * Required profiles that must be active in order to enable the target.
+     * If any of the required profiles is not active, then the target will be disabled.
+     * If the list of required profiles is empty, then the target will be enabled.
+     *
+     * @return required profiles
+     */
+    String[] value();
+
 }
