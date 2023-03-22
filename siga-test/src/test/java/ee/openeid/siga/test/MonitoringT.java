@@ -101,7 +101,7 @@ public class MonitoringT extends TestBase {
     protected Response getMonitoringStatus(String accept) {
         RequestSpecification requestSpecification =  given()
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON);
         if (accept != null) {
             requestSpecification = requestSpecification.accept(accept);
@@ -109,7 +109,7 @@ public class MonitoringT extends TestBase {
         return requestSpecification.when()
                 .get(createUrl(getContainerEndpoint()))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -118,12 +118,12 @@ public class MonitoringT extends TestBase {
     protected Response getVersionInfo() {
         return given()
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(createUrl(VERSION))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }

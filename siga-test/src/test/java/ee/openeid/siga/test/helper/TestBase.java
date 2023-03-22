@@ -220,12 +220,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
         if (response.getBody().path(CONTAINER_ID) != null) {
@@ -264,12 +264,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .put(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
         if (response.getBody().path(CONTAINER_ID) != null) {
@@ -286,12 +286,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -304,12 +304,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .delete(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -322,12 +322,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .head(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -340,12 +340,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .options(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -358,12 +358,12 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().all()
+                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .patch(createUrl(endpoint))
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .extract()
                 .response();
     }
