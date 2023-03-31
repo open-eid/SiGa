@@ -96,6 +96,10 @@
             <artifactId>ignite-core</artifactId>
             <version>${ignite.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

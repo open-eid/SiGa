@@ -80,7 +80,7 @@ class HashcodeContainerCreator {
 
     void writeManifest(List<org.digidoc4j.DataFile> dataFiles) {
         final AsicManifest asicManifest = new AsicManifest(Container.DocumentType.ASICE.name());
-        asicManifest.addFileEntry(dataFiles);
+        asicManifest.addFileEntries(dataFiles);
         new EntryCallback(new ZipEntry(AsicManifest.XML_PATH)) {
             @Override
             void doWithEntryStream(OutputStream stream) {
