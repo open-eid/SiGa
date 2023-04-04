@@ -36,7 +36,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19656));
+                .body(CONTAINER + ".length()", equalTo(19680));
 
         XmlPath manifest = manifestAsXmlPath(extractEntryFromContainer(MANIFEST, response.path(CONTAINER).toString()));
 
@@ -109,7 +109,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19684));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19684));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19684));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
         response.then()
                 .statusCode(200)
-                .body(CONTAINER + ".length()", equalTo(19660));
+                .body(CONTAINER + ".length()", equalTo(19684));
     }
 
     @Test
