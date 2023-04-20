@@ -55,7 +55,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "DELETE to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow)
 
@@ -159,7 +159,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "POST to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow, "request")
 
@@ -409,7 +409,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "GET to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow)
 
@@ -476,7 +476,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "HEAD to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow)
 
@@ -543,7 +543,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "OPTIONS to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow)
 
@@ -696,7 +696,7 @@ class NegativeApiScenariosSpec extends TestBaseSpecification {
     def "PATCH to hashcode remote signing finalization should fail"() {
         expect:
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault())
-        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
+        CreateContainerRemoteSigningResponse startResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class)
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + REMOTE_SIGNING + "/" + startResponse.getGeneratedSignatureId(), flow)
 

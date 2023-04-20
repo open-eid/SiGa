@@ -4,7 +4,6 @@ import ee.openeid.siga.test.{BaseSimulation, HmacSignatureCalculator}
 
 import java.io.FileInputStream
 import java.util.Properties
-import ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM
 import ee.openeid.siga.test.utils.RequestBuilder.{hashcodeContainersDataRequestWithDefault, smartIdSigningRequestWithDefault}
 import ee.openeid.siga.test.utils.{DigestSigner, RequestBuilder}
 import io.gatling.core.Predef._

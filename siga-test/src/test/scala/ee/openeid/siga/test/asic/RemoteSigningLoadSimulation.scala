@@ -1,7 +1,7 @@
 package ee.openeid.siga.test.asic
 
 import ee.openeid.siga.test.{BaseSimulation, HmacSignatureCalculator}
-import ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM
+import ee.openeid.siga.test.helper.TestData.SIGNER_CERT_ESTEID2018_PEM
 import ee.openeid.siga.test.utils.RequestBuilder.{hashcodeContainersDataRequestWithDefault, remoteSigningRequestWithDefault}
 import ee.openeid.siga.test.utils.{DigestSigner, RequestBuilder}
 import io.gatling.core.Predef._
@@ -30,7 +30,7 @@ class RemoteSigningLoadSimulation extends BaseSimulation {
   def asicRemoteSigningInit = {
     http("REMOTE_SIGNING_INIT")
       .post(ASIC_REMOTE_SIGNING_INIT)
-      .body(StringBody(remoteSigningRequestWithDefault(SIGNER_CERT_PEM, "LT").toString)).asJson
+      .body(StringBody(remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT").toString)).asJson
       .check(
         status.is(200),
         jsonPath("$.generatedSignatureId").saveAs("generatedSignatureId"),
