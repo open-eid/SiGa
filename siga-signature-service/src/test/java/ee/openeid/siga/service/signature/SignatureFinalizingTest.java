@@ -65,6 +65,7 @@ public class SignatureFinalizingTest {
     private final PKCS12SignatureToken UNKNOWN_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_state_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken UNKNOWN_ISSUER_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_issuer_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken EXPIRED_PKCS12_Esteid2011 = new PKCS12SignatureToken("src/test/resources/p12/expired_signer_ESTEID-SK 2011.p12", "test".toCharArray());
+    private final PKCS12SignatureToken VALID_PKCS12_EsteidSK2015 = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEIDSK2015.p12", "1234".toCharArray());
 
     @InjectMocks
     private HashcodeContainerSigningService signingService;
@@ -111,7 +112,7 @@ public class SignatureFinalizingTest {
     @Test
     public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
-        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
+        Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
@@ -120,7 +121,7 @@ public class SignatureFinalizingTest {
     @Test
     public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
-        Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT_TM);
+        Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
