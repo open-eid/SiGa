@@ -244,13 +244,17 @@ public class RequestBuilder {
     }
 
     public static JSONObject addDataFileToAsicRequestFromFile(String fileName) throws Exception {
+        JSONObject request = new JSONObject();
+        JSONArray datafiles = new JSONArray();
         JSONObject dataFile = new JSONObject();
         ClassLoader classLoader = RequestBuilder.class.getClassLoader();
         File file = new File(classLoader.getResource("asic/" + fileName).getFile());
         String fileBase64 = Base64.encodeBase64String(Files.readAllBytes(file.toPath()));
         dataFile.put("fileName", fileName);
         dataFile.put("fileContent", fileBase64);
-        return dataFile;
+        datafiles.put(dataFile);
+        request.put("dataFiles", datafiles);
+        return request;
     }
 
 
