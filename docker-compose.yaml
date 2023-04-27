@@ -119,6 +119,10 @@ services:
       - spring.datasource.driver-class-name=org.postgresql.Driver
       - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - spring.profiles.active=inMemoryAuth
+      - spring.mail.host=siga-admin-smtp.localhost
+      - spring.mail.port=25
+      - spring.mail.properties.mail.smtp.auth=false
+      - spring.mail.properties.mail.smtp.starttls.enable=false
     ports:
       - "4443:4443"
     networks:
@@ -127,6 +131,18 @@ services:
           - siga-admin.localhost
     volumes:
       - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
+
+  siga-admin-smtp:
+    image: rnwood/smtp4dev
+    profiles:
+      - siga-admin
+    ports:
+      - "2525:25"
+      - "3000:80"
+    networks:
+      default:
+        aliases:
+          - siga-admin-smtp.localhost
 
   ignite-01:
     image: apacheignite/ignite:2.14.0-jdk11
