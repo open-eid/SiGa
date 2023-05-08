@@ -55,12 +55,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .body(CONTAINER_ID, notNullValue());
     }
 
@@ -137,12 +135,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -179,12 +175,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -200,12 +194,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, "SomeRandomAlgo")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -219,12 +211,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -238,12 +228,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -258,12 +246,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, "HmacSHA256")
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -291,12 +277,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -310,12 +294,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -329,12 +311,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -348,12 +328,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
@@ -369,12 +347,10 @@ public class AuthenticationT extends TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request2.toString())
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(HASHCODE_CONTAINERS))
                 .then()
-                .log().ifValidationFails()
                 .statusCode(401)
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }

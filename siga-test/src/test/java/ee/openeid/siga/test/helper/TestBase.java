@@ -39,17 +39,19 @@ public abstract class TestBase {
             throw new RuntimeException(e);
         }
         RestAssured.useRelaxedHTTPSValidation();
-        RestAssured.filters(new AllureRestAssured());
+        
+        boolean isLoggingEnabled = Boolean.parseBoolean(properties.getProperty("siga-test.logging.enabled"));
+        if (isLoggingEnabled) {
+            int characterSplitLimit = Integer.parseInt(properties.getProperty("siga-test.logging.character-split-limit"));
+            RestAssured.filters(new AllureRestAssured(), new LoggingFilter(characterSplitLimit));
+        } else {
+            RestAssured.filters(new AllureRestAssured());
+        }
     }
 
     @Step("Create container")
     protected Response postCreateContainer(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
         return post(getContainerEndpoint(), flow, request.toString());
-    }
-
-    @Step("Create container without logging")
-    protected Response postCreateContainerWithoutLogging(SigaApiFlow flow, JSONObject request) throws InvalidKeyException, NoSuchAlgorithmException {
-        return postWithoutLogging(getContainerEndpoint(), flow, request.toString());
     }
 
     @Step("Upload container")
@@ -220,29 +222,6 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
-                .log().ifValidationFails()
-                .contentType(ContentType.JSON)
-                .when()
-                .post(createUrl(endpoint))
-                .then()
-                .log().ifValidationFails()
-                .extract()
-                .response();
-        if (response.getBody().path(CONTAINER_ID) != null) {
-            flow.setContainerId(response.getBody().path(CONTAINER_ID).toString());
-        }
-        return response;
-    }
-
-    @Step("HTTP POST {0}")
-    protected Response postWithoutLogging(String endpoint, SigaApiFlow flow, String request) throws NoSuchAlgorithmException, InvalidKeyException {
-        Response response = given()
-                .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request, "POST", endpoint))
-                .header(X_AUTHORIZATION_TIMESTAMP, flow.getSigningTime())
-                .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
-                .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
-                .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .body(request)
                 .contentType(ContentType.JSON)
                 .when()
                 .post(createUrl(endpoint))
@@ -264,12 +243,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
                 .body(request)
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .put(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
         if (response.getBody().path(CONTAINER_ID) != null) {
@@ -286,12 +263,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -304,12 +279,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .delete(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -322,12 +295,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .head(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -340,12 +311,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .options(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
     }
@@ -358,12 +327,10 @@ public abstract class TestBase {
                 .header(X_AUTHORIZATION_SERVICE_UUID, flow.getServiceUuid())
                 .header(X_AUTHORIZATION_HMAC_ALGO, flow.getHmacAlgorithm())
                 .config(RestAssured.config().encoderConfig(encoderConfig().defaultContentCharset("UTF-8")))
-                .log().ifValidationFails()
                 .contentType(ContentType.JSON)
                 .when()
                 .patch(createUrl(endpoint))
                 .then()
-                .log().ifValidationFails()
                 .extract()
                 .response();
     }

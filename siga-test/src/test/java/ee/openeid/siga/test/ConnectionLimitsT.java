@@ -95,7 +95,7 @@ public class ConnectionLimitsT extends TestBase {
     public void requestMaxSizeReached() throws Exception {
         File dataFile = ResourceUtils.getFile("classpath:20mb.jpg");
         byte[] dataFileString = Files.readAllBytes(dataFile.toPath());
-        Response response = postCreateContainerWithoutLogging(flow, asicContainersDataRequest(DEFAULT_FILENAME, Base64.encodeToString(dataFileString), DEFAULT_ASICE_CONTAINER_NAME));
+        Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, Base64.encodeToString(dataFileString), DEFAULT_ASICE_CONTAINER_NAME));
         expectError(response, 400, REQUEST_SIZE_LIMIT_EXCEPTION);
     }
 
