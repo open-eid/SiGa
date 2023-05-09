@@ -4,6 +4,7 @@ import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
+import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -25,6 +26,9 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
         assertEquals(2, originalContainer.getDataFiles().size());
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         assertEquals(2, dataFiles.size());
+        ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
+        assertEquals("JÃ\u0095EORG,JAAK-KRISTJAN,38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getCommonName());
+        assertEquals("PNOEE-38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getSerialNumber());
 
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();

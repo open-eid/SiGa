@@ -480,6 +480,7 @@
             <xs:element name="signatureFormat" type="xs:string"/>
             <xs:element name="signatureLevel" minOccurs="0" type="xs:string"/>
             <xs:element name="signedBy" type="xs:string"/>
+            <xs:element name="subjectDistinguishedName" minOccurs="0" type="tns:subjectDistinguishedName"/>
             <xs:element name="indication" type="xs:string"/>
             <xs:element name="subIndication" minOccurs="0" type="xs:string"/>
             <xs:element name="errors" minOccurs="0" maxOccurs="unbounded" type="tns:error"/>
@@ -524,6 +525,12 @@
         <xs:sequence>
             <xs:element name="fileName" type="xs:string"/>
             <xs:element name="fileContent" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="subjectDistinguishedName">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="xs:string"/>
+            <xs:element name="commonName" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
 </xs:schema>
