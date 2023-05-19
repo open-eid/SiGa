@@ -39,6 +39,8 @@ public class RequestUtil {
     public static final String CLIENT_NAME = "client1";
     public static final String SERVICE_NAME = "Testimine";
     public static final String SIGNED_HASHCODE = "hashcode.asice";
+    public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES = "hashcode_several_data_files.asice";
+    public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER = "hashcode_several_data_files_in_random_order.asice";
     public static final String VALID_ASICE = "test.asice";
     public static final String DIFFERENT_MANIFEST_FILENAME = "different_manifest_path-filename.asice";
     public static final String DIFFERENT_SHA256_FILENAME = "different_sha256_path-filename.asice";

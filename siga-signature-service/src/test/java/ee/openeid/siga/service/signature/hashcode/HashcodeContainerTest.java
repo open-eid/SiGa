@@ -30,6 +30,8 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA51
 import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_HASHCODE_FILENAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_MANIFEST_FILENAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -68,6 +70,45 @@ public class HashcodeContainerTest {
         assertEquals("SHA256", signatureDataFiles.get(0).getHashAlgo());
         assertEquals("test1.txt", signatureDataFiles.get(1).getFileName());
         assertEquals("SHA256", signatureDataFiles.get(1).getHashAlgo());
+    }
+
+    @Test
+    public void validHashcodeContainerOpeningWithDataFilesInGrowingOrder() throws IOException, URISyntaxException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE_SEVERAL_DATAFILES);
+        hashcodeContainer.open(container);
+        assertEquals(1, hashcodeContainer.getSignatures().size());
+        assertEquals(10, hashcodeContainer.getDataFiles().size());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+        assertEquals("test3.txt", hashcodeContainer.getDataFiles().get(3).getFileName());
+        assertEquals("test4.txt", hashcodeContainer.getDataFiles().get(4).getFileName());
+        assertEquals("test5.txt", hashcodeContainer.getDataFiles().get(5).getFileName());
+        assertEquals("test6.txt", hashcodeContainer.getDataFiles().get(6).getFileName());
+        assertEquals("test7.txt", hashcodeContainer.getDataFiles().get(7).getFileName());
+        assertEquals("test8.txt", hashcodeContainer.getDataFiles().get(8).getFileName());
+        assertEquals("test9.txt", hashcodeContainer.getDataFiles().get(9).getFileName());
+    }
+
+    @Test
+    public void validHashcodeContainerOpeningWithDataFilesInRandomOrder() throws IOException, URISyntaxException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER);
+        hashcodeContainer.open(container);
+        assertEquals(1, hashcodeContainer.getSignatures().size());
+        assertEquals(10, hashcodeContainer.getDataFiles().size());
+        assertEquals("test9.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+        assertEquals("test6.txt", hashcodeContainer.getDataFiles().get(3).getFileName());
+        assertEquals("test3.txt", hashcodeContainer.getDataFiles().get(4).getFileName());
+        assertEquals("test4.txt", hashcodeContainer.getDataFiles().get(5).getFileName());
+        assertEquals("test5.txt", hashcodeContainer.getDataFiles().get(6).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(7).getFileName());
+        assertEquals("test7.txt", hashcodeContainer.getDataFiles().get(8).getFileName());
+        assertEquals("test8.txt", hashcodeContainer.getDataFiles().get(9).getFileName());
+
     }
 
     @Test
@@ -164,9 +205,9 @@ public class HashcodeContainerTest {
         byte[] container = TestUtil.getFile(DIFFERENT_SHA256_ORDER);
         hashcodeContainer.open(container);
         assertEquals(3, hashcodeContainer.getDataFiles().size());
-        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
-        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
-        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+        assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
+        assertEquals("test.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
+        assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
     }
 
     @Test
