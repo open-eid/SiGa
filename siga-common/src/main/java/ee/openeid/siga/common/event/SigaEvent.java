@@ -25,6 +25,7 @@ public class SigaEvent {
     private String serviceUuid;
     private String errorCode;
     private String errorMessage;
+    private Integer statusCode;
     private Long timestamp;
     private Long duration;
     private EventResultType resultType;
@@ -101,6 +102,7 @@ public class SigaEvent {
         ts.add("error_code", escapeJava(errorCode));
         ts.add("error_message", errorMessage != null ? wrap(escapeJava(errorMessage), "\"") : null);
         ts.add("duration_ms", duration);
+        ts.add("status_code", statusCode);
         ts.add("result", resultType);
         return ts.omitNullValues().toString().replace("SigaEvent{", "[").replace("}", "]");
     }
