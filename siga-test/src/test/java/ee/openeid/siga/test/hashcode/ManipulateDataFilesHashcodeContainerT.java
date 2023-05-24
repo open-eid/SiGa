@@ -140,7 +140,6 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_DATA);
     }
 
-    //TODO: This test locally fails in Docker - SIGA-484
     @Test
     public void uploadHashcodeContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNonconventionalCharactersInDataFile.asice"));

@@ -45,6 +45,7 @@ services:
       - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=7000
+      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
     ports:
       - "7443:7443"
       - "7000:7000"
@@ -74,6 +75,7 @@ services:
       - spring.liquibase.enabled=false
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=6000
+      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
     ports:
       - "6443:6443"
       - "6000:6000"

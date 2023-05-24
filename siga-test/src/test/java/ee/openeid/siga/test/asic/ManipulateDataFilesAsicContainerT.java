@@ -165,7 +165,6 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_DATA);
     }
 
-    //TODO: This test locally fails in Docker - SIGA-484
     @Test
     public void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("NonconventionalCharactersInDataFile.asice"));
