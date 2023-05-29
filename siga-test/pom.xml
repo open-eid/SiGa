@@ -269,6 +269,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <goal>compile</goal>
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
@@ -282,6 +283,7 @@
                                 <arg>-language:implicitConversions</arg>
                                 <arg>-language:postfixOps</arg>
                             </args>
+                            <scalaVersion>2.13.6</scalaVersion>
                         </configuration>
                     </execution>
                 </executions>

@@ -39,12 +39,9 @@ services:
     environment:
       - server.port=7443
       - server.ssl.key-alias=siga-01.localhost
-      - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
-      - spring.sql.init.platform=postgresql
-      - spring.datasource.driver-class-name=org.postgresql.Driver
-      - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=7000
+      - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
     ports:
       - "7443:7443"
@@ -59,6 +56,8 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
+      - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
+      - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
       - siga-logs-01:/usr/local/tomcat/logs
     depends_on:
       - siga-db
@@ -68,13 +67,10 @@ services:
     environment:
       - server.port=7443
       - server.ssl.key-alias=siga-02.localhost
-      - spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
-      - spring.sql.init.platform=postgresql
-      - spring.datasource.driver-class-name=org.postgresql.Driver
-      - spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
       - spring.liquibase.enabled=false
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=6000
+      - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
     ports:
       - "6443:6443"
@@ -89,6 +85,8 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
+      - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
+      - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
       - siga-logs-02:/usr/local/tomcat/logs
     depends_on:
       - siga-db

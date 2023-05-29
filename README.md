@@ -22,7 +22,6 @@ Signature Gateway is a web service for creating, signing and validating ASIC-E a
 ### Using Maven Wrapper
 
 Recommended way of building this project is using [Maven Wrapper](https://github.com/takari/maven-wrapper) to build it.
-Run the following command:
 
 ```bash
 ./mvnw clean install
@@ -37,7 +36,7 @@ Run the following command:
 SiGa project compiles into a WAR (Web application archive) file and requires a servlet container to run.
 
 Additionally [Apache Ignite](https://ignite.apache.org/) version 2.12.0 is required for session management. **Ignite servers must be up and running prior SiGa startup.**
-Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](siga-webapp/src/main/resources/ignite/ignite-configuration.xml).
+Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](docker/siga-ignite/ignite-configuration.xml).
 
 ### Running SiGa in Tomcat
 
@@ -79,8 +78,6 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 -Djdk.tls.client.protocols=TLSv1.2
 ```
 
-**NB:** when providing your own external `application.properties` file, logback configuration and so on, be sure to remove them from `siga-webapp/src/main/resources` folder before building SiGa!
-
 #### Available profiles
 
 | Profile name       | Description                                             |
@@ -100,8 +97,8 @@ Additionally, when running SiGa on a Java version greater than 8, the following 
 
 ### `application.properties`
 
-Example `application.properties` file with DEMO parameters can be seen [here](siga-webapp/src/main/resources/application.properties).
-`application.properties` values must be changed for production mode.
+Example `application.properties` file with DEMO parameters can be seen [here](docker/siga-webapp/application.properties).
+`application.properties` values must be changed for production mode, as default maven profile does not include it in the build.
 Common Spring Boot properties are described [here](https://docs.spring.io/spring-boot/docs/2.7.7/reference/html/application-properties.html).
 
 #### SiGa Ignite configuration
@@ -111,7 +108,7 @@ Common Spring Boot properties are described [here](https://docs.spring.io/spring
 | siga.ignite.configuration-location     | Y         | Location of the ignite configuration file.  | `/path/to/ignite-configuration.xml`  |
 | siga.ignite.application-cache-version  | Y         | Version of Ignite cache.                    | `v1`                                 |
 
-Example `ignite-configuration.xml` file can be seen [here](siga-webapp/src/main/resources/ignite/ignite-configuration.xml).
+Example `ignite-configuration.xml` file can be seen [here](docker/siga-ignite/ignite-configuration.xml).
 
 #### SiGa DD4J configuration
 
@@ -120,7 +117,6 @@ Example `ignite-configuration.xml` file can be seen [here](siga-webapp/src/main/
 | siga.dd4j.configuration-location  | Y         | Location of the DD4J configuration file.                              | `/path/to/digidoc4j.yaml`  |
 | siga.dd4j.tsl-refresh-job-cron    | Y         | Cron expression for the scheduled job that refreshes DD4J TSL cache.  | `0 0 3 * * *`              |
 
-Example `digidoc4j.yaml` file can be seen [here](siga-webapp/src/main/resources/digidoc4j.yaml).
 More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Questions-&-Answers#using-a-yaml-file-for-configuration).
 
 #### SiGa SiVa configuration
