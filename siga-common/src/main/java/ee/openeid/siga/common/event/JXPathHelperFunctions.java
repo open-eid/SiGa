@@ -8,7 +8,7 @@ public class JXPathHelperFunctions {
         throw new IllegalStateException("Utility class");
     }
 
-    public static int size(Collection list) {
+    public static int size(Collection<?> list) {
         return list.size();
     }
 }

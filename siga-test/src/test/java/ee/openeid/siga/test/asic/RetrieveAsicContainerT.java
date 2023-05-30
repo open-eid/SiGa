@@ -33,17 +33,17 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class RetrieveAsicContainerT extends TestBase {
+class RetrieveAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadAsicContainerAndRetrieveIt() throws Exception {
+    void uploadAsicContainerAndRetrieveIt() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = getContainer(flow);
         response.then()
@@ -57,7 +57,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndRetrieve() throws Exception {
+    void createAsicContainerAndRetrieve() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = getContainer(flow);
 
@@ -72,7 +72,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerTwice() throws Exception {
+    void retrieveAsicContainerTwice() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = getContainer(flow);
@@ -89,7 +89,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerBeforeSigning() throws Exception {
+    void retrieveAsicContainerBeforeSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT"));
 
@@ -101,7 +101,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerAfterSigning() throws Exception {
+    void retrieveAsicContainerAfterSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -114,7 +114,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerBeforeFinishingMidSigning() throws Exception {
+    void retrieveAsicContainerBeforeFinishingMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
@@ -127,7 +127,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void retrieveAsicContainerDuringMidSigning() throws Exception {
+    void retrieveAsicContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -142,7 +142,7 @@ public class RetrieveAsicContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void retrieveAsicContainerAfterMidSigning() throws Exception {
+    void retrieveAsicContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -156,7 +156,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerAfterValidation() throws Exception {
+    void retrieveAsicContainerAfterValidation() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         getValidationReportForContainerInSession(flow);
 
@@ -168,7 +168,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerAfterRetrievingSignatures() throws Exception {
+    void retrieveAsicContainerAfterRetrievingSignatures() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         getSignatureList(flow);
 
@@ -180,7 +180,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveAsicContainerForOtherClientNotPossible() throws Exception {
+    void retrieveAsicContainerForOtherClientNotPossible() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         flow.setServiceUuid(SERVICE_UUID_2);
@@ -191,7 +191,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAndRetrieveIt() throws Exception {
+    void deleteAsicContainerAndRetrieveIt() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         deleteContainer(flow);
 
@@ -201,7 +201,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void postToGetAsicContainer() throws Exception {
+    void postToGetAsicContainer() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId(), flow, "");
@@ -210,7 +210,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void headToGetAsicContainer() throws Exception {
+    void headToGetAsicContainer() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
@@ -220,7 +220,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToGetAsicContainer() throws Exception {
+    void optionsToGetAsicContainer() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId(), flow);
@@ -229,7 +229,7 @@ public class RetrieveAsicContainerT extends TestBase {
     }
 
     @Test
-    public void patchToGetAsicContainer() throws Exception {
+    void patchToGetAsicContainer() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId(), flow);

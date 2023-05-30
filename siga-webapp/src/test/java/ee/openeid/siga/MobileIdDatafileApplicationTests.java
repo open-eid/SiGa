@@ -19,10 +19,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class MobileIdDatafileApplicationTests extends MobileIdBaseApplicationTests {
+class MobileIdDatafileApplicationTests extends MobileIdBaseApplicationTests {
 
     @Test
-    public void mobileIdDatafileSigningFlow() throws Exception {
+    void mobileIdDatafileSigningFlow() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         assertEquals(1, signatures.size());

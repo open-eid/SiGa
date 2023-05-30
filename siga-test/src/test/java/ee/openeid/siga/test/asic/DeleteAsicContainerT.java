@@ -28,17 +28,17 @@ import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureVa
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class DeleteAsicContainerT extends TestBase {
+class DeleteAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadAsicContainerAndDelete() throws Exception {
+    void uploadAsicContainerAndDelete() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         deleteContainer(flow);
 
@@ -47,7 +47,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndDelete() throws Exception {
+    void createAsicContainerAndDelete() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         deleteContainer(flow);
 
@@ -56,7 +56,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAlwaysReturnsOk() throws Exception {
+    void deleteAsicContainerAlwaysReturnsOk() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         deleteContainer(flow);
 
@@ -68,7 +68,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerBeforeSigning() throws Exception {
+    void deleteAsicContainerBeforeSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT"));
 
@@ -79,7 +79,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAfterSigning() throws Exception {
+    void deleteAsicContainerAfterSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -91,7 +91,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAfterRetrievingIt() throws Exception {
+    void deleteAsicContainerAfterRetrievingIt() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -104,7 +104,7 @@ public class DeleteAsicContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteAsicContainerBeforeFinishingMidSigning() throws Exception {
+    void deleteAsicContainerBeforeFinishingMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -116,7 +116,7 @@ public class DeleteAsicContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteAsicContainerDuringMidSigning() throws Exception {
+    void deleteAsicContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -130,7 +130,7 @@ public class DeleteAsicContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteAsicContainerAfterMidSigning() throws Exception {
+    void deleteAsicContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -143,7 +143,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAfterValidation() throws Exception {
+    void deleteAsicContainerAfterValidation() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         getValidationReportForContainerInSession(flow);
 
@@ -154,7 +154,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerAfterRetrievingSignatures() throws Exception {
+    void deleteAsicContainerAfterRetrievingSignatures() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         getSignatureList(flow);
 
@@ -165,7 +165,7 @@ public class DeleteAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteAsicContainerForOtherClientNotPossible() throws Exception {
+    void deleteAsicContainerForOtherClientNotPossible() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         flow.setServiceUuid(SERVICE_UUID_2);

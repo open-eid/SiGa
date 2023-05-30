@@ -14,12 +14,12 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
-public class MonitoringT extends TestBase {
+class MonitoringT extends TestBase {
 
     private static final String ACCEPT_HEADER_V2 = "application/vnd.spring-boot.actuator.v2+json";
 
     @Test
-    public void getMonitoringStatusAndCheckComponentStatusCurrent() {
+    void getMonitoringStatusAndCheckComponentStatusCurrent() {
         Response response = getMonitoringStatus(null);
 
         response.then()
@@ -32,7 +32,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckComponentStatusV2() {
+    void getMonitoringStatusAndCheckComponentStatusV2() {
         Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
@@ -45,7 +45,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckStructureCurrent() {
+    void getMonitoringStatusAndCheckStructureCurrent() {
         Response response = getMonitoringStatus(null);
 
         response.then()
@@ -67,7 +67,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getMonitoringStatusAndCheckStructureV2() {
+    void getMonitoringStatusAndCheckStructureV2() {
         Response response = getMonitoringStatus(ACCEPT_HEADER_V2);
 
         response.then()
@@ -89,7 +89,7 @@ public class MonitoringT extends TestBase {
     }
 
     @Test
-    public void getVersionInfoStatus() {
+    void getVersionInfoStatus() {
         Response response = getVersionInfo();
 
         response.then()

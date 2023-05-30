@@ -13,7 +13,7 @@ import org.springframework.boot.actuate.health.Status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class IgniteHealthIndicatorTest {
+class IgniteHealthIndicatorTest {
 
 
     private IgniteHealthIndicator igniteHealthIndicator;
@@ -22,19 +22,19 @@ public class IgniteHealthIndicatorTest {
     private SessionService sessionService;
 
     @BeforeEach
-    public void beforeTests() {
+    void beforeTests() {
         igniteHealthIndicator = new IgniteHealthIndicator(sessionService);
     }
 
     @Test
-    public void igniteDownStatus() {
+    void igniteDownStatus() {
         Mockito.when(sessionService.getCacheSize()).thenThrow(new RuntimeException("Invalid ignite session"));
         Health health = igniteHealthIndicator.health();
         assertEquals(Status.DOWN, health.getStatus());
     }
 
     @Test
-    public void igniteUpStatus() {
+    void igniteUpStatus() {
         Mockito.when(sessionService.getCacheSize()).thenReturn(2);
         Health health = igniteHealthIndicator.health();
         assertEquals(Status.UP, health.getStatus());

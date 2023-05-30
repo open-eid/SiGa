@@ -14,17 +14,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class SoapProxySpecificT extends TestBase {
+class SoapProxySpecificT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient2Service7();
     }
 
     @Test
-    public void CreateHashcodeContainerWithoutSha512hashesForSoapProxy() throws Exception {
+    void CreateHashcodeContainerWithoutSha512hashesForSoapProxy() throws Exception {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null , DEFAULT_FILESIZE));
 
         response.then()
@@ -33,14 +33,14 @@ public class SoapProxySpecificT extends TestBase {
     }
 
     @Test
-    public void CreateHashcodeContainerWithoutSha256hashesForSoapProxyReturnsError() throws Exception {
+    void CreateHashcodeContainerWithoutSha256hashesForSoapProxyReturnsError() throws Exception {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, null, DEFAULT_SHA512_DATAFILE , DEFAULT_FILESIZE));
 
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutSha512hashesForSoapProxy() throws Exception {
+    void uploadHashcodeContainerWithoutSha512hashesForSoapProxy() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeMissingSha512File.asice"));
 
         response.then()
@@ -49,7 +49,7 @@ public class SoapProxySpecificT extends TestBase {
     }
 
     @Test
-    public void createContainerForSoapProxyContainsMinimalData() throws Exception {
+    void createContainerForSoapProxyContainsMinimalData() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null , DEFAULT_FILESIZE));
 
         Response response = getContainer(flow);
@@ -65,7 +65,7 @@ public class SoapProxySpecificT extends TestBase {
     }
 
     @Test
-    public void createContainerForSoapProxyDoNotContainSha512file() throws Exception {
+    void createContainerForSoapProxyDoNotContainSha512file() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null , DEFAULT_FILESIZE));
 
         Response response = getContainer(flow);
@@ -75,7 +75,7 @@ public class SoapProxySpecificT extends TestBase {
     }
 
     @Test
-    public void addDataFileForUploadedContainerForSoapProxyDoNotContainSha512file() throws Exception {
+    void addDataFileForUploadedContainerForSoapProxyDoNotContainSha512file() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
         addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, null, DEFAULT_FILESIZE));
 

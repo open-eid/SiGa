@@ -21,10 +21,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
+class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
 
     @Test
-    public void dataFileModifyingContainerFlow() throws Exception {
+    void dataFileModifyingContainerFlow() throws Exception {
         String containerId = createContainer();
         Container originalContainer = getContainer(containerId);
         assertEquals(0, originalContainer.getSignatures().size());
@@ -41,7 +41,7 @@ public class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void remoteDatafileSigningFlowWithBase64EncodedCertificate() throws Exception {
+    void remoteDatafileSigningFlowWithBase64EncodedCertificate() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
@@ -64,7 +64,7 @@ public class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void remoteDatafileSigningFlowWithHexEncodedCertificate() throws Exception {
+    void remoteDatafileSigningFlowWithHexEncodedCertificate() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());

@@ -18,17 +18,17 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ValidateHashcodeContainerT extends TestBase {
+class ValidateHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void validateHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void validateHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeMultipleSignatures.asice"));
 
         assertThat(response.statusCode(), equalTo(200));
@@ -40,7 +40,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateDDOCHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void validateDDOCHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeDdoc.ddoc"));
 
 
@@ -56,7 +56,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHashcodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void validateHashcodeContainerWithLTASignatureProfile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequest(HASHCODE_CONTAINER_WITH_LTA_SIGNATURE));
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(CLIENT_EXCEPTION));
@@ -64,7 +64,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void uploadHashcodeContainerAndValidateInSession() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -77,7 +77,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerSignRemotelyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerSignRemotelyAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -88,7 +88,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateRegularDDOCContainer() throws Exception {
+    void validateRegularDDOCContainer() throws Exception {
         Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("container.ddoc"));
         assertThat(validationResponse.statusCode(), equalTo(400));
         assertThat(validationResponse.getBody().path(ERROR_CODE), equalTo(INVALID_CONTAINER_EXCEPTION));
@@ -96,7 +96,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHashcodeContainerWithoutSignatures() throws Exception {
+    void validateHashcodeContainerWithoutSignatures() throws Exception {
         Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         assertThat(validationResponse.statusCode(), equalTo(400));
@@ -104,7 +104,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHashcodeContainerWithZeroFileSizeDataFiles() throws Exception {
+    void validateHashcodeContainerWithZeroFileSizeDataFiles() throws Exception {
         Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeSignedContainerWithEmptyDatafiles.asice"));
 
         assertThat(validationResponse.statusCode(), equalTo(200));
@@ -120,7 +120,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void validateHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignatures() throws Exception {
+    void validateHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignatures() throws Exception {
         Response validationResponse = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeUnsignedContainerWithEmptyDatafiles.asice"));
 
         assertThat(validationResponse.statusCode(), equalTo(400));
@@ -129,7 +129,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutSignaturesAndValidateInSession() throws Exception {
+    void uploadHashcodeContainerWithoutSignaturesAndValidateInSession() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -139,7 +139,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithZeroFileSizeDataFilesAndValidateInSession() throws Exception {
+    void uploadHashcodeContainerWithZeroFileSizeDataFilesAndValidateInSession() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeSignedContainerWithEmptyDatafiles.asice"));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -157,7 +157,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignaturesAndValidateInSession() throws Exception {
+    void uploadHashcodeContainerWithZeroFileSizeDataFilesAndWithoutSignaturesAndValidateInSession() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeUnsignedContainerWithEmptyDatafiles.asice"));
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -168,7 +168,7 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerWithoutSignaturesAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerWithoutSignaturesAndValidate() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response validationResponse = getValidationReportForContainerInSession(flow);
@@ -178,14 +178,14 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
+    void getValidationReportForNotExistingContainer() throws NoSuchAlgorithmException, InvalidKeyException {
         Response response = getValidationReportForContainerInSession(flow);
         assertThat(response.statusCode(), equalTo(400));
         assertThat(response.getBody().path(ERROR_CODE), equalTo(RESOURCE_NOT_FOUND));
     }
 
     @Test
-    public void createHashcodeContainerAndValidateContainerStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerAndValidateContainerStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -197,14 +197,14 @@ public class ValidateHashcodeContainerT extends TestBase {
     }
 
     @Test //SIGA handles this as DELETE to containerId
-    public void deleteToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
+    void deleteToValidateHashcodeContainer() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         Response response = delete(getContainerEndpoint() + VALIDATIONREPORT, flow);
 
         assertThat(response.statusCode(), equalTo(200));
     }
 
     @Test
-    public void headToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToValidateHashcodeContainerInSession() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + VALIDATIONREPORT, flow);

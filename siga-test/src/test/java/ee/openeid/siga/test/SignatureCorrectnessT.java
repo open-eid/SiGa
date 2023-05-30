@@ -15,17 +15,17 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 
-public class SignatureCorrectnessT extends TestBase {
+class SignatureCorrectnessT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void signatureValuesAreCorrectForRemoteSigning() throws Exception {
+    void signatureValuesAreCorrectForRemoteSigning() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -46,7 +46,7 @@ public class SignatureCorrectnessT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void signatureValuesAreCorrectForMidSigning() throws Exception {
+    void signatureValuesAreCorrectForMidSigning() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT_TM"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -67,7 +67,7 @@ public class SignatureCorrectnessT extends TestBase {
     }
 
     @Test
-    public void signatureHashcodeContainerWithLtaProfileReturnsError() throws Exception {
+    void signatureHashcodeContainerWithLtaProfileReturnsError() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LTA")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         Response response = putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());

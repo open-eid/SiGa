@@ -15,17 +15,17 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class DeleteHashcodeContainerT extends TestBase {
+class DeleteHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadHashcodeContainerAndDelete() throws Exception {
+    void uploadHashcodeContainerAndDelete() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         deleteContainer(flow);
 
@@ -34,7 +34,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndDelete() throws Exception {
+    void createHashcodeContainerAndDelete() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         deleteContainer(flow);
 
@@ -43,7 +43,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAlwaysReturnsOk() throws Exception {
+    void deleteHashcodeContainerAlwaysReturnsOk() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         deleteContainer(flow);
 
@@ -55,7 +55,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerBeforeSigning() throws Exception {
+    void deleteHashcodeContainerBeforeSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT"));
 
@@ -66,7 +66,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAfterSigning() throws Exception {
+    void deleteHashcodeContainerAfterSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -78,7 +78,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAfterRetrievingIt() throws Exception {
+    void deleteHashcodeContainerAfterRetrievingIt() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -91,7 +91,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteHashcodeContainerBeforeFinishingMidSigning() throws Exception {
+    void deleteHashcodeContainerBeforeFinishingMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -103,7 +103,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteHashcodeContainerDuringMidSigning() throws Exception {
+    void deleteHashcodeContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -117,7 +117,7 @@ public class DeleteHashcodeContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void deleteHashcodeContainerAfterMidSigning() throws Exception {
+    void deleteHashcodeContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -130,7 +130,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAfterValidation() throws Exception {
+    void deleteHashcodeContainerAfterValidation() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getValidationReportForContainerInSession(flow);
 
@@ -141,7 +141,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAfterRetrievingSignatures() throws Exception {
+    void deleteHashcodeContainerAfterRetrievingSignatures() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getSignatureList(flow);
 
@@ -152,7 +152,7 @@ public class DeleteHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerForOtherClientNotPossible() throws Exception {
+    void deleteHashcodeContainerForOtherClientNotPossible() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         flow.setServiceUuid(SERVICE_UUID_2);

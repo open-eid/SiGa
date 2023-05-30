@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @WireMockTest
-public class SivaClientTest {
+class SivaClientTest {
 
     @InjectMocks
     private SivaClient sivaClient;
@@ -48,18 +48,18 @@ public class SivaClientTest {
     private String requestUrl;
 
     @BeforeEach
-    public void setUp(WireMockRuntimeInfo wireMockServer) {
+    void setUp(WireMockRuntimeInfo wireMockServer) {
         requestUrl = "http://localhost:" + wireMockServer.getHttpPort();
         lenient().when(sivaConfigurationProperties.getUrl()).thenReturn(requestUrl);
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         WireMock.reset();
     }
 
     @Test
-    public void successfulSivaResponse() throws Exception {
+    void successfulSivaResponse() throws Exception {
         String body = toJson(RequestUtil.createValidationResponse());
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
@@ -72,7 +72,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void invalidSivaTruststoreCertificate() {
+    void invalidSivaTruststoreCertificate() {
         RestTemplate restTemplate = mock(RestTemplate.class);
         when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));
         sivaClient = new SivaClient(restTemplate, sivaConfigurationProperties);
@@ -84,7 +84,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void siva404NotFound() {
+    void siva404NotFound() {
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -98,7 +98,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void siva500InternalServerError() {
+    void siva500InternalServerError() {
         WireMock.stubFor(
                 WireMock.post("/validateHashcode").willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -112,7 +112,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void hashMismatch() throws IOException, URISyntaxException {
+    void hashMismatch() throws IOException, URISyntaxException {
         List<HashcodeSignatureWrapper> signatureWrappers = RequestUtil.createSignatureWrapper();
         signatureWrappers.get(0).getDataFiles().get(0).setHashAlgo("SHA386");
 
@@ -123,7 +123,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void sivaDocumentMalformed() {
+    void sivaDocumentMalformed() {
         String body = "{\"requestErrors\": [{\n" +
                 "    \"message\": \"Document malformed or not matching documentType\",\n" +
                 "    \"key\": \"document\"\n" +
@@ -142,7 +142,7 @@ public class SivaClientTest {
     }
 
     @Test
-    public void sivaSignatureMalformed() {
+    void sivaSignatureMalformed() {
         String body = "{\"requestErrors\": [{\n" +
                 "    \"message\": \" Signature file malformed\",\n" +
                 "    \"key\": \"signatureFiles.signature\"\n" +

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class HashcodeContainerSessionTest {
+class HashcodeContainerSessionTest {
 
     private static final String DEFAULT_MOCK_CLIENT_NAME = "clientName";
     private static final String DEFAULT_MOCK_SERVICE_NAME = "serviceName";
@@ -24,7 +24,7 @@ public class HashcodeContainerSessionTest {
     private static final String DEFAULT_MOCK_SIGNATURE_ID = "12345_id";
 
     @Test
-    public void createEmptyContainerSessionHolder() {
+    void createEmptyContainerSessionHolder() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> HashcodeContainerSession.builder().build()
         );
@@ -32,7 +32,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithOnlyClientName() {
+    void createContainerSessionHolderWithOnlyClientName() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> HashcodeContainerSession
                     .builder()
@@ -43,7 +43,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutServiceUuid() {
+    void createContainerSessionHolderWithoutServiceUuid() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> HashcodeContainerSession
                     .builder()
@@ -55,7 +55,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutSessionId() {
+    void createContainerSessionHolderWithoutSessionId() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> HashcodeContainerSession
                     .builder()
@@ -68,7 +68,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createEmptyValidContainerSession() {
+    void createEmptyValidContainerSession() {
         HashcodeContainerSession sessionHolder = HashcodeContainerSession
                 .builder()
                 .clientName(DEFAULT_MOCK_CLIENT_NAME)
@@ -84,7 +84,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createValidContainerSessionWithDataFile() {
+    void createValidContainerSessionWithDataFile() {
         HashcodeContainerSession sessionHolder = HashcodeContainerSession
                 .builder()
                 .clientName(DEFAULT_MOCK_CLIENT_NAME)
@@ -104,7 +104,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void createValidContainerSessionWithSignatures() {
+    void createValidContainerSessionWithSignatures() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
         assertEquals(1, sessionHolder.getSignatures().size());
@@ -117,7 +117,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void addDataToSignToContainerSession() {
+    void addDataToSignToContainerSession() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();
@@ -130,7 +130,7 @@ public class HashcodeContainerSessionTest {
     }
 
     @Test
-    public void addDataToSignAndThenRemoveItFromContainer() {
+    void addDataToSignAndThenRemoveItFromContainer() {
         HashcodeContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();

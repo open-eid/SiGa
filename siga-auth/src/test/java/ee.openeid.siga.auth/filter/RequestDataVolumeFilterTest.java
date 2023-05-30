@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RequestDataVolumeFilterTest {
+class RequestDataVolumeFilterTest {
 
     private RequestDataVolumeFilter filter;
     @Mock
@@ -51,7 +51,7 @@ public class RequestDataVolumeFilterTest {
     private FilterChain filterChain;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         request = new MockHttpServletRequest();
         request.setMethod(DEFAULT_HTTP_METHOD);
         request.setRequestURI(TEST_URI);
@@ -66,21 +66,21 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void getHttpMethod() throws ServletException, IOException {
+    void getHttpMethod() throws ServletException, IOException {
         request.setMethod("GET");
         filter.doFilter(request, response, filterChain);
         verify(serviceRepository, never()).findByUuid(any());
     }
 
     @Test
-    public void noServiceFound() throws ServletException, IOException {
+    void noServiceFound() throws ServletException, IOException {
         filter.doFilter(request, response, filterChain);
         verify(serviceRepository).findByUuid(any());
         verify(connectionRepository, never()).findAllByServiceId(SERVICE_ID);
     }
 
     @Test
-    public void serviceFoundNewContainer() throws ServletException, IOException {
+    void serviceFoundNewContainer() throws ServletException, IOException {
         when(serviceRepository.findByUuid(any())).thenReturn(mockSigaService());
         filter.doFilter(request, response, filterChain);
         verify(connectionRepository).findAllByServiceId(SERVICE_ID);
@@ -89,7 +89,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void serviceFoundExistingContainer() throws ServletException, IOException {
+    void serviceFoundExistingContainer() throws ServletException, IOException {
         when(serviceRepository.findByUuid(any())).thenReturn(mockSigaService());
         request.setRequestURI(TEST_URI + "/" + CONTAINER_ID + "/remotesigning");
         when(connectionRepository.findAllByContainerId(CONTAINER_ID)).thenReturn(mockSigaConnection());
@@ -98,7 +98,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void serviceFoundExistingContainerAndConnectionExpired() throws ServletException, IOException {
+    void serviceFoundExistingContainerAndConnectionExpired() throws ServletException, IOException {
         when(serviceRepository.findByUuid(any())).thenReturn(mockSigaService());
         request.setRequestURI(TEST_URI + "/" + CONTAINER_ID + "/remotesigning");
         filter.doFilter(request, response, filterChain);
@@ -107,7 +107,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void allConnectionParametersAreLimitless() throws ServletException, IOException {
+    void allConnectionParametersAreLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionSize(-1);
         sigaService.get().setMaxConnectionsSize(-1);
@@ -118,7 +118,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void twoOfConnectionParametersAreLimitless() throws ServletException, IOException {
+    void twoOfConnectionParametersAreLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionSize(-1);
         sigaService.get().setMaxConnectionsSize(-1);
@@ -129,7 +129,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionCountLimitless() throws ServletException, IOException {
+    void connectionCountLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionCount(-1);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -140,7 +140,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionsSizeLimitless() throws ServletException, IOException {
+    void connectionsSizeLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionsSize(-1);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -151,7 +151,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionSizeLimitless() throws ServletException, IOException {
+    void connectionSizeLimitless() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionSize(-1);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -162,7 +162,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionCountExceeded() throws ServletException, IOException {
+    void connectionCountExceeded() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionCount(0);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -172,7 +172,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionsSizeExceeded() throws ServletException, IOException {
+    void connectionsSizeExceeded() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionsSize(0);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -182,7 +182,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void connectionSizeExceeded() throws ServletException, IOException {
+    void connectionSizeExceeded() throws ServletException, IOException {
         Optional<SigaService> sigaService = mockSigaService();
         sigaService.get().setMaxConnectionSize(0);
         when(serviceRepository.findByUuid(any())).thenReturn(sigaService);
@@ -192,7 +192,7 @@ public class RequestDataVolumeFilterTest {
     }
 
     @Test
-    public void requestMaxSizeExceeded() throws Exception {
+    void requestMaxSizeExceeded() throws Exception {
         JSONObject jsonObject = new JSONObject();
         JSONObject dataFile = new JSONObject();
         JSONArray dataFiles = new JSONArray();

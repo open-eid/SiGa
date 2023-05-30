@@ -24,16 +24,16 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ManipulateDataFilesHashcodeContainerT extends TestBase {
+class ManipulateDataFilesHashcodeContainerT extends TestBase {
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveDataFilesList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndRetrieveDataFilesList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = getDataFileList(flow);
@@ -47,7 +47,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = getDataFileList(flow);
@@ -61,7 +61,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithInvalidSignatureAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithInvalidSignatureAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
 
         Response response = getDataFileList(flow);
@@ -75,7 +75,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createHashcodeContainerAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = getDataFileList(flow);
@@ -89,7 +89,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -106,7 +106,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -123,7 +123,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = deleteDataFile(flow, "random.txt");
@@ -132,7 +132,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithSignaturesAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithSignaturesAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[1].fileName"));
@@ -141,7 +141,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNonconventionalCharactersInDataFile.asice"));
 
         Response deleteResponse = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -154,7 +154,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -170,7 +170,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -179,7 +179,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
@@ -188,7 +188,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -204,7 +204,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         JSONObject dataFiles = addDataFileToHashcodeRequest("testFile1.xml", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
@@ -232,7 +232,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -241,7 +241,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         addDataFile(flow, addDataFilesToHashcodeRequest(TEST_FILE_EXTENSIONS.stream()
                 .map(ext -> addDataFileToHashcodeRequestDataFile("filename." + ext, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE))
@@ -255,7 +255,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
@@ -264,7 +264,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadSignedHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadSignedHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -273,7 +273,7 @@ public class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToHashcodeDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcode.asice"));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);

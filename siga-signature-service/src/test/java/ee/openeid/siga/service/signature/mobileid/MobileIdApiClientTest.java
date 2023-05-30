@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @WireMockTest
-public class MobileIdApiClientTest {
+class MobileIdApiClientTest {
 
     private static final String DEFAULT_MOCK_SESSION_CODE = "mock-session-code";
     private static final UUID DEFAULT_MOCK_RELYING_PARTY_UUID = UUID.randomUUID();
@@ -69,7 +69,7 @@ public class MobileIdApiClientTest {
     private Resource resource;
 
     @BeforeEach
-    public void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+    void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
@@ -79,12 +79,12 @@ public class MobileIdApiClientTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         WireMock.reset();
     }
 
     @Test
-    public void getCertificate_midRestReturnsOk() throws Exception {
+    void getCertificate_midRestReturnsOk() throws Exception {
         X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
         stubCertificateRequestOkResponse("{" +
                 "\"result\": \"OK\"," +
@@ -96,7 +96,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_midRestReturnsNotFound() {
+    void getCertificate_midRestReturnsNotFound() {
         stubCertificateRequestOkResponse("{\"result\": \"NOT_FOUND\"}");
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
@@ -107,7 +107,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_midRestReturnsUnexpectedResult() {
+    void getCertificate_midRestReturnsUnexpectedResult() {
         stubCertificateRequestOkResponse("{\"result\": \"INVALID_RESULT\"}");
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
@@ -118,7 +118,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_midRestReturns400() {
+    void getCertificate_midRestReturns400() {
         stubCertificateRequestErrorResponse(400);
         try {
             mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
@@ -129,7 +129,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_midRestReturns5XX() {
+    void getCertificate_midRestReturns5XX() {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubCertificateRequestErrorResponse(status.value());
             try {
@@ -144,7 +144,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void initMobileSigning_midRestReturnsValidResponse() {
+    void initMobileSigning_midRestReturnsValidResponse() {
         stubSigningInitiationOkResponse("{\"sessionID\": \"session-id-value\"}");
 
         InitMidSignatureResponse response = mobileIdApiClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
@@ -153,7 +153,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void initMobileSigning_midRestReturns5XX() {
+    void initMobileSigning_midRestReturns5XX() {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubSigningInitiationErrorResponse(status.value());
             try {
@@ -168,7 +168,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsUnexpectedState() {
+    void getStatus_midRestReturnsUnexpectedState() {
         stubGetStatusOkResponse("{\"state\":\"SOME_INVALID_STATE\"}");
 
         MobileIdStatusResponse response = mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE);
@@ -178,7 +178,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndOk() {
+    void getStatus_midRestReturnsCompleteAndOk() {
         byte[] signatureBytes = "\tSignature bytes.\n".getBytes(StandardCharsets.UTF_8);
         stubGetStatusOkResponse("{" +
                 " \"state\": \"COMPLETE\"," +
@@ -196,7 +196,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndTimeout() {
+    void getStatus_midRestReturnsCompleteAndTimeout() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"TIMEOUT\"" +
@@ -209,7 +209,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndNotMidClient() {
+    void getStatus_midRestReturnsCompleteAndNotMidClient() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"NOT_MID_CLIENT\"" +
@@ -222,7 +222,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndUserCancelled() {
+    void getStatus_midRestReturnsCompleteAndUserCancelled() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"USER_CANCELLED\"" +
@@ -235,7 +235,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndSignatureHashMismatch() {
+    void getStatus_midRestReturnsCompleteAndSignatureHashMismatch() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"SIGNATURE_HASH_MISMATCH\"" +
@@ -248,7 +248,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndPhoneAbsent() {
+    void getStatus_midRestReturnsCompleteAndPhoneAbsent() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"PHONE_ABSENT\"" +
@@ -261,7 +261,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndDeliveryError() {
+    void getStatus_midRestReturnsCompleteAndDeliveryError() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"DELIVERY_ERROR\"" +
@@ -274,7 +274,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndSimError() {
+    void getStatus_midRestReturnsCompleteAndSimError() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"SIM_ERROR\"" +
@@ -287,7 +287,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturnsCompleteAndUnexpectedResult() {
+    void getStatus_midRestReturnsCompleteAndUnexpectedResult() {
         stubGetStatusOkResponse("{" +
                 "\"state\": \"COMPLETE\"," +
                 "\"result\": \"SOME_INVALID_RESULT\"" +
@@ -300,7 +300,7 @@ public class MobileIdApiClientTest {
     }
 
     @Test
-    public void getStatus_midRestReturns5XX() {
+    void getStatus_midRestReturns5XX() {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubGetStatusErrorResponse(status.value());
             try {

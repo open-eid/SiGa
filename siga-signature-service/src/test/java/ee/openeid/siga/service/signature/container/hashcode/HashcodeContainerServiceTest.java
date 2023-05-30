@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
-public class HashcodeContainerServiceTest {
+class HashcodeContainerServiceTest {
 
     @Spy
     @InjectMocks
@@ -53,7 +53,7 @@ public class HashcodeContainerServiceTest {
     private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.lenient().when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()
                 .clientName("client1")
@@ -68,7 +68,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulCreateContainer() {
+    void successfulCreateContainer() {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         String containerId = containerService.createContainer(hashcodeDataFiles);
         assertFalse(StringUtils.isBlank(containerId));
@@ -83,7 +83,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulCreateContainerFromDataFileWithUnknownExtension() {
+    void successfulCreateContainerFromDataFileWithUnknownExtension() {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles().stream().limit(1)
                 .peek(dataFile -> dataFile.setFileName("filename.unknown")).collect(Collectors.toList());
         String containerId = containerService.createContainer(hashcodeDataFiles);
@@ -95,21 +95,21 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulUploadContainer() throws IOException, URISyntaxException {
+    void successfulUploadContainer() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(SIGNED_HASHCODE).readAllBytes()));
         String containerId = containerService.uploadContainer(container);
         assertFalse(StringUtils.isBlank(containerId));
     }
 
     @Test
-    public void successfulGetContainer() throws IOException, URISyntaxException {
+    void successfulGetContainer() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         String container = containerService.getContainer(CONTAINER_ID);
         assertFalse(StringUtils.isBlank(container));
     }
 
     @Test
-    public void successfulGetDataFiles() throws IOException, URISyntaxException {
+    void successfulGetDataFiles() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         List<HashcodeDataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
         assertEquals("test.txt", dataFiles.get(0).getFileName());
@@ -119,7 +119,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulGetSignatures() throws IOException, URISyntaxException {
+    void successfulGetSignatures() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
         List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
         assertEquals("id-a9fae00496ae203a6a8b92adbe762bd3", signatures.get(0).getId());
@@ -129,7 +129,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulGetSignature() throws IOException, URISyntaxException {
+    void successfulGetSignature() throws IOException, URISyntaxException {
         HashcodeContainerSession session = createHashcodeSessionHolder();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
         org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, session.getSignatures().get(0).getGeneratedSignatureId());
@@ -137,7 +137,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
+    void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createHashcodeSessionHolder());
 
         InvalidSessionDataException caughtException = assertThrows(
@@ -147,7 +147,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulAddDataFile() throws IOException, URISyntaxException {
+    void successfulAddDataFile() throws IOException, URISyntaxException {
         HashcodeContainerSession session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
@@ -158,7 +158,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulRemoveDataFile() throws IOException, URISyntaxException {
+    void successfulRemoveDataFile() throws IOException, URISyntaxException {
         HashcodeContainerSession session = createHashcodeSessionHolder();
 
         session.getSignatures().clear();
@@ -169,7 +169,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void removeDataFileNoDataFile() throws IOException, URISyntaxException {
+    void removeDataFileNoDataFile() throws IOException, URISyntaxException {
         HashcodeContainerSession session = createHashcodeSessionHolder();
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -181,13 +181,13 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void successfulCloseSession() {
+    void successfulCloseSession() {
         Result result = containerService.closeSession(CONTAINER_ID);
         assertEquals(Result.OK, result);
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
+    void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files.asice")));
 
         DuplicateDataFileException caughtException = assertThrows(
@@ -197,7 +197,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
+    void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files_in_manifest.asice")));
 
         DuplicateDataFileException caughtException = assertThrows(
@@ -207,7 +207,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFilesInSignatureThrows() throws IOException, URISyntaxException {
+    void uploadContainerWithDuplicateDataFilesInSignatureThrows() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(getFile("hashcode_duplicate_data_files_in_signature.asice")));
 
         DuplicateDataFileException caughtException = assertThrows(
@@ -217,7 +217,7 @@ public class HashcodeContainerServiceTest {
     }
 
     @Test
-    public void addDuplicateDataFileThrows() throws IOException, URISyntaxException {
+    void addDuplicateDataFileThrows() throws IOException, URISyntaxException {
         HashcodeContainerSession session = createHashcodeSessionHolder();
         session.getSignatures().clear();
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);

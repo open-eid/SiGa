@@ -30,17 +30,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class AsicContainerStructureT extends TestBase {
+class AsicContainerStructureT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void createAsicContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createAsicContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         CreateContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -54,7 +54,7 @@ public class AsicContainerStructureT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
@@ -66,7 +66,7 @@ public class AsicContainerStructureT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndVerifyMimetypeFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndVerifyMimetypeFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         String mimeType = new String(extractEntryFromContainer(MIMETYPE, containerBase64));

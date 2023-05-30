@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SignatureFinalizingTest {
+class SignatureFinalizingTest {
     private final PKCS12SignatureToken VALID_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken REVOKED_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_revoked_state_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken UNKNOWN_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_state_ESTEID2018.p12", "1234".toCharArray());
@@ -85,7 +85,7 @@ public class SignatureFinalizingTest {
     private SecurityContext securityContext;
 
     @BeforeEach
-    public void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
         SecurityContextHolder.setContext(securityContext);
@@ -96,12 +96,12 @@ public class SignatureFinalizingTest {
     }
 
     @AfterEach
-    public void clearLogs() {
+    void clearLogs() {
         sigaEventLogger.logEvents();
     }
 
     @Test
-    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
@@ -110,7 +110,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
@@ -119,7 +119,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
+    void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
@@ -128,7 +128,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_AIAOCSP_WithSignatureProfile_LT_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_AIAOCSP_WithSignatureProfile_LT_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
@@ -157,7 +157,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() {
+    void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() {
         Exception e = assertThrows(IllegalArgumentException.class, () -> {
             Pair<String, String> signature = createSignature(EXPIRED_PKCS12_Esteid2011, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
@@ -178,7 +178,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() throws IOException, URISyntaxException {
+    void shouldNotRequest_OCSP_AfterUnsuccessfulTSARequest() throws IOException, URISyntaxException {
         when(configuration.getTspSource()).thenReturn("http://demo.invalid.url.sk.ee/tsa");
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
 
@@ -200,7 +200,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_BeforeUnsuccessfulOCSPRequest() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         when(configuration.getOcspSource()).thenReturn("http://aia.invalid.url.sk.ee/esteid2018");
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
@@ -224,7 +224,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_and_OCSP_WithRevokedCertificate() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_and_OCSP_WithRevokedCertificate() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(REVOKED_STATE_PKCS12_Esteid2018, SignatureProfile.LT);
 
@@ -251,7 +251,7 @@ public class SignatureFinalizingTest {
     }
 
     @Test
-    public void shouldRequest_TSA_and_OCSP_WithUnknownCertificate() throws IOException, URISyntaxException {
+    void shouldRequest_TSA_and_OCSP_WithUnknownCertificate() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(UNKNOWN_STATE_PKCS12_Esteid2018, SignatureProfile.LT);
 
@@ -283,7 +283,7 @@ public class SignatureFinalizingTest {
      * @see <a href="https://jira.ria.ee/browse/DD4J-416">Jira task DD4J-416</a>
      */
     @Test
-    public void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
+    void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(UNKNOWN_ISSUER_PKCS12_Esteid2018, SignatureProfile.LT);
 

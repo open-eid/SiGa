@@ -9,6 +9,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.security.Security;
 import java.time.Instant;
@@ -20,17 +22,17 @@ import static io.restassured.config.EncoderConfig.encoderConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 
-public class AuthenticationT extends TestBase {
+class AuthenticationT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void serviceDisabled() throws Exception {
+    void serviceDisabled() throws Exception {
         flow.setServiceUuid(SERVICE_UUID_6);
         flow.setServiceSecret(SERVICE_SECRET_6);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
@@ -39,7 +41,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void uuidAndSecretMismatch() throws Exception {
+    void uuidAndSecretMismatch() throws Exception {
         flow.setServiceUuid(SERVICE_UUID_2);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
@@ -47,7 +49,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void defaultAlgoHmacSHA256HeaderMissing() throws Exception {
+    void defaultAlgoHmacSHA256HeaderMissing() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS))
@@ -62,9 +64,10 @@ public class AuthenticationT extends TestBase {
                 .body(CONTAINER_ID, notNullValue());
     }
 
-    @Test
-    public void algoHmacSHA256ExplicitlySet() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA256");
+    @ParameterizedTest
+    @ValueSource(strings = {"HmacSHA256", "HmacSHA384", "HmacSHA512"})
+    void algoHmacExplicitlySet(String hmacAlgorithm) throws Exception {
+        flow.setHmacAlgorithm(hmacAlgorithm);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
@@ -72,30 +75,11 @@ public class AuthenticationT extends TestBase {
                 .body(CONTAINER_ID, notNullValue());
     }
 
-    @Test
-    public void algoHmacSHA384ExplicitlySet() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA384");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        response.then()
-                .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
-    }
-    
-    @Test
-    public void algoHmacSHA512ExplicitlySet() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA512");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        response.then()
-                .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
-    }
-
-    @Test
-    public void algoHmacSHA3_256ExplicitlySet() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"HmacSHA3-256", "HmacSHA3-384", "HmacSHA3-512"})
+    void algoHmacSHA3ExplicitlySet(String hmacAlgorithm) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-        flow.setHmacAlgorithm("HmacSHA3-256");
+        flow.setHmacAlgorithm(hmacAlgorithm);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         response.then()
@@ -104,29 +88,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void algoHmacSHA3_384ExplicitlySet() throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        flow.setHmacAlgorithm("HmacSHA3-384");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        response.then()
-                .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
-    }
-
-    @Test
-    public void algoHmacSHA3_512ExplicitlySet() throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        flow.setHmacAlgorithm("HmacSHA3-512");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-
-        response.then()
-                .statusCode(200)
-                .body(CONTAINER_ID, notNullValue());
-    }
-
-    @Test
-    public void notDefaultAlgoUsedAndNotSpecifiedInHeader() throws Exception {
+    void notDefaultAlgoUsedAndNotSpecifiedInHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         flow.setHmacAlgorithm("HmacSHA512");
         given()
@@ -143,29 +105,16 @@ public class AuthenticationT extends TestBase {
                 .body(ERROR_CODE, equalTo(AUTHORIZATION_ERROR));
     }
 
-    @Test
-    public void algoHmacSHA3_512_224ExplicitlySetShouldNotBeAllowed() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA512/224");
+    @ParameterizedTest
+    @ValueSource(strings = {"HmacSHA512/224", "HmacSHA224", "HmacSHA1"})
+    void algoHmacExplicitlySetShouldNotBeAllowed(String hmacAlgorithm) throws Exception {
+        flow.setHmacAlgorithm(hmacAlgorithm);
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test
-    public void algoHmacSHA224ExplicitlySetShouldNotBeAllowed() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA224");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        expectError(response, 401, AUTHORIZATION_ERROR);
-    }
-
-    @Test
-    public void algoHmacSHA1ExplicitlySetShouldNotBeAllowed() throws Exception {
-        flow.setHmacAlgorithm("HmacSHA1");
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        expectError(response, 401, AUTHORIZATION_ERROR);
-    }
-
-    @Test
-    public void algoSetInHeaderAndActuallyUsedDoNotMatch() throws Exception {
+    void algoSetInHeaderAndActuallyUsedDoNotMatch() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         flow.setHmacAlgorithm("HmacSHA512");
         given()
@@ -184,7 +133,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void notExistingHmacAlgoInHeader() throws Exception {
+    void notExistingHmacAlgoInHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         flow.setHmacAlgorithm("HmacSHA512");
         given()
@@ -203,7 +152,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void missingServiceUuidHeader() throws Exception {
+    void missingServiceUuidHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS))
@@ -220,7 +169,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void missingSignatureHeader() throws Exception {
+    void missingSignatureHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_TIMESTAMP, "1555443270")
@@ -238,7 +187,7 @@ public class AuthenticationT extends TestBase {
 
 
     @Test
-    public void missingTimeStampHeader() throws Exception {
+    void missingTimeStampHeader() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
                 given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS))
@@ -255,21 +204,21 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void nonExistingUuid() throws Exception {
+    void nonExistingUuid() throws Exception {
         flow.setServiceUuid("a3a2a728-a3ea-4975-bfab-f240a67e894f");
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test
-    public void wrongSigningSecret() throws Exception {
+    void wrongSigningSecret() throws Exception {
         flow.setServiceSecret("746573715365637265724b6579304031");
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         expectError(response, 401, AUTHORIZATION_ERROR);
     }
 
     @Test
-    public void wrongMethodInSignature() throws Exception {
+    void wrongMethodInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "PUT", HASHCODE_CONTAINERS))
@@ -286,7 +235,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void wrongUrlInSignature() throws Exception {
+    void wrongUrlInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), "POST", VALIDATIONREPORT))
@@ -303,7 +252,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void missingBodyInSignature() throws Exception {
+    void missingBodyInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, null, "POST", HASHCODE_CONTAINERS))
@@ -320,7 +269,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void wrongOrderInSignature() throws Exception {
+    void wrongOrderInSignature() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         given()
                 .header(X_AUTHORIZATION_SIGNATURE, signRequest(flow, request.toString(), HASHCODE_CONTAINERS, "POST"))
@@ -337,7 +286,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void signatureFromDifferentRequest() throws Exception {
+    void signatureFromDifferentRequest() throws Exception {
         JSONObject request = hashcodeContainersDataRequestWithDefault();
         String signature = signRequest(flow, request.toString(), "POST", HASHCODE_CONTAINERS);
         JSONObject request2 = hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME);
@@ -356,7 +305,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void signingTimeInFuture() throws Exception {
+    void signingTimeInFuture() throws Exception {
         Long signingTime = Instant.now().getEpochSecond() + 30;
 
         flow.setSigningTime(signingTime.toString());
@@ -366,7 +315,7 @@ public class AuthenticationT extends TestBase {
     }
 
     @Test
-    public void signingTimeInPast() throws Exception {
+    void signingTimeInPast() throws Exception {
         Long signingTime = Instant.now().getEpochSecond() - 120;
 
         flow.setSigningTime(signingTime.toString());

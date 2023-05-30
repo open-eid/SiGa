@@ -7,40 +7,40 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PhoneNumberUtilTest {
+class PhoneNumberUtilTest {
 
     @Test
-    public void validPhoneNumber() {
+    void validPhoneNumber() {
         assertTrue(PhoneNumberUtil.isPhoneNumberValid("+37253483726"));
     }
 
     @Test
-    public void phoneNumberWithoutPlusSign() {
+    void phoneNumberWithoutPlusSign() {
         assertFalse(PhoneNumberUtil.isPhoneNumberValid("37253483726"));
     }
 
     @Test
-    public void phoneNumberTooShort() {
+    void phoneNumberTooShort() {
         assertFalse(PhoneNumberUtil.isPhoneNumberValid("+372873"));
     }
 
     @Test
-    public void phoneNumberTooLong() {
+    void phoneNumberTooLong() {
         assertFalse(PhoneNumberUtil.isPhoneNumberValid("+372538737293729373"));
     }
 
     @Test
-    public void countryPrefixIsNotInList(){
+    void countryPrefixIsNotInList(){
         assertNull(PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("+371"));
     }
 
     @Test
-    public void invalidCountryPrefix(){
+    void invalidCountryPrefix(){
         assertNull(PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("random"));
     }
 
     @Test
-    public void validCountryPrefix(){
+    void validCountryPrefix(){
         assertEquals(PhoneNumberUtil.CountryCallingCode.EE, PhoneNumberUtil.CountryCallingCode.getCountryByPrefix("+372"));
     }
 }

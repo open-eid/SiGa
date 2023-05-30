@@ -22,18 +22,18 @@ import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWit
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class GenericAsicSigningFlowT extends TestBase {
+class GenericAsicSigningFlowT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
     @EnabledIfSigaProfileActive({"mobileId", "smartId"})
-    public void signNewAsicContainerWithRetryAfterFailure() throws Exception {
+    void signNewAsicContainerWithRetryAfterFailure() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         CreateContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
@@ -68,7 +68,7 @@ public class GenericAsicSigningFlowT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void signNewAsicContainerWithRetryAfterFailureWithMidSigning() throws Exception {
+    void signNewAsicContainerWithRetryAfterFailureWithMidSigning() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         CreateContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);
@@ -94,7 +94,7 @@ public class GenericAsicSigningFlowT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("smartId")
-    public void signNewAsicContainerWithRetryAfterFailureWithSmartIdSigning() throws Exception {
+    void signNewAsicContainerWithRetryAfterFailureWithSmartIdSigning() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         CreateContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateContainerRemoteSigningResponse.class);

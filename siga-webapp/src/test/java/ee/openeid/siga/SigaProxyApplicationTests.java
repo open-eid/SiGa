@@ -25,13 +25,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class SigaProxyApplicationTests extends BaseTest {
+class SigaProxyApplicationTests extends BaseTest {
 
     private final static String HMAC_SHARED_SECRET = "746573745365637265744b6579303037";
     private final static String REQUESTING_SERVICE_UUID = "7dc75cb8-7076-4bed-9f06-b304f85cdccd";
 
     @Test
-    public void sha256SupportedCreateContainerFlow() throws Exception {
+    void sha256SupportedCreateContainerFlow() throws Exception {
         String containerId = createHashcodeContainerWithSha256();
         String signatureId = startHashcodeMobileSigning(containerId);
         String mobileFirstStatus = getHashcodeMobileIdStatus(containerId, signatureId);
@@ -50,7 +50,7 @@ public class SigaProxyApplicationTests extends BaseTest {
     }
 
     @Test
-    public void sha256SupportedUploadContainerFlow() throws Exception {
+    void sha256SupportedUploadContainerFlow() throws Exception {
         String containerId = uploadHashcodeContainer("hashcodeMissingSha512File.asice");
         List<Signature> signatures = getHashcodeSignatures(containerId);
 
@@ -70,7 +70,7 @@ public class SigaProxyApplicationTests extends BaseTest {
     }
 
     @Test
-    public void sha256SupportedValidationReport() throws Exception {
+    void sha256SupportedValidationReport() throws Exception {
         ValidationConclusion validationConclusion = getValidationConclusionByUploadingContainer("hashcodeMissingSha512File.asice");
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());

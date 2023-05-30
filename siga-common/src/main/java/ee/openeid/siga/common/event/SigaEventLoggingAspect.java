@@ -131,7 +131,7 @@ public class SigaEventLoggingAspect {
         return null;
     }
 
-    private Optional<Annotation> createEventParameterForAnnotation(Annotation[] annotations, Class annotationClass) {
+    private Optional<Annotation> createEventParameterForAnnotation(Annotation[] annotations, Class<?> annotationClass) {
         for (Annotation annotation : annotations) {
             if (annotation.annotationType().isAssignableFrom(annotationClass)) {
                 return Optional.of(annotation);

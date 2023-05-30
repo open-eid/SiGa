@@ -179,7 +179,7 @@ public abstract class ContainerSigningServiceTest {
         await().atMost(FIVE_SECONDS)
                 .untilAsserted(() -> assertEquals("SIGNATURE",
                         getSigningService().getMobileIdSignatureStatus(CONTAINER_ID, dataToSign.getSignatureParameters().getSignatureId())));
-        Mockito.verify(sessionService, Mockito.times(2)).update(eq(session));
+        Mockito.verify(sessionService, Mockito.times(2)).update(session);
         Mockito.verify(containerSigningService, Mockito.times(1)).finalizeSignature(eq(session), anyString(), any());
     }
 
@@ -216,7 +216,7 @@ public abstract class ContainerSigningServiceTest {
             assertEquals(SmartIdSessionStatus.OK.getSigaCertificateMessage(), certificateStatus.getStatus());
             assertEquals(DOCUMENT_NUMBER, certificateStatus.getDocumentNumber());
         });
-        Mockito.verify(sessionService, Mockito.times(2)).update(eq(session));
+        Mockito.verify(sessionService, Mockito.times(2)).update(session);
     }
 
     protected void assertSuccessfulSmartIdSigningWithoutSessionCert() {

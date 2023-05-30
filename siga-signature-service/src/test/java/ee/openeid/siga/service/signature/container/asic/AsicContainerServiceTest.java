@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
-public class AsicContainerServiceTest {
+class AsicContainerServiceTest {
 
     @Spy
     @InjectMocks
@@ -61,7 +61,7 @@ public class AsicContainerServiceTest {
     private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.lenient().when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder()
                 .clientName("client1")
@@ -76,7 +76,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulCreateContainer() {
+    void successfulCreateContainer() {
         List<DataFile> dataFiles = createDataFileListWithOneFile();
 
         String containerId = containerService.createContainer("test.asice", dataFiles);
@@ -84,14 +84,14 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulUploadContainer() throws Exception {
+    void successfulUploadContainer() throws Exception {
         String container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
         String containerId = containerService.uploadContainer("test.asice", container);
         assertFalse(StringUtils.isBlank(containerId));
     }
 
     @Test
-    public void successfulGetContainer() throws Exception {
+    void successfulGetContainer() throws Exception {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
         ContainerInfo containerInfo = containerService.getContainer(CONTAINER_ID);
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(containerInfo.getContainer().getBytes()));
@@ -100,7 +100,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulGetSignatures() throws IOException, URISyntaxException {
+    void successfulGetSignatures() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
         List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
         assertEquals("S0", signatures.get(0).getId());
@@ -110,7 +110,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulGetSignature() throws IOException, URISyntaxException {
+    void successfulGetSignature() throws IOException, URISyntaxException {
         AsicContainerSession session = createAsicSessionHolder();
         AtomicReference<String> signatureId = new AtomicReference<>();
         session.getSignatureIdHolder().forEach((sigId, integer) -> signatureId.set(sigId));
@@ -120,7 +120,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulGetDataFiles() throws IOException, URISyntaxException {
+    void successfulGetDataFiles() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
         List<DataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
         assertEquals("test.xml", dataFiles.get(0).getFileName());
@@ -128,7 +128,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void addDataFileButSignatureExists() throws IOException, URISyntaxException {
+    void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
 
         InvalidSessionDataException caughtException = assertThrows(
@@ -138,7 +138,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulAddDataFile() {
+    void successfulAddDataFile() {
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain")).build();
         Map<String, Integer> signatureIdHolder = new HashMap<>();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -162,7 +162,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulRemoveDataFile() {
+    void successfulRemoveDataFile() {
 
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST))
                 .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test1.xml", "text/plain"))
@@ -189,7 +189,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void removeDataFileNoDataFile() {
+    void removeDataFileNoDataFile() {
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST))
                 .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml1", "text/plain"))
                 .build();
@@ -217,13 +217,13 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void successfulCloseSession() {
+    void successfulCloseSession() {
         String result = containerService.closeSession(CONTAINER_ID);
         assertEquals(Result.OK.name(), result);
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
+    void uploadContainerWithDuplicateDataFilesThrows() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(getFile("asice_duplicate_data_files.asice")));
 
         DuplicateDataFileException caughtException = assertThrows(
@@ -233,7 +233,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
+    void uploadContainerWithDuplicateDataFileInManifestThrows() throws IOException, URISyntaxException {
         String container = new String(Base64.getEncoder().encode(getFile("asice_duplicate_data_files_in_manifest.asice")));
 
         DuplicateDataFileException caughtException = assertThrows(
@@ -243,7 +243,7 @@ public class AsicContainerServiceTest {
     }
 
     @Test
-    public void addDuplicateDataFileThrows() {
+    void addDuplicateDataFileThrows() {
         Container container = ContainerBuilder
                 .aContainer()
                 .withConfiguration(Configuration.of(Configuration.Mode.TEST))

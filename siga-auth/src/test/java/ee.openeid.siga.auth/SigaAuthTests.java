@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
 @AutoConfigureMockMvc
-public class SigaAuthTests {
+class SigaAuthTests {
 
     final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
     final static String HMAC_SHARED_SECRET = "326573745365637265714b6579303029";
@@ -46,17 +46,17 @@ public class SigaAuthTests {
     private MockMvc mockMvc;
 
     @Test
-    public void accessShouldBeAuthorized_WithValidToken() throws Exception {
+    void accessShouldBeAuthorized_WithValidToken() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/")).andExpect(status().isNotFound());
     }
 
     @Test
-    public void accessShouldBeAuthorized_WithValidTokenAndPayload() throws Exception {
+    void accessShouldBeAuthorized_WithValidTokenAndPayload() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/", "{\"test\":\"value\"}".getBytes(), DEFAULT_HMAC_ALGO)).andExpect(status().isNotFound());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithNonMatchingRequestUriComparedToTokenSignature() throws Exception {
+    void accessShouldBeUnauthorized_WithNonMatchingRequestUriComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/path/not/specified/in/hmac"), "/"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
@@ -66,13 +66,13 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeAuthorized_WithMatchingRequestUriComparedToTokenSignature() throws Exception {
+    void accessShouldBeAuthorized_WithMatchingRequestUriComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/path/specified/in/hmac"), "/path/specified/in/hmac"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithNonMatchingRequestParametersComparedToTokenSignature() throws Exception {
+    void accessShouldBeUnauthorized_WithNonMatchingRequestParametersComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/?parameter_name=parameter_value"), "/"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
@@ -82,20 +82,20 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeAuthorized_WithMatchingRequestParametersComparedToTokenSignature() throws Exception {
+    void accessShouldBeAuthorized_WithMatchingRequestParametersComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/?parameter_name=parameter_value"), "/?parameter_name=parameter_value"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithNonMatchingRequestMethodComparedToTokenSignature() throws Exception {
+    void accessShouldBeUnauthorized_WithNonMatchingRequestMethodComparedToTokenSignature() throws Exception {
         mockMvc.perform(buildRequest(post("/"), "/"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithInvalidXAuthorizationHmacAlgorithmHeader() throws Exception {
+    void accessShouldBeUnauthorized_WithInvalidXAuthorizationHmacAlgorithmHeader() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, "/", null, DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/")
@@ -108,7 +108,7 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithInactiveService() throws Exception {
+    void accessShouldBeUnauthorized_WithInactiveService() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, "/", null, DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/")
@@ -120,23 +120,23 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_224() throws Exception {
+    void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_224() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA512/224")).andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_256() throws Exception {
+    void accessShouldBeUnauthorized_WithOldXAuthorizationHmacAlgorithmHeaderHmacSHA512_256() throws Exception {
         mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA512/256")).andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void accessShouldBeAuthorized_WithSHA3XAuthorizationHmacAlgorithmHeader() throws Exception {
+    void accessShouldBeAuthorized_WithSHA3XAuthorizationHmacAlgorithmHeader() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         mockMvc.perform(buildRequest(get("/"), "/", null, "HmacSHA3-256")).andExpect(status().isNotFound());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithoutXAuthorizationServiceUuidHeader() throws Exception {
+    void accessShouldBeUnauthorized_WithoutXAuthorizationServiceUuidHeader() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
@@ -148,7 +148,7 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithoutXAuthorizationTimestampHeader() throws Exception {
+    void accessShouldBeUnauthorized_WithoutXAuthorizationTimestampHeader() throws Exception {
         String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +159,7 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithInvalidXAuthorizationTimestampFormat() throws Exception {
+    void accessShouldBeUnauthorized_WithInvalidXAuthorizationTimestampFormat() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         xAuthorizationTimestamp = xAuthorizationTimestamp.substring(0, xAuthorizationTimestamp.length() - 1);
         String xAuthorizationSignature = buildSignature(valueOf(now().getEpochSecond()), DEFAULT_HMAC_ALGO);
@@ -180,7 +180,7 @@ public class SigaAuthTests {
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, expectErrorMessage);
     }
 
-    private void performRequestWithRequiredHeaders(String xAuthorizationTimestamp, String xAuthorizationSignature, ResultMatcher resultMatcher) throws Exception {
+    void performRequestWithRequiredHeaders(String xAuthorizationTimestamp, String xAuthorizationSignature, ResultMatcher resultMatcher) throws Exception {
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(X_AUTHORIZATION_SERVICE_UUID.getValue(), REQUESTING_SERVICE_UUID)
@@ -191,7 +191,7 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithoutXAuthorizationSignatureHeader() throws Exception {
+    void accessShouldBeUnauthorized_WithoutXAuthorizationSignatureHeader() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().getEpochSecond());
         mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +202,7 @@ public class SigaAuthTests {
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithInvalidSignature() throws Exception {
+    void accessShouldBeUnauthorized_WithInvalidSignature() throws Exception {
         mockMvc.perform(buildRequest(get("/").header(X_AUTHORIZATION_SIGNATURE.getValue(), "2c4a5baedfc1ebae179ed5be3a1855aea28f5fbab7d2bd1a957bf8822f6f2f40"), "/"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token provided signature and calculated signature do not match. Invalid signed token claims or invalid signature."))
                 .andExpect(status().isUnauthorized());
@@ -210,21 +210,21 @@ public class SigaAuthTests {
 
 
     @Test
-    public void accessShouldBeUnauthorized_WithInvalidServiceUuid() throws Exception {
+    void accessShouldBeUnauthorized_WithInvalidServiceUuid() throws Exception {
         mockMvc.perform(buildRequest(get("/").header(X_AUTHORIZATION_SERVICE_UUID.getValue(), "12345678900123456789012345678901"), "/"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("Bad credentials"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithTokenTimestampInFuture() throws Exception {
+    void accessShouldBeUnauthorized_WithTokenTimestampInFuture() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().plusSeconds(TOKEN_CLOCK_SKEW).plusSeconds(10).getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in future."));
     }
 
     @Test
-    public void accessShouldBeUnauthorized_WithExpiredToken() throws Exception {
+    void accessShouldBeUnauthorized_WithExpiredToken() throws Exception {
         String xAuthorizationTimestamp = valueOf(now().minusSeconds(TOKEN_EXPIRATION_IN_SECONDS + TOKEN_CLOCK_SKEW).getEpochSecond());
         String xAuthorizationSignature = buildSignature(xAuthorizationTimestamp, DEFAULT_HMAC_ALGO);
         performRequestWithRequiredHeaders(xAuthorizationTimestamp, xAuthorizationSignature, MockMvcResultMatchers.jsonPath("$.errorMessage").value("HMAC token is expired. Token timestamp too far in past."));

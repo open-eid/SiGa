@@ -13,7 +13,7 @@ import static ee.openeid.siga.monitoring.ApplicationInfoConstants.NOT_AVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class VersionEndpointTest {
+class VersionEndpointTest {
 
     private static final String TEST_VERSION = "TEST_VERSION";
 
@@ -21,7 +21,7 @@ public class VersionEndpointTest {
     private ManifestReader manifestReader;
 
     @Test
-    public void testVersionMissingInManifestFile() {
+    void testVersionMissingInManifestFile() {
         VersionEndpoint versionEndpoint = new VersionEndpoint(manifestReader);
 
         Map<String, Object> result = versionEndpoint.version();
@@ -35,7 +35,7 @@ public class VersionEndpointTest {
     }
 
     @Test
-    public void testVersionFoundInManifestFile() {
+    void testVersionFoundInManifestFile() {
         Mockito.doReturn(TEST_VERSION).when(manifestReader).read(Mockito.anyString());
         VersionEndpoint versionEndpoint = new VersionEndpoint(manifestReader);
 

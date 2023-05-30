@@ -21,16 +21,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class RetrieveSignaturesHashcodeContainerT extends TestBase {
+class RetrieveSignaturesHashcodeContainerT extends TestBase {
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = getSignatureList(flow);
@@ -45,7 +45,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
 
     @Disabled("This test jams the system")
     @Test
-    public void uploadHashcodeContainerWithManySignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithManySignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("asice-1000-signatures.asice"));
 
         Response response = getSignatureList(flow);
@@ -59,7 +59,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithoutSignaturesAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
 
         Response response = getSignatureList(flow);
@@ -70,7 +70,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createSignatureAndRetrieveSignatureList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -85,7 +85,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
@@ -102,7 +102,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createLtProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -124,7 +124,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createLtTmProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createLtTmProfileSignatureAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEIDSK2011_PEM, "LT_TM")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigestWithKeystore(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm(), "sign_ESTEIDSK2011.p12", "test")), dataToSignResponse.getGeneratedSignatureId());
@@ -144,7 +144,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createSignatureWithSigningInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createSignatureWithSigningInfoAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequest(SIGNER_CERT_ESTEID2018_PEM, "LT", "Member of board", "Tallinn", "Harju", "4953", "Estonia")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -164,7 +164,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithInvalidSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithInvalidSignature() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidOcspValue.asice"));
         
         Response response = getSignatureList(flow);
@@ -174,7 +174,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerWithHashMismatchAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerWithHashMismatchAndRetrieveSignatureInfo() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeSha512HashMismatch.asice"));
 
         Response response = getSignatureInfo(flow, getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"));
@@ -192,7 +192,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeAndRetrieveSignatureInfoWithWrongId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeAndRetrieveSignatureInfoWithWrongId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = getSignatureInfo(flow, "randomSignatureId");
@@ -203,7 +203,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToRetrieveHashcodeSignatureList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES, flow);
@@ -212,7 +212,7 @@ public class RetrieveSignaturesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToRetrieveHashcodeSignatureInfo() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SIGNATURES + "/" + getSignatureList(flow).getBody().path("signatures[0].generatedSignatureId"), flow);

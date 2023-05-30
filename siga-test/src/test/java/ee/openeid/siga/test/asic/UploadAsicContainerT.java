@@ -21,17 +21,17 @@ import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFrom
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class UploadAsicContainerT extends TestBase {
+class UploadAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadAsicContainerShouldReturnContainerId() throws Exception {
+    void uploadAsicContainerShouldReturnContainerId() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         response.then()
@@ -41,14 +41,14 @@ public class UploadAsicContainerT extends TestBase {
 
     @Test
     @Disabled("Should manifest be required?")
-    public void uploadAsicContainerMissingManifest() throws Exception {
+    void uploadAsicContainerMissingManifest() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerMissingManifest.asice"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
-    public void uploadAsicContainerWithoutSignatures() throws Exception {
+    void uploadAsicContainerWithoutSignatures() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         response.then()
@@ -57,7 +57,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithEmptyDataFiles() throws Exception {
+    void uploadAsicContainerWithEmptyDataFiles() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("signedContainerWithEmptyDatafiles.asice"));
 
         response.then()
@@ -66,7 +66,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithEmptyDataFilesAndWithoutSignatures() throws Exception {
+    void uploadAsicContainerWithEmptyDataFilesAndWithoutSignatures() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("unsignedContainerWithEmptyDatafiles.asice"));
 
         response.then()
@@ -75,28 +75,28 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithoutDatafiles() throws Exception {
+    void uploadAsicContainerWithoutDatafiles() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("containerNoDataFile.bdoc"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
-    public void uploadDdocContainer() throws Exception {
+    void uploadDdocContainer() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("ddocSingleSignature.ddoc"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
-    public void uploadPadesContainer() throws Exception {
+    void uploadPadesContainer() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("pdfSingleSignature.pdf"));
 
         expectError(response, 400, INVALID_CONTAINER);
     }
 
     @Test
-    public void uploadAsicContainerEmptyBody() throws Exception {
+    void uploadAsicContainerEmptyBody() throws Exception {
         JSONObject request = new JSONObject();
         Response response = postUploadContainer(flow, request);
 
@@ -104,7 +104,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerEmptyContainerField() throws Exception {
+    void uploadAsicContainerEmptyContainerField() throws Exception {
         JSONObject request = new JSONObject();
         request.put("container", "");
         request.put("containerName", "container.asice");
@@ -114,7 +114,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerEmptyContainerNameField() throws Exception {
+    void uploadAsicContainerEmptyContainerNameField() throws Exception {
         JSONObject request = new JSONObject();
         request.put("containerName", "");
         request.put("container", "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=");
@@ -124,7 +124,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsiceContainerNotBase64Container() throws Exception {
+    void uploadAsiceContainerNotBase64Container() throws Exception {
         JSONObject request = new JSONObject();
         request.put("container", "-32/432+*");
         request.put("containerName", "container.asice");
@@ -134,7 +134,7 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerRandomStringAsContainer() throws Exception {
+    void uploadAsicContainerRandomStringAsContainer() throws Exception {
         JSONObject request = new JSONObject();
         request.put("container", Base64.encodeBase64String("random string".getBytes()));
         request.put("containerName", "container.asice");
@@ -144,14 +144,14 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToUploadAsicContainer() throws Exception {
+    void deleteToUploadAsicContainer() throws Exception {
         Response response = delete(UPLOAD + getContainerEndpoint(), flow);
 
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void putToUploadAsicContainer() throws Exception {
+    void putToUploadAsicContainer() throws Exception {
         JSONObject request = new JSONObject();
         request.put("containerName", "container.asice");
         request.put("container", "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=");
@@ -162,14 +162,14 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void getToUploadAsicContainer() throws Exception {
+    void getToUploadAsicContainer() throws Exception {
         Response response = get(UPLOAD + getContainerEndpoint(), flow);
 
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void headToUploadAsicContainer() throws Exception {
+    void headToUploadAsicContainer() throws Exception {
         Response response = head(UPLOAD + getContainerEndpoint(), flow);
 
         response.then()
@@ -177,28 +177,28 @@ public class UploadAsicContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToUploadAsicContainer() throws Exception {
+    void optionsToUploadAsicContainer() throws Exception {
         Response response = options(UPLOAD + getContainerEndpoint(), flow);
 
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void patchToUploadAsicContainer() throws Exception {
+    void patchToUploadAsicContainer() throws Exception {
         Response response = patch(UPLOAD + getContainerEndpoint(), flow);
 
         expectError(response, 405, INVALID_REQUEST);
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFiles() throws Exception {
+    void uploadContainerWithDuplicateDataFiles() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("asice_duplicate_data_files.asice"));
 
         expectError(response, 400, DUPLICATE_DATA_FILE);
     }
 
     @Test
-    public void uploadContainerWithDuplicateDataFileInManifest() throws Exception {
+    void uploadContainerWithDuplicateDataFileInManifest() throws Exception {
         Response response = postUploadContainer(flow, asicContainerRequestFromFile("asice_duplicate_data_files_in_manifest.asice"));
 
         expectError(response, 400, DUPLICATE_DATA_FILE);

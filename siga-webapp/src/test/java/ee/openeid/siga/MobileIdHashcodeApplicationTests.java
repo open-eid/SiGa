@@ -14,10 +14,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "mobileId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class MobileIdHashcodeApplicationTests extends MobileIdBaseApplicationTests {
+class MobileIdHashcodeApplicationTests extends MobileIdBaseApplicationTests {
 
     @Test
-    public void mobileIdDatafileStartMobileIdSigningFailsWith404() throws Exception {
+    void mobileIdDatafileStartMobileIdSigningFailsWith404() throws Exception {
         postRequest(
                 "/containers/" + UUID.randomUUID() + "/mobileidsigning",
                 createStartMobileSigningRequest(),
@@ -26,7 +26,7 @@ public class MobileIdHashcodeApplicationTests extends MobileIdBaseApplicationTes
     }
 
     @Test
-    public void mobileIdDatafileGetMobileIdSigningStatusFailsWith404() throws Exception {
+    void mobileIdDatafileGetMobileIdSigningStatusFailsWith404() throws Exception {
         getRequest(
                 "/containers/" + UUID.randomUUID() + "/mobileidsigning/" + UUID.randomUUID() + "/status",
                 status().isNotFound()

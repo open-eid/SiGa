@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
-public class MetaInfoHealthIndicatorTest {
+class MetaInfoHealthIndicatorTest {
 
     private static final String NOT_AVAILABLE = "N/A";
     private static final String TEST_WEBAPP = "TEST_WEBAPP";
@@ -38,7 +38,7 @@ public class MetaInfoHealthIndicatorTest {
     private ManifestReader manifestReader;
 
     @Test
-    public void parametersMissingInManifestFile() {
+    void parametersMissingInManifestFile() {
         Instant earliestStartTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         healthIndicator = new MetaInfoHealthIndicator(manifestReader);
         Instant latestStartTime = Instant.now();
@@ -64,7 +64,7 @@ public class MetaInfoHealthIndicatorTest {
     }
 
     @Test
-    public void parametersFoundInManifestFile() {
+    void parametersFoundInManifestFile() {
         Mockito.when(manifestReader.read(MANIFEST_PARAM_NAME)).thenReturn(TEST_WEBAPP);
         Mockito.when(manifestReader.read(MANIFEST_PARAM_VERSION)).thenReturn(TEST_VERSION);
         Mockito.when(manifestReader.read(MANIFEST_PARAM_BUILD_TIME)).thenReturn(TEST_BUILD_TIME_IN_UTC);
@@ -85,7 +85,7 @@ public class MetaInfoHealthIndicatorTest {
     }
 
     @Test
-    public void invalidBuildTime() {
+    void invalidBuildTime() {
         Mockito.when(manifestReader.read(MANIFEST_PARAM_NAME)).thenReturn(TEST_WEBAPP);
         Mockito.when(manifestReader.read(MANIFEST_PARAM_VERSION)).thenReturn(TEST_VERSION);
         Mockito.when(manifestReader.read(MANIFEST_PARAM_BUILD_TIME)).thenReturn("random_time");

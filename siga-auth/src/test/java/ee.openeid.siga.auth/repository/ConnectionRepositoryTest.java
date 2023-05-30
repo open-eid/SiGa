@@ -22,13 +22,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         properties = {"spring.main.allow-bean-definition-overriding=true",
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
-public class ConnectionRepositoryTest {
+class ConnectionRepositoryTest {
 
     @Autowired
     private ConnectionRepository connectionRepository;
 
     @Test
-    public void deleteByContainerIdShouldReturnZeroWhenNoSigaConnectionWithSuchContainerIdExists() {
+    void deleteByContainerIdShouldReturnZeroWhenNoSigaConnectionWithSuchContainerIdExists() {
         UUID containerId = UUID.randomUUID();
 
         assertFalse(connectionRepository.findAllByContainerId(containerId.toString()).isPresent());
@@ -39,7 +39,7 @@ public class ConnectionRepositoryTest {
     }
 
     @Test
-    public void deleteByContainerIdShouldDeleteSigaConnectionWithSpecifiedContainerId() {
+    void deleteByContainerIdShouldDeleteSigaConnectionWithSpecifiedContainerId() {
         UUID containerId = UUID.randomUUID();
 
         connectionRepository.save(createDefaultConnection(containerId.toString()));
@@ -51,7 +51,7 @@ public class ConnectionRepositoryTest {
     }
 
     @Test
-    public void deleteByContainerIdShouldNotDeleteSigaConnectionsWithUnrelatedContainerId() {
+    void deleteByContainerIdShouldNotDeleteSigaConnectionsWithUnrelatedContainerId() {
         UUID otherContainerId = UUID.randomUUID();
         UUID containerId = UUID.randomUUID();
 

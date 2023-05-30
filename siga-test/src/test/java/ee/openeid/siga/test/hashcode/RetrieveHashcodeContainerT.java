@@ -19,17 +19,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RetrieveHashcodeContainerT extends TestBase {
+class RetrieveHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadHashcodeContainerAndRetrieveIt() throws Exception {
+    void uploadHashcodeContainerAndRetrieveIt() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
 
         Response response = getContainer(flow);
@@ -44,7 +44,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndRetrieve() throws Exception {
+    void createHashcodeContainerAndRetrieve() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = getContainer(flow);
@@ -59,7 +59,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerTwice() throws Exception {
+    void retrieveHashcodeContainerTwice() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = getContainer(flow);
@@ -76,7 +76,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerBeforeSigning() throws Exception {
+    void retrieveHashcodeContainerBeforeSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT"));
 
@@ -88,7 +88,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterSigning() throws Exception {
+    void retrieveHashcodeContainerAfterSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -101,7 +101,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerBeforeFinishingMidSigning() throws Exception {
+    void retrieveHashcodeContainerBeforeFinishingMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
@@ -114,7 +114,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void retrieveHashcodeContainerDuringMidSigning() throws Exception {
+    void retrieveHashcodeContainerDuringMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -129,7 +129,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void retrieveHashcodeContainerAfterMidSigning() throws Exception {
+    void retrieveHashcodeContainerAfterMidSigning() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
@@ -143,7 +143,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterValidation() throws Exception {
+    void retrieveHashcodeContainerAfterValidation() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getValidationReportForContainerInSession(flow);
 
@@ -155,7 +155,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerAfterRetrievingSignatures() throws Exception {
+    void retrieveHashcodeContainerAfterRetrievingSignatures() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         getSignatureList(flow);
 
@@ -167,7 +167,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void retrieveHashcodeContainerForOtherClientNotPossible() throws Exception {
+    void retrieveHashcodeContainerForOtherClientNotPossible() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         flow.setServiceUuid(SERVICE_UUID_2);
@@ -178,7 +178,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void deleteHashcodeContainerAndRetrieveIt() throws Exception {
+    void deleteHashcodeContainerAndRetrieveIt() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
         deleteContainer(flow);
 
@@ -188,7 +188,7 @@ public class RetrieveHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void headToGetHashcodeContainer() throws Exception {
+    void headToGetHashcodeContainer() throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId(), flow);

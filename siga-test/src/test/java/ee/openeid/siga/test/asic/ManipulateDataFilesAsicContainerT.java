@@ -43,17 +43,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSigaProfileActive("datafileContainer")
-public class ManipulateDataFilesAsicContainerT extends TestBase {
+class ManipulateDataFilesAsicContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void uploadAsicContainerAndRetrieveDataFilesList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndRetrieveDataFilesList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = getDataFileList(flow);
@@ -67,7 +67,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerWithoutSignaturesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = getDataFileList(flow);
@@ -79,7 +79,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithoutDataFilesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerWithoutDataFilesAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutDataFiles.asice"));
 
         Response response = getDataFileList(flow);
@@ -90,7 +90,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithInvalidSignatureAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerWithInvalidSignatureAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("unknownOcspResponder.asice"));
 
         Response response = getDataFileList(flow);
@@ -102,7 +102,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndRetrieveDataFileList() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = getDataFileList(flow);
@@ -114,7 +114,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -131,7 +131,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -148,7 +148,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndRemoveNotExistingDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = deleteDataFile(flow, "random.txt");
@@ -157,7 +157,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithSignaturesAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerWithSignaturesAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[1].fileName"));
@@ -166,7 +166,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerWithSpecialCharactersAndTryToRemoveDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("NonconventionalCharactersInDataFile.asice"));
 
         Response deleteResponse = deleteDataFile(flow, getDataFileList(flow).getBody().path("dataFiles[0].fileName"));
@@ -179,7 +179,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -195,7 +195,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -205,7 +205,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", ""));
@@ -214,7 +214,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -230,7 +230,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToAsicRequest(DEFAULT_FILENAME, "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -239,7 +239,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createAsicContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         JSONObject dataFiles = addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu");
@@ -263,7 +263,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createAsicContainerAndAddMultipleDataFileMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         addDataFile(flow, addDataFilesToAsicRequest(TEST_FILE_EXTENSIONS.stream()
                 .map(ext -> addDataFileToAsicRequestDataFile("filename." + ext, DEFAULT_DATAFILE_CONTENT))
@@ -277,7 +277,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void createAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createAsicContainerAndAddEmptyDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", ""));
@@ -286,7 +286,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void uploadSignedAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadSignedAsicContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
@@ -295,7 +295,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void deleteToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void deleteToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
 
         Response response = delete(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
@@ -304,7 +304,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void putToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void putToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow, "request");
@@ -313,7 +313,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void headToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
@@ -322,7 +322,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void optionsToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
@@ -331,7 +331,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void patchToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void patchToAsicDataFilesList() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES, flow);
@@ -340,7 +340,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void getToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void getToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = get(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
@@ -349,7 +349,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void putToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void putToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = put(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow, "request");
@@ -358,7 +358,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void postToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void postToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow, "request");
@@ -367,7 +367,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void headToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void headToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
@@ -376,7 +376,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void optionsToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void optionsToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = options(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);
@@ -385,7 +385,7 @@ public class ManipulateDataFilesAsicContainerT extends TestBase {
     }
 
     @Test
-    public void patchToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
+    void patchToAsicDataFile() throws NoSuchAlgorithmException, InvalidKeyException, JSONException, IOException {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = patch(getContainerEndpoint() + "/" + flow.getContainerId() + DATAFILES + "/" + getDataFileList(flow).getBody().path("dataFiles[0].fileName"), flow);

@@ -15,10 +15,10 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RequestTransformerTest {
+class RequestTransformerTest {
 
     @Test
-    public void transformValidSignatureToDetails_validDateFormats() throws Exception {
+    void transformValidSignatureToDetails_validDateFormats() throws Exception {
         Path documentPath = Paths.get(new ClassPathResource("datafile.asice").getURI());
         InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();

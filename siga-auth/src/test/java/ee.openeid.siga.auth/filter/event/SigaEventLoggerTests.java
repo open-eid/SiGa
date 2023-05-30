@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
-public class SigaEventLoggerTests {
+class SigaEventLoggerTests {
 
     Logger logger = (Logger) LoggerFactory.getLogger(SigaEventLogger.class);
 
@@ -45,7 +45,7 @@ public class SigaEventLoggerTests {
     SigaEventLogAnnotatedComponentStub sigaEventLogAnnotatedComponentStub;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         logger.addAppender(appender);
         AspectJProxyFactory factory = new AspectJProxyFactory(new SigaEventLogAnnotatedComponentStub());
         factory.addAspect(eventLoggingAspect);
@@ -53,12 +53,12 @@ public class SigaEventLoggerTests {
     }
 
     @AfterEach
-    public void teardown() {
+    void teardown() {
         logger.detachAppender(appender);
     }
 
     @Test
-    public void shouldLogMethodArgumentsAndReturnObject() {
+    void shouldLogMethodArgumentsAndReturnObject() {
         SigaEventLogAnnotatedComponentStub.Parameter parameter1 = SigaEventLogAnnotatedComponentStub.Parameter.builder().value("value1 with \"characters\" that should be escaped").build();
         SigaEventLogAnnotatedComponentStub.Parameter parameter2 = SigaEventLogAnnotatedComponentStub.Parameter.builder().value("value2").build();
         sigaEventLogAnnotatedComponentStub.annotatedMethod(parameter1, parameter2);
@@ -87,7 +87,7 @@ public class SigaEventLoggerTests {
     }
 
     @Test
-    public void shouldLogLoggableExceptionWithSpecifiedMessage() {
+    void shouldLogLoggableExceptionWithSpecifiedMessage() {
         try {
             sigaEventLogAnnotatedComponentStub.annotatedMethodThrowsLoggableException();
         } catch (SigaEventLogAnnotatedComponentStub.ExceptionToLog ex) {
@@ -108,7 +108,7 @@ public class SigaEventLoggerTests {
     }
 
     @Test
-    public void shouldLogAnyExceptionWithConstantMessage() {
+    void shouldLogAnyExceptionWithConstantMessage() {
         try {
             sigaEventLogAnnotatedComponentStub.annotatedMethodThrowsException();
         } catch (NullPointerException ex) {

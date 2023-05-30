@@ -15,18 +15,18 @@ import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class GenericHashcodeSigningFlowT extends TestBase {
+class GenericHashcodeSigningFlowT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
     @EnabledIfSigaProfileActive({"mobileId", "smartId"})
-    public void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailure() throws Exception {
+    void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailure() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
@@ -60,7 +60,7 @@ public class GenericHashcodeSigningFlowT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("mobileId")
-    public void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailureWithMidSigning() throws Exception {
+    void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailureWithMidSigning() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
@@ -86,7 +86,7 @@ public class GenericHashcodeSigningFlowT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("smartId")
-    public void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailureWithSmartIdSigning() throws Exception {
+    void signNewHashcodeContainerWithMultipleSignaturesRetryAfterFailureWithSmartIdSigning() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse1 = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);

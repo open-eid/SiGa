@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
-public class HashcodeContainerValidationServiceTest {
+class HashcodeContainerValidationServiceTest {
 
     @InjectMocks
     private HashcodeContainerValidationService validationService;
@@ -41,7 +41,7 @@ public class HashcodeContainerValidationServiceTest {
     private SessionService sessionService;
 
     @BeforeEach
-    public void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException {
         ValidationConclusion hashcodeValidationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
         Mockito.lenient().when(sivaClient.validateContainer(any(), any())).thenReturn(validationConclusion);
@@ -50,7 +50,7 @@ public class HashcodeContainerValidationServiceTest {
     }
 
     @Test
-    public void DDOCHashcodeContainerValidation() throws IOException, URISyntaxException {
+    void DDOCHashcodeContainerValidation() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = validationService
                 .validateContainer(createContainer(HASHCODE_DDOC_FILE), ServiceType.REST);
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
@@ -58,7 +58,7 @@ public class HashcodeContainerValidationServiceTest {
     }
 
     @Test
-    public void regularDDOCNotSupported() {
+    void regularDDOCNotSupported() {
         InvalidContainerException caughtException = assertThrows(
                 InvalidContainerException.class, () -> validationService.validateContainer(createContainer(DDOC_FILE), ServiceType.REST)
         );
@@ -66,7 +66,7 @@ public class HashcodeContainerValidationServiceTest {
     }
 
     @Test
-    public void successfulHashcodeContainerValidation() throws IOException, URISyntaxException {
+    void successfulHashcodeContainerValidation() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = validationService
                 .validateContainer(createContainer(SIGNED_HASHCODE), ServiceType.REST);
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
@@ -74,7 +74,7 @@ public class HashcodeContainerValidationServiceTest {
     }
 
     @Test
-    public void successfulExistingContainerValidation() {
+    void successfulExistingContainerValidation() {
         ValidationConclusion validationConclusion = validationService.validateExistingContainer("12312312312");
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());

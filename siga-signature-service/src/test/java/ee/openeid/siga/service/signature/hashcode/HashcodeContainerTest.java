@@ -36,12 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HashcodeContainerTest {
+class HashcodeContainerTest {
 
     @Test
-    public void validHashcodeContainerCreation() throws IOException {
+    void validHashcodeContainerCreation() throws IOException {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeDataFiles.forEach(hashcodeContainer::addDataFile);
@@ -56,7 +55,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerOpening() throws IOException, URISyntaxException {
+    void validHashcodeContainerOpening() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(SIGNED_HASHCODE);
         hashcodeContainer.open(container);
@@ -73,7 +72,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerOpeningWithDataFilesInGrowingOrder() throws IOException, URISyntaxException {
+    void validHashcodeContainerOpeningWithDataFilesInGrowingOrder() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(SIGNED_HASHCODE_SEVERAL_DATAFILES);
         hashcodeContainer.open(container);
@@ -92,7 +91,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerOpeningWithDataFilesInRandomOrder() throws IOException, URISyntaxException {
+    void validHashcodeContainerOpeningWithDataFilesInRandomOrder() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER);
         hashcodeContainer.open(container);
@@ -112,7 +111,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha256ContainsDifferentFileName() throws URISyntaxException, IOException {
+    void hashcodeSha256ContainsDifferentFileName() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_SHA256_FILENAME);
 
@@ -123,7 +122,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha512ContainsDifferentFileName() throws URISyntaxException, IOException {
+    void hashcodeSha512ContainsDifferentFileName() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_SHA512_FILENAME);
 
@@ -134,7 +133,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha256ContainsAdditionalFileName() throws URISyntaxException, IOException {
+    void hashcodeSha256ContainsAdditionalFileName() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(ADDITIONAL_SHA256_FILENAME);
 
@@ -145,7 +144,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha512ContainsAdditionalFileName() throws URISyntaxException, IOException {
+    void hashcodeSha512ContainsAdditionalFileName() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(ADDITIONAL_SHA512_FILENAME);
 
@@ -156,7 +155,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeDataFileContainsDuplicateFileNames() throws URISyntaxException, IOException {
+    void hashcodeDataFileContainsDuplicateFileNames() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DUPLICATE_HASHCODE_FILENAME);
 
@@ -167,7 +166,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void manifestContainsDuplicateFileNames() throws URISyntaxException, IOException {
+    void manifestContainsDuplicateFileNames() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DUPLICATE_MANIFEST_FILENAME);
 
@@ -178,7 +177,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void manifestAndHashcodeFilesMustContainMatchingFileNames() throws URISyntaxException, IOException {
+    void manifestAndHashcodeFilesMustContainMatchingFileNames() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_MANIFEST_FILENAME);
 
@@ -189,7 +188,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void manifestContainsAdditionalFileName() throws URISyntaxException, IOException {
+    void manifestContainsAdditionalFileName() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(ADDITIONAL_MANIFEST_FILENAME);
 
@@ -200,7 +199,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha256HasDifferentFileNameOrder() throws URISyntaxException, IOException {
+    void hashcodeSha256HasDifferentFileNameOrder() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_SHA256_ORDER);
         hashcodeContainer.open(container);
@@ -211,7 +210,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeSha512HasDifferentFileNameOrder() throws URISyntaxException, IOException {
+    void hashcodeSha512HasDifferentFileNameOrder() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_SHA512_ORDER);
         hashcodeContainer.open(container);
@@ -222,7 +221,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void manifestHasDifferentFileNameOrder() throws URISyntaxException, IOException {
+    void manifestHasDifferentFileNameOrder() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(DIFFERENT_MANIFEST_ORDER);
         hashcodeContainer.open(container);
@@ -233,7 +232,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void couldNotAddDataFileWhenSignatureExists() throws URISyntaxException, IOException {
+    void couldNotAddDataFileWhenSignatureExists() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile(SIGNED_HASHCODE);
         hashcodeContainer.open(container);
@@ -248,7 +247,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
+    void hashcodeContainerMustHaveAtLeastOneDataFile() throws IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] outputBytes;
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -264,7 +263,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void hashcodeContainerMissingSha512() {
+    void hashcodeContainerMissingSha512() {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
 
         InvalidContainerException caughtException = assertThrows(
@@ -274,7 +273,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void directoryNotAllowedForFileName() {
+    void directoryNotAllowedForFileName() {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
 
         InvalidContainerException caughtException = assertThrows(
@@ -284,7 +283,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void containerWithTooLargeFiles() {
+    void containerWithTooLargeFiles() {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
 
         InvalidContainerException caughtException = assertThrows(
@@ -294,7 +293,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerAddedNewData() throws IOException, URISyntaxException {
+    void validHashcodeContainerAddedNewData() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFile(SIGNED_HASHCODE));
         HashcodeSignatureWrapper signature = hashcodeContainer.getSignatures().get(0);
@@ -320,7 +319,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerOpening_StoredAlgoWithDataDescriptor() throws IOException, URISyntaxException {
+    void validHashcodeContainerOpening_StoredAlgoWithDataDescriptor() throws IOException, URISyntaxException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         hashcodeContainer.open(TestUtil.getFile("hashcodeStoredAlgoWithDataDescriptor.asice"));
         assertEquals(1, hashcodeContainer.getSignatures().size());
@@ -334,7 +333,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validHashcodeContainerCreation_withOneDataFile() throws IOException {
+    void validHashcodeContainerCreation_withOneDataFile() throws IOException {
         List<HashcodeDataFile> hashcodeDataFiles = RequestUtil.createHashcodeDataFiles();
         hashcodeDataFiles.get(0).setFileHashSha512(null);
         HashcodeContainer hashcodeContainer = new HashcodeContainer(ServiceType.PROXY);
@@ -350,7 +349,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validateHashcodeContainerOpening_withInvalidBase64DataFileHash() throws URISyntaxException, IOException {
+    void validateHashcodeContainerOpening_withInvalidBase64DataFileHash() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile("hashcode_with_invalid_base64_hash.asice");
 
@@ -361,7 +360,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void validateHashcodeContainerOpening_withInvalidLengthDataFileHash() throws URISyntaxException, IOException {
+    void validateHashcodeContainerOpening_withInvalidLengthDataFileHash() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile("hashcode_with_invalid_length_hash.asice");
 
@@ -372,7 +371,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void invalidStructureHashcodeContainer() throws URISyntaxException, IOException {
+    void invalidStructureHashcodeContainer() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile("hashcode_invalid_structure.asice");
 
@@ -383,7 +382,7 @@ public class HashcodeContainerTest {
     }
 
     @Test
-    public void openRegularAsicContainerWithDataFiles() throws URISyntaxException, IOException {
+    void openRegularAsicContainerWithDataFiles() throws URISyntaxException, IOException {
         HashcodeContainer hashcodeContainer = new HashcodeContainer();
         byte[] container = TestUtil.getFile("test.asice");
 

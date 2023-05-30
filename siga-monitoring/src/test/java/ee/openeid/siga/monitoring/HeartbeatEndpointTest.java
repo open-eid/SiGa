@@ -17,7 +17,7 @@ import org.springframework.boot.actuate.health.Status;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
-public class HeartbeatEndpointTest {
+class HeartbeatEndpointTest {
 
     @Mock
     private HealthEndpoint healthEndpoint;
@@ -29,7 +29,7 @@ public class HeartbeatEndpointTest {
 
     @ParameterizedTest
     @MethodSource("allStatuses")
-    public void testHealthEndpointIsPolledForStatus(Status status) {
+    void testHealthEndpointIsPolledForStatus(Status status) {
         mockHealthEndpointToReturnStatus(status);
 
         Status returnedStatus = heartbeatEndpoint.heartbeat();
@@ -40,7 +40,7 @@ public class HeartbeatEndpointTest {
 
     @ParameterizedTest
     @MethodSource("combinationsOfAllStatusesTwice")
-    public void testHealthEndpointIsPolledSecondTime(Status status1, Status status2) {
+    void testHealthEndpointIsPolledSecondTime(Status status1, Status status2) {
         mockHealthEndpointToReturnStatuses(status1, status2);
 
         Status returnedStatus1 = heartbeatEndpoint.heartbeat();

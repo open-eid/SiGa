@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AsicContainerSessionTest {
+class AsicContainerSessionTest {
     private static final String DEFAULT_MOCK_CONTAINER_NAME = "container.asice";
     private static final String DEFAULT_MOCK_CLIENT_NAME = "clientName";
     private static final String DEFAULT_MOCK_SERVICE_NAME = "serviceName";
@@ -25,7 +25,7 @@ public class AsicContainerSessionTest {
     private static final String DEFAULT_MOCK_SIGNATURE_ID = "12345_id";
 
     @Test
-    public void createEmptyContainerSessionHolder() {
+    void createEmptyContainerSessionHolder() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession.builder().build()
         );
@@ -33,7 +33,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithOnlyContainerName() {
+    void createContainerSessionHolderWithOnlyContainerName() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession
                     .builder()
@@ -44,7 +44,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutServiceName() {
+    void createContainerSessionHolderWithoutServiceName() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession
                     .builder()
@@ -56,7 +56,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutServiceUuid() {
+    void createContainerSessionHolderWithoutServiceUuid() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession
                     .builder()
@@ -69,7 +69,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutSessionId() {
+    void createContainerSessionHolderWithoutSessionId() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession
                     .builder()
@@ -83,7 +83,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createContainerSessionHolderWithoutContainer() {
+    void createContainerSessionHolderWithoutContainer() {
         NullPointerException caughtException = assertThrows(
             NullPointerException.class, () -> AsicContainerSession
                     .builder()
@@ -98,7 +98,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void createValidContainerSession() throws IOException {
+    void createValidContainerSession() throws IOException {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
 
         assertEquals(DEFAULT_MOCK_CONTAINER_NAME, sessionHolder.getContainerName());
@@ -110,7 +110,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void addSignatureToContainerSession() throws IOException {
+    void addSignatureToContainerSession() throws IOException {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
         sessionHolder.addSignatureId("signatureID", 23894237);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get("signatureID");
@@ -118,7 +118,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void addDataToSignToContainerSession() throws IOException {
+    void addDataToSignToContainerSession() throws IOException {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();
@@ -131,7 +131,7 @@ public class AsicContainerSessionTest {
     }
 
     @Test
-    public void addDataToSignAndThenRemoveItFromContainer() throws Exception {
+    void addDataToSignAndThenRemoveItFromContainer() throws Exception {
         AsicContainerSession sessionHolder = generateDefaultSessionHolder();
 
         SignatureSession signatureSession = SignatureSession.builder().dataToSign(generateDefaultDataToSign()).signingType(SigningType.REMOTE).build();

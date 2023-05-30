@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-public class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
+class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
     private static final String EXPECTED_DATATOSIGN_PREFIX = "<ds:SignedInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"></ds:CanonicalizationMethod><ds:SignatureMethod Algorithm=\"http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512\"></ds:SignatureMethod><ds:Reference";
 
     @Spy
@@ -76,7 +76,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     private SessionStatusReprocessingProperties reprocessingProperties;
 
     @BeforeEach
-    public void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException {
         configuration = new Configuration(Configuration.Mode.TEST);
         MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate((signingService));
         Mockito.lenient().when(signingService.getMobileIdSigningDelegate()).thenReturn(mobileIdSigningDelegate);
@@ -92,20 +92,20 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void createDataToSignSuccessfulTest() {
+    void createDataToSignSuccessfulTest() {
         assertCreateDataToSignSuccessful();
     }
 
     @Test
-    public void invalidContainerIdTest() {
+    void invalidContainerIdTest() {
         TechnicalException caughtException = assertThrows(
-            TechnicalException.class, () -> invalidContainerId()
+            TechnicalException.class, this::invalidContainerId
         );
         assertEquals("Unable to parse session object", caughtException.getMessage());
     }
 
     @Test
-    public void noDataFilesInSession() throws IOException, URISyntaxException {
+    void noDataFilesInSession() throws IOException, URISyntaxException {
         HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().clear();
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -117,7 +117,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void emptyDataFilesInSession() throws IOException, URISyntaxException {
+    void emptyDataFilesInSession() throws IOException, URISyntaxException {
         HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -129,48 +129,48 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void onlyRequiredSignatureParametersTest() {
+    void onlyRequiredSignatureParametersTest() {
         assertOnlyRequiredSignatureParameters();
     }
 
     @Test
-    public void signAndValidateSignatureTest() {
+    void signAndValidateSignatureTest() {
         assertSignAndValidateSignature();
     }
 
     @Test
-    public void finalizeAndValidateSignatureTest() throws IOException, URISyntaxException {
+    void finalizeAndValidateSignatureTest() throws IOException, URISyntaxException {
         assertFinalizeAndValidateSignature();
     }
 
     @Test
-    public void noDataToSignInSessionTest() {
+    void noDataToSignInSessionTest() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> noDataToSignInSession()
+            InvalidSessionDataException.class, this::noDataToSignInSession
         );
         assertEquals("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId", caughtException.getMessage());
     }
 
     @Test
-    public void noDataToSignInSessionForSignatureIdTest() {
+    void noDataToSignInSessionForSignatureIdTest() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> noDataToSignInSessionForSignatureId()
+            InvalidSessionDataException.class, this::noDataToSignInSessionForSignatureId
         );
         assertEquals("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId", caughtException.getMessage());
     }
 
     @Test
-    public void successfulMobileIdSigningTest() {
+    void successfulMobileIdSigningTest() {
         assertSuccessfulMobileIdSigning();
     }
 
     @Test
-    public void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
+    void successfulMobileIdSignatureStatusTest() throws IOException, URISyntaxException {
         assertSuccessfulMobileIdSignatureProcessing(signingService);
     }
 
     @Test
-    public void noSessionFoundMobileSigning() {
+    void noSessionFoundMobileSigning() {
         InvalidSessionDataException caughtException = assertThrows(
             InvalidSessionDataException.class, () -> signingService.getMobileIdSignatureStatus(CONTAINER_ID, "someUnknownSignatureId")
         );
@@ -178,7 +178,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void emptyDataFilesInSessionStartMobileSigning() throws IOException, URISyntaxException {
+    void emptyDataFilesInSessionStartMobileSigning() throws IOException, URISyntaxException {
         HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -191,32 +191,32 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void successfulCertificateChoice(){
+    void successfulCertificateChoice(){
         assertSuccessfulCertificateChoice();
     }
 
     @Test
-    public void successfulCertificateChoiceProcessing(){
+    void successfulCertificateChoiceProcessing(){
         assertSuccessfulCertificateChoiceProcessing();
     }
 
     @Test
-    public void successfulSmartIdSigningWithSessionCert() throws IOException, URISyntaxException {
+    void successfulSmartIdSigningWithSessionCert() throws IOException, URISyntaxException {
         assertSuccessfulSmartIdSigningWithSessionCert();
     }
 
     @Test
-    public void successfulSmartIdSigningWithoutSessionCert() {
+    void successfulSmartIdSigningWithoutSessionCert() {
         assertSuccessfulSmartIdSigningWithoutSessionCert();
     }
 
     @Test
-    public void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
+    void successfulSmartIdSignatureStatusTest() throws IOException, URISyntaxException {
         assertSuccessfulSmartIdSignatureProcessing(signingService);
     }
 
     @Test
-    public void emptyDataFilesInSessionInitSmartIdSigning() throws IOException, URISyntaxException {
+    void emptyDataFilesInSessionInitSmartIdSigning() throws IOException, URISyntaxException {
         HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -228,7 +228,7 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void emptyDataFilesInSessionStartSmartIdSigning() throws IOException, URISyntaxException {
+    void emptyDataFilesInSessionStartSmartIdSigning() throws IOException, URISyntaxException {
         HashcodeContainerSession sessionHolder = RequestUtil.createHashcodeSessionHolder();
         sessionHolder.getDataFiles().add(RequestUtil.createHashcodeDataFileFrom("empty.file", "application/octet-stream"));
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
@@ -241,31 +241,31 @@ public class HashcodeContainerSigningServiceTest extends ContainerSigningService
     }
 
     @Test
-    public void generateDataFilesHash_generatesOrderAgnosticDataFilesHash() {
+    void generateDataFilesHash_generatesOrderAgnosticDataFilesHash() {
         assertGeneratesOrderAgnosticDataFilesHash();
     }
 
     @Test
-    public void generateDataFilesHash_sameFileNameButDifferentDataGeneratesDifferentHash() {
+    void generateDataFilesHash_sameFileNameButDifferentDataGeneratesDifferentHash() {
         assertSameFileNameButDifferentDataGeneratesDifferentHash();
     }
 
     @Test
-    public void generateDataFilesHash_sameDataButDifferentFileNameGeneratesDifferentHash() {
+    void generateDataFilesHash_sameDataButDifferentFileNameGeneratesDifferentHash() {
         assertSameDataButDifferentFileNameGeneratesDifferentHash();
     }
 
     @Test
-    public void finalizeSignatureWithContainerDataFilesChangedThrows() {
+    void finalizeSignatureWithContainerDataFilesChangedThrows() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> finalizeSignatureWithContainerDataFilesChanged()
+            InvalidSessionDataException.class, this::finalizeSignatureWithContainerDataFilesChanged
         );
         assertEquals("Unable to finalize signature. " +
                 "Container data files have been changed after signing was initiated. Repeat signing process", caughtException.getMessage());
     }
 
     @Test
-    public void finalizeSignatureWithContainerDataFilesChangedClearsDataToSign() {
+    void finalizeSignatureWithContainerDataFilesChangedClearsDataToSign() {
         assertFinalizeSignatureWithContainerDataFilesChangedClearsDataToSign();
     }
 

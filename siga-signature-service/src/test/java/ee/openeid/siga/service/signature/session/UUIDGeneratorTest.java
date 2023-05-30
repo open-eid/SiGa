@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UUIDGeneratorTest {
+class UUIDGeneratorTest {
 
     @Test
-    public void validSessionIdLength() {
+    void validSessionIdLength() {
         String sessionId = UUIDGenerator.generateUUID();
         assertEquals(36, sessionId.length());
     }

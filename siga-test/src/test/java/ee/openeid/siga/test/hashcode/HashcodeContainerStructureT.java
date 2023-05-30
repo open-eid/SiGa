@@ -20,17 +20,17 @@ import static ee.openeid.siga.test.utils.RequestBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class HashcodeContainerStructureT extends TestBase {
+class HashcodeContainerStructureT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void createHashcodeContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         CreateHashcodeContainerRemoteSigningResponse dataToSignResponse = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "LT")).as(CreateHashcodeContainerRemoteSigningResponse.class);
         putRemoteSigningInSession(flow, remoteSigningSignatureValueRequest(signDigest(dataToSignResponse.getDataToSign(), dataToSignResponse.getDigestAlgorithm())), dataToSignResponse.getGeneratedSignatureId());
@@ -45,7 +45,7 @@ public class HashcodeContainerStructureT extends TestBase {
     }
 
     @Test
-    public void uploadHashcodeContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void uploadHashcodeContainerAndVerifyStructure() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile(DEFAULT_HASHCODE_CONTAINER_NAME));
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
 
@@ -57,7 +57,7 @@ public class HashcodeContainerStructureT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndVerifyHascode256File() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createHashcodeContainerAndVerifyHascode256File() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         XmlPath hashcodesSha256 = hashcodeDataFileAsXmlPath(HASHCODE_SHA256, containerBase64);
@@ -68,7 +68,7 @@ public class HashcodeContainerStructureT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndVerifyHascode512File() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createHashcodeContainerAndVerifyHascode512File() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         XmlPath hashcodesSha512 = hashcodeDataFileAsXmlPath(HASHCODE_SHA512, containerBase64);
@@ -79,7 +79,7 @@ public class HashcodeContainerStructureT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerAndVerifyMimetypeFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void createHashcodeContainerAndVerifyMimetypeFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         String containerBase64 = getContainer(flow).getBody().path(CONTAINER).toString();
         String mimeType = new String(extractEntryFromContainer(MIMETYPE, containerBase64));

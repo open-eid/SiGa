@@ -14,10 +14,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "smartId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class SmartIdHashcodeApplicationTests extends SmartIdBaseApplicationTests {
+class SmartIdHashcodeApplicationTests extends SmartIdBaseApplicationTests {
 
     @Test
-    public void smartIdDatafileStartSmartIdCertificateChoiceFailsWith404() throws Exception {
+    void smartIdDatafileStartSmartIdCertificateChoiceFailsWith404() throws Exception {
         postRequest(
                 "/containers/" + UUID.randomUUID() + "/smartidsigning/certificatechoice",
                 createStartSmartIdCertificateChoiceRequest(),
@@ -26,7 +26,7 @@ public class SmartIdHashcodeApplicationTests extends SmartIdBaseApplicationTests
     }
 
     @Test
-    public void smartIdDatafileStartSmartIdSigningFailsWith404() throws Exception {
+    void smartIdDatafileStartSmartIdSigningFailsWith404() throws Exception {
         postRequest(
                 "/containers/" + UUID.randomUUID() + "/smartidsigning",
                 createStartSmartIdSigningRequest(null),
@@ -35,7 +35,7 @@ public class SmartIdHashcodeApplicationTests extends SmartIdBaseApplicationTests
     }
 
     @Test
-    public void smartIdDatafileGetSmartIdStatusFailsWith404() throws Exception {
+    void smartIdDatafileGetSmartIdStatusFailsWith404() throws Exception {
         getRequest(
                 "/containers/" + UUID.randomUUID() + "/smartidsigning/" + UUID.randomUUID() + "/status",
                 status().isNotFound()

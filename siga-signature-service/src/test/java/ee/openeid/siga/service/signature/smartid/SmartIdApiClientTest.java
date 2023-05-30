@@ -69,7 +69,7 @@ public class SmartIdApiClientTest {
     private SmartIdApiClient smartIdApiClient;
 
     @BeforeEach
-    public void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+    void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
         Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
         Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
@@ -81,12 +81,12 @@ public class SmartIdApiClientTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         WireMock.reset();
     }
 
     @Test
-    public void initiateCertificateChoice_ok() {
+    void initiateCertificateChoice_ok() {
         stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
                 "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
@@ -95,7 +95,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initiateCertificateChoice_excessFieldsInResponse_ok() {
+    void initiateCertificateChoice_excessFieldsInResponse_ok() {
         stubCertificateChoiceEtsiSessionResponse(200, "{\n" +
                 "    \"excessText\": \"text\",\n" +
                 "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\",\n" +
@@ -110,42 +110,42 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initiateCertificateChoice_forbidden() {
+    void initiateCertificateChoice_forbidden() {
         stubCertificateChoiceEtsiSessionResponse(403, "");
         Exception exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
         assertThat(exception.getMessage(), equalTo("Smart-ID service error"));
     }
 
     @Test
-    public void initiateCertificateChoice_notFound() {
+    void initiateCertificateChoice_notFound() {
         stubCertificateChoiceEtsiSessionResponse(404, "");
         SmartIdApiException exception = assertThrows(SmartIdApiException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
         assertThat(exception.getMessage(), equalTo(SmartIdErrorStatus.NOT_FOUND.getSigaMessage()));
     }
 
     @Test
-    public void initiateCertificateChoice_noSuitableAccount() {
+    void initiateCertificateChoice_noSuitableAccount() {
         stubCertificateChoiceEtsiSessionResponse(471, "");
         ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
         assertThat(exception.getMessage(), equalTo("No suitable account of requested type found, but user has some other accounts"));
     }
 
     @Test
-    public void initiateCertificateChoice_personShouldViewPortal() {
+    void initiateCertificateChoice_personShouldViewPortal() {
         stubCertificateChoiceEtsiSessionResponse(472, "");
         ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
         assertThat(exception.getMessage(), equalTo("Person should view app or self-service portal now"));
     }
 
     @Test
-    public void initiateCertificateChoice_serverError() {
+    void initiateCertificateChoice_serverError() {
         stubCertificateChoiceErrorResponse(504);
         Exception exception = assertThrows(ClientException.class, () -> smartIdApiClient.initiateCertificateChoice(createRPInfo(), createDefaultSmartIdInformation()));
         assertThat(exception.getMessage(), equalTo("Smart-ID service error"));
     }
 
     @Test
-    public void getCertificate_ok() throws Exception {
+    void getCertificate_ok() throws Exception {
         X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
@@ -157,7 +157,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_excessFieldsInResponse_ok() throws Exception {
+    void getCertificate_excessFieldsInResponse_ok() throws Exception {
         X509Certificate certificate = pkcs12Esteid2018SignatureToken.getCertificate();
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "    \"excessText\": \"text\",\n" +
@@ -175,7 +175,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_userRefused() throws CertificateEncodingException {
+    void getCertificate_userRefused() throws CertificateEncodingException {
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
@@ -187,7 +187,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_sessionTimeout() throws CertificateEncodingException {
+    void getCertificate_sessionTimeout() throws CertificateEncodingException {
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
@@ -199,7 +199,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_documentUnusable() throws CertificateEncodingException {
+    void getCertificate_documentUnusable() throws CertificateEncodingException {
         stubCertificateChoiceDocumentSessionResponse(200, "{\n" +
                 "      \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\"\n" +
                 "}");
@@ -211,32 +211,32 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getCertificate_forbidden() {
+    void getCertificate_forbidden() {
         assertGetCertificateGenericException(403);
     }
 
     @Test
-    public void getCertificate_notFound() {
+    void getCertificate_notFound() {
         assertGetCertificateException(404, SmartIdApiException.class, SmartIdErrorStatus.NOT_FOUND.getSigaMessage());
     }
 
     @Test
-    public void getCertificate_noSuitableAccount() {
+    void getCertificate_noSuitableAccount() {
         assertGetCertificateException(471, ClientException.class, "No suitable account of requested type found, but user has some other accounts");
     }
 
     @Test
-    public void getCertificate_personShouldViewPortal() {
+    void getCertificate_personShouldViewPortal() {
         assertGetCertificateException(472, ClientException.class, "Person should view app or self-service portal now");
     }
 
     @Test
-    public void getCertificate_serverMaintenance() {
+    void getCertificate_serverMaintenance() {
         assertGetCertificateGenericException(580);
     }
 
     @Test
-    public void getCertificate_clientNotSupported() {
+    void getCertificate_clientNotSupported() {
         assertGetCertificateGenericException(480);
     }
 
@@ -251,7 +251,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_displayTextAndPin_ok() {
+    void initSmartIdSigning_displayTextAndPin_ok() {
         Mockito.doReturn(SmartIdInteractionType.DISPLAY_TEXT_AND_PIN).when(configurationProperties).getInteractionType();
         stubSigningInitiationResponse(
                 WireMock.equalToJson("{\n" +
@@ -280,7 +280,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_verificationCodeChoice_ok() {
+    void initSmartIdSigning_verificationCodeChoice_ok() {
         Mockito.doReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE).when(configurationProperties).getInteractionType();
         stubSigningInitiationResponse(
                 WireMock.equalToJson("{\n" +
@@ -309,7 +309,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_excessFieldsInResponse_ok() {
+    void initSmartIdSigning_excessFieldsInResponse_ok() {
         stubSigningInitiationResponse(200, "{\n" +
                 "    \"excessText\": \"text\",\n" +
                 "    \"sessionID\": \"" + DEFAULT_MOCK_SESSION_ID + "\",\n" +
@@ -331,37 +331,37 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void initSmartIdSigning_forbidden() {
+    void initSmartIdSigning_forbidden() {
         assertInitSmartIdSigningGenericException(403);
     }
 
     @Test
-    public void initSmartIdSigning_notFound() {
+    void initSmartIdSigning_notFound() {
         assertInitSmartIdSigningGenericException(404);
     }
 
     @Test
-    public void initSmartIdSigning_noSuitableAccount() {
+    void initSmartIdSigning_noSuitableAccount() {
         assertInitSmartIdSigningException(471, ClientException.class, "No suitable account of requested type found, but user has some other accounts");
     }
 
     @Test
-    public void initSmartIdSigning_personShouldViewPortal() {
+    void initSmartIdSigning_personShouldViewPortal() {
         assertInitSmartIdSigningException(472, ClientException.class, "Person should view app or self-service portal now");
     }
 
     @Test
-    public void initSmartIdSigning_clientNotSupported() {
+    void initSmartIdSigning_clientNotSupported() {
         assertInitSmartIdSigningGenericException(480);
     }
 
     @Test
-    public void initSmartIdSigning_serverError() {
+    void initSmartIdSigning_serverError() {
         assertInitSmartIdSigningGenericException(504);
     }
 
     @Test
-    public void initSmartIdSigning_serverMaintenance() {
+    void initSmartIdSigning_serverMaintenance() {
         assertInitSmartIdSigningGenericException(580);
     }
 
@@ -379,7 +379,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_ok() throws CertificateEncodingException {
+    void getSessionStatus_ok() throws CertificateEncodingException {
         stubGetSession("COMPLETE", "OK");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -388,7 +388,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_excessFieldsInResponse_ok() throws CertificateEncodingException {
+    void getSessionStatus_excessFieldsInResponse_ok() throws CertificateEncodingException {
         stubGetSession(200, "{\n" +
                 "    \"excessText\": \"text\",\n" +
                 "    \"state\": \"COMPLETE\",\n" +
@@ -422,7 +422,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_timeout() throws CertificateEncodingException {
+    void getSessionStatus_timeout() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "TIMEOUT");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -431,7 +431,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefused() throws CertificateEncodingException {
+    void getSessionStatus_userRefused() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -440,7 +440,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefusedCertChoice() throws CertificateEncodingException {
+    void getSessionStatus_userRefusedCertChoice() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CERT_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -449,7 +449,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefusedConfirmationMessage() throws CertificateEncodingException {
+    void getSessionStatus_userRefusedConfirmationMessage() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -458,7 +458,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefusedConfirmationMessageWithVerificationCodeChoice() throws CertificateEncodingException {
+    void getSessionStatus_userRefusedConfirmationMessageWithVerificationCodeChoice() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_CONFIRMATIONMESSAGE_WITH_VC_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -467,7 +467,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefusedDisplayTextAndPin() throws CertificateEncodingException {
+    void getSessionStatus_userRefusedDisplayTextAndPin() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_DISPLAYTEXTANDPIN");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -476,7 +476,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userRefusedVerificationCodeChoice() throws CertificateEncodingException {
+    void getSessionStatus_userRefusedVerificationCodeChoice() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "USER_REFUSED_VC_CHOICE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -485,7 +485,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_userChoseWrongVerificationCode() throws CertificateEncodingException {
+    void getSessionStatus_userChoseWrongVerificationCode() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "WRONG_VC");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -494,7 +494,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_documentUnusable() throws CertificateEncodingException {
+    void getSessionStatus_documentUnusable() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "DOCUMENT_UNUSABLE");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -503,7 +503,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_notSupportedByApp() throws CertificateEncodingException {
+    void getSessionStatus_notSupportedByApp() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "REQUIRED_INTERACTION_NOT_SUPPORTED_BY_APP");
 
         SmartIdStatusResponse response = smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID);
@@ -512,7 +512,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_unexpectedState() throws CertificateEncodingException {
+    void getSessionStatus_unexpectedState() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("RANDOM123", "OK");
 
         ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID));
@@ -521,7 +521,7 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_unexpectedResult() throws CertificateEncodingException {
+    void getSessionStatus_unexpectedResult() throws CertificateEncodingException {
         stubGetSessionOkResponseWithoutSignature("COMPLETE", "RANDOM123");
 
         ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID));
@@ -530,42 +530,42 @@ public class SmartIdApiClientTest {
     }
 
     @Test
-    public void getSessionStatus_forbidden() {
+    void getSessionStatus_forbidden() {
         assertGetSessionStatusException(403, ForbiddenException.class, "HTTP 403 Forbidden");
     }
 
     @Test
-    public void getSessionStatus_sessionNotFound() {
+    void getSessionStatus_sessionNotFound() {
         assertGetSessionStatusException(404, SmartIdApiException.class, SmartIdErrorStatus.SESSION_NOT_FOUND.getSigaMessage());
     }
 
     @Test
-    public void getSessionStatus_serverError() {
+    void getSessionStatus_serverError() {
         assertGetSessionStatusException(504, ServerErrorException.class, "HTTP 504 Gateway Timeout");
     }
 
     @Test
-    public void getSessionStatus_serverMaintenance() {
+    void getSessionStatus_serverMaintenance() {
         assertGetSessionStatusException(580, ServerErrorException.class, "HTTP 580 580");
     }
 
     @Test
-    public void getSessionStatus_notSuitableAccount() {
+    void getSessionStatus_notSuitableAccount() {
         assertGetSessionStatusException(471, ClientException.class, "No suitable account of requested type found, but user has some other accounts");
     }
 
     @Test
-    public void getSessionStatus_problemWithAccount() {
+    void getSessionStatus_problemWithAccount() {
         assertGetSessionStatusException(472, ClientException.class, "Person should view app or self-service portal now");
     }
 
     @Test
-    public void getStatus_clientNotSupported() {
+    void getStatus_clientNotSupported() {
         assertGetSessionStatusException(480, ClientErrorException.class, "HTTP 480 480");
     }
 
     @Test
-    public void getSessionStatus_unableToParseSignature() throws CertificateEncodingException {
+    void getSessionStatus_unableToParseSignature() throws CertificateEncodingException {
         stubGetSession("COMPLETE", "OK", "12345");
 
         ClientException exception = assertThrows(ClientException.class, () -> smartIdApiClient.getSessionStatus(createRPInfo(), DEFAULT_MOCK_SESSION_ID));

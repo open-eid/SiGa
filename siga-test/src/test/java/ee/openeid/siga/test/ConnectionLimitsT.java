@@ -25,18 +25,18 @@ import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataReques
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
 import static org.junit.Assert.assertEquals;
 
-public class ConnectionLimitsT extends TestBase {
+class ConnectionLimitsT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient2Service5();
     }
 
     @Test
     @EnabledIfSigaProfileActive("datafileContainer")
-    public void connectionLimitReached() throws Exception {
+    void connectionLimitReached() throws Exception {
         List<String> sessions = new ArrayList<>();
         try {
             for (int i = 1; i <= 5; i++) {
@@ -55,7 +55,7 @@ public class ConnectionLimitsT extends TestBase {
     }
 
     @Test
-    public void connectionSizeReached() throws Exception {
+    void connectionSizeReached() throws Exception {
         Response errorResponse = postUploadContainer(flow, asicContainerRequestFromFile("2379KB_file.asice"));
 
         expectError(errorResponse, 400, CONNECTION_LIMIT_EXCEPTION);
@@ -63,7 +63,7 @@ public class ConnectionLimitsT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("datafileContainer")
-    public void connectionSizeReachedInTotal() throws Exception {
+    void connectionSizeReachedInTotal() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile("1385KB_file.asice"));
         Response errorResponse = addDataFile(flow, addDataFileToAsicRequestFromFile("1391KB_picture.JPG"));
         deleteContainer(flow);
@@ -72,7 +72,7 @@ public class ConnectionLimitsT extends TestBase {
 
     @Test
     @EnabledIfSigaProfileActive("datafileContainer")
-    public void connectionsTotalSizeReached() throws Exception {
+    void connectionsTotalSizeReached() throws Exception {
         List<String> sessions = new ArrayList<>();
         for (int i = 1; i <= 2; i++) {
             Response validResponse = postUploadContainer(flow, asicContainerRequestFromFile("1385KB_file.asice"));
@@ -92,7 +92,7 @@ public class ConnectionLimitsT extends TestBase {
     }
 
     @Test
-    public void requestMaxSizeReached() throws Exception {
+    void requestMaxSizeReached() throws Exception {
         File dataFile = ResourceUtils.getFile("classpath:20mb.jpg");
         byte[] dataFileString = Files.readAllBytes(dataFile.toPath());
         Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, Base64.encodeToString(dataFileString), DEFAULT_ASICE_CONTAINER_NAME));

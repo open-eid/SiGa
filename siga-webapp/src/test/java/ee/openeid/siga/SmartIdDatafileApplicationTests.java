@@ -25,10 +25,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest", "datafileContainer", "smartId"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests {
+class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests {
 
     @Test
-    public void smartIdDatafileFlowWihCertificateChoice() throws Exception {
+    void smartIdDatafileFlowWihCertificateChoice() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 
@@ -58,7 +58,7 @@ public class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests
     }
 
     @Test
-    public void smartIdDatafileSigningFlowWithDocumentNumber() throws Exception {
+    void smartIdDatafileSigningFlowWithDocumentNumber() throws Exception {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
 

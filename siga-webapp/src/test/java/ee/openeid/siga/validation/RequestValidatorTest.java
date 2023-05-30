@@ -46,9 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "application-test.properties")
-public class RequestValidatorTest {
+class RequestValidatorTest {
 
-    public static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
+    static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
 
     @InjectMocks
     private RequestValidator validator;
@@ -63,7 +63,7 @@ public class RequestValidatorTest {
     private SecurityConfigurationProperties securityConfigurationProperties;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         Mockito.lenient().when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
         Mockito.lenient().when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
         validator = new RequestValidator(mobileIdClientConfigurationProperties, smartIdClientConfigurationProperties, securityConfigurationProperties);
@@ -99,7 +99,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulCreateContainerHashcodeRequest() {
+    void successfulCreateContainerHashcodeRequest() {
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(SigaUserDetails.builder().build());
@@ -109,17 +109,17 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulCreateContainerRequest() {
+    void successfulCreateContainerRequest() {
         validator.validateDataFiles(getCreateContainerRequest().getDataFiles());
     }
 
     @Test
-    public void successfulFileContent() {
+    void successfulFileContent() {
         validator.validateFileContent(CONTENT);
     }
 
     @Test
-    public void containerContentEmpty() {
+    void containerContentEmpty() {
         RequestValidationException caughtException = assertThrows(
                 RequestValidationException.class,
                 () -> validator.validateFileContent("")
@@ -128,7 +128,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void containerContentNotBase64() {
+    void containerContentNotBase64() {
         RequestValidationException caughtException = assertThrows(
                 RequestValidationException.class,
                 () -> validator.validateFileContent("?&%")
@@ -137,7 +137,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createHashcodeContainer_NoDataFiles() {
+    void createHashcodeContainer_NoDataFiles() {
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
 
@@ -149,7 +149,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createContainer_NoDataFiles() {
+    void createContainer_NoDataFiles() {
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().clear();
 
@@ -160,7 +160,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createHashcodeContainer_DataFileContentIsEmpty() {
+    void createHashcodeContainer_DataFileContentIsEmpty() {
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new HashcodeDataFile());
@@ -173,7 +173,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createContainer_DataFileContentIsEmpty() {
+    void createContainer_DataFileContentIsEmpty() {
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new DataFile());
@@ -186,7 +186,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createHashcodeContainer_DataFileNameInvalid() {
+    void createHashcodeContainer_DataFileNameInvalid() {
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().add(new HashcodeDataFile());
         request.getDataFiles().get(0).setFileName("*/random.txt");
@@ -199,7 +199,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createContainer_DataFileNameInvalid() {
+    void createContainer_DataFileNameInvalid() {
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().add(new DataFile());
         request.getDataFiles().get(0).setFileName("*/random.txt");
@@ -211,7 +211,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createHashcodeContainer_DataFileHashIsNotBase64() {
+    void createHashcodeContainer_DataFileHashIsNotBase64() {
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256(StringUtils.repeat("a", 101));
 
@@ -222,7 +222,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createContainer_DataFileHashIsNotBase64() {
+    void createContainer_DataFileHashIsNotBase64() {
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().get(0).setFileContent(StringUtils.repeat("a", 101));
 
@@ -233,7 +233,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void createContainer_DataFileHashTooLong() {
+    void createContainer_DataFileHashTooLong() {
         CreateHashcodeContainerRequest request = getCreateHashcodeContainerRequest();
         request.getDataFiles().get(0).setFileHashSha256("+=?!%");
 
@@ -244,7 +244,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void containerIdIsNull() {
+    void containerIdIsNull() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateContainerId(null)
         );
@@ -252,7 +252,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void containerIdIsEmpty() {
+    void containerIdIsEmpty() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateContainerId("")
         );
@@ -260,7 +260,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void containerIdIsTooLong() {
+    void containerIdIsTooLong() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateContainerId(StringUtils.repeat("a", 37))
         );
@@ -268,17 +268,17 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validSigningCertificateWithBase64Certificate() {
+    void validSigningCertificateWithBase64Certificate() {
         validator.validateSigningCertificate("dGVzdCBoYXNo");
     }
 
     @Test
-    public void validSigningCertificateWithHexCertificate() {
+    void validSigningCertificateWithHexCertificate() {
         validator.validateSigningCertificate("1237ABCDEF");
     }
 
     @Test
-    public void invalidSigningCertificate() {
+    void invalidSigningCertificate() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateSigningCertificate("+=?!%")
         );
@@ -286,7 +286,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void emptySigningCertificate() {
+    void emptySigningCertificate() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateSigningCertificate("")
         );
@@ -294,7 +294,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void remoteSigning_authCertificateNotAllowed() throws IOException {
+    void remoteSigning_authCertificateNotAllowed() throws IOException {
         Path documentPath = Paths.get(new ClassPathResource("mari-liis_auth.cer").getURI());
         InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
 
@@ -305,7 +305,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void remoteSigning_smartIdCertificateNotAllowed() throws IOException {
+    void remoteSigning_smartIdCertificateNotAllowed() throws IOException {
         Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.17.2", "1.3.6.1.4.1.10015.3.1.3"));
         X509Certificate certificate = readCertificate("smart-id.cer");
 
@@ -316,7 +316,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void remoteSigning_mobileIdCertificateNotAllowed() throws IOException {
+    void remoteSigning_mobileIdCertificateNotAllowed() throws IOException {
         Mockito.when(securityConfigurationProperties.getProhibitedPoliciesForRemoteSigning()).thenReturn(Arrays.asList("1.3.6.1.4.1.10015.3.1.3"));
         X509Certificate certificate = readCertificate("mobile-id.cer");
 
@@ -327,7 +327,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void oldSignatureProfile() {
+    void oldSignatureProfile() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRemoteSigning(null, "B_BES")
         );
@@ -335,7 +335,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidSignatureProfile() {
+    void invalidSignatureProfile() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRemoteSigning(null, "TL")
         );
@@ -343,7 +343,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void emptySignatureProfile() {
+    void emptySignatureProfile() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRemoteSigning(null, "")
         );
@@ -351,12 +351,12 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulSignatureValue() {
+    void successfulSignatureValue() {
         validator.validateSignatureValue("dGVzdCBoYXNo");
     }
 
     @Test
-    public void emptySignatureValue() {
+    void emptySignatureValue() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateSignatureValue("")
         );
@@ -364,7 +364,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidSignatureValue() {
+    void invalidSignatureValue() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateSignatureValue("+=?!%")
         );
@@ -372,12 +372,12 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void successfulMobileInformation() {
+    void successfulMobileInformation() {
         validator.validateMobileIdInformation(getMobileInformationRequest());
     }
 
     @Test
-    public void nullLanguage() {
+    void nullLanguage() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage(null);
 
@@ -388,7 +388,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void emptyLanguage() {
+    void emptyLanguage() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("");
 
@@ -399,7 +399,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidLanguage() {
+    void invalidLanguage() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("ESTO");
 
@@ -410,7 +410,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void languageNotInTheAllowedList() {
+    void languageNotInTheAllowedList() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setLanguage("ESP");
 
@@ -421,7 +421,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidMessageToDisplay() {
+    void invalidMessageToDisplay() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 41));
 
@@ -432,14 +432,14 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void nullMessageToDisplay() {
+    void nullMessageToDisplay() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(null);
         validator.validateMobileIdInformation(mobileIdInformation);
     }
 
     @Test
-    public void validatePhoneNo_nullIsInvalid() {
+    void validatePhoneNo_nullIsInvalid() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(null);
 
@@ -450,7 +450,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validatePhoneNo_emptyIsInvalid() {
+    void validatePhoneNo_emptyIsInvalid() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("");
 
@@ -461,7 +461,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validatePhoneNo_invalidFormat() {
+    void validatePhoneNo_invalidFormat() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo(StringUtils.repeat("a", 21));
 
@@ -472,7 +472,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validatePhoneNo_invalidCountryPrefix() {
+    void validatePhoneNo_invalidCountryPrefix() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3795394823");
 
@@ -483,7 +483,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validatePhoneNo_notAllowedCountryPrefix() {
+    void validatePhoneNo_notAllowedCountryPrefix() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPhoneNo("+3715394823");
 
@@ -494,7 +494,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void nullPersonIdentifier() {
+    void nullPersonIdentifier() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(null);
 
@@ -505,7 +505,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void emptyPersonIdentifier() {
+    void emptyPersonIdentifier() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier("");
 
@@ -516,7 +516,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidPersonIdentifierTooLong() {
+    void invalidPersonIdentifierTooLong() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("1", 13));
 
@@ -527,7 +527,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void invalidPersonIdentifierContainsLetter() {
+    void invalidPersonIdentifierContainsLetter() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 11));
 
@@ -538,29 +538,29 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void latvianPersonIdentifier() {
+    void latvianPersonIdentifier() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier("111111-11111");
         validator.validateMobileIdInformation(mobileIdInformation);
     }
 
     @Test
-    public void validateRoles_nullIsValid() {
+    void validateRoles_nullIsValid() {
         validator.validateRoles(null);
     }
 
     @Test
-    public void validateRoles_emptyListIsValid() {
+    void validateRoles_emptyListIsValid() {
         validator.validateRoles(new ArrayList<>());
     }
 
     @Test
-    public void validateRoles_listWithValuesIsValid() {
+    void validateRoles_listWithValuesIsValid() {
         validator.validateRoles(Arrays.asList("role1", "role2"));
     }
 
     @Test
-    public void validateRoles_includingNullValueIsInvalid() {
+    void validateRoles_includingNullValueIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(null))
         );
@@ -568,7 +568,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateRoles_includingEmptyValueIsInvalid() {
+    void validateRoles_includingEmptyValueIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(""))
         );
@@ -576,7 +576,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateRoles_includingBlankValueIsInvalid() {
+    void validateRoles_includingBlankValueIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRoles(Collections.singletonList(" "))
         );
@@ -584,12 +584,12 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateCertificateId_isValid() {
+    void validateCertificateId_isValid() {
         validator.validateCertificateId(UUID.randomUUID().toString());
     }
 
     @Test
-    public void validateCertificateId_nullIsInvalid() {
+    void validateCertificateId_nullIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateCertificateId(null)
         );
@@ -597,7 +597,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateCertificateId_emptyStringIsInvalid() {
+    void validateCertificateId_emptyStringIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateCertificateId("")
         );
@@ -605,7 +605,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateCertificateId_tooLongStringIsInvalid() {
+    void validateCertificateId_tooLongStringIsInvalid() {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateCertificateId(UUID.randomUUID().toString() + "a")
         );
@@ -613,13 +613,13 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_isValid() {
+    void validateSmartIdInformationForCertChoice_isValid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         validator.validateSmartIdInformationForCertChoice(smartIdInformation);
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_nullCountryIsInvalid() {
+    void validateSmartIdInformationForCertChoice_nullCountryIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry(null);
 
@@ -630,7 +630,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_tooShortCountryIsInvalid() {
+    void validateSmartIdInformationForCertChoice_tooShortCountryIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("E");
 
@@ -641,7 +641,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_countryIsNotInAllowedList() {
+    void validateSmartIdInformationForCertChoice_countryIsNotInAllowedList() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("LV");
 
@@ -652,7 +652,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_tooLongCountryIsInvalid() {
+    void validateSmartIdInformationForCertChoice_tooLongCountryIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setCountry("EEE");
 
@@ -663,7 +663,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_nullPersonIdentifierIsInvalid() {
+    void validateSmartIdInformationForCertChoice_nullPersonIdentifierIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier(null);
 
@@ -674,7 +674,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_tooLongPersonIdentifierIsInvalid() {
+    void validateSmartIdInformationForCertChoice_tooLongPersonIdentifierIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
 
@@ -685,7 +685,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForCertChoice_emptyPersonIdentifierIsInvalid() {
+    void validateSmartIdInformationForCertChoice_emptyPersonIdentifierIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setPersonIdentifier("");
 
@@ -696,13 +696,13 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_isValid() {
+    void validateSmartIdInformationForSigning_isValid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         validator.validateSmartIdInformationForSigning(smartIdInformation);
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_tooLongMessageIsInvalid() {
+    void validateSmartIdInformationForSigning_tooLongMessageIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setMessageToDisplay(StringUtils.repeat("a", 61));
 
@@ -713,7 +713,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_nullDocumentNumberIsInvalid() {
+    void validateSmartIdInformationForSigning_nullDocumentNumberIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber(null);
 
@@ -724,7 +724,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_tooLongDocumentNumberIsInvalid() {
+    void validateSmartIdInformationForSigning_tooLongDocumentNumberIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber(StringUtils.repeat("a", 41));
 
@@ -735,7 +735,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_emptyDocumentNumberIsInvalid() {
+    void validateSmartIdInformationForSigning_emptyDocumentNumberIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("");
 
@@ -746,7 +746,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_tooShortDocumentNumberIsInvalid() {
+    void validateSmartIdInformationForSigning_tooShortDocumentNumberIsInvalid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOEE-123");
 
@@ -757,7 +757,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_documentNumberNotStartingPNOPrefix() {
+    void validateSmartIdInformationForSigning_documentNumberNotStartingPNOPrefix() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNKEE-12345678-ZOKS-Q");
 
@@ -768,7 +768,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_documentNumberNotAllowedCountryList() {
+    void validateSmartIdInformationForSigning_documentNumberNotAllowedCountryList() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOLV-12345678-ZOKS-Q");
 
@@ -779,7 +779,7 @@ public class RequestValidatorTest {
     }
 
     @Test
-    public void validateSmartIdInformationForSigning_invalidCountry() {
+    void validateSmartIdInformationForSigning_invalidCountry() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
         smartIdInformation.setDocumentNumber("PNOWW-12345678-ZOKS-Q");
 

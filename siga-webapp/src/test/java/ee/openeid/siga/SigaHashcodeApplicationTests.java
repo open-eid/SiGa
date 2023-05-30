@@ -17,10 +17,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles({"test", "digidoc4jTest"})
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"siga.security.hmac.expiration=120", "siga.security.hmac.clock-skew=2"})
-public class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
+class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
 
     @Test
-    public void createDatafileContainerFailsWith404() throws Exception {
+    void createDatafileContainerFailsWith404() throws Exception {
         postRequest(
                 "/containers",
                 createCreateContainerRequest(),
@@ -29,7 +29,7 @@ public class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void uploadDatafileContainerFailsWith404() throws Exception {
+    void uploadDatafileContainerFailsWith404() throws Exception {
         String container = IOUtils.toString(getFileInputStream("datafile.asice"), Charset.defaultCharset());
         postRequest(
                 "/upload/containers",
@@ -39,7 +39,7 @@ public class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void getDatafileContainerFailsWith404() throws Exception {
+    void getDatafileContainerFailsWith404() throws Exception {
         getRequest(
                 "/containers/" + UUID.randomUUID(),
                 status().isNotFound()
@@ -47,7 +47,7 @@ public class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void startDatafileRemoteSigning() throws Exception {
+    void startDatafileRemoteSigning() throws Exception {
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
         postRequest(
                 "/containers/" + UUID.randomUUID() + "/remotesigning",
@@ -57,7 +57,7 @@ public class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
     }
 
     @Test
-    public void finalizeDatafileRemoteSigning() throws Exception {
+    void finalizeDatafileRemoteSigning() throws Exception {
         putRequest(
                 "/containers/" + UUID.randomUUID() + "/remotesigning/" + UUID.randomUUID(),
                 createFinalizeRemoteSigningRequest("signatureValue"),

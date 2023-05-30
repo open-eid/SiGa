@@ -23,24 +23,24 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CreateHashcodeContainerT extends TestBase {
+class CreateHashcodeContainerT extends TestBase {
 
     private SigaApiFlow flow;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         flow = SigaApiFlow.buildForTestClient1Service1();
     }
 
     @Test
-    public void createHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerShouldReturnContainerId() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.getBody().path(CONTAINER_ID).toString().length(), equalTo(36));
     }
 
     @Test
-    public void createHashcodeContainerMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerMimeTypeFromFileExtension() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequest(TEST_FILE_EXTENSIONS.stream()
                 .map(ext -> hashcodeContainersDataRequestDataFile("filename." + ext, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE))
                 .collect(Collectors.toList())));
@@ -53,7 +53,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerEmptyBody() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptyBody() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONObject request = new JSONObject();
         Response response = postCreateContainer(flow, request);
         assertThat(response.statusCode(), equalTo(400));
@@ -61,7 +61,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerEmptyDatafiles() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptyDatafiles() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONArray datafiles = new JSONArray();
         JSONObject request = new JSONObject();
         request.put("dataFiles", datafiles);
@@ -71,7 +71,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerMissingFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerMissingFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -86,7 +86,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerMissingSha256Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerMissingSha256Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -101,7 +101,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerMissingSha512Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerMissingSha512Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -116,7 +116,7 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerMissingFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerMissingFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         JSONArray datafiles = new JSONArray();
         JSONObject dataFileObject = new JSONObject();
         JSONObject request = new JSONObject();
@@ -131,85 +131,85 @@ public class CreateHashcodeContainerT extends TestBase {
     }
 
     @Test
-    public void createHashcodeContainerEmptyFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptyFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest("", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerEmptySha256Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptySha256Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, " ", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerEmptySha512Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptySha512Hash() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, "    ", DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerEmptyFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerEmptyFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, null));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerFileInFolder() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerFileInFolder() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest("folder/test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerInvalidFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerInvalidFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, -12));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerInvalidHash256() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerInvalidHash256() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, "+-KZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerInvalidHash512() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerInvalidHash512() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, "+-Vz9wirVZNvP/q3HoaW8nu0FfvrGkZinhADKE4Y4j/dUuGfgONfR4VYdu0p/dj/yGH0qlE0FGsmUB2N3oLuhA==", DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerTooLongHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerTooLongHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE + "=", DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerTooShortHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerTooShortHash256length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE.substring(1), DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerTooLongHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerTooLongHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE + "=", DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    public void createHashcodeContainerTooShortHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+    void createHashcodeContainerTooShortHash512length() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, hashcodeContainersDataRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE.substring(1), DEFAULT_FILESIZE));
         expectError(response, 400, INVALID_REQUEST);
     }

@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
-public class SivaHealthIndicatorTest {
+class SivaHealthIndicatorTest {
 
     @InjectMocks
     private SivaHealthIndicator healthIndicator;
@@ -28,25 +28,25 @@ public class SivaHealthIndicatorTest {
     private SivaClientConfigurationProperties configProperties;
 
     @BeforeEach
-    public void init() {
+    void init() {
         Mockito.when(restTemplate.getForObject(anyString(), any())).thenReturn(new SivaHealthIndicator.HealthStatus("UP"));
     }
 
     @Test
-    public void sivaIsUp() {
+    void sivaIsUp() {
         Health health = healthIndicator.health();
         assertEquals(Status.UP, health.getStatus());
     }
 
     @Test
-    public void sivaIsDown() {
+    void sivaIsDown() {
         Mockito.when(restTemplate.getForObject(anyString(), any())).thenReturn(new SivaHealthIndicator.HealthStatus("DOWN"));
         Health health = healthIndicator.health();
         assertEquals(Status.DOWN, health.getStatus());
     }
 
     @Test
-    public void couldNotConnectToSiva() {
+    void couldNotConnectToSiva() {
         Mockito.when(restTemplate.getForObject(anyString(), any())).thenThrow(new RuntimeException("Network error"));
         Health health = healthIndicator.health();
         assertEquals(Status.DOWN, health.getStatus());

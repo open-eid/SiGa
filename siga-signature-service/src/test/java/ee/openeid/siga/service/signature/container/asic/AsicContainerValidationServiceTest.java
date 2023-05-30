@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
-public class AsicContainerValidationServiceTest {
+class AsicContainerValidationServiceTest {
 
     @InjectMocks
     private AsicContainerValidationService validationService;
@@ -36,21 +36,21 @@ public class AsicContainerValidationServiceTest {
     private SessionService sessionService;
 
     @BeforeEach
-    public void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = RequestUtil.createValidationResponse().getValidationReport().getValidationConclusion();
         Mockito.lenient().when(sivaClient.validateContainer(any(), any())).thenReturn(validationConclusion);
         Mockito.lenient().when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
     }
 
     @Test
-    public void successfulContainerValidation() throws IOException, URISyntaxException {
+    void successfulContainerValidation() throws IOException, URISyntaxException {
         ValidationConclusion validationConclusion = validationService.validateContainer(VALID_ASICE, createContainer());
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());
     }
 
     @Test
-    public void successfulExistingContainerValidation() {
+    void successfulExistingContainerValidation() {
         ValidationConclusion validationConclusion = validationService.validateExistingContainer("12312312312");
         assertEquals(Integer.valueOf(1), validationConclusion.getValidSignaturesCount());
         assertEquals(Integer.valueOf(1), validationConclusion.getSignaturesCount());

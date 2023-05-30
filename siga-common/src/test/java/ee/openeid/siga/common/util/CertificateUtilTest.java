@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class CertificateUtilTest {
+class CertificateUtilTest {
     private static final String ROOT_CERTIFICATE = "MIIEEzCCAvugAwIBAgIQc/jtqiMEFERMtVvsSsH7sjANBgkqhkiG9w0BAQUFADB9" +
             "MQswCQYDVQQGEwJFRTEiMCAGA1UECgwZQVMgU2VydGlmaXRzZWVyaW1pc2tlc2t1" +
             "czEwMC4GA1UEAwwnVEVTVCBvZiBFRSBDZXJ0aWZpY2F0aW9uIENlbnRyZSBSb290" +
@@ -72,37 +72,37 @@ public class CertificateUtilTest {
             "RL3MKLpZ1AOf8i1iGvpHI9S6iyXcDhh6hM8slDg7EK3KyNwfkMLh5A==";
 
     @Test
-    public void createValidCertificate() {
+    void createValidCertificate() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(ROOT_CERTIFICATE.getBytes()));
         assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
     }
 
     @Test
-    public void createInvalidCertificate() {
+    void createInvalidCertificate() {
         String invalidCertificate = ROOT_CERTIFICATE.replace("a", "b");
         assertThrows(InvalidCertificateException.class, () -> CertificateUtil.createX509Certificate(Base64.getDecoder().decode(invalidCertificate.getBytes())));
     }
 
     @Test
-    public void certificateIsActive() {
+    void certificateIsActive() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(ROOT_CERTIFICATE.getBytes()));
         assertTrue(CertificateUtil.isCertificateActive(certificate));
     }
 
     @Test
-    public void certificateIsNotActive() {
+    void certificateIsNotActive() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(OLD_CERTIFICATE.getBytes()));
         assertFalse(CertificateUtil.isCertificateActive(certificate));
     }
 
     @Test
-    public void notSigningCertificate() {
+    void notSigningCertificate() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(OLD_CERTIFICATE.getBytes()));
         assertFalse(CertificateUtil.isSigningCertificate(certificate));
     }
 
     @Test
-    public void isSigningCertificate() {
+    void isSigningCertificate() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(SIGNING_CERTIFICATE.getBytes()));
         assertTrue(CertificateUtil.isSigningCertificate(certificate));
     }
