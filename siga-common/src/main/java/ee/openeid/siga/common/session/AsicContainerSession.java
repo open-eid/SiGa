@@ -25,7 +25,7 @@ public class AsicContainerSession implements Session {
     private String sessionId;
     @NonNull
     @Setter
-    private byte[] container;
+    private byte [] container;
     @Builder.Default
     private Map<String, Integer> signatureIdHolder = new HashMap<>();
 

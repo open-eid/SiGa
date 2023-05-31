@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,7 +53,10 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
     @Override
     protected void verifySigningObjectExistence(Session session) {
         AsicContainerSession sessionHolder = (AsicContainerSession) session;
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = Optional
+                .ofNullable(sessionHolder.getContainer())
+                .map(bytes -> ContainerUtil.createContainer(bytes, configuration))
+                .orElse(null);
         verifyContainerExistence(container);
         verifyContainerContainsNoEmptyDataFiles(container);
     }

@@ -25,7 +25,6 @@ import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -107,16 +106,18 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     }
 
     @Test
-    @Disabled("SIGA-505")
-    void noContainerInSession() throws IOException, URISyntaxException {
-        AsicContainerSession sessionHolder = Mockito.spy(RequestUtil.createAsicSessionHolder());
+    public void noContainerInSession() {
+        AsicContainerSession sessionHolder = Mockito.mock(AsicContainerSession.class);
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         Mockito.when(sessionHolder.getContainer()).thenReturn(null);
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
-        NullPointerException caughtException = assertThrows(
-            NullPointerException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+        InvalidSessionDataException caughtException = assertThrows(
+                InvalidSessionDataException.class,
+                () -> signingService.createDataToSign(CONTAINER_ID, signatureParameters)
         );
-        assertEquals("container is marked non-null but is null", caughtException.getMessage());
+
+        assertEquals("Unable to create signature. Container must exist", caughtException.getMessage());
     }
 
     @Test
