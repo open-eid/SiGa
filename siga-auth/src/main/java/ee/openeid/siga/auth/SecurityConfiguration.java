@@ -5,6 +5,7 @@ import ee.openeid.siga.auth.filter.RequestDataVolumeFilter;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
+import ee.openeid.siga.auth.filter.logging.CorrelationIdForAccessLogFilter;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final SigaEventLoggingFilter eventsLoggingFilter;
     private final SigaEventLogger sigaEventLogger;
     private final RequestDataVolumeFilter requestDataVolumeFilter;
+    private final CorrelationIdForAccessLogFilter correlationIdForAccessLogFilter;
 
     @Override
     public void configure(final WebSecurity web) {
@@ -73,6 +75,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
+                .addFilterBefore(correlationIdForAccessLogFilter, MethodFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PUBLIC_URLS).permitAll()
                 .requestMatchers(PROTECTED_URLS).authenticated()
