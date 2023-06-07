@@ -2,6 +2,7 @@ package ee.openeid.siga.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.HttpServletFilterResponseWrapper;
+import ee.openeid.siga.auth.filter.util.ContainerIdUtil;
 import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.model.SigaService;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
@@ -34,8 +35,6 @@ import static ee.openeid.siga.auth.filter.hmac.HmacHeader.X_AUTHORIZATION_SERVIC
 public class RequestDataVolumeFilter extends OncePerRequestFilter {
     private static final long LIMITLESS = -1;
     private static final String OBSERVABLE_HTTP_METHOD = "POST";
-    private static final String ASIC_CONTAINERS_ENDPOINT = "/containers/";
-    private static final String HASHCODE_CONTAINERS_ENDPOINT = "/hashcodecontainers/";
     private final ServiceRepository serviceRepository;
     private final ConnectionRepository connectionRepository;
     private final SecurityConfigurationProperties configurationProperties;
@@ -81,19 +80,6 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         }
     }
 
-    private String getContainerIdFromUrl(String url) {
-        String urlPrefix;
-        if (url.contains(ASIC_CONTAINERS_ENDPOINT)) {
-            urlPrefix = ASIC_CONTAINERS_ENDPOINT;
-        } else if (url.contains(HASHCODE_CONTAINERS_ENDPOINT)) {
-            urlPrefix = HASHCODE_CONTAINERS_ENDPOINT;
-        } else {
-            return null;
-        }
-        String suffix = url.substring(url.indexOf(urlPrefix) + urlPrefix.length());
-        return suffix.substring(0, suffix.indexOf('/'));
-    }
-
     private boolean validateRequestSize(long requestSize, HttpServletResponse response) throws IOException {
         if (requestSize > configurationProperties.getMaxFileSize()) {
             log.warn("Request max size exceeded. Request size:{}", requestSize);
@@ -133,24 +119,22 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
         return url.endsWith("containers/validationreport") || url.endsWith("hashcodecontainers/validationreport");
     }
 
-    private boolean isNewContainerUrl(String url) {
-        return url.endsWith("/containers") || url.endsWith("/hashcodecontainers");
-    }
-
     private void refreshConnectionData(SigaService sigaService, long requestSize, HttpServletFilterResponseWrapper response, String requestUrl) {
         String containerId;
-        boolean isNewContainer = isNewContainerUrl(requestUrl);
+        boolean isNewContainer = ContainerIdUtil.isNewContainerRequest(requestUrl);
         if (isNewContainer) {
             containerId = getContainerIdFromResponse(response);
             if (containerId != null)
                 insertConnectionData(requestSize, containerId, sigaService);
         } else {
-            containerId = getContainerIdFromUrl(requestUrl);
-            Optional<SigaConnection> connectionOptional = connectionRepository.findAllByContainerId(containerId);
-            if (connectionOptional.isPresent()) {
-                SigaConnection connection = connectionOptional.get();
-                connection.setSize(connection.getSize() + requestSize);
-                connectionRepository.saveAndFlush(connection);
+            containerId = ContainerIdUtil.findContainerIdFromRequestURI(requestUrl);
+            if (containerId != null) {
+                Optional<SigaConnection> connectionOptional = connectionRepository.findAllByContainerId(containerId);
+                if (connectionOptional.isPresent()) {
+                    SigaConnection connection = connectionOptional.get();
+                    connection.setSize(connection.getSize() + requestSize);
+                    connectionRepository.saveAndFlush(connection);
+                }
             }
         }
     }
@@ -191,9 +175,9 @@ public class RequestDataVolumeFilter extends OncePerRequestFilter {
             return true;
         }
         long currentSize = 0;
-        boolean isNewContainer = isNewContainerUrl(requestUrl);
+        boolean isNewContainer = ContainerIdUtil.isNewContainerRequest(requestUrl);
         if (!isNewContainer) {
-            String containerId = getContainerIdFromUrl(requestUrl);
+            String containerId = ContainerIdUtil.findContainerIdFromRequestURI(requestUrl);
             currentSize = connections.stream()
                     .filter(connection -> connection.getContainerId() != null && connection.getContainerId().equals(containerId))
                     .mapToLong(SigaConnection::getSize)
