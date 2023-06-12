@@ -88,7 +88,7 @@
         <dependency><!-- CVE-2022-40152 in versions below 5.4.0 -->
             <groupId>com.fasterxml.woodstox</groupId>
             <artifactId>woodstox-core</artifactId>
-            <version>5.4.0</version>
+            <version>6.5.1</version>
         </dependency>
 
         <dependency>

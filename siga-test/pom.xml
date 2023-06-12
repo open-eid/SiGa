@@ -49,7 +49,7 @@
     <properties>
         <allure.version>2.16.1</allure.version>
         <gatling-maven-plugin.version>4.2.7</gatling-maven-plugin.version>
-        <scala-maven-plugin.version>4.7.2</scala-maven-plugin.version>
+        <scala-maven-plugin.version>4.8.1</scala-maven-plugin.version>
         <gatling.version>3.6.0</gatling.version>
         <groovy.version>2.5.15</groovy.version>
         <!-- Use different property name than "rest-assured.version" to avoid conflict with Spring Boot dependency management -->
