@@ -37,12 +37,18 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path("validationConclusion.policy.policyName"), equalTo("POLv4"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-02-22T11:04:25Z"));
+
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[1].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[1].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[2].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[2].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
     }
 
     @Test
     void validateDDOCHashcodeContainer() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeDdoc.ddoc"));
-
 
         assertThat(response.statusCode(), equalTo(200));
 
@@ -53,6 +59,9 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(REPORT_SIGNATURE_FORM), equalTo("DIGIDOC_XML_1.3_hashcode"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signatureFormat"), equalTo("DIGIDOC_XML_1.3"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2012-10-03T07:46:51Z"));
+
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("LUKIN,LIISA,47710110274"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("47710110274"));
     }
 
     @Test
@@ -74,6 +83,9 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].signedBy"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
         assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2019-02-22T11:04:25Z"));
+
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
     }
 
     @Test
@@ -85,6 +97,9 @@ class ValidateHashcodeContainerT extends TestBase {
         Response validationResponse = getValidationReportForContainerInSession(flow);
         assertThat(validationResponse.statusCode(), equalTo(200));
         assertThat(validationResponse.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
     }
 
     @Test
@@ -117,6 +132,9 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-1.txt"))));
         assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-3.txt"))));
         assertThat(validationResponse.getBody().path("validationConclusion.signatures[0].warnings.content"), everyItem(not(containsString("data-file-5.txt"))));
+
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("JÕEORG,JAAK-KRISTJAN,38001085718"));
+        assertThat(validationResponse.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("PNOEE-38001085718"));
     }
 
     @Test
