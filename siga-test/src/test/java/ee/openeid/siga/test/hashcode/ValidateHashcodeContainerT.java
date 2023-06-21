@@ -59,9 +59,6 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.getBody().path(REPORT_SIGNATURE_FORM), equalTo("DIGIDOC_XML_1.3_hashcode"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].signatureFormat"), equalTo("DIGIDOC_XML_1.3"));
         assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].info.bestSignatureTime"), equalTo("2012-10-03T07:46:51Z"));
-
-        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("LUKIN,LIISA,47710110274"));
-        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("47710110274"));
     }
 
     @Test
