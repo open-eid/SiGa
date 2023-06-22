@@ -1,7 +1,9 @@
-package ee.openeid.siga.test.hashcode;
+package ee.openeid.siga.test.hashcode.upload;
 
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.restassured.response.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
@@ -15,6 +17,8 @@ import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Epic("/hashcodecontainers")
+@Feature("/upload/hashcodecontainers")
 class UploadHashcodeContainerT extends TestBase {
 
 
@@ -210,13 +214,6 @@ class UploadHashcodeContainerT extends TestBase {
     @Test
     void uploadContainerWithInvalidBase64LengthInDatafileXmlStructure() throws Exception {
         Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeInvalidBase64LengthInDatafileDescriptorFile.asice"));
-        expectError(response, 400, INVALID_CONTAINER);
-    }
-
-    @Disabled("SIGA-264")
-    @Test
-    void uploadContainerWithExtraDatafileInDatafileXmlStructure() throws Exception {
-        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNotSignedDatafilesInDatafileDescriptorFile.asice"));
         expectError(response, 400, INVALID_CONTAINER);
     }
 
