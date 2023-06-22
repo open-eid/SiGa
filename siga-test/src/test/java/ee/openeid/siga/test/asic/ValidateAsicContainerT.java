@@ -310,6 +310,17 @@ class ValidateAsicContainerT extends TestBase {
         expectError(response, 405, INVALID_REQUEST);
     }
 
+    @Test
+    void validatePadesContainerSubjectDistinguishedName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, asicContainerRequestFromFile("pdfSingleTestSignature.pdf"));
+
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.getBody().path(REPORT_VALID_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_SIGNATURES_COUNT), equalTo(1));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("11404176865"));
+    }
+
     @Override
     public String getContainerEndpoint() {
         return CONTAINERS;

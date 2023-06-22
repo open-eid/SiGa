@@ -227,6 +227,16 @@ class ValidateHashcodeContainerT extends TestBase {
         assertThat(response.statusCode(), equalTo(200));
     }
 
+    @Test
+    void validateDDOCHashcodeContainerSubjectDistinguishedName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Response response = postContainerValidationReport(flow, hashcodeContainerRequestFromFile("hashcodeDdocTest.ddoc"));
+
+        assertThat(response.statusCode(), equalTo(200));
+
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.commonName"), equalTo("ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865"));
+        assertThat(response.getBody().path(REPORT_SIGNATURES + "[0].subjectDistinguishedName.serialNumber"), equalTo("11404176865"));
+    }
+
     @Override
     public String getContainerEndpoint() {
         return HASHCODE_CONTAINERS;
