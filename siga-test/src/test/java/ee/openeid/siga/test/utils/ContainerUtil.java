@@ -62,6 +62,10 @@ public final class ContainerUtil {
         }
     }
 
+    public static XmlPath manifestAsXmlPath(String entryPath, String containerBase64String) {
+        return manifestAsXmlPath(extractEntryFromContainer(entryPath, containerBase64String));
+    }
+
     public static XmlPath configureXmlPathForManifest(XmlPath xmlPath) {
         return xmlPath.using(XmlPathConfig.xmlPathConfig().declaredNamespace(MANIFEST_NAMESPACE_PREFIX, MANIFEST_NAMESPACE_URL));
     }
@@ -77,9 +81,8 @@ public final class ContainerUtil {
     public static boolean getHashcodeSha512FilePresent(String container) {
         try {
             hashcodeDataFileAsXmlPath(HASHCODE_SHA512, container);
-        }
-        catch (IllegalStateException e) {
-            if(e.getMessage().equals("No entry META-INF/hashcodes-sha512.xml found")) {
+        } catch (IllegalStateException e) {
+            if (e.getMessage().equals("No entry META-INF/hashcodes-sha512.xml found")) {
                 return false;
             }
         }

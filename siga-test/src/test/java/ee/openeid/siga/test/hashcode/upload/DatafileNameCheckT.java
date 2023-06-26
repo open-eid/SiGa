@@ -121,13 +121,13 @@ class DatafileNameCheckT extends TestBase {
 
     @Test
     void uploadContainerDifferentFilenameOrderInManifest() throws Exception {
-        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeDifferentManifestFilenameOrder.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeFileOrderDifferentInManifest.asice"));
         response.then().statusCode(200);
     }
 
     @Test
     void uploadContainerExtraSpaceInManifest() throws Exception {
-        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeAdditionalFilenameSpaceInManifest.asice"));
+        Response response = postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeAdditionalSpaceInFilenameManifest.asice"));
         expectError(response, 400, INVALID_CONTAINER, "Manifest does not contain same file names as hashcode files");
     }
 
