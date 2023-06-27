@@ -3,6 +3,8 @@ package ee.openeid.siga.test.hashcode;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.restassured.path.xml.XmlPath;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +46,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Epic("/hashcodecontainers")
+@Feature("Verify hashcode container structure")
 class HashcodeContainerStructureT extends TestBase {
 
     private SigaApiFlow flow;
