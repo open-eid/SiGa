@@ -136,9 +136,17 @@ services:
       - spring.mail.host=siga-admin-smtp.localhost
       - spring.mail.port=25
       - spring.mail.properties.mail.smtp.auth=false
-      - spring.mail.properties.mail.smtp.starttls.enable=false
+      - spring.mail.properties.mail.smtp.starttls.enable=true
+      - spring.mail.properties.mail.smtp.starttls.required=true
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=4000
+      - JAVA_OPTS=
+        -Djavax.net.ssl.trustStore=/etc/siga-admin/smtp.truststore.p12
+        -Djavax.net.ssl.trustStorePassword='changeit'
+        -Djavax.net.ssl.trustStoreType=pkcs12
+        -Djavax.net.ssl.keyStore=/etc/siga-admin/siga-admin.localhost.keystore.p12
+        -Djavax.net.ssl.keyStorePassword=changeit
+        -Djavax.net.ssl.keyStoreType=pkcs12
     ports:
       - "4443:4443"
       - "4000:4000"
@@ -149,11 +157,16 @@ services:
     volumes:
       - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
       - ./docker/tls/esteid-ldap/esteid-ldap.truststore.p12:/etc/siga-admin/tls.esteid-ldap.truststore.p12
+      - ./docker/tls/siga-admin-smtp/siga-admin-smtp.truststore.p12:/etc/siga-admin/smtp.truststore.p12
 
   siga-admin-smtp:
-    image: rnwood/smtp4dev
+    image: rnwood/smtp4dev:3.2.0-ci20221023104
     profiles:
       - siga-admin
+    environment:
+      - ServerOptions__TlsMode=StartTls
+      - ServerOptions__TlsCertificatePassword=changeit
+      - ServerOptions__TlsCertificate=/siga-admin-smtp.localhost.keystore.p12
     ports:
       - "2525:25"
       - "3000:80"
@@ -161,6 +174,11 @@ services:
       default:
         aliases:
           - siga-admin-smtp.localhost
+    volumes:
+      # The directory where smtp4dev will store the e-mail database.
+      - ./docker/siga-admin-smtp/:/smtp4dev
+      # TLS keystore
+      - ./docker/tls/siga-admin-smtp/siga-admin-smtp.localhost.keystore.p12:/siga-admin-smtp.localhost.keystore.p12
 
   ignite-01:
     image: apacheignite/ignite:2.14.0-jdk11

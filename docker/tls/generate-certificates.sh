@@ -17,6 +17,8 @@ rm -rf ./*/
 ./generate-certificate.sh 'siga-ca' 'siga-02'
 ./generate-certificate.sh 'siga-ca' 'ignite-01'
 ./generate-certificate.sh 'siga-ca' 'ignite-02'
+./generate-certificate.sh 'siga-ca' 'siga-admin-smtp'
+./generate-truststore.sh 'siga-ca' 'siga-admin-smtp' 'siga-admin-smtp.truststore.p12'
 
 ./fetch-tls-certificate.sh 'sid.demo.sk.ee' 'sid'
 ./import-to-truststore.sh 'sid' 'sid.demo.sk.ee' 'sid/sid.demo.sk.ee.crt'
