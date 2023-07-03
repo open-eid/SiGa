@@ -24,3 +24,5 @@ rm -rf ./*/
 ./import-to-truststore.sh 'mid' 'tsp.demo.sk.ee' 'mid/tsp.demo.sk.ee.crt'
 ./fetch-tls-certificate.sh 'siva-demo.eesti.ee' 'siva'
 ./import-to-truststore.sh 'siva' 'siva-demo.eesti.ee' 'siva/siva-demo.eesti.ee.crt'
+./fetch-tls-certificate.sh 'esteid.ldap.sk.ee' 'esteid-ldap' 636
+./import-to-truststore.sh 'esteid-ldap' 'esteid.ldap.sk.ee' 'esteid-ldap/esteid.ldap.sk.ee.crt'

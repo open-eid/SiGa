@@ -2,6 +2,18 @@ version: "3.7"
 
 services:
 
+  dozzle: # Web-based UI for browsing container logs
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      default:
+        aliases:
+          - dozzle.localhost
+    ports:
+      - '11080:8080'
+    restart: unless-stopped
+
   siga-demo-application:
     image: siga-demo-application:latest
     environment:
@@ -109,6 +121,8 @@ services:
     profiles:
       - siga-admin
     environment:
+      - siga.admin.esteid-ldap.tls-truststore-path=file:/etc/siga-admin/tls.esteid-ldap.truststore.p12
+      - siga.admin.esteid-ldap.tls-truststore-password=changeit
       - server.port=4443
       - server.ssl.enabled=true
       - server.ssl.key-store-type=PKCS12
@@ -123,14 +137,18 @@ services:
       - spring.mail.port=25
       - spring.mail.properties.mail.smtp.auth=false
       - spring.mail.properties.mail.smtp.starttls.enable=false
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=4000
     ports:
       - "4443:4443"
+      - "4000:4000"
     networks:
       default:
         aliases:
           - siga-admin.localhost
     volumes:
       - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
+      - ./docker/tls/esteid-ldap/esteid-ldap.truststore.p12:/etc/siga-admin/tls.esteid-ldap.truststore.p12
 
   siga-admin-smtp:
     image: rnwood/smtp4dev

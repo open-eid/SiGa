@@ -326,7 +326,8 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 docker-compose up
 ```
 
-Now SiGa itself is accessible `https://localhost:8443/siga` and siga-demo-application `https://siga-demo.localhost:9443/`.
+Now SiGa itself is accessible https://localhost:8443/siga and siga-demo-application https://siga-demo.localhost:9443/ .
+You can view the logs for all the running containers at http://localhost:11080 .
 
 #### For updating software:
 
