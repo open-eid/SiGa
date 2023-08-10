@@ -199,10 +199,24 @@ class RequestValidatorTest {
     }
 
     @Test
-    void createContainer_DataFileNameInvalid() {
+    void createContainer_DataFileNameContainsInvalidCharacters() {
         CreateContainerRequest request = getCreateContainerRequest();
+        request.getDataFiles().clear();
         request.getDataFiles().add(new DataFile());
         request.getDataFiles().get(0).setFileName("*/random.txt");
+
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
+        );
+        assertEquals("Data file name is invalid", caughtException.getMessage());
+    }
+
+    @Test
+    void createContainer_DataFileNameContainsControlCharacters() {
+        CreateContainerRequest request = getCreateContainerRequest();
+        request.getDataFiles().clear();
+        request.getDataFiles().add(new DataFile());
+        request.getDataFiles().get(0).setFileName("random\u0017.txt");
 
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())

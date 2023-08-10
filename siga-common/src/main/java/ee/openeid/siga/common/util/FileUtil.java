@@ -1,19 +1,22 @@
 package ee.openeid.siga.common.util;
 
+import java.util.regex.Pattern;
+
 public class FileUtil {
 
     private FileUtil() {
         throw new IllegalStateException("Utility class");
     }
 
-    private static final char[] ILLEGAL_CHARACTERS = {'/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
+    private static final Pattern CONTAINS_CONTROL_CHARACTERS_PATTERN = Pattern.compile(".*\\p{Cntrl}.*");
+    private static final char[] OTHER_ILLEGAL_CHARACTERS = {'/', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
 
-    public static boolean isFilenameValid(String file) {
-        for (char illegalCharacter : ILLEGAL_CHARACTERS) {
-            if (file.indexOf(illegalCharacter) > -1) {
+    public static boolean isFilenameValid(String fileName) {
+        for (char illegalCharacter : OTHER_ILLEGAL_CHARACTERS) {
+            if (fileName.indexOf(illegalCharacter) > -1) {
                 return false;
             }
         }
-        return true;
+        return !CONTAINS_CONTROL_CHARACTERS_PATTERN.matcher(fileName).matches();
     }
 }
