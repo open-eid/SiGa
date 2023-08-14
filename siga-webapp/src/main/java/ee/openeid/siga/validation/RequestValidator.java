@@ -249,9 +249,8 @@ public class RequestValidator {
 
     private void validateFileName(String fileName, String errorMessage) {
         if (StringUtils.isBlank(fileName)
-                || !FileUtil.isFilenameValid(fileName)
-                || fileName.length() < 1
-                || fileName.length() > 260) {
+                || fileName.length() > 260
+                || !FileUtil.isFilenameValid(fileName)) {
             throw new RequestValidationException(errorMessage);
         }
     }

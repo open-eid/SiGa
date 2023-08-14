@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -198,25 +200,13 @@ class RequestValidatorTest {
 
     }
 
-    @Test
-    void createContainer_DataFileNameContainsInvalidCharacters() {
+    @ParameterizedTest
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000"})
+    void createContainer_DataFileNameContainsInvalidCharacters(String invalidCharacter) {
         CreateContainerRequest request = getCreateContainerRequest();
         request.getDataFiles().clear();
         request.getDataFiles().add(new DataFile());
-        request.getDataFiles().get(0).setFileName("*/random.txt");
-
-        RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
-        );
-        assertEquals("Data file name is invalid", caughtException.getMessage());
-    }
-
-    @Test
-    void createContainer_DataFileNameContainsControlCharacters() {
-        CreateContainerRequest request = getCreateContainerRequest();
-        request.getDataFiles().clear();
-        request.getDataFiles().add(new DataFile());
-        request.getDataFiles().get(0).setFileName("random\u0017.txt");
+        request.getDataFiles().get(0).setFileName("filename" + invalidCharacter + ".txt");
 
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateDataFiles(request.getDataFiles())
