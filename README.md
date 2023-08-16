@@ -121,9 +121,14 @@ More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Qu
 
 #### SiGa SiVa configuration
 
-| Parameter      | Mandatory | Description                        | Example                             |
-| -------------- | --------- | ---------------------------------- | ----------------------------------- |
-| siga.siva.url  | Y         | Signature validation service URL.  | `https://siva-arendus.eesti.ee/V3`  |
+| Parameter                      | Mandatory | Description                                                                                                                                                                          | Example                                                                |
+|--------------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| siga.siva.url                  | Y         | Signature validation service URL.                                                                                                                                                    | `https://siva-arendus.eesti.ee/V3`                                     |
+| siga.siva.trust-store          | Y         | SiVa service truststore path.                                                                                                                                                        | `file:/path/to/trust-store.p12` or `classpath:path/to/trust-store.p12` |
+| siga.siva.trust-store-password | Y         | SiVa service truststore password.                                                                                                                                                    | `changeit`                                                             |
+| siga.siva.connection-timeout   | N         | Connection timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default. | `PT10S`                                                                |
+| siga.siva.write-timeout        | N         | Write timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default.      | `PT10S`                                                                |
+| siga.siva.read-timeout         | N         | Read timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default.       | `PT10S`                                                                |
 
 #### SiGa MID REST configuration
 

@@ -1,6 +1,7 @@
 package ee.openeid.siga.monitoring;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ee.openeid.siga.common.client.HttpGetClient;
 import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,14 +9,13 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SivaHealthIndicator implements HealthIndicator {
     private static final String HEALTH_ENDPOINT = "/monitoring/health";
-    private final RestTemplate restTemplate;
+    private final HttpGetClient sivaHttpClient;
     private final SivaClientConfigurationProperties configProperties;
     @Override
     public Health health() {
@@ -24,7 +24,7 @@ public class SivaHealthIndicator implements HealthIndicator {
 
     private Health.Builder createSivaHealthBuilder() {
         try {
-            HealthStatus response = restTemplate.getForObject(configProperties.getUrl() + HEALTH_ENDPOINT, HealthStatus.class);
+            HealthStatus response = sivaHttpClient.get(HEALTH_ENDPOINT, HealthStatus.class);
             if (response == null) {
                 throw new IllegalStateException("Invalid health status");
             }

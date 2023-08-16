@@ -1,8 +1,13 @@
 package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
-import ee.openeid.siga.common.exception.*;
+import ee.openeid.siga.common.client.HttpPostClient;
+import ee.openeid.siga.common.client.HttpStatusException;
+import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.exception.InvalidContainerException;
+import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
+import ee.openeid.siga.common.exception.InvalidSignatureException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.SignatureHashcodeDataFile;
@@ -11,18 +16,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureProfile;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.Base64Utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -32,15 +35,13 @@ public class SivaClient {
     private static final String VALIDATION_ENDPOINT = "/validate";
     private static final String DOCUMENT_KEY = "document";
     private static final String SIGNATURE_KEY = "signatureFiles.signature";
-    private final RestTemplate restTemplate;
-    private final SivaClientConfigurationProperties configurationProperties;
+    private final HttpPostClient sivaHttpClient;
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
         ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
         validateLTASignatureProfile(validationResponse);
         return validationResponse;
-
     }
 
     public ValidationConclusion validateContainer(String name, String container) {
@@ -50,8 +51,9 @@ public class SivaClient {
         return validate(request, VALIDATION_ENDPOINT);
     }
 
-    private void handleHttpStatusCodeException(HttpStatusCodeException e) {
-        if (HttpStatus.BAD_REQUEST == e.getStatusCode()) {
+    private void handleHttpStatusCodeException(HttpStatusException e) {
+        HttpStatus httpStatus = e.getHttpStatus();
+        if (HttpStatus.BAD_REQUEST == httpStatus) {
             SivaRequestValidationError errorResponse = parseErrorResponse(e);
             for (SivaErrorResponse error : errorResponse.getRequestErrors()) {
                 if (DOCUMENT_KEY.equals(error.getKey())) {
@@ -61,8 +63,19 @@ public class SivaClient {
                 }
             }
         }
-        log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", e.getRawStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
+        log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", httpStatus.value(), httpStatus.getReasonPhrase(), tryToParseResponseBody(e.getResponseBody()));
         throw new TechnicalException("Unable to get valid response from client");
+    }
+
+    private static String tryToParseResponseBody(byte[] responseBody) {
+        if (responseBody == null) {
+            return null;
+        }
+        try {
+            return new String(responseBody, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return Base64Utils.encodeToString(responseBody);
+        }
     }
 
 
@@ -76,21 +89,24 @@ public class SivaClient {
     }
 
     private ValidationConclusion validate(Object request, String validationEndpoint) {
-        ResponseEntity<ValidationResponse> responseEntity;
+        ValidationResponse validationResponse;
         try {
-            responseEntity = restTemplate.exchange(configurationProperties.getUrl() + validationEndpoint,
-                    HttpMethod.POST, formHttpEntity(request), ValidationResponse.class);
-        } catch (HttpStatusCodeException e) {
+            validationResponse = sivaHttpClient.post(validationEndpoint, request, ValidationResponse.class);
+        } catch (HttpStatusException e) {
             handleHttpStatusCodeException(e);
-            throw e; //Cannot reach here
+            throw e; // cannot reach here
         } catch (Exception e) {
-            throw new TechnicalException("SIVA service error");
+            throw new TechnicalException("SIVA service error", e);
         }
-        if (responseEntity.getBody() == null) {
-            throw new TechnicalException("Unable to parse client empty response");
-        }
+
+        ValidationConclusion validationConclusion = Optional
+                .ofNullable(validationResponse)
+                .map(ValidationResponse::getValidationReport)
+                .map(ValidationReport::getValidationConclusion)
+                .orElseThrow(() -> new TechnicalException("Unable to parse client empty response"));
         log.info("Container validation details received successfully");
-        return responseEntity.getBody().getValidationReport().getValidationConclusion();
+
+        return validationConclusion;
     }
 
     private SivaHashcodeValidationRequest createHashcodeRequest(List<HashcodeSignatureWrapper>
@@ -134,15 +150,11 @@ public class SivaClient {
         throw new InvalidHashAlgorithmException("Container contains invalid hash algorithms");
     }
 
-    private SivaRequestValidationError parseErrorResponse(HttpStatusCodeException e) {
+    private SivaRequestValidationError parseErrorResponse(HttpStatusException e) {
         try {
-            return new ObjectMapper().readValue(e.getResponseBodyAsString(), SivaRequestValidationError.class);
+            return new ObjectMapper().readValue(e.getResponseBody(), SivaRequestValidationError.class);
         } catch (IOException ex) {
             throw new IllegalStateException("Could not parse SiVa error response body. Is this a valid JSON in the expected format?", ex);
         }
-    }
-
-    private HttpEntity<?> formHttpEntity(Object object) {
-        return new HttpEntity<>(object);
     }
 }
