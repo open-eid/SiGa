@@ -48,7 +48,7 @@ class SignatureCorrectnessT extends TestBase {
     @EnabledIfSigaProfileActive("mobileId")
     void signatureValuesAreCorrectForMidSigning() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT_TM"));
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
         String signatureId = response.as(CreateHashcodeContainerMobileIdSigningResponse.class).getGeneratedSignatureId();
         pollForMidSigning(flow, signatureId);
 
@@ -58,7 +58,7 @@ class SignatureCorrectnessT extends TestBase {
                 .statusCode(200)
                 .body("validationConclusion.validSignaturesCount", equalTo(1))
                 .body("validationConclusion.signaturesCount", equalTo(1))
-                .body("validationConclusion.signatures[0].signatureFormat", equalTo("XAdES_BASELINE_LT_TM"))
+                .body("validationConclusion.signatures[0].signatureFormat", equalTo("XAdES_BASELINE_LT"))
                 .body("validationConclusion.signatures[0].signatureLevel", equalTo("QESIG"))
                 .body("validationConclusion.signatures[0].signedBy", equalTo("O’CONNEŽ-ŠUSLIK TESTNUMBER,MARY ÄNN,60001019906"))
                 .body("validationConclusion.signatures[0].signatureScopes[0].name", equalTo(DEFAULT_FILENAME))
