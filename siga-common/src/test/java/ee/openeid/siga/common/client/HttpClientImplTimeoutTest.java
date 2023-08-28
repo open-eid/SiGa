@@ -8,11 +8,6 @@ import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.junit.jupiter.api.Test;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.matchers.Times;
-import org.mockserver.model.Delay;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -38,14 +33,13 @@ public class HttpClientImplTimeoutTest {
 
     @Test
     void testConnectionTimeout() {
-        int port = simulateServer();
         Duration connectionTimeout = Duration.ofSeconds(2);
-
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(connectionTimeout.toMillis()));
 
         WebClient webClient = WebClient.builder()
-                .baseUrl("http://localhost:" + port)
+                // Non-routable IP Address
+                .baseUrl("http://10.255.255.1:99")
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
 
@@ -90,15 +84,6 @@ public class HttpClientImplTimeoutTest {
         );
 
         assertThat(caughtException.getCause(), instanceOf(ReadTimeoutException.class));
-    }
-
-    private int simulateServer() {
-        int port = findFreePort();
-        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(port)) {
-            mockServer.when(HttpRequest.request("/path"), Times.once())
-                    .respond(HttpResponse.response().withDelay(Delay.milliseconds(5000)));
-        }
-        return port;
     }
 
     private int findFreePort() {
