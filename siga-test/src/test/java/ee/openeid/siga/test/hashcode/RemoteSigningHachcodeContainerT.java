@@ -8,10 +8,38 @@ import io.restassured.response.Response;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.AUTH_CERT_PEM;
+import static ee.openeid.siga.test.helper.TestData.AUTH_CERT_PEM_HEX;
+import static ee.openeid.siga.test.helper.TestData.DATA_TO_SIGN;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_HASHCODE_CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA512_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DIGEST_ALGO;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.INVALID_CERTIFICATE_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SIGNATURE;
+import static ee.openeid.siga.test.helper.TestData.MID_SID_CERT_REMOTE_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.RESULT;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_ESTEID2018_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM_HEX;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_MID_PEM;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM_HEX;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToHashcodeRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.remoteSigningSignatureValueRequest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -211,11 +239,23 @@ class RemoteSigningHachcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
-    @Test
-    void startRemoteSigningHashcodeContainerEmptyProfile() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signNewHashcodeContainerRemotelyWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void uploadHashcodeRemoteSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, ""));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
+
         expectError(response, 400, INVALID_REQUEST);
     }
 
@@ -281,22 +321,6 @@ class RemoteSigningHachcodeContainerT extends TestBase {
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_MID_PEM, "LT"));
         expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION, MID_SID_CERT_REMOTE_SIGNING);
-    }
-
-    @Test
-    void startRemoteSigningHashcodeContainerInvalidProfileFormat() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "123"));
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
-    void startRemoteSigningHashcodeContainerInvalidProfile() throws Exception {
-        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
-
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "B_BES"));
-        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

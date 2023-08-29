@@ -9,12 +9,36 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_HASHCODE_CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA512_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.EXPIRED_TRANSACTION;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.MID_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.NOT_VALID;
+import static ee.openeid.siga.test.helper.TestData.PHONE_ABSENT;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SENDING_ERROR;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_SECRET_2;
+import static ee.openeid.siga.test.helper.TestData.SERVICE_UUID_2;
+import static ee.openeid.siga.test.helper.TestData.STATUS;
+import static ee.openeid.siga.test.helper.TestData.USER_CANCEL;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToHashcodeRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -299,25 +323,29 @@ class MobileSigningHashcodeContainerT extends TestBase {
     }
 
     @Test
-    void missingProfileInRequest() throws Exception {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "", null, null, null, null, null, null));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
-    void invalidProfileInRequest() throws Exception {
-        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "T", null, null, null, null, null, null));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
     void invalidRoleInRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "LT", null, null, null, null, null, ""));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signingNewHashcodeContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signingUploadedHashcodeContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
 
         expectError(response, 400, INVALID_REQUEST);
     }

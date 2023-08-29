@@ -10,6 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -27,10 +29,10 @@ import static ee.openeid.siga.test.helper.TestData.INVALID_SIGNATURE;
 import static ee.openeid.siga.test.helper.TestData.MID_SID_CERT_REMOTE_SIGNING;
 import static ee.openeid.siga.test.helper.TestData.REMOTE_SIGNING;
 import static ee.openeid.siga.test.helper.TestData.RESULT;
+import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_ESTEID2018_PEM;
 import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM;
 import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_EXPIRED_PEM_HEX;
 import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_MID_PEM;
-import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_ESTEID2018_PEM;
 import static ee.openeid.siga.test.helper.TestData.SIGNER_CERT_PEM_HEX;
 import static ee.openeid.siga.test.utils.DigestSigner.signDigest;
 import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest;
@@ -251,15 +253,6 @@ class RemoteSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    void startAsicRemoteSigningContainerEmptyProfile() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
-
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, ""));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
     void startAsicRemoteSigningContainerInvalidSigningCertificate() throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
@@ -322,20 +315,12 @@ class RemoteSigningAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
     }
 
-    @Test
-    void startAsicRemoteSigningContainerInvalidProfileFormat() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void uploadAsicRemoteSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "123"));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
-    void startAsicRemoteSigningContainerInvalidProfile() throws Exception {
-        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
-
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, "B_BES"));
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -434,6 +419,16 @@ class RemoteSigningAsicContainerT extends TestBase {
                 dataToSignResponse.getGeneratedSignatureId());
 
         expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signNewAsicContainerRemotelyWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

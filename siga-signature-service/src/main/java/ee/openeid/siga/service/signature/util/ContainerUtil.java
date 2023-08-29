@@ -26,7 +26,7 @@ public class ContainerUtil {
 
     public static Container createContainer(byte[] container, Configuration configuration) {
         return ContainerBuilder
-                .aContainer(Container.DocumentType.BDOC)
+                .aContainer(Container.DocumentType.ASICE)
                 .withConfiguration(configuration)
                 .fromStream(new ByteArrayInputStream(container))
                 .build();

@@ -338,10 +338,11 @@ class RequestValidatorTest {
         assertEquals("Invalid signature profile", caughtException.getMessage());
     }
 
-    @Test
-    void invalidSignatureProfile() {
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "123", "@!*", "UNKNOWN", "B_BES", "B_EPES", "LT_TM"})
+    void invalidSignatureProfile(String signatureProfile) {
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "TL")
+            RequestValidationException.class, () -> validator.validateRemoteSigning(null, signatureProfile)
         );
         assertEquals("Invalid signature profile", caughtException.getMessage());
     }

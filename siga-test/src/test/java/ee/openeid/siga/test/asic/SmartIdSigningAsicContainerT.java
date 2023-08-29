@@ -12,6 +12,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import static ee.openeid.siga.test.helper.TestData.CERTIFICATE_CHOICE;
 import static ee.openeid.siga.test.helper.TestData.CLIENT_EXCEPTION;
 import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_ASICE_CONTAINER_NAME;
 import static ee.openeid.siga.test.helper.TestData.EXPIRED_TRANSACTION;
 import static ee.openeid.siga.test.helper.TestData.INVALID_DATA;
 import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
@@ -267,6 +270,26 @@ class SmartIdSigningAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void createNewAsicSidContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, SID_EE_DEFAULT_DOCUMENT_NUMBER));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void uploadAsicSidSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, SID_EE_DEFAULT_DOCUMENT_NUMBER));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
     @Test
     void getSmartIdCertificateChoiceInvalidCertificateId() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
@@ -494,14 +517,6 @@ class SmartIdSigningAsicContainerT extends TestBase {
 
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-49101290235-9RF6-Q"));
         expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
-    }
-
-    @Test
-    void signWithSmartIdNonExistingSignatureProfile() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("QES", null));
-
-        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

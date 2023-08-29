@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -309,22 +311,6 @@ class MobileSigningAsicContainerT extends TestBase {
     }
 
     @Test
-    void missingProfileInRequest() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "", null, null, null, null, null, null));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
-    void invalidProfileInRequest() throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-        Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "T", null, null, null, null, null, null));
-
-        expectError(response, 400, INVALID_REQUEST);
-    }
-
-    @Test
     void invalidRoleInRequest() throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
         Response response = postMidSigningInSession(flow, midSigningRequest("60001019906", "+37200000766", "EST", "LT", null, null, null, null, null, ""));
@@ -378,6 +364,26 @@ class MobileSigningAsicContainerT extends TestBase {
         Response pollResponse = pollForMidSigning(flow, signatureId);
 
         expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signingNewAsicContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signingUploadedAsicContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
+        postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
+
+        Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

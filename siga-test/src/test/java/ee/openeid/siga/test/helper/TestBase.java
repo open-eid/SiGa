@@ -15,6 +15,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static ee.openeid.siga.test.helper.TestData.*;
 import static ee.openeid.siga.test.utils.RequestBuilder.signRequest;
@@ -360,5 +361,9 @@ public abstract class TestBase {
         response.then()
                 .statusCode(200)
                 .body(SMARTID_STATUS, equalTo(message));
+    }
+
+    protected static Stream<String> provideInvalidSignatureProfiles() {
+        return INVALID_SIGNATURE_PROFILES.stream();
     }
 }

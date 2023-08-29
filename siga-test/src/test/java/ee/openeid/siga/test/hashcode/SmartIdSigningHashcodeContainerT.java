@@ -3,20 +3,50 @@ package ee.openeid.siga.test.hashcode;
 import ee.openeid.siga.test.helper.EnabledIfSigaProfileActive;
 import ee.openeid.siga.test.helper.TestBase;
 import ee.openeid.siga.test.model.SigaApiFlow;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdSigningResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSmartIdCertificateChoiceStatusResponse;
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static ee.openeid.siga.test.helper.TestData.*;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
-import static org.hamcrest.CoreMatchers.*;
+import static ee.openeid.siga.test.helper.TestData.CERTIFICATE_CHOICE;
+import static ee.openeid.siga.test.helper.TestData.CLIENT_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_HASHCODE_CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA512_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.EXPIRED_TRANSACTION;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.INVALID_DATA;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.INVALID_SESSION_DATA_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.SID_EE_DEFAULT_DOCUMENT_NUMBER;
+import static ee.openeid.siga.test.helper.TestData.SID_EE_MULT_ACCOUNTS_DOCUMENT_NUMBER;
+import static ee.openeid.siga.test.helper.TestData.SMARTID_EXCEPTION;
+import static ee.openeid.siga.test.helper.TestData.SMARTID_SIGNING;
+import static ee.openeid.siga.test.helper.TestData.STATUS;
+import static ee.openeid.siga.test.helper.TestData.USER_CANCEL;
+import static ee.openeid.siga.test.helper.TestData.USER_SELECTED_WRONG_VC;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToHashcodeRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdCertificateChoiceRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithDefault;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @EnabledIfSigaProfileActive("smartId")
@@ -391,6 +421,26 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOLT-10101020001-K87V-NQ"));
 
         expectError(response, 400, CLIENT_EXCEPTION);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void createNewHashcodeSidContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, "PNOEE-30403039917-905H-Q"));
+
+        expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidSignatureProfiles")
+    void uploadHashcodeSidSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
+
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, "PNOEE-30403039917-905H-Q"));
+
+        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

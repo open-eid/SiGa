@@ -126,7 +126,7 @@ public class RequestValidator {
 
     public void validateSignatureProfile(String signatureProfile) {
         SignatureProfile generatedSignatureProfile = SignatureProfile.findByProfile(signatureProfile);
-        if (!(SignatureProfile.LT == generatedSignatureProfile || SignatureProfile.LT_TM == generatedSignatureProfile || SignatureProfile.LTA == generatedSignatureProfile)) {
+        if (SignatureProfile.LT != generatedSignatureProfile && SignatureProfile.LTA != generatedSignatureProfile) {
             throw new RequestValidationException("Invalid signature profile");
         }
     }

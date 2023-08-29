@@ -1,6 +1,7 @@
 package ee.openeid.siga.test.helper;
 
 import java.util.List;
+import java.util.Set;
 
 public class TestData {
 
@@ -147,4 +148,16 @@ public class TestData {
     //Test numbers
     public static final String SID_EE_DEFAULT_DOCUMENT_NUMBER = "PNOEE-30303039914-MOCK-Q";
     public static final String SID_EE_MULT_ACCOUNTS_DOCUMENT_NUMBER = "PNOEE-30303039816-MOCK-Q";
+
+    // Invalid signature profiles
+    public static final Set<String> INVALID_SIGNATURE_PROFILES = Set.of(
+            "",
+            " ",
+            "123",
+            "@!*",
+            "UNKNOWN",
+            "B_BES",
+            "B_EPES",
+            "LT_TM"
+    );
 }

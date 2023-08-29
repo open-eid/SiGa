@@ -2,7 +2,7 @@
 
 # SiGa - Signature Gateway
 
-Signature Gateway is a web service for creating, signing and validating ASIC-E and BDOC containers with XAdES signatures.
+Signature Gateway is a web service for creating and signing ASIC-E containers and validating both ASIC-E and BDOC containers with XAdES signatures.
 
 ## External services used by SiGa
 

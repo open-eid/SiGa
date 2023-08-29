@@ -17,7 +17,6 @@ import org.digidoc4j.*;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -108,26 +107,6 @@ class SignatureFinalizingTest {
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
-    }
-
-    @Test
-    @Disabled("SIGA-583: ensure that this test exists for LT profile and remove it once time-mark support is removed")
-    void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
-        configuration.setPreferAiaOcsp(false);
-        Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        assertEquals(Result.OK, result);
-        assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
-    }
-
-    @Test
-    @Disabled("SIGA-583: ensure that this test exists for LT profile and remove it once time-mark support is removed")
-    void shouldRequestOnly_OCSP_WithSignatureProfile_LT_TM_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
-        configuration.setPreferAiaOcsp(true);
-        Pair<String, String> signature = createSignature(VALID_PKCS12_EsteidSK2015, SignatureProfile.LT_TM);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
-        assertEquals(Result.OK, result);
-        assertTSAOCSPEvents(null, "http://demo.sk.ee/ocsp");
     }
 
     @Test
