@@ -8,6 +8,7 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -366,24 +367,26 @@ class MobileSigningAsicContainerT extends TestBase {
         expectError(pollResponse, 400, INVALID_SESSION_DATA_EXCEPTION);
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Mobile signing new ASIC container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void signingNewAsicContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
         postCreateContainer(flow, asicContainersDataRequestWithDefault());
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Mobile signing uploaded ASIC container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void signingUploadedAsicContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
     @Test

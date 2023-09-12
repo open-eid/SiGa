@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -208,7 +209,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void postWithSmartIdCertificateChoiceSymbolsInPersonIdentifier() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest(".!:", "EE"));
+        Response response = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest(".!:", "EE"));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -216,7 +217,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void postWithSmartIdCertificateChoiceInvalidFormatPersonIdentifier() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("39101290235", "EE"));
+        Response response = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("39101290235", "EE"));
 
         expectError(response, 400, SMARTID_EXCEPTION, NOT_FOUND);
     }
@@ -262,7 +263,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void postWithSmartIdCertificateChoiceEmptyPersonIdentifier() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("", "EE"));
+        Response response = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("", "EE"));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -270,7 +271,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void postWithSmartIdCertificateChoiceInvalidCountry() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "ee"));
+        Response response = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "ee"));
 
         expectError(response, 400, INVALID_REQUEST);
     }
@@ -323,7 +324,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void getSmartIdSidStatusCertificateReturned() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response certificateStatus = pollForSidCertificateStatus(flow, generatedCertificateId);
@@ -335,7 +336,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void getSmartIdSidStatusErrorOnSecondRequest() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
         pollForSidCertificateStatus(flow, generatedCertificateId);
         Response certificateStatus = getSidCertificateStatus(flow, generatedCertificateId);
@@ -347,7 +348,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void smartIdCertificateChoiceAdvancedCertificateLevel() throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101020001", "LT"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("10101020001", "LT"));
 
         expectError(certificateChoice, 400, CLIENT_EXCEPTION);
     }
@@ -423,24 +424,26 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
         expectError(response, 400, CLIENT_EXCEPTION);
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Smart-ID signing new hashcode container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void createNewHashcodeSidContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, "PNOEE-30403039917-905H-Q"));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Smart-ID signing uploaded hashcode container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void uploadHashcodeSidSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault(signatureProfile, "PNOEE-30403039917-905H-Q"));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
     @Test
@@ -512,7 +515,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
         Response response = postSmartIdSigningInSession(flow, smartIdSigningRequestWithDefault("LT", "PNOEE-30403039983-5NFT-Q"));
         String signatureId = response.as(CreateHashcodeContainerSmartIdSigningResponse.class).getGeneratedSignatureId();
-        Response signingResponse = pollForSidSigningWithPollParameters(10000, 120000,  flow, signatureId);
+        Response signingResponse = pollForSidSigningWithPollParameters(10000, 120000, flow, signatureId);
         expectSmartIdStatus(signingResponse, EXPIRED_TRANSACTION);
     }
 
@@ -539,7 +542,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void headToHashcodeSmartIdCertificateStatus() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response certificateChoice =  postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
+        Response certificateChoice = postSidCertificateChoice(flow, smartIdCertificateChoiceRequest("30303039914", "EE"));
         String generatedCertificateId = certificateChoice.as(CreateHashcodeContainerSmartIdCertificateChoiceResponse.class).getGeneratedCertificateId();
 
         Response response = head(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING + CERTIFICATE_CHOICE + "/" + generatedCertificateId + STATUS, flow);
@@ -550,7 +553,7 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
     @Test
     void signWithSmartIdInvalidRole() throws NoSuchAlgorithmException, InvalidKeyException, JSONException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
-        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("LT", null, null, null, null, null, "",null));
+        Response response = postSmartIdSigningInSession(flow, smartIdSigningRequest("LT", null, null, null, null, null, "", null));
 
         expectError(response, 400, INVALID_REQUEST);
     }

@@ -9,6 +9,7 @@ import io.restassured.response.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -315,14 +316,26 @@ class RemoteSigningAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_CERTIFICATE_EXCEPTION);
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Remotely signing new ASIC container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
-    void uploadAsicRemoteSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+    void signNewAsicContainerRemotelyWithInvalidSignatureProfile(String signatureProfile) throws Exception {
+        postCreateContainer(flow, asicContainersDataRequestWithDefault());
+
+        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
+
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
+    }
+
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Remotely signing uploaded ASIC container not allowed with signatureProfile = ''{0}''")
+    @MethodSource("provideInvalidSignatureProfiles")
+    void signUploadAsicRemoteSigningContainerWithInvalidSignatureProfile(String signatureProfile) throws Exception {
         postUploadContainer(flow, asicContainerRequestFromFile(DEFAULT_ASICE_CONTAINER_NAME));
 
         Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
     @Test
@@ -419,16 +432,6 @@ class RemoteSigningAsicContainerT extends TestBase {
                 dataToSignResponse.getGeneratedSignatureId());
 
         expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION);
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideInvalidSignatureProfiles")
-    void signNewAsicContainerRemotelyWithInvalidSignatureProfile(String signatureProfile) throws Exception {
-        postCreateContainer(flow, asicContainersDataRequestWithDefault());
-
-        Response response = postRemoteSigningInSession(flow, remoteSigningRequestWithDefault(SIGNER_CERT_ESTEID2018_PEM, signatureProfile));
-
-        expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test

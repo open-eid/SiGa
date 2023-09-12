@@ -158,6 +158,10 @@ public class TestData {
             "UNKNOWN",
             "B_BES",
             "B_EPES",
-            "LT_TM"
+            "LT_TM",
+            "lt_TM",
+            "lt_tm",
+            "LT-TM",
+            "LT TM"
     );
 }

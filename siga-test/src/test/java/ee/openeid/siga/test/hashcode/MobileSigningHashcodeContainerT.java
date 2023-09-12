@@ -8,6 +8,7 @@ import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRespons
 import io.restassured.response.Response;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -330,24 +331,26 @@ class MobileSigningHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Mobile signing new hashcode container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void signingNewHashcodeContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
-    @ParameterizedTest
+    @DisplayName("Signing not allowed with invalid signature profiles")
+    @ParameterizedTest(name = "Mobile signing uploaded hashcode container not allowed with signatureProfile = ''{0}''")
     @MethodSource("provideInvalidSignatureProfiles")
     void signingUploadedHashcodeContainerWithMidInvalidSignatureProfileNotAllowed(String signatureProfile) throws Exception {
         postUploadContainer(flow, hashcodeContainerRequest(DEFAULT_HASHCODE_CONTAINER));
 
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", signatureProfile));
 
-        expectError(response, 400, INVALID_REQUEST);
+        expectError(response, 400, INVALID_REQUEST, "Invalid signature profile");
     }
 
     @Test
