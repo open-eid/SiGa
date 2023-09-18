@@ -10,6 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -211,6 +213,16 @@ class ManipulateDataFilesAsicContainerT extends TestBase {
         Response response = addDataFile(flow, addDataFileToAsicRequest("testFile.txt", ""));
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest(name = "Adding datafile to ASIC container not allowed if fileName contains ''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void uploadAsicContainerAndTryAddingDataFileWithInvalidFilename(String invalidChar) throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, asicContainerRequestFromFile("containerWithoutSignatures.asice"));
+
+        Response response = addDataFile(flow, addDataFileToAsicRequest("Char=" + invalidChar + ".txt", "eWV0IGFub3RoZXIgdGVzdCBmaWxlIGNvbnRlbnQu"));
+
+        expectError(response, 400, INVALID_REQUEST, "Data file name is invalid");
     }
 
     @Test

@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -123,10 +125,18 @@ class CreateAsicContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
+    @ParameterizedTest(name = "Creating ASIC container not allowed if fileName contains ''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void tryCreatingAsicContainerWithInvalidFileName(String fileName) throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        Response response = postCreateContainer(flow, asicContainersDataRequest(fileName, DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME));
+        expectError(response, 400, INVALID_REQUEST, "Data file name is invalid");
+    }
+
     @Test
-    void createAsicContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        Response response = postCreateContainer(flow, asicContainersDataRequest("?%*", DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME));
-        expectError(response, 400, INVALID_REQUEST);
+    void createAsicContainerWithSpecialCharsInFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        String fileName = "!#$%&'()+,-.0123456789;=@ ABCDEFGHIJKLMNOPQRSTUVWXYZÕÄÖÜ[]^_abcdefghijklmnopqrstuvwxyzõäöü{}~";
+        Response response = postCreateContainer(flow, asicContainersDataRequest(fileName, DEFAULT_DATAFILE_CONTENT, DEFAULT_ASICE_CONTAINER_NAME));
+        response.then().statusCode(200);
     }
 
     @Test
@@ -142,13 +152,13 @@ class CreateAsicContainerT extends TestBase {
     }
 
     @Test
-    void createAsicContainerInvalidContainerName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException{
+    void createAsicContainerInvalidContainerName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, "?%*"));
         expectError(response, 400, INVALID_REQUEST);
     }
 
     @Test
-    void createAsicContainerPathInContainerName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException{
+    void createAsicContainerPathInContainerName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         Response response = postCreateContainer(flow, asicContainersDataRequest(DEFAULT_FILENAME, DEFAULT_DATAFILE_CONTENT, "C://folder/test.asice"));
         expectError(response, 400, INVALID_REQUEST);
     }

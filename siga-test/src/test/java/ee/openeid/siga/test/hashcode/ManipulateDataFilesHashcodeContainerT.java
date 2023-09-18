@@ -9,16 +9,38 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.DATAFILES;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA512_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DUPLICATE_DATA_FILE;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.INVALID_DATA;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.MANIFEST;
+import static ee.openeid.siga.test.helper.TestData.RESOURCE_NOT_FOUND;
+import static ee.openeid.siga.test.helper.TestData.TEST_FILE_EXTENSIONS;
+import static ee.openeid.siga.test.helper.TestData.UPLOADED_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.UPLOADED_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.UPLOADED_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.UPLOADED_SHA512_DATAFILE;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToHashcodeRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToHashcodeRequestDataFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.addDataFilesToHashcodeRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequestFromFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -187,8 +209,18 @@ class ManipulateDataFilesHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
+    @ParameterizedTest(name = "Adding datafile to hashcode container not allowed if fileName contains ''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void uploadHashcontainerAndTryAddingDataFileWithInvalidFilename(String invalidChar) throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));
+
+        Response response = addDataFile(flow, addDataFileToHashcodeRequest("Char=" + invalidChar + ".txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+
+        expectError(response, 400, INVALID_REQUEST, "Data file name is invalid");
+    }
+
     @Test
-    void createHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -204,7 +236,7 @@ class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    void createHashcodeContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddMultipleDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         JSONObject dataFiles = addDataFileToHashcodeRequest("testFile1.xml", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE);
@@ -232,7 +264,7 @@ class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    void createHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDuplicateDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest(DEFAULT_FILENAME, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
@@ -255,7 +287,7 @@ class ManipulateDataFilesHashcodeContainerT extends TestBase {
     }
 
     @Test
-    void createHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException  {
+    void createHashcodeContainerAndAddDataFileWithZeroFileSize() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
         postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
 
         Response response = addDataFile(flow, addDataFileToHashcodeRequest("test.txt", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, 0));

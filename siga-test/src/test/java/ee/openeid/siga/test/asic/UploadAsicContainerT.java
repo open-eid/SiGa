@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static ee.openeid.siga.test.helper.TestData.CONTAINERS;
 import static ee.openeid.siga.test.helper.TestData.CONTAINER_ID;
@@ -121,6 +123,17 @@ class UploadAsicContainerT extends TestBase {
         Response response = postUploadContainer(flow, request);
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest(name = "Uploading ASIC container not allowed if containerName contains ''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void tryUploadingAsicContainerWithInvalidFileName(String fileName) throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("containerName", "InvalidChar=" + fileName);
+        request.put("container", "RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=");
+        Response response = postUploadContainer(flow, request);
+
+        expectError(response, 400, INVALID_REQUEST, "Container name is invalid");
     }
 
     @Test

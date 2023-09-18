@@ -10,15 +10,29 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Collectors;
 
-import static ee.openeid.siga.test.helper.TestData.*;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER;
+import static ee.openeid.siga.test.helper.TestData.CONTAINER_ID;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILENAME;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_FILESIZE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA256_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.DEFAULT_SHA512_DATAFILE;
+import static ee.openeid.siga.test.helper.TestData.ERROR_CODE;
+import static ee.openeid.siga.test.helper.TestData.HASHCODE_CONTAINERS;
+import static ee.openeid.siga.test.helper.TestData.INVALID_REQUEST;
+import static ee.openeid.siga.test.helper.TestData.MANIFEST;
+import static ee.openeid.siga.test.helper.TestData.TEST_FILE_EXTENSIONS;
 import static ee.openeid.siga.test.utils.ContainerUtil.extractEntryFromContainer;
 import static ee.openeid.siga.test.utils.ContainerUtil.manifestAsXmlPath;
-import static ee.openeid.siga.test.utils.RequestBuilder.*;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequest;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestDataFile;
+import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,10 +168,18 @@ class CreateHashcodeContainerT extends TestBase {
         expectError(response, 400, INVALID_REQUEST);
     }
 
+    @ParameterizedTest(name = "Creating hashcode container not allowed if fileName contains ''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void tryCreatingHashcodeContainerWithInvalidFileName(String fileName) throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequest(fileName, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+        expectError(response, 400, INVALID_REQUEST, "Data file name is invalid");
+    }
+
     @Test
-    void createHashcodeContainerInvalidFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
-        Response response = postCreateContainer(flow, hashcodeContainersDataRequest("?%*", DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
-        expectError(response, 400, INVALID_REQUEST);
+    void createHashcodeContainerWithSpecialCharsInFileName() throws JSONException, NoSuchAlgorithmException, InvalidKeyException {
+        String fileName = "!#$%&'()+,-.0123456789;=@ ABCDEFGHIJKLMNOPQRSTUVWXYZÕÄÖÜ[]^_abcdefghijklmnopqrstuvwxyzõäöü{}~";
+        Response response = postCreateContainer(flow, hashcodeContainersDataRequest(fileName, DEFAULT_SHA256_DATAFILE, DEFAULT_SHA512_DATAFILE, DEFAULT_FILESIZE));
+        response.then().statusCode(200);
     }
 
     @Test
