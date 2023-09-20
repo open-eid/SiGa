@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -40,6 +41,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainerRequest
 import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRequestWithDefault;
 import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.midSigningRequestWithMessageToDisplay;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -273,6 +275,17 @@ class MobileSigningHashcodeContainerT extends TestBase {
         Response response = postMidSigningInSession(flow, midSigningRequestWithDefault("60001019906", "+37200000766", "LT"));
 
         expectError(response, 400, INVALID_SESSION_DATA_EXCEPTION, "Unable to sign container with empty datafiles");
+    }
+
+    @ParameterizedTest(name = "Starting MID signing hashcode container successful if messageToDisplay field contains char''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0000", "\u0007"})
+    void signHashcodeContainerWithSpecialCharsInMessageToDisplaySuccessful(String specialChar) throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        String messageToDisplay = "Special char = " + specialChar;
+        Response response = postMidSigningInSession(flow, midSigningRequestWithMessageToDisplay("60001019906", "+37200000766", messageToDisplay));
+
+        response.then().statusCode(200);
     }
 
     @Test

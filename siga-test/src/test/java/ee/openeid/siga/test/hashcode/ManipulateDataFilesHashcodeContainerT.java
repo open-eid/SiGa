@@ -175,6 +175,16 @@ class ManipulateDataFilesHashcodeContainerT extends TestBase {
                 .body("dataFiles[0]", nullValue());
     }
 
+    //Some invalid chars (/, ?, \, \u0000) produce different errors as the filename is in URL and are excluded from test
+    @ParameterizedTest(name = "Deleting datafile from hashcode container not allowed if fileName contains ''{0}''")
+    @ValueSource(strings = {"`", "*", "<", ">", "|", "\"", ":", "\u0017", "\u0007"})
+    void uploadHashcodeContainerAndTryRemovingDataFileWithInvalidFilename(String invalidChar) throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+        postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeNonconventionalCharactersInDataFile.asice"));
+        Response response = deleteDataFile(flow, "Char=" + invalidChar + "isInvalid");
+
+        expectError(response, 400, INVALID_REQUEST, "Data file name is invalid");
+    }
+
     @Test
     void uploadHashcodeContainerAndAddDataFile() throws JSONException, NoSuchAlgorithmException, InvalidKeyException, IOException {
         postUploadContainer(flow, hashcodeContainerRequestFromFile("hashcodeWithoutSignature.asice"));

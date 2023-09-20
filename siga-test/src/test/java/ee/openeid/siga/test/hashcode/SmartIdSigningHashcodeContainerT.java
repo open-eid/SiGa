@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -46,6 +47,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.hashcodeContainersDataRe
 import static ee.openeid.siga.test.utils.RequestBuilder.smartIdCertificateChoiceRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithDefault;
+import static ee.openeid.siga.test.utils.RequestBuilder.smartIdSigningRequestWithMessageToDisplay;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -319,6 +321,26 @@ class SmartIdSigningHashcodeContainerT extends TestBase {
         Response response = post(getContainerEndpoint() + "/" + flow.getContainerId() + SMARTID_SIGNING, flow, request.toString());
 
         expectError(response, 400, INVALID_REQUEST);
+    }
+
+    @ParameterizedTest(name = "Starting SID signing hashcode container successful if messageToDisplay field contains char''{0}''")
+    @ValueSource(strings = {"/", "`", "?", "*", "\\", "<", ">", "|", "\"", ":", "\u0017", "\u0007"})
+    void signSmartIdHashcodeContainerInSessionWithSpecialCharsInMessageToDisplaySuccessful(String specialChar) throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+
+        String messageToDisplay = "Special char = " + specialChar;
+        Response signingResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithMessageToDisplay(SID_EE_DEFAULT_DOCUMENT_NUMBER, messageToDisplay));
+
+        signingResponse.then().statusCode(200);
+    }
+
+    @Test
+    void signSmartIdHashcodeContainerInSessionWithSpecialCharNullInMessageToDisplayFails() throws Exception {
+        postCreateContainer(flow, hashcodeContainersDataRequestWithDefault());
+        String messageToDisplay = "Special char = " + "\u0000";
+        Response signingResponse = postSmartIdSigningInSession(flow, smartIdSigningRequestWithMessageToDisplay(SID_EE_DEFAULT_DOCUMENT_NUMBER, messageToDisplay));
+
+        expectError(signingResponse, 400, CLIENT_EXCEPTION, "Smart-ID service error");
     }
 
     @Test

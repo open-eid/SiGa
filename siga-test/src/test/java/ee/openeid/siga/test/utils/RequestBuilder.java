@@ -149,6 +149,10 @@ public class RequestBuilder {
         return midSigningRequest(personIdentifier, phoneNo, "EST", signatureProfile, "SIGA test", null, null, null, null, null);
     }
 
+    public static JSONObject midSigningRequestWithMessageToDisplay(String personIdentifier, String phoneNo, String messageToDisplay) throws JSONException {
+        return midSigningRequest(personIdentifier, phoneNo, "EST", "LT", messageToDisplay, null, null, null, null, null);
+    }
+
     public static JSONObject midSigningRequest(String personIdentifier, String phoneNo, String language, String signatureProfile, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
         JSONObject request = new JSONObject();
         request.put("personIdentifier", personIdentifier);
@@ -182,6 +186,10 @@ public class RequestBuilder {
 
     public static JSONObject smartIdSigningRequestWithDefault(String signatureProfile, String documentNumber) throws JSONException {
         return smartIdSigningRequest(signatureProfile, documentNumber, "something", null, null,null, null, null);
+    }
+
+    public static JSONObject smartIdSigningRequestWithMessageToDisplay(String documentNumber, String messageToDisplay) throws JSONException {
+        return smartIdSigningRequest("LT", documentNumber, messageToDisplay, null, null,null, null, null);
     }
 
     public static JSONObject smartIdSigningRequest(String signatureProfile, String documentNumber, String messageToDisplay, String city, String stateOrProvince, String postalCode, String country, String roles) throws JSONException {
