@@ -18,6 +18,6 @@ public interface ConnectionRepository extends JpaRepository<SigaConnection, Inte
 
     @Modifying
     @Transactional
-    @Query("delete from SigaConnection c where c.containerId=:container_id")
-    int deleteByContainerId(@Param("container_id") String containerId);
+    @Query("delete from SigaConnection c where c.containerId=:container_id and c.service.id=:service_id")
+    int deleteByContainerIdAndServiceId(@Param("container_id") String containerId, @Param("service_id") int serviceId);
 }

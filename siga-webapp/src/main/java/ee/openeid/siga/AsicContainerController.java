@@ -1,6 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
+import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -13,10 +14,12 @@ import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningServ
 import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.*;
+import lombok.RequiredArgsConstructor;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,22 +34,15 @@ import java.util.List;
 
 @RestController
 @Profile("datafileContainer")
+@RequiredArgsConstructor
 public class AsicContainerController {
 
-    private AsicContainerService containerService;
-    private AsicContainerValidationService validationService;
-    private AsicContainerSigningService signingService;
-    private ConnectionRepository connectionRepository;
+    private final AsicContainerService containerService;
+    private final AsicContainerValidationService validationService;
+    private final AsicContainerSigningService signingService;
+    private final ConnectionRepository connectionRepository;
+    private final ServiceRepository serviceRepository;
     private final RequestValidator validator;
-
-    public AsicContainerController(AsicContainerService containerService, AsicContainerValidationService validationService,
-                                   AsicContainerSigningService signingService, ConnectionRepository connectionRepository, RequestValidator validator) {
-        this.containerService = containerService;
-        this.validationService = validationService;
-        this.signingService = signingService;
-        this.connectionRepository = connectionRepository;
-        this.validator = validator;
-    }
 
     @SigaEventLog(eventName = SigaEventName.CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @PostMapping(value = "/containers", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -213,7 +209,9 @@ public class AsicContainerController {
         validator.validateContainerId(containerId);
         String result = containerService.closeSession(containerId);
 
-        connectionRepository.deleteByContainerId(containerId);
+        String serviceUuid = SecurityContextHolder.getContext().getAuthentication().getName();
+        serviceRepository.findByUuid(serviceUuid)
+                .ifPresent(service -> connectionRepository.deleteByContainerIdAndServiceId(containerId, service.getId()));
 
         DeleteContainerResponse response = new DeleteContainerResponse();
         response.setResult(result);

@@ -1,6 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
+import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
@@ -32,6 +33,7 @@ public class HashcodeContainerController {
     private final HashcodeContainerSigningService signingService;
     private final ConnectionRepository connectionRepository;
     private final RequestValidator validator;
+    private final ServiceRepository serviceRepository;
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @PostMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -195,7 +197,10 @@ public class HashcodeContainerController {
         validator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);
 
-        connectionRepository.deleteByContainerId(containerId);
+        String serviceUuid = SecurityContextHolder.getContext().getAuthentication().getName();
+        serviceRepository.findByUuid(serviceUuid)
+                .ifPresent(service -> connectionRepository.deleteByContainerIdAndServiceId(containerId, service.getId()));
+
 
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
         response.setResult(result.name());

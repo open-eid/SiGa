@@ -72,7 +72,7 @@ public class HashcodeContainerService implements HashcodeSessionHolder {
 
 
     public Result closeSession(String containerId) {
-        sessionService.remove(containerId);
+        sessionService.removeByContainerId(containerId);
         return Result.OK;
     }
 

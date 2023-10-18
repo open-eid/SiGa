@@ -1,7 +1,10 @@
 package ee.openeid.siga.session.configuration;
 
+import ee.openeid.siga.auth.model.SigaService;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
+import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.session.CacheName;
+import ee.openeid.siga.session.SessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
@@ -15,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.ignite.IgniteSystemProperties.IGNITE_NO_SHUTDOWN_HOOK;
@@ -27,6 +31,7 @@ import static org.apache.ignite.IgniteSystemProperties.IGNITE_NO_SHUTDOWN_HOOK;
 public class SessionConfiguration {
     private final SessionConfigurationProperties sessionConfigurationProperties;
     private final ConnectionRepository connectionRepository;
+    private final ServiceRepository serviceRepository;
 
     @Bean(destroyMethod = "close")
     public Ignite ignite() {
@@ -46,10 +51,20 @@ public class SessionConfiguration {
     }
 
     private void removeContainerConnectionData(BinaryObject sessionObject) {
-        String containerId = BinaryObjectBuilderImpl.wrap(sessionObject).getField("sessionId");
-        if (containerId != null) {
-            int count = connectionRepository.deleteByContainerId(containerId);
-            log.debug("Deleted " + count + " connection(s) by container id " + containerId);
+        String sessionId = BinaryObjectBuilderImpl.wrap(sessionObject).getField("sessionId");
+        if (sessionId == null) {
+            log.debug("Session with ID " + sessionId + " not found. No need to delete it.");
+            return;
         }
+        String containerId = SessionService.parseContainerId(sessionId);
+        String serviceUuid = SessionService.parseServiceUuid(sessionId);
+        serviceRepository.findByUuid(serviceUuid)
+                .ifPresentOrElse(
+                    service -> {
+                        int count = connectionRepository.deleteByContainerIdAndServiceId(containerId, service.getId());
+                        log.debug("Deleted " + count + " connection(s) by container id " + containerId + " and service ID " + service.getId());
+                    },
+                    () -> log.debug("Service with UUID " + serviceUuid + " not found. No need to delete it.")
+                );
     }
 }

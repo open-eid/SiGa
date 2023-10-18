@@ -158,7 +158,7 @@ public class AsicContainerService implements AsicSessionHolder {
     }
 
     public String closeSession(String containerId) {
-        sessionService.remove(containerId);
+        sessionService.removeByContainerId(containerId);
         return Result.OK.name();
     }
 

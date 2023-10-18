@@ -1,5 +1,6 @@
 package ee.openeid.siga.session;
 
+import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.session.CertificateSession;
 import ee.openeid.siga.common.session.Session;
@@ -50,7 +51,7 @@ public class SessionService {
         getCertificateSessionCache().put(session.getSessionId(), session.getCertificateSessions());
     }
 
-    public void remove(String containerId) {
+    public void removeByContainerId(String containerId) {
         String sessionId = getSessionId(containerId);
         removeBySessionId(sessionId);
     }
@@ -80,5 +81,23 @@ public class SessionService {
     public String getSessionId(String containerId) {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
         return sessionConfigurationProperties.getApplicationCacheVersion() + "_" + user + "_" + containerId;
+    }
+
+    public static String parseServiceUuid(String sessionId) {
+        String[] sessionIdParts = sessionId.split("_");
+        if (sessionIdParts.length == 3) {
+            return sessionIdParts[1];
+        } else {
+            throw new InvalidSessionDataException("Invalid sessionId: " + sessionId);
+        }
+    }
+
+    public static String parseContainerId(String sessionId) {
+        String[] sessionIdParts = sessionId.split("_");
+        if (sessionIdParts.length == 3) {
+            return sessionIdParts[2];
+        } else {
+            throw new InvalidSessionDataException("Invalid sessionId: " + sessionId);
+        }
     }
 }
