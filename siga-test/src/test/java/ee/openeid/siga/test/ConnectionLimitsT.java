@@ -23,7 +23,7 @@ import static ee.openeid.siga.test.utils.RequestBuilder.addDataFileToAsicRequest
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainerRequestFromFile;
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequest;
 import static ee.openeid.siga.test.utils.RequestBuilder.asicContainersDataRequestWithDefault;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConnectionLimitsT extends TestBase {
 
@@ -42,7 +42,7 @@ class ConnectionLimitsT extends TestBase {
             for (int i = 1; i <= 5; i++) {
                 Response validResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
                 sessions.add(flow.getContainerId());
-                assertEquals("Max connection limit reached before configured value", 200, validResponse.getStatusCode());
+                assertEquals(200, validResponse.getStatusCode(), "Max connection limit reached before configured value");
             }
             Response errorResponse = postCreateContainer(flow, asicContainersDataRequestWithDefault());
             expectError(errorResponse, 400, CONNECTION_LIMIT_EXCEPTION);

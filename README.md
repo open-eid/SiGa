@@ -29,13 +29,13 @@ Recommended way of building this project is using [Maven Wrapper](https://github
 
 ## How to deploy
 
-### SiGa Deployment digagram
+### SiGa Deployment diagram
 
 ![SiGa deployment diagram](docs/img/siga_deployment.jpg)
 
 SiGa project compiles into a WAR (Web application archive) file and requires a servlet container to run.
 
-Additionally [Apache Ignite](https://ignite.apache.org/) version 2.12.0 is required for session management. **Ignite servers must be up and running prior SiGa startup.**
+Additionally, [Apache Ignite](https://ignite.apache.org/) version 2.15.0 is required for session management. **Ignite servers must be up and running prior to SiGa startup.**
 Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](docker/siga-ignite/ignite-configuration.xml).
 
 ### Running SiGa in Tomcat
@@ -62,20 +62,49 @@ cp SiGa/siga-webapp/target/siga-webapp-2.0.1.war apache-tomcat-8.5.46/webapps
 ### Configuring SiGa in Tomcat
 
 * Make [`application.properties`](#applicationproperties) available anywhere in the host system.
+* Depending on your system, it might be required to set the `JAVA_HOME` environment variable in file `/etc/default/tomcat8`. For example:
+  * `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64`
 * Create or modify `setenv.sh` placed inside Tomcat `bin` directory:
   * `export JAVA_OPTS="$JAVA_OPTS -Dspring.config.location=file:/path/to/application.properties"`
   * `export JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=list-of-profiles-to-activate"` (see [available profiles](#available-profiles))
 
-Additionally, when running SiGa on a Java version greater than 8, the following parameters should be added to `JAVA_OPTS` (see more on [Ignite Getting Started guide](https://apacheignite.readme.io/docs/getting-started#section-running-ignite-with-java-9-10-11)):
-
+Additionally, the following options must be added to the `JAVA_OPTS` parameter in the same `setenv.sh` file (see more on
+[Ignite Getting Started guide](https://ignite.apache.org/docs/latest/quick-start/java#running-ignite-with-java-11-or-later)):
 ```bash
---add-exports=java.base/jdk.internal.misc=ALL-UNNAMED
---add-exports=java.base/sun.nio.ch=ALL-UNNAMED
---add-exports=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
---add-exports=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
---add-exports=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
---illegal-access=permit
+--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+--add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.time=ALL-UNNAMED
+--add-opens=java.base/sun.security.x509=ALL-UNNAMED
+--add-opens=java.base/java.security.cert=ALL-UNNAMED
 -Djdk.tls.client.protocols=TLSv1.2
+```
+The following options must be added to the `JVM_OPTS` parameter in Ignite's `setenv.sh` file:
+```bash
+--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+--add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.time=ALL-UNNAMED
 ```
 
 #### Available profiles
@@ -305,8 +334,8 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 
 ### For development and testing purposes only!
 
-#### Preconditons
-1. Java 11
+#### Preconditions
+1. Java 17
 2. Docker must be installed and running.
 3. The [siga-demo-application](https://github.com/open-eid/SiGa-demo-application) docker image must be built and available on Docker as `siga-demo-application:latest`.
 
@@ -328,7 +357,7 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 
 4. From your project directory, start up your applications in test mode by running
 ```bash
-docker-compose up
+docker-compose up --build
 ```
 
 Now SiGa itself is accessible https://localhost:8443/siga and siga-demo-application https://siga-demo.localhost:9443/ .

@@ -55,6 +55,24 @@ services:
       - BPL_DEBUG_PORT=7000
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+      # The '--add-opens' below is required for running Apache Ignite with JDK 17
+      - JAVA_OPTS=
+        --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+        --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+        --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+        --add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+        --add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+        --add-opens=java.base/java.io=ALL-UNNAMED
+        --add-opens=java.base/java.nio=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+        --add-opens=java.base/java.lang=ALL-UNNAMED
+        --add-opens=java.base/java.time=ALL-UNNAMED
+        --add-opens=java.base/sun.security.x509=ALL-UNNAMED
+        --add-opens=java.base/java.security.cert=ALL-UNNAMED
     ports:
       - "7443:7443"
       - "7000:7000"
@@ -84,6 +102,24 @@ services:
       - BPL_DEBUG_PORT=6000
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+      # The '--add-opens' below is required for running Apache Ignite with JDK 17
+      - JAVA_OPTS=
+        --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+        --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+        --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+        --add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+        --add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+        --add-opens=java.base/java.io=ALL-UNNAMED
+        --add-opens=java.base/java.nio=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+        --add-opens=java.base/java.lang=ALL-UNNAMED
+        --add-opens=java.base/java.time=ALL-UNNAMED
+        --add-opens=java.base/sun.security.x509=ALL-UNNAMED
+        --add-opens=java.base/java.security.cert=ALL-UNNAMED
     ports:
       - "6443:6443"
       - "6000:6000"
@@ -181,11 +217,14 @@ services:
       - ./docker/tls/siga-admin-smtp/siga-admin-smtp.localhost.keystore.p12:/siga-admin-smtp.localhost.keystore.p12
 
   ignite-01:
-    image: apacheignite/ignite:2.14.0-jdk11
+    # TODO: Use pre-built image when an official Ignite image is released for JDK17.
+    #       '--build' argument in README.md can also be removed after that.
+    #image: apacheignite/ignite:2.15.0
+    build: docker/siga-ignite
     environment:
       - CONFIG_URI=/etc/ignite/ignite-configuration.xml
       - JVM_OPTS=
-        -Xms512m -Xmx512m -server -XX:+AggressiveOpts -XX:+UseG1GC -XX:MaxPermSize=256m -XX:+DisableExplicitGC
+        -Xms512m -Xmx512m -server -XX:+UseG1GC -XX:+DisableExplicitGC
         -Djava.net.preferIPv4Stack=true
     networks:
       default:
@@ -193,13 +232,17 @@ services:
           - ignite-01.localhost
     volumes:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
+      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
 
   ignite-02:
-    image: apacheignite/ignite:2.14.0-jdk11
+    # TODO: Use pre-built image when an official Ignite image is released for JDK17.
+    #       '--build' argument in README.md can also be removed after that.
+    #image: apacheignite/ignite:2.15.0
+    build: docker/siga-ignite
     environment:
       - CONFIG_URI=/etc/ignite/ignite-configuration.xml
       - JVM_OPTS=
-        -Xms512m -Xmx512m -server -XX:+AggressiveOpts -XX:+UseG1GC -XX:MaxPermSize=256m -XX:+DisableExplicitGC
+        -Xms512m -Xmx512m -server -XX:+UseG1GC -XX:+DisableExplicitGC
         -Djava.net.preferIPv4Stack=true
     networks:
       default:
@@ -207,6 +250,7 @@ services:
           - ignite-02.localhost
     volumes:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
+      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
 
 volumes:
   siga-logs-01:

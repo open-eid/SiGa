@@ -7,7 +7,7 @@ import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningResponse
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceResponse
 import ee.openeid.siga.webapp.json.GetContainerSmartIdCertificateChoiceStatusResponse
 import io.restassured.response.Response
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static ee.openeid.siga.test.helper.TestData.CONTAINERS
 import static ee.openeid.siga.test.utils.RequestBuilder.*
