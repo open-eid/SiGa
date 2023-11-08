@@ -6,7 +6,7 @@ Libraries license information was obtained using below command:
 ./mvnw license:aggregate-add-third-party
 ```
 
-Lists of 62 third-party dependencies.
+Lists of 49 third-party dependencies.
 
     (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.2.12 - http://logback.qos.ch/logback-classic)
     (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.2.12 - http://logback.qos.ch/logback-core)
@@ -26,17 +26,7 @@ Lists of 62 third-party dependencies.
     (Apache License, Version 2.0) siga-signature-service (ee.openeid.siga:siga-signature-service:2.8.1 - https://spring.io/projects/spring-boot/siga-parent/siga-signature-service)
     (MIT License) Mobile-ID Java client (ee.sk.mid:mid-rest-java-client:1.4 - https://github.com/SK-EID/mid-rest-java-client)
     (MIT License) Smart-ID Java client (ee.sk.smartid:smart-id-java-client:2.1.4 - https://github.com/SK-EID/smart-id-java-client)
-    (Apache-2.0) gatling-core (io.gatling:gatling-core:3.6.0 - https://gatling.io)
-    (Apache-2.0) gatling-http (io.gatling:gatling-http:3.6.0 - https://gatling.io)
-    (Gatling Highcharts) gatling-charts-highcharts (io.gatling.highcharts:gatling-charts-highcharts:3.6.0 - https://gatling.io)
     (Apache License, Version 2.0) Reactor Test support (io.projectreactor:reactor-test:3.4.32 - https://github.com/reactor/reactor-core)
-    (The Apache License, Version 2.0) allure-junit5 (io.qameta.allure:allure-junit5:2.16.1 - https://github.com/allure-framework/allure-java)
-    (The Apache License, Version 2.0) allure-rest-assured (io.qameta.allure:allure-rest-assured:2.16.1 - https://github.com/allure-framework/allure-java)
-    (The Apache License, Version 2.0) allure-spock (io.qameta.allure:allure-spock:2.16.1 - https://github.com/allure-framework/allure-java)
-    (Apache 2.0) json-path (io.rest-assured:json-path:4.2.1 - http://maven.apache.org)
-    (Apache 2.0) REST Assured (io.rest-assured:rest-assured:4.2.1 - http://code.google.com/p/rest-assured)
-    (Apache 2.0) rest-assured-common (io.rest-assured:rest-assured-common:4.2.1 - http://maven.apache.org)
-    (Apache 2.0) xml-path (io.rest-assured:xml-path:4.2.1 - http://code.google.com/p/rest-assured/xml-path)
     (EPL 2.0) (GPL2 w/ CPE) javax.ws.rs-api (javax.ws.rs:javax.ws.rs-api:2.1.1 - https://github.com/eclipse-ee4j/jaxrs-api)
     (Apache-2.0) Apache Commons Compress (org.apache.commons:commons-compress:1.24.0 - https://commons.apache.org/proper/commons-compress/)
     (Apache License, Version 2.0) Apache Commons Text (org.apache.commons:commons-text:1.10.0 - https://commons.apache.org/proper/commons-text)
@@ -47,16 +37,13 @@ Lists of 62 third-party dependencies.
     (Apache 2.0) Awaitility (org.awaitility:awaitility:4.2.0 - http://awaitility.org)
     (Bouncy Castle Licence) Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk15on:1.70 - https://www.bouncycastle.org/java.html)
     (Bouncy Castle Licence) Bouncy Castle Provider (org.bouncycastle:bcprov-jdk15on:1.70 - https://www.bouncycastle.org/java.html)
-    (The Apache Software License, Version 2.0) Apache Groovy (org.codehaus.groovy:groovy-all:2.5.15 - https://groovy-lang.org)
     (BSD-3-Clause) janino (org.codehaus.janino:janino:3.1.9 - http://janino-compiler.github.io/janino/)
     (GNU Lesser General Public License, Version 2.1) DigiDoc4j (org.digidoc4j:digidoc4j:5.2.0 - https://github.com/open-eid/digidoc4j)
     (Eclipse Distribution License - v 1.0) JAXB Runtime (org.glassfish.jaxb:jaxb-runtime:4.0.3 - https://eclipse-ee4j.github.io/jaxb-ri/)
-    (BSD License 3) Hamcrest (org.hamcrest:hamcrest:2.2 - http://hamcrest.org/JavaHamcrest/)
     (Public Domain) JSON in Java (org.json:json:20230618 - https://github.com/douglascrockford/JSON-java)
     (Apache License, Version 2.0) Liquibase (org.liquibase:liquibase-core:4.9.1 - http://www.liquibase.org/liquibase-root/liquibase-dist)
     (BSD-2-Clause) PostgreSQL JDBC Driver (org.postgresql:postgresql:42.6.0 - https://jdbc.postgresql.org)
     (The MIT License) Project Lombok (org.projectlombok:lombok:1.18.26 - https://projectlombok.org)
-    (The Apache Software License, Version 2.0) Spock Framework - Core Module (org.spockframework:spock-core:1.3-groovy-2.5 - http://spockframework.org)
     (Apache License, Version 2.0) Spring Web (org.springframework:spring-web:5.3.29 - https://github.com/spring-projects/spring-framework)
     (Apache License, Version 2.0) spring-boot-starter (org.springframework.boot:spring-boot-starter:2.7.15 - https://spring.io/projects/spring-boot)
     (Apache License, Version 2.0) spring-boot-starter-actuator (org.springframework.boot:spring-boot-starter-actuator:2.7.15 - https://spring.io/projects/spring-boot)

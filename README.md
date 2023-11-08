@@ -379,3 +379,7 @@ You can view the logs for all the running containers at http://localhost:11080 .
 ```bash
 docker-compose up
 ```
+
+## Integration tests
+
+Integration tests for SiGa are available in the following repository: https://github.com/open-eid/SiGa-Tests

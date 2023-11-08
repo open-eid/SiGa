@@ -1,5 +1,4 @@
 **/target/
-**/allure-results/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
