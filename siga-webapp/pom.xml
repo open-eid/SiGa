@@ -12,7 +12,7 @@
 
     <artifactId>siga-webapp</artifactId>
     <version>2.8.1</version>
-    <packaging>war</packaging>
+    <packaging>${webapp.packaging}</packaging>
 
     <properties>
         <spring-boot.build-image.builder>paketobuildpacks/builder:tiny</spring-boot.build-image.builder>
@@ -99,6 +99,20 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <SiGa-Webapp-Name>${project.artifactId}</SiGa-Webapp-Name>
+                            <SiGa-Webapp-Version>${project.version}</SiGa-Webapp-Version>
+                            <SiGa-Webapp-Build-Time>${maven.build.timestamp}</SiGa-Webapp-Build-Time>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifestEntries>

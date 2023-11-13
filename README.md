@@ -4,6 +4,9 @@
 
 Signature Gateway is a web service for creating and signing ASIC-E containers and validating both ASIC-E and BDOC containers with XAdES signatures.
 
+## Prerequisites:
+For building and running SiGa you need Java 17.
+
 ## External services used by SiGa
 
 * [Signature Validation Service](http://open-eid.github.io/SiVa/) for validating signatures.
@@ -19,47 +22,106 @@ Signature Gateway is a web service for creating and signing ASIC-E containers an
 
 ## How to build
 
-### Using Maven Wrapper
+SiGa project compiles into a JAR (Java archive) or WAR (Web application archive) file. The former one includes embedded
+Tomcat, while the latter one requires a separate servlet container to run.
 
-Recommended way of building this project is using [Maven Wrapper](https://github.com/takari/maven-wrapper) to build it.
+### Building JAR with embedded Tomcat
 
 ```bash
 ./mvnw clean install
+```
+
+### Building WAR for a separate servlet container
+
+```bash
+./mvnw clean install -Pwar
 ```
 
 ## How to deploy
 
 ### SiGa Deployment diagram
 
-![SiGa deployment diagram](docs/img/siga_deployment.jpg)
+![SiGa deployment diagram](docs/img/siga_deployment.png)
 
-SiGa project compiles into a WAR (Web application archive) file and requires a servlet container to run.
+In addition to a JAR or WAR file containing compiled SiGa, [Apache Ignite](https://ignite.apache.org/) version 2.15.0 is
+required for session management.
 
-Additionally, [Apache Ignite](https://ignite.apache.org/) version 2.15.0 is required for session management. **Ignite servers must be up and running prior to SiGa startup.**
-Ignite servers must be configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen [here](docker/siga-ignite/ignite-configuration.xml).
+### Running Apache Ignite
 
-### Running SiGa in Tomcat
+**Ignite servers must be up and running prior to SiGa startup.** Ignite servers must be
+configured the same way as the Ignite client embedded in SiGa. An example Ignite configuration file can be seen
+[here](docker/siga-ignite/ignite-configuration.xml).
+Additionally, the following options must be added to the `JVM_OPTS` parameter in Ignite's `setenv.sh` file:
+```bash
+--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
+--add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.time=ALL-UNNAMED
+```
+For general instructions, refer to [the official documentation](https://ignite.apache.org/docs/latest/quick-start/java) to
+configure and run Ignite.
 
-First Tomcat web servlet container needs to be downloaded. For example, when using the latest 8.5 version, which at the time of writing was 8.5.46, could be downloaded with `wget`:
+### Running SiGa
 
+#### Running SiGa with embedded Tomcat
+
+* Make [`application.properties`](#applicationproperties) available anywhere in the host system.
+* Set $JAVA_OPTS environment variable with the required options (see more on
+  [Ignite Getting Started guide](https://ignite.apache.org/docs/latest/quick-start/java#running-ignite-with-java-11-or-later)).
+  Replace the path of `application.properties` in the following command to point to your own file.
+  ```bash
+  export JAVA_OPTS="-Dspring.config.location=file:/path/to/application.properties\
+    --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED\
+    --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED\
+    --add-opens=java.base/sun.nio.ch=ALL-UNNAMED\
+    --add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED\
+    --add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED\
+    --add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED\
+    --add-opens=java.base/java.io=ALL-UNNAMED\
+    --add-opens=java.base/java.nio=ALL-UNNAMED\
+    --add-opens=java.base/java.util=ALL-UNNAMED\
+    --add-opens=java.base/java.util.concurrent=ALL-UNNAMED\
+    --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED\
+    --add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED\
+    --add-opens=java.base/java.lang=ALL-UNNAMED\
+    --add-opens=java.base/java.time=ALL-UNNAMED\
+    --add-opens=java.base/sun.security.x509=ALL-UNNAMED\
+    --add-opens=java.base/java.security.cert=ALL-UNNAMED\
+    -Djdk.tls.client.protocols=TLSv1.2"
+  ```
+* Run JAR file with SiGa webapp and embedded Tomcat (X.X.X denotes the version you are using):
+  ```bash
+  java $JAVA_OPTS -jar siga-webapp/target/siga-webapp-X.X.X.jar
+  ```
+
+#### Running SiGa in separate Tomcat installation
+
+At first, Tomcat web servlet container needs to be downloaded. For example, version 8.5.46 could be downloaded with the
+following command using `wget`:
 ```bash
 wget https://www-eu.apache.org/dist/tomcat/tomcat-8/v8.5.46/bin/apache-tomcat-8.5.46.tar.gz
 ```
 
 Unpack it somewhere:
-
 ```bash
 tar -xzf apache-tomcat-8.5.46.tar.gz
 ```
 
-Copy the built WAR file into Tomcat `webapps` directory and start the servlet container:
-
+Copy the built WAR file containing SiGa into Tomcat's `webapps` directory and start the servlet container:
 ```bash
 cp SiGa/siga-webapp/target/siga-webapp-2.0.1.war apache-tomcat-8.5.46/webapps
 ./apache-tomcat-8.5.46/bin/catalina.sh run
 ```
-
-### Configuring SiGa in Tomcat
 
 * Make [`application.properties`](#applicationproperties) available anywhere in the host system.
 * Depending on your system, it might be required to set the `JAVA_HOME` environment variable in file `/etc/default/tomcat8`. For example:
@@ -89,34 +151,17 @@ Additionally, the following options must be added to the `JAVA_OPTS` parameter i
 --add-opens=java.base/java.security.cert=ALL-UNNAMED
 -Djdk.tls.client.protocols=TLSv1.2
 ```
-The following options must be added to the `JVM_OPTS` parameter in Ignite's `setenv.sh` file:
-```bash
---add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
---add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
---add-opens=java.base/sun.nio.ch=ALL-UNNAMED
---add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
---add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED
---add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
---add-opens=java.base/java.io=ALL-UNNAMED
---add-opens=java.base/java.nio=ALL-UNNAMED
---add-opens=java.base/java.util=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
---add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED
---add-opens=java.base/java.lang=ALL-UNNAMED
---add-opens=java.base/java.time=ALL-UNNAMED
-```
 
-#### Available profiles
+### Available Spring profiles
 
-| Profile name       | Description                                             |
-| ------------------ | ------------------------------------------------------- |
-| digidoc4jProd      | Use DD4J production mode                                |
-| digidoc4jTest      | Use DD4J test mode (prefer AIA-OCSP)                    |
-| digidoc4jPerf      | Use DD4J test mode (without AIA-OCSP)                   |
-| mobileId           | Enable endpoints for signing with Mobile-ID             |
-| smartId            | Enable endpoints for signing with Smart-ID             |
-| datafileContainer  | Enable datafile container endpoints*                   |
+| Profile name      | Description                                 |
+|-------------------|---------------------------------------------|
+| digidoc4jProd     | Use DD4J production mode                    |
+| digidoc4jTest     | Use DD4J test mode (prefer AIA-OCSP)        |
+| digidoc4jPerf     | Use DD4J test mode (without AIA-OCSP)       |
+| mobileId          | Enable endpoints for signing with Mobile-ID |
+| smartId           | Enable endpoints for signing with Smart-ID  |
+| datafileContainer | Enable datafile container endpoints*        |
 
 **NB:** exactly one of `digidoc4jProd`, `digidoc4jTest` and `digidoc4jPerf` must be active!
 
@@ -347,7 +392,7 @@ A table holding ip permissions for external Siga service (SOAP PROXY)
 
 2. Build SiGa webapp docker image 
 ```bash
-./mvnw spring-boot:build-image -pl siga-webapp
+./mvnw spring-boot:build-image -pl siga-webapp -DskipTests
 ```
 
 3. Generate application keystores/truststores
@@ -372,7 +417,7 @@ You can view the logs for all the running containers at http://localhost:11080 .
 
 2. Build SiGa webapp docker image
 ```bash
-./mvnw spring-boot:build-image -pl siga-webapp
+./mvnw spring-boot:build-image -pl siga-webapp -DskipTests
 ```
 
 3. Run the image
