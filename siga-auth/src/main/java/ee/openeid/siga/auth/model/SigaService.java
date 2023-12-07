@@ -1,29 +1,17 @@
 package ee.openeid.siga.auth.model;
 
+import ee.openeid.siga.auth.EncryptedStringConverter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.jasypt.hibernate5.type.EncryptedStringType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static ee.openeid.siga.auth.HibernateStringEncryptorConfiguration.HIBERNATE_STRING_ENCRYPTOR;
-
-@TypeDef(
-        name = "encryptedString", typeClass = EncryptedStringType.class,
-        parameters = {
-                @Parameter(name = "encryptorRegisteredName", value = HIBERNATE_STRING_ENCRYPTOR)
-        }
-)
 
 @Entity
 @Getter
@@ -43,7 +31,7 @@ public class SigaService {
     private String name;
     @NonNull
     private String uuid;
-    @Type(type = "encryptedString")
+    @Convert(converter = EncryptedStringConverter.class)
     @NonNull
     private String signingSecret;
     @NonNull

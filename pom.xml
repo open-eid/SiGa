@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.15</version>
+        <version>3.2.0</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -41,45 +41,37 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <awaitility.version>4.2.0</awaitility.version>
         <bouncycastle.version>1.70</bouncycastle.version>
         <commons-compress.version>1.24.0</commons-compress.version>
         <digidoc4j.version>5.2.0</digidoc4j.version>
         <guava.version>32.1.2-jre</guava.version>
-        <h2.version>2.2.222</h2.version>
         <ignite.version>2.15.0</ignite.version>
-        <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-        <jaxb-runtime.version>4.0.3</jaxb-runtime.version>
+        <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
+        <jaxb-runtime.version>2.3.9</jaxb-runtime.version>
         <json.version>20230618</json.version>
-        <logback-classic.version>1.2.12</logback-classic.version>
 
         <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
-        <cxf-wadl2java-plugin.version>3.6.1</cxf-wadl2java-plugin.version>
+        <cxf-wadl2java-plugin.version>4.0.3</cxf-wadl2java-plugin.version>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <spring-boot.build-image.builder>paketobuildpacks/builder:tiny</spring-boot.build-image.builder>
         <spring-boot.build-image.imageName>${project.artifactId}:latest</spring-boot.build-image.imageName>
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
-        <snakeyaml.version>1.33</snakeyaml.version>
-        <tomcat.version>9.0.80</tomcat.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback-classic.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${logback-classic.version}</version>
         </dependency>
         <dependency>
             <groupId>co.elastic.logging</groupId>
@@ -90,6 +82,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <!-- Solves a duplicate JSON class warning in SessionStatusReprocessingServiceTest -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

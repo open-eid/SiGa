@@ -16,6 +16,7 @@ public class HibernateStringEncryptorConfiguration {
         HibernatePBEStringEncryptor hibernateEncryptor = new HibernatePBEStringEncryptor();
         hibernateEncryptor.setRegisteredName(HIBERNATE_STRING_ENCRYPTOR);
         hibernateEncryptor.setProvider(new BouncyCastleProvider());
+        // TODO SIGA-703: jasypt seems to be a dead project and not updated for Hibernate 6. It should be replaced with something else.
         hibernateEncryptor.setPassword(securityConfigurationProperties.getJasypt().getEncryptionKey());
         hibernateEncryptor.setAlgorithm(securityConfigurationProperties.getJasypt().getEncryptionAlgo());
         return hibernateEncryptor;

@@ -1,25 +1,12 @@
 package ee.openeid.siga.monitoring;
 
 import com.jcabi.manifests.Manifests;
-import com.jcabi.manifests.ServletMfs;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.ServletContext;
 
 @Component
 @Slf4j
 public class ManifestReader {
-
-    @Autowired
-    public ManifestReader(final ServletContext servletContext) {
-        try {
-            Manifests.DEFAULT.append(new ServletMfs(servletContext));
-        } catch (Exception e) {
-            log.error("Failed to set up " + e.getMessage(), e);
-        }
-    }
 
     public String read(final String parameterName) {
         try {

@@ -12,11 +12,15 @@ import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.hashcode.SignatureDataFilesParser;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.digidoc4j.*;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.DetachedXadesSignatureBuilder;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.DigestDataFile;
+import org.digidoc4j.Signature;
+import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.exceptions.TechnicalException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,9 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class HashcodeContainerSigningService extends ContainerSigningService implements HashcodeSessionHolder {
-    private final Configuration configuration;
 
     @Override
     protected DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {

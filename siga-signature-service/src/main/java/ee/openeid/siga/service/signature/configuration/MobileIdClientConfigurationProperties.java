@@ -1,14 +1,14 @@
 package ee.openeid.siga.service.signature.configuration;
 
+import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
 @ConfigurationProperties(prefix = "siga.midrest")
 public class MobileIdClientConfigurationProperties {
 
@@ -29,6 +28,11 @@ public class MobileIdClientConfigurationProperties {
     private Duration statusPollingDelay = Duration.ofMillis(6000);
     private String url;
     private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT"));
+
+    @Autowired
+    public MobileIdClientConfigurationProperties(Environment environment) {
+        this.environment = environment;
+    }
 
     @PostConstruct
     public void validateConfiguration() {

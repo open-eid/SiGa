@@ -44,8 +44,9 @@ import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
 
 @Slf4j
 @Getter(AccessLevel.PACKAGE)
-@Setter(onMethod = @__({@Autowired}))
+@Setter(onMethod_ = {@Autowired})
 public abstract class ContainerSigningService {
+    protected Configuration configuration;
     static final String UNABLE_TO_FINALIZE_SIGNATURE = "Unable to finalize signature";
     @Getter
     @Delegate

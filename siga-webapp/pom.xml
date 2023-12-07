@@ -73,6 +73,11 @@
             <version>3.1.9</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${jaxb-runtime.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.awaitility</groupId>

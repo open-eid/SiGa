@@ -80,7 +80,7 @@ class HttpClientImplTest {
     @EnumSource(
             value = HttpStatus.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "CHECKPOINT"}
+            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "EARLY_HINTS", "CHECKPOINT"}
     )
     void getMethodWithNon1xxandNonOkStatusCodesWithoutBody(HttpStatus status) {
         WireMock.stubFor(
@@ -99,7 +99,7 @@ class HttpClientImplTest {
     @EnumSource(
             value = HttpStatus.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "CHECKPOINT", "NO_CONTENT", "NOT_MODIFIED"}
+            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "EARLY_HINTS", "CHECKPOINT", "NO_CONTENT", "NOT_MODIFIED"}
     )
     void getMethodWithNon1xxandNonOkStatusCodesWithBody(HttpStatus status) {
         WireMock.stubFor(
@@ -119,7 +119,7 @@ class HttpClientImplTest {
     @EnumSource(
             value = HttpStatus.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "CHECKPOINT"}
+            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "EARLY_HINTS", "CHECKPOINT"}
     )
     void postMethodWithNon1xxandNonOkStatusCodesWithoutBody(HttpStatus status) {
         WireMock.stubFor(
@@ -140,7 +140,7 @@ class HttpClientImplTest {
     @EnumSource(
             value = HttpStatus.class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "CHECKPOINT", "NO_CONTENT", "NOT_MODIFIED"}
+            names = {"OK", "CONTINUE", "SWITCHING_PROTOCOLS", "PROCESSING", "EARLY_HINTS", "CHECKPOINT", "NO_CONTENT", "NOT_MODIFIED"}
     )
     void postMethodWithNon1xxandNonOkStatusCodesWithBody(HttpStatus status) {
         WireMock.stubFor(

@@ -5,17 +5,16 @@ import static java.time.Instant.ofEpochMilli;
 import java.io.IOException;
 import java.time.Duration;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import ee.openeid.siga.auth.filter.hmac.HmacHeader;
 import ee.openeid.siga.common.event.SigaEvent;
-import ee.openeid.siga.common.event.SigaEvent.EventResultType;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import lombok.RequiredArgsConstructor;

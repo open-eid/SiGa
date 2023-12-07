@@ -47,13 +47,15 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
     }
 
     private static Mono<ClientResponse> verifyResponseStatus(ClientResponse clientResponse) {
-        if (clientResponse.statusCode() == HttpStatus.OK) {
+        int statusCode = clientResponse.statusCode().value();
+        if (statusCode == HttpStatus.OK.value()) {
             return Mono.just(clientResponse);
         }
         return clientResponse.bodyToMono(byte[].class)
                 .defaultIfEmpty(ArrayUtils.EMPTY_BYTE_ARRAY)
                 .map(bytes -> {
-                    throw new HttpStatusException(clientResponse.statusCode(), bytes);
+                    HttpStatus httpStatus = HttpStatus.resolve(statusCode);
+                    throw new HttpStatusException(httpStatus, bytes);
                 });
     }
 }

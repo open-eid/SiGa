@@ -18,7 +18,6 @@ import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureProfile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Base64Utils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -63,7 +62,11 @@ public class SivaClient {
                 }
             }
         }
-        log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", httpStatus.value(), httpStatus.getReasonPhrase(), tryToParseResponseBody(e.getResponseBody()));
+        if (httpStatus == null) {
+            log.error("Unexpected exception was thrown by SiVa. Status: unknown, Response body: {} ", tryToParseResponseBody(e.getResponseBody()));
+        } else {
+            log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", httpStatus.value(), httpStatus.getReasonPhrase(), tryToParseResponseBody(e.getResponseBody()));
+        }
         throw new TechnicalException("Unable to get valid response from client");
     }
 
@@ -74,7 +77,7 @@ public class SivaClient {
         try {
             return new String(responseBody, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return Base64Utils.encodeToString(responseBody);
+            return Base64.getEncoder().encodeToString(responseBody);
         }
     }
 

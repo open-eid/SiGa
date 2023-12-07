@@ -6,9 +6,14 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.digidoc4j.*;
+import org.digidoc4j.Container;
+import org.digidoc4j.DataFile;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.Signature;
+import org.digidoc4j.SignatureBuilder;
+import org.digidoc4j.SignatureParameters;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Profile("datafileContainer")
-@RequiredArgsConstructor
 public class AsicContainerSigningService extends ContainerSigningService implements AsicSessionHolder {
-    private final Configuration configuration;
 
     @Override
     protected DataToSign buildDataToSign(Session session, SignatureParameters signatureParameters) {

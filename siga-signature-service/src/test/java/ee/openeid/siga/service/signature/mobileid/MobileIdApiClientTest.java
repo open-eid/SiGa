@@ -28,7 +28,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 
-import javax.ws.rs.ServerErrorException;
+import jakarta.ws.rs.ServerErrorException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;

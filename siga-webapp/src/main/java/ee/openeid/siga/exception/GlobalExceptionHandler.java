@@ -11,6 +11,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -54,6 +55,16 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorResponse notFoundException(NoResourceFoundException exception) {
+        log.error("Not found exception - {}", exception.getLocalizedMessage(), exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorCode(ErrorResponseCode.RESOURCE_NOT_FOUND_EXCEPTION.name());
         return errorResponse;
     }
 

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -64,8 +65,9 @@ class SivaClientTest {
     }
 
     @ParameterizedTest
+    @NullSource
     @EnumSource(value = HttpStatus.class, names = {"NOT_FOUND", "INTERNAL_SERVER_ERROR"})
-    void siva404and500HttpCodeTest(HttpStatus status) {
+    void sivaHttpStatusCodesTest(HttpStatus status) {
         when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
                 .thenThrow(new HttpStatusException(status, ArrayUtils.EMPTY_BYTE_ARRAY));
 
