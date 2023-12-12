@@ -266,12 +266,12 @@ spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yaml
 
 Use `classpath:db/changelog/db.changelog-master-dev.yaml` only for test/dev purposes. This changeset inserts default testing values into services database.
 
-Out-of-the-box, SiGa supports **H2** and **PostgreSQL** databases. **H2** (which is also configured by default in the example configuration) is good for development and testing, but in production using **PostgreSQL** is recommended.
+Out-of-the-box, SiGa supports **H2** and **PostgreSQL** databases. **H2** is good for development and testing, but in production using **PostgreSQL** is recommended.
 An example for configuring SiGa to use PostgreSQL:
 
 ```
-spring.datasource.continue-on-error=false
-spring.datasource.platform=postgresql
+spring.sql.init.continue-on-error=false
+spring.sql.init.platform=postgresql
 spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://127.0.0.1:5432/database
 spring.datasource.username=user
