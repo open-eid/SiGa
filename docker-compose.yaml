@@ -57,6 +57,7 @@ services:
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
+        -Djava.net.preferIPv4Stack=true
         --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
         --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
         --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
@@ -103,6 +104,7 @@ services:
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
+        -Djava.net.preferIPv4Stack=true
         --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
         --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
         --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
