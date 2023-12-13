@@ -10,7 +10,6 @@ import ee.openeid.siga.auth.filter.logging.CorrelationIdForAccessLogFilter;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -19,10 +18,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -45,11 +46,9 @@ public class SecurityConfiguration {
     private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(new AntPathRequestMatcher("/siga.wadl"), new AntPathRequestMatcher("/siga.xsd"),
             new AntPathRequestMatcher("/actuator/health"), new AntPathRequestMatcher("/actuator/heartbeat"), new AntPathRequestMatcher("/actuator/version"));
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
-    private final SecurityConfigurationProperties configurationProperties;
     private final HmacAuthenticationProvider hmacAuthenticationProvider;
     private final MethodFilter methodFilter;
     private final SigaEventLoggingFilter eventsLoggingFilter;
-    private final SigaEventLogger sigaEventLogger;
     private final RequestDataVolumeFilter requestDataVolumeFilter;
     private final CorrelationIdForAccessLogFilter correlationIdForAccessLogFilter;
     private final ContainerIdForAccessLogFilter containerIdForAccessLogFilter;
@@ -68,11 +67,9 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, HmacAuthenticationFilter hmacAuthenticationFilter) throws Exception {
+        http.sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
+        http.exceptionHandling(Customizer.withDefaults());
         http
-                .sessionManagement().sessionCreationPolicy(STATELESS)
-                .and()
-                .exceptionHandling()
-                .and()
                 .addFilterBefore(hmacAuthenticationFilter, AnonymousAuthenticationFilter.class)
                 .addFilterBefore((servletRequest, servletResponse, filterChain) -> {
                     ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
@@ -82,22 +79,21 @@ public class SecurityConfiguration {
                 .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterBefore(correlationIdForAccessLogFilter, MethodFilter.class)
-                .addFilterAfter(containerIdForAccessLogFilter, MethodFilter.class)
-                .authorizeRequests()
-                .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers(PROTECTED_URLS).authenticated()
-                .and()
-                .csrf().disable()
-                .formLogin().disable()
-                .httpBasic().disable()
-                .logout().disable();
-
+                .addFilterAfter(containerIdForAccessLogFilter, MethodFilter.class);
+        http.authorizeHttpRequests(auth -> auth
+                    .requestMatchers(PUBLIC_URLS).permitAll()
+                    .requestMatchers(PROTECTED_URLS).authenticated()
+                );
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.formLogin(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable);
+        http.logout(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
     @Bean
     HmacAuthenticationFilter authenticationFilter(SecurityConfigurationProperties configurationProperties,
-                                                  SigaEventLogger sigaEventLogger, AuthenticationManager authenticationManager) throws Exception {
+                                                  SigaEventLogger sigaEventLogger, AuthenticationManager authenticationManager) {
         final HmacAuthenticationFilter filter = new HmacAuthenticationFilter(sigaEventLogger, PROTECTED_URLS, configurationProperties);
         filter.setAuthenticationManager(authenticationManager);
         return filter;

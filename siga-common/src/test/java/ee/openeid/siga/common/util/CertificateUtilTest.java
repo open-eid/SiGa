@@ -74,7 +74,7 @@ class CertificateUtilTest {
     @Test
     void createValidCertificate() {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(ROOT_CERTIFICATE.getBytes()));
-        assertEquals("EMAILADDRESS=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerDN().getName());
+        assertEquals("OID.1.2.840.113549.1.9.1=pki@sk.ee, CN=TEST of EE Certification Centre Root CA, O=AS Sertifitseerimiskeskus, C=EE", certificate.getIssuerX500Principal().getName("RFC1779"));
     }
 
     @Test
