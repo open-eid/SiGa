@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class SigaUserDetails implements UserDetails {
+    private int serviceId;
     private String clientName;
     private String clientUuid;
     private String serviceName;

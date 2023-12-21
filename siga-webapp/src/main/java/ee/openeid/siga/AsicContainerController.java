@@ -1,7 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
-import ee.openeid.siga.auth.repository.ServiceRepository;
+import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
@@ -13,7 +13,28 @@ import ee.openeid.siga.service.signature.container.asic.AsicContainerService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateContainerDataFileRequest;
+import ee.openeid.siga.webapp.json.CreateContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningRequest;
+import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.CreateContainerRequest;
+import ee.openeid.siga.webapp.json.CreateContainerResponse;
+import ee.openeid.siga.webapp.json.CreateContainerValidationReportRequest;
+import ee.openeid.siga.webapp.json.CreateContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.DataFile;
+import ee.openeid.siga.webapp.json.DeleteContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.DeleteContainerResponse;
+import ee.openeid.siga.webapp.json.GetContainerDataFilesResponse;
+import ee.openeid.siga.webapp.json.GetContainerResponse;
+import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
+import ee.openeid.siga.webapp.json.GetContainerSignaturesResponse;
+import ee.openeid.siga.webapp.json.GetContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import ee.openeid.siga.webapp.json.UpdateContainerRemoteSigningRequest;
+import ee.openeid.siga.webapp.json.UpdateContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.UploadContainerRequest;
+import ee.openeid.siga.webapp.json.UploadContainerResponse;
+import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
@@ -31,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
+import java.util.OptionalInt;
 
 @RestController
 @Profile("datafileContainer")
@@ -41,7 +63,6 @@ public class AsicContainerController {
     private final AsicContainerValidationService validationService;
     private final AsicContainerSigningService signingService;
     private final ConnectionRepository connectionRepository;
-    private final ServiceRepository serviceRepository;
     private final RequestValidator validator;
 
     @SigaEventLog(eventName = SigaEventName.CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
@@ -209,12 +230,21 @@ public class AsicContainerController {
         validator.validateContainerId(containerId);
         String result = containerService.closeSession(containerId);
 
-        String serviceUuid = SecurityContextHolder.getContext().getAuthentication().getName();
-        serviceRepository.findByUuid(serviceUuid)
-                .ifPresent(service -> connectionRepository.deleteByContainerIdAndServiceId(containerId, service.getId()));
+        findCurrentSessionServiceId().ifPresent(
+                serviceId -> connectionRepository.deleteByContainerIdAndServiceId(containerId, serviceId)
+        );
 
         DeleteContainerResponse response = new DeleteContainerResponse();
         response.setResult(result);
         return response;
+    }
+
+    private OptionalInt findCurrentSessionServiceId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof SigaUserDetails userDetails) {
+            return OptionalInt.of(userDetails.getServiceId());
+        } else {
+            return OptionalInt.empty();
+        }
     }
 }

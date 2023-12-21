@@ -1,7 +1,6 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.repository.ConnectionRepository;
-import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.Param;
 import ee.openeid.siga.common.event.SigaEventLog;
@@ -13,17 +12,45 @@ import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSer
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
-import ee.openeid.siga.webapp.json.*;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerDataFileRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerValidationReportRequest;
+import ee.openeid.siga.webapp.json.CreateHashcodeContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.DeleteHashcodeContainerDataFileResponse;
+import ee.openeid.siga.webapp.json.DeleteHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerDataFilesResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerSignaturesResponse;
+import ee.openeid.siga.webapp.json.GetHashcodeContainerValidationReportResponse;
+import ee.openeid.siga.webapp.json.HashcodeDataFile;
+import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import ee.openeid.siga.webapp.json.UpdateHashcodeContainerRemoteSigningRequest;
+import ee.openeid.siga.webapp.json.UpdateHashcodeContainerRemoteSigningResponse;
+import ee.openeid.siga.webapp.json.UploadHashcodeContainerRequest;
+import ee.openeid.siga.webapp.json.UploadHashcodeContainerResponse;
+import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
+import java.util.OptionalInt;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +60,6 @@ public class HashcodeContainerController {
     private final HashcodeContainerSigningService signingService;
     private final ConnectionRepository connectionRepository;
     private final RequestValidator validator;
-    private final ServiceRepository serviceRepository;
 
     @SigaEventLog(eventName = SigaEventName.HC_CREATE_CONTAINER, logParameters = {@Param(index = 0, fields = {@XPath(name = "no_of_datafiles", xpath = "helper:size(dataFiles)")})}, logReturnObject = {@XPath(name = "container_id", xpath = "containerId")})
     @PostMapping(value = "/hashcodecontainers", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -197,14 +223,22 @@ public class HashcodeContainerController {
         validator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);
 
-        String serviceUuid = SecurityContextHolder.getContext().getAuthentication().getName();
-        serviceRepository.findByUuid(serviceUuid)
-                .ifPresent(service -> connectionRepository.deleteByContainerIdAndServiceId(containerId, service.getId()));
-
+        findCurrentSessionServiceId().ifPresent(
+                serviceId -> connectionRepository.deleteByContainerIdAndServiceId(containerId, serviceId)
+        );
 
         DeleteHashcodeContainerResponse response = new DeleteHashcodeContainerResponse();
         response.setResult(result.name());
         return response;
+    }
+
+    private OptionalInt findCurrentSessionServiceId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof SigaUserDetails userDetails) {
+            return OptionalInt.of(userDetails.getServiceId());
+        } else {
+            return OptionalInt.empty();
+        }
     }
 
 }
