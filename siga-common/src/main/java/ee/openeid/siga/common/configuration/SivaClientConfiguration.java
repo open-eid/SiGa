@@ -32,6 +32,9 @@ public class SivaClientConfiguration {
     public HttpClientImpl sivaHttpClient(SivaClientConfigurationProperties configuration) {
         WebClient webClient = WebClient
                 .builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(
+                        Math.toIntExact(configuration.getMaxInMemorySize().toBytes())
+                ))
                 .baseUrl(configuration.getUrl())
                 .clientConnector(new ReactorClientHttpConnector(createHttpClient(configuration)))
                 .build();

@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.time.DurationMax;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
+import org.springframework.util.unit.DataSize;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotBlank;
@@ -30,4 +31,5 @@ public class SivaClientConfigurationProperties {
     private Duration writeTimeout;
     @DurationMin(message = "duration must not be negative")
     private Duration readTimeout;
+    private DataSize maxInMemorySize = DataSize.ofKilobytes(256);
 }
