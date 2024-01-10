@@ -200,6 +200,7 @@ More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Qu
 | siga.siva.connection-timeout   | N         | Connection timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default. | `PT10S`                                                                |
 | siga.siva.write-timeout        | N         | Write timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default.      | `PT10S`                                                                |
 | siga.siva.read-timeout         | N         | Read timeout for regular connections in ISO-8601 duration format `PnDTnHnMn.nS`. The input is truncated to millisecond precision. If not provided, defaults to system default.       | `PT10S`                                                                |
+| siga.siva.max-in-memory-size   | N         | Maximum size of data to be sent to SiVa. If not provided, defaults to 256KB. Note that the default size may not be enough for containers with dozens of signatures.                  | `5MB`                                                                  |
 
 #### SiGa MID REST configuration
 
