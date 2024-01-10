@@ -3,10 +3,12 @@ package ee.openeid.siga.service.signature.container;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
@@ -87,6 +89,7 @@ public class MobileIdSigningDelegate {
             throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + ". No data to sign with signature Id: " + signatureId);
         }
         SignatureSession signatureSession = session.getSignatureSession(signatureId);
+        ensureSigningTypeIsMobileId(signatureSession);
         SessionStatus sessionStatus = signatureSession.getSessionStatus();
         String status = sessionStatus.getStatus();
         StatusError statusError = sessionStatus.getStatusError();
@@ -189,5 +192,12 @@ public class MobileIdSigningDelegate {
                 .errorMessage(ex.getMessage())
                 .build());
         containerSigningService.getSessionService().update(session);
+    }
+
+    private void ensureSigningTypeIsMobileId(SignatureSession signatureSession) {
+        SigningType signingType = signatureSession.getSigningType();
+        if (signingType != MOBILE_ID) {
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + " for signing type: " + signingType);
+        }
     }
 }

@@ -3,10 +3,12 @@ package ee.openeid.siga.service.signature.container;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
+import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.CertificateSession;
 import ee.openeid.siga.common.session.Session;
@@ -210,6 +212,7 @@ public class SmartIdSigningDelegate {
             throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + ". No data to sign with signature Id: " + signatureId);
         }
         SignatureSession signatureSession = session.getSignatureSession(signatureId);
+        ensureSigningTypeIsSmartId(signatureSession);
         SessionStatus sessionStatus = signatureSession.getSessionStatus();
         String status = sessionStatus.getStatus();
         StatusError statusError = sessionStatus.getStatusError();
@@ -312,5 +315,12 @@ public class SmartIdSigningDelegate {
                 .errorMessage(ex.getMessage())
                 .build());
         containerSigningService.getSessionService().update(session);
+    }
+
+    private void ensureSigningTypeIsSmartId(SignatureSession signatureSession) {
+        SigningType signingType = signatureSession.getSigningType();
+        if (signingType != SMART_ID) {
+            throw new InvalidSessionDataException(UNABLE_TO_FINALIZE_SIGNATURE + " for signing type: " + signingType);
+        }
     }
 }
