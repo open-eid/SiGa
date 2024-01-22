@@ -3,7 +3,6 @@ package ee.openeid.siga.service.signature.container;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.RelyingPartyInfo;

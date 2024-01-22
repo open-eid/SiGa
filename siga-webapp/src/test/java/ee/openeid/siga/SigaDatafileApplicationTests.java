@@ -59,7 +59,7 @@ class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
         finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
 
         assertSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://tsa.demo.sk.ee/tsa, .* result=SUCCESS.*",
                 ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
     }
 
@@ -82,7 +82,7 @@ class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
         finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
 
         assertSignedContainer(containerId, 2);
-        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://demo.sk.ee/tsa, .* result=SUCCESS.*",
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://tsa.demo.sk.ee/tsa, .* result=SUCCESS.*",
                 ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*");
     }
 

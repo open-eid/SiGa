@@ -76,8 +76,7 @@ class SignatureFinalizingTest {
     @Spy
     private Configuration configuration = Configuration.of(Configuration.Mode.TEST);;
 
-    @Spy
-    private SigaEventLogger sigaEventLogger;
+    private final SigaEventLogger sigaEventLogger = new SigaEventLogger();
 
     @Mock
     private Authentication authentication;
@@ -106,7 +105,7 @@ class SignatureFinalizingTest {
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         assertEquals(Result.OK, result);
-        assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
+        assertTSAOCSPEvents("http://tsa.demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
 
     @Test
@@ -115,7 +114,7 @@ class SignatureFinalizingTest {
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
         Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         assertEquals(Result.OK, result);
-        assertTSAOCSPEvents("http://demo.sk.ee/tsa", "http://aia.demo.sk.ee/esteid2018");
+        assertTSAOCSPEvents("http://tsa.demo.sk.ee/tsa", "http://aia.demo.sk.ee/esteid2018");
     }
 
     private void assertTSAOCSPEvents(String tsaUrl, String ocspUrl) {
@@ -199,7 +198,7 @@ class SignatureFinalizingTest {
         assertEquals(SUCCESS, tsaRequestEvent.getResultType());
         assertNull(tsaRequestEvent.getErrorCode());
         assertNull(tsaRequestEvent.getErrorMessage());
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://tsa.demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals(EXCEPTION, ocspRequestEvent.getResultType());
         assertEquals(SIGNATURE_FINALIZING_REQUEST_ERROR.name(), ocspRequestEvent.getErrorCode());
         assertEquals("Failed to connect to OCSP service <http://aia.invalid.url.sk.ee/esteid2018>. Service is down or URL is invalid.", ocspRequestEvent.getErrorMessage());
@@ -219,7 +218,7 @@ class SignatureFinalizingTest {
         assertNotNull(finalizeSignatureEvent);
         assertNotNull(ocspRequestEvent);
         assertNotNull(tsaRequestEvent);
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://tsa.demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals("http://demo.sk.ee/ocsp", ocspRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
         assertEquals(SUCCESS, tsaRequestEvent.getResultType());
@@ -246,7 +245,7 @@ class SignatureFinalizingTest {
         assertNotNull(finalizeSignatureEvent);
         assertNotNull(ocspRequestEvent);
         assertNotNull(tsaRequestEvent);
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://tsa.demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals("http://demo.sk.ee/ocsp", ocspRequestEvent.getEventParameter(REQUEST_URL));
         assertEquals(EXCEPTION, finalizeSignatureEvent.getResultType());
         assertEquals(SUCCESS, tsaRequestEvent.getResultType());
@@ -283,7 +282,7 @@ class SignatureFinalizingTest {
         assertNull(tsaRequestEvent.getErrorCode());
         assertNull(tsaRequestEvent.getErrorMessage());
         assertFalse(sigaEventLogger.getFirstMachingEvent(OCSP_REQUEST, FINISH).isPresent());
-        assertEquals("http://demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
+        assertEquals("http://tsa.demo.sk.ee/tsa", tsaRequestEvent.getEventParameter(REQUEST_URL));
         event = sigaEventLogger.getFirstMachingEvent(FINALIZE_SIGNATURE, FINISH);
         assertTrue(event.isPresent());
         SigaEvent finalizeSignatureEvent = event.get();
