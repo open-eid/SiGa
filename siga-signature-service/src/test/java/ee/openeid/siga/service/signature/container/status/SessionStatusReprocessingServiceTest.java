@@ -112,7 +112,7 @@ public class SessionStatusReprocessingServiceTest {
     );
     private static final String MOCK_SESSION_CODE = "mock-session-code";
     private static final String SID_DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
-    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
+    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
     @SpyBean
     private MobileIdApiClient mobileIdApiClient;
     @SpyBean

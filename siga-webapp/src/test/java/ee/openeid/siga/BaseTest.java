@@ -90,7 +90,7 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     protected final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
     private final static String DEFAULT_HMAC_SHARED_SECRET = "746573745365637265744b6579303031";
     private final static String DEFAULT_REQUESTING_SERVICE_UUID = "a7fd7728-a3ea-4975-bfab-f240a67e894f";
-    protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/sign_ESTEID2018.p12", "1234".toCharArray());
+    protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
 
     @Autowired
     protected MockMvc mockMvc;

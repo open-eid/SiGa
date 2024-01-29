@@ -51,7 +51,7 @@ import static org.mockito.ArgumentMatchers.*;
 public abstract class ContainerSigningServiceTest {
 
     private static final String SIG_ID = "sig123";
-    protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
+    protected final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
 
     @Mock
     protected SessionService sessionService;

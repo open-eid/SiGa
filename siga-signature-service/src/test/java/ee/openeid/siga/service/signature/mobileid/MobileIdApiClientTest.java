@@ -57,7 +57,7 @@ class MobileIdApiClientTest {
     private static final String DEFAULT_MOCK_LANGUAGE = "ENG";
     private static final String DEFAULT_MOCK_DISPLAY_TEXT = "This is display text.";
     private static final byte[] DEFAULT_MOCK_DATA_TO_SIGN = "Data to be signed.".getBytes(StandardCharsets.UTF_8);
-    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
+    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
 
     @Mock
     private MobileIdClientConfigurationProperties configurationProperties;

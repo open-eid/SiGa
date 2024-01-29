@@ -58,7 +58,7 @@ public class SmartIdApiClientTest {
     private static final String DEFAULT_MOCK_COUNTRY = "EE";
     private static final String DEFAULT_MOCK_DISPLAY_TEXT = "This is display text.";
     private static final String DEFAULT_MOCK_SESSION_ID = "de305d54-75b4-431b-adb2-eb6b9e546014";
-    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEID2018.p12", "1234".toCharArray());
+    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
 
     @Mock
     private SmartIdClientConfigurationProperties configurationProperties;
