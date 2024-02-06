@@ -6,7 +6,6 @@ import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationProvider;
 import ee.openeid.siga.auth.filter.logging.ContainerIdForAccessLogFilter;
-import ee.openeid.siga.auth.filter.logging.CorrelationIdForAccessLogFilter;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +49,6 @@ public class SecurityConfiguration {
     private final MethodFilter methodFilter;
     private final SigaEventLoggingFilter eventsLoggingFilter;
     private final RequestDataVolumeFilter requestDataVolumeFilter;
-    private final CorrelationIdForAccessLogFilter correlationIdForAccessLogFilter;
     private final ContainerIdForAccessLogFilter containerIdForAccessLogFilter;
 
     @Bean
@@ -78,7 +76,6 @@ public class SecurityConfiguration {
                 .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
-                .addFilterBefore(correlationIdForAccessLogFilter, MethodFilter.class)
                 .addFilterAfter(containerIdForAccessLogFilter, MethodFilter.class);
         http.authorizeHttpRequests(auth -> auth
                     .requestMatchers(PUBLIC_URLS).permitAll()
