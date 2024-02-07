@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.2</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -48,7 +48,8 @@
         <ignite.version>2.15.0</ignite.version>
         <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
         <jaxb-runtime.version>2.3.9</jaxb-runtime.version>
-        <json.version>20230618</json.version>
+        <json.version>20231013</json.version>
+        <wiremock.version>3.3.1</wiremock.version>
 
         <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
         <cxf-wadl2java-plugin.version>4.0.3</cxf-wadl2java-plugin.version>
