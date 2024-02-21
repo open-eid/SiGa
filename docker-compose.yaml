@@ -174,6 +174,7 @@ services:
       - spring.mail.properties.mail.smtp.auth=false
       - spring.mail.properties.mail.smtp.starttls.enable=true
       - spring.mail.properties.mail.smtp.starttls.required=true
+      - logging.config=/etc/siga-admin/logback.xml
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=4000
       - JAVA_OPTS=
@@ -191,6 +192,7 @@ services:
         aliases:
           - siga-admin.localhost
     volumes:
+      - ./docker/siga-admin/logback.xml:/etc/siga-admin/logback.xml
       - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
       - ./docker/tls/esteid-ldap/esteid-ldap.truststore.p12:/etc/siga-admin/tls.esteid-ldap.truststore.p12
       - ./docker/tls/siga-admin-smtp/siga-admin-smtp.truststore.p12:/etc/siga-admin/smtp.truststore.p12
