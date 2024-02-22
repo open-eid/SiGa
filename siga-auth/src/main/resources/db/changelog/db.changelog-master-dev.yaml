@@ -41,3 +41,5 @@ databaseChangeLog:
       file: db/changelog/SIGA-413.yaml
   - include:
       file: db/data/dev-data-10.yaml
+  - include:
+      file: db/data/dev-data-11.yaml
