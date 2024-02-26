@@ -56,6 +56,12 @@
             <version>${commons-compress.version}</version>
         </dependency>
         <dependency>
+            <!-- TODO: This should not be needed anymore when commons-compress is updated to version 1.26.1 or higher. -->
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>${jaxb-runtime.version}</version>
