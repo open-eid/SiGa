@@ -8,11 +8,12 @@ import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.common.model.ServiceType;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeType;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
@@ -235,7 +236,7 @@ public class HashcodeContainer {
     private List<org.digidoc4j.DataFile> convertDataFiles() {
         return dataFiles.stream().map(d -> {
             DSSDocument dssDocument = new DigestDocument();
-            dssDocument.setMimeType(d.getMimeType() != null ? MimeType.fromMimeTypeString(d.getMimeType()) : MimeType.BINARY);
+            dssDocument.setMimeType(d.getMimeType() != null ? MimeType.fromMimeTypeString(d.getMimeType()) : MimeTypeEnum.BINARY);
             dssDocument.setName(d.getFileName());
             org.digidoc4j.DataFile dataFile = new org.digidoc4j.DataFile();
             dataFile.setDocument(dssDocument);

@@ -41,13 +41,11 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.70</bouncycastle.version>
         <commons-compress.version>1.26.0</commons-compress.version>
-        <digidoc4j.version>5.2.0</digidoc4j.version>
+        <digidoc4j.version>5.3.0-SNAPSHOT</digidoc4j.version>
         <guava.version>32.1.2-jre</guava.version>
         <ignite.version>2.15.0</ignite.version>
         <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
-        <jaxb-runtime.version>2.3.9</jaxb-runtime.version>
         <json.version>20231013</json.version>
         <wiremock.version>3.3.1</wiremock.version>
 
@@ -60,6 +58,9 @@
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
         <postgresql.version>42.7.2</postgresql.version>
+
+        <!-- Overridden to downgrade dependencies that are pulled in via Spring Boot -->
+        <glassfish-jaxb.version>3.0.2</glassfish-jaxb.version>
     </properties>
 
     <dependencies>

@@ -11,7 +11,8 @@ import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeType;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.Configuration;
 
@@ -90,7 +91,7 @@ class HashcodeContainerServiceTest {
         assertFalse(StringUtils.isBlank(containerId));
 
         verifySessionServiceUpdateCalled(containerId, session -> {
-            assertEquals(MimeType.BINARY.getMimeTypeString(), session.getDataFiles().get(0).getMimeType());
+            assertEquals(MimeTypeEnum.BINARY.getMimeTypeString(), session.getDataFiles().get(0).getMimeType());
         });
     }
 
