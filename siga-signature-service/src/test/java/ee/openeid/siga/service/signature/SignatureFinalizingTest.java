@@ -13,7 +13,11 @@ import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSig
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
 import org.apache.commons.lang3.tuple.Pair;
-import org.digidoc4j.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,13 +34,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.Month;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Optional;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
@@ -45,11 +47,13 @@ import static ee.openeid.siga.common.event.SigaEvent.EventType.FINISH;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
-import static ee.openeid.siga.common.event.SigaEventName.*;
+import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
+import static ee.openeid.siga.common.event.SigaEventName.OCSP_REQUEST;
+import static ee.openeid.siga.common.event.SigaEventName.TSA_REQUEST;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -144,16 +148,15 @@ class SignatureFinalizingTest {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         });
 
-        assertThat(e.getMessage(), matchesPattern(String.format(
-                "The signing certificate \\(notBefore : %s, notAfter : %s\\) is expired at signing time .*",
-                Date.from(OffsetDateTime.of(
-                        LocalDate.of(2011, Month.APRIL, 8),
-                        LocalTime.of(16, 35, 52),
-                        ZoneOffset.ofHours(3)).toInstant()),
-                Date.from(OffsetDateTime.of(
-                        LocalDate.of(2014, Month.APRIL, 7),
-                        LocalTime.of(23, 59, 59),
-                        ZoneOffset.ofHours(3)).toInstant())
+        LocalDateTime currentDateTime = LocalDateTime.now(ZoneOffset.UTC);
+        String formattedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+
+        assertThat(e.getMessage(), is(String.format(
+                "The signing certificate (notBefore : %s, notAfter : %s) is expired at signing time %s! " +
+                        "Change signing certificate or use method setSignWithExpiredCertificate(true).",
+                OffsetDateTime.of(2011, 4, 8, 13, 35, 52, 0, ZoneOffset.UTC),
+                OffsetDateTime.of(2014, 4, 7, 20, 59, 59, 0, ZoneOffset.UTC),
+                formattedDateTime
         )));
         assertNull(sigaEventLogger.getEvent(0));
     }

@@ -1,7 +1,7 @@
 package ee.openeid.siga.service.signature.hashcode;
 
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
-import eu.europa.esig.dss.DomUtils;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.w3c.dom.Element;

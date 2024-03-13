@@ -14,7 +14,7 @@ import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.session.HashcodeSessionHolder;
 import ee.openeid.siga.session.SessionService;
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeType;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DetachedXadesSignatureBuilder;

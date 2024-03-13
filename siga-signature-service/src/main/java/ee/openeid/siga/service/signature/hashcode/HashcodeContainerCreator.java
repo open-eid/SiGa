@@ -3,7 +3,7 @@ package ee.openeid.siga.service.signature.hashcode;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;
@@ -66,7 +66,7 @@ class HashcodeContainerCreator {
     }
 
     void writeMimeType() {
-        byte[] mimeType = MimeType.ASICE.getMimeTypeString().getBytes();
+        byte[] mimeType = MimeTypeEnum.ASICE.getMimeTypeString().getBytes();
         new BytesEntryCallback(getZipEntry(mimeType, ZIP_ENTRY_MIMETYPE), mimeType).write();
     }
 

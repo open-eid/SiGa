@@ -3,7 +3,7 @@ package ee.openeid.siga.service.signature.hashcode;
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.util.Base64Util;
-import eu.europa.esig.dss.DomUtils;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;

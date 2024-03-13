@@ -15,9 +15,14 @@ import ee.openeid.siga.service.signature.client.ValidationReport;
 import ee.openeid.siga.service.signature.client.ValidationResponse;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.digidoc4j.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.SignatureProfile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -70,7 +75,7 @@ public class RequestUtil {
         dataFile.setFileHashSha256("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg");
         dataFile.setFileSize(10);
         dataFile.setFileHashSha512("gRKArS6jBsPLF1VP7aQ8VZ7BA5QA66hj/ntmNcxONZG5899w2VFHg9psyEH4Scg7rPSJQEYf65BGAscMztSXsA");
-        dataFile.setMimeType(MimeType.TEXT.getMimeTypeString());
+        dataFile.setMimeType(MimeTypeEnum.TEXT.getMimeTypeString());
         hashcodeDataFiles.add(dataFile);
         return hashcodeDataFiles;
     }
