@@ -63,7 +63,7 @@ class SignatureFinalizingTest {
     private final PKCS12SignatureToken VALID_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken REVOKED_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_revoked_state_ESTEID2018.p12", "1234".toCharArray());
     private final PKCS12SignatureToken UNKNOWN_STATE_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_state_ESTEID2018.p12", "1234".toCharArray());
-    private final PKCS12SignatureToken UNKNOWN_ISSUER_PKCS12_Esteid2018 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_issuer_ESTEID2018.p12", "1234".toCharArray());
+    private final PKCS12SignatureToken UNKNOWN_ISSUER_PKCS12 = new PKCS12SignatureToken("src/test/resources/p12/sign_unknown_issuer.p12", "1234".toCharArray());
     private final PKCS12SignatureToken EXPIRED_PKCS12_Esteid2011 = new PKCS12SignatureToken("src/test/resources/p12/expired_signer_ESTEID-SK 2011.p12", "test".toCharArray());
     private final PKCS12SignatureToken VALID_PKCS12_EsteidSK2015 = new PKCS12SignatureToken("src/test/resources/p12/sign_ESTEIDSK2015.p12", "1234".toCharArray());
 
@@ -266,7 +266,7 @@ class SignatureFinalizingTest {
     @Test
     void shouldRequestOnly_TSA_WithUnknownIssuer() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
-        Pair<String, String> signature = createSignature(UNKNOWN_ISSUER_PKCS12_Esteid2018, SignatureProfile.LT);
+        Pair<String, String> signature = createSignature(UNKNOWN_ISSUER_PKCS12, SignatureProfile.LT);
 
         Exception e = assertThrows(SignatureCreationException.class, () -> {
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
