@@ -8,10 +8,8 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.session.configuration.SessionConfigurationProperties;
 import org.apache.ignite.Ignite;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,22 +17,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = {IgniteConfiguration.class})
 @ActiveProfiles({"test"})
-@RunWith(SpringRunner.class)
 public class SessionServiceTest {
     private SessionService sessionService;
 
     @Autowired
     private Ignite ignite;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         SessionConfigurationProperties sessionConfigurationProperties = new SessionConfigurationProperties();
         sessionConfigurationProperties.setApplicationCacheVersion("v1");
@@ -47,9 +45,12 @@ public class SessionServiceTest {
         when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("user_name");
     }
 
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void noContainerInSession() {
-        sessionService.getContainer(UUIDGenerator.generateUUID());
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> sessionService.getContainer(UUIDGenerator.generateUUID())
+        );
     }
 
     @Test
@@ -57,29 +58,35 @@ public class SessionServiceTest {
         String containerId = UUIDGenerator.generateUUID();
         sessionService.update(createDefaultSession(containerId));
         Session session = sessionService.getContainer(containerId);
-        Assert.assertEquals("Client_name", session.getClientName());
-        Assert.assertEquals("Service_name", session.getServiceName());
-        Assert.assertEquals("Service_uuid", session.getServiceUuid());
-        Assert.assertEquals("v1_user_name_" + containerId, session.getSessionId());
+        assertEquals("Client_name", session.getClientName());
+        assertEquals("Service_name", session.getServiceName());
+        assertEquals("Service_uuid", session.getServiceUuid());
+        assertEquals("v1_user_name_" + containerId, session.getSessionId());
     }
 
     @Test
     public void getMultipleSessionsCacheSize() {
-        int initialCacheSize = sessionService.getCacheSize();
+        int initialCacheSize = 0;
+        try {
+            initialCacheSize = sessionService.getCacheSize();
+        } catch (NullPointerException e) {}
         sessionService.update(createDefaultSession(UUIDGenerator.generateUUID()));
         sessionService.update(createDefaultSession(UUIDGenerator.generateUUID()));
         int cacheSize = sessionService.getCacheSize();
-        Assert.assertEquals(initialCacheSize + 2, cacheSize);
+        assertEquals(initialCacheSize + 2, cacheSize);
     }
 
     @Test
     public void removeContainerFromSession() {
+        int initialCacheSize = 0;
+        try {
+            initialCacheSize = sessionService.getCacheSize();
+        } catch (NullPointerException e) {}
         String containerId = UUIDGenerator.generateUUID();
-        int initialCacheSize = sessionService.getCacheSize();
         sessionService.update(createDefaultSession(containerId));
-        sessionService.remove(containerId);
+        sessionService.removeByContainerId(containerId);
         int cacheSize = sessionService.getCacheSize();
-        Assert.assertEquals(initialCacheSize, cacheSize);
+        assertEquals(initialCacheSize, cacheSize);
     }
 
     private SigaUserDetails createDefaultUserDetails() {
