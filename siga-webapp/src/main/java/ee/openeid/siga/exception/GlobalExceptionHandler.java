@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ErrorResponse notFoundException(NoResourceFoundException exception) {
-        log.error("Not found exception - {}", exception.getLocalizedMessage(), exception);
+        log.error("Not found exception - {}", exception.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.RESOURCE_NOT_FOUND_EXCEPTION.name());
