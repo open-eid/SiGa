@@ -7,7 +7,9 @@ import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
+import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.test.RequestUtil;
+import ee.openeid.siga.service.signature.test.TestUtil;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,23 @@ class SivaClientTest {
 
         ValidationConclusion response = sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
                 RequestUtil.createHashcodeDataFileListWithOneFile());
+
+        assertEquals(Integer.valueOf(1), response.getSignaturesCount());
+        assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
+    }
+
+    @Test
+    void invalidPlusSignEncodingInSignaturesFileShouldStillPass() throws Exception {
+        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
+                .thenReturn(RequestUtil.createValidationResponse());
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        hashcodeContainer.open(TestUtil.getFile("hashcodePlusCharacterInFilename.asice"));
+        List<HashcodeSignatureWrapper> signatureWrappers = hashcodeContainer.getSignatures();
+        // Plus sign in XML parameters is decoded to space character
+        signatureWrappers.get(0).getDataFiles().get(0).setFileName("This is a test");
+
+        ValidationConclusion response = sivaClient.validateHashcodeContainer(signatureWrappers,
+                RequestUtil.createHashcodeDataFileListWithOneFile("This+is+a+test"));
 
         assertEquals(Integer.valueOf(1), response.getSignaturesCount());
         assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());

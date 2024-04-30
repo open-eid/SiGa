@@ -142,15 +142,30 @@ public class SivaClient {
 
     private String getDataFileHashAlgorithm(List<SignatureHashcodeDataFile> signatureDataFiles, HashcodeDataFile
             dataFile) {
+        String hashAlgorithm = getHashAlgorithm(signatureDataFiles, dataFile.getFileName());
+        if (hashAlgorithm == null) {
+            // There are apparently some malformed containers out there that have encoded "+" character in filename as
+            // literal "+" instead of "%2B" in URI field in signatures file. However, "+" is decoded as space (" "), so
+            // we wouldn't find a match between signatureDataFiles and dataFile in these cases. To work around this, we
+            // try to match the wrongly decoded filenames in case the correct decoding gives no match.
+            hashAlgorithm = getHashAlgorithm(signatureDataFiles, dataFile.getFileName().replaceAll("\\+", " "));
+        }
+        if (hashAlgorithm == null) {
+            throw new InvalidHashAlgorithmException("Container contains invalid hash algorithms");
+        }
+        return hashAlgorithm;
+    }
+
+    private static String getHashAlgorithm(List<SignatureHashcodeDataFile> signatureDataFiles, String dataFileName) {
         for (SignatureHashcodeDataFile signatureDataFile : signatureDataFiles) {
-            if (signatureDataFile.getFileName().equals(dataFile.getFileName())) {
+            if (signatureDataFile.getFileName().equals(dataFileName)) {
                 String hashAlgorithm = signatureDataFile.getHashAlgo();
                 if (DigestAlgorithm.SHA256.name().equals(hashAlgorithm) || DigestAlgorithm.SHA512.name().equals(hashAlgorithm)) {
                     return hashAlgorithm;
                 }
             }
         }
-        throw new InvalidHashAlgorithmException("Container contains invalid hash algorithms");
+        return null;
     }
 
     private SivaRequestValidationError parseErrorResponse(HttpStatusException e) {
