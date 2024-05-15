@@ -183,7 +183,7 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         return response.getValidationConclusion();
     }
 
-    private ValidationConclusion getValidationConclusion(String containerId) throws Exception {
+    protected ValidationConclusion getValidationConclusion(String containerId) throws Exception {
         GetContainerValidationReportResponse response = getRequest(
                 "/containers/" + containerId + "/validationreport",
                 GetContainerValidationReportResponse.class
@@ -421,6 +421,13 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
                 UploadContainerResponse.class
         );
         return containerResponse.getContainerId();
+    }
+
+    protected void augmentContainer(String containerId) throws Exception {
+        putRequest(
+                "/containers/" + containerId + "/augmentation",
+                new JSONObject()
+        );
     }
 
     protected static JSONObject createUploadContainerRequest(String container, String containerName) {

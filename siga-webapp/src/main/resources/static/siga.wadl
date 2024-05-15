@@ -1021,6 +1021,32 @@
                     </response>
                 </method>
             </resource>
+            <resource path="containers/{containerId}/augmentation">
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <method id="augmentContainerSignatures" name="PUT">
+                    <response status="200">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
+                                            element="tns:augmentContainerSignaturesResponse"
+                                            mediaType="application/json" xmlns=""/>
+                    </response>
+                    <response status="400">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="401">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                    <response status="500">
+                        <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" element="tns:errorResponse"
+                                            mediaType="application/json"
+                                            xmlns=""/>
+                    </response>
+                </method>
+            </resource>
             <resource path="containers/{containerId}/datafiles">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>

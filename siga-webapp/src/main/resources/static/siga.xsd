@@ -73,6 +73,7 @@
     <xs:element name="getContainerSignatureDetailsResponse" type="tns:getContainerSignatureDetailsResponse"/>
     <xs:element name="createContainerDataFileRequest" type="tns:createContainerDataFileRequest"/>
     <xs:element name="createContainerDataFileResponse" type="tns:createContainerDataFileResponse"/>
+    <xs:element name="augmentContainerSignaturesResponse" type="tns:augmentContainerSignaturesResponse"/>
     <xs:element name="getContainerDataFilesResponse" type="tns:getContainerDataFilesResponse"/>
     <xs:element name="deleteContainerDataFileResponse" type="tns:deleteContainerDataFileResponse"/>
     <xs:element name="getContainerResponse" type="tns:getContainerResponse"/>
@@ -397,6 +398,11 @@
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="deleteContainerDataFileResponse">
+        <xs:sequence>
+            <xs:element name="result" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="augmentContainerSignaturesResponse">
         <xs:sequence>
             <xs:element name="result" type="xs:string"/>
         </xs:sequence>

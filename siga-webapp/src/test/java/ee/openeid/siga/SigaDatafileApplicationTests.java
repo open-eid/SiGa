@@ -6,6 +6,7 @@ import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.Container;
 import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.SignatureProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +39,32 @@ class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
         deleteDataFile(containerId, updatedContainer.getDataFiles().get(0).getName());
         Container updatedContainer2 = getContainer(containerId);
         assertEquals(1, updatedContainer2.getDataFiles().size());
+    }
+
+    @Test
+    void datafileAugmentingSignaturesFlow() throws Exception {
+        String containerId = createContainer();
+        String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
+        CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
+        byte[] dataToSign = Base64.getDecoder().decode(startRemoteSigningResponse.getDataToSign());
+        byte[] signedData = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.findByAlgorithm(startRemoteSigningResponse.getDigestAlgorithm()), dataToSign);
+        String signatureValue = new String(Base64.getEncoder().encode(signedData));
+
+        finalizeRemoteSigning("/containers/" + containerId + "/remotesigning/" + startRemoteSigningResponse.getGeneratedSignatureId(), signatureValue);
+
+        List<Signature> signatures = getSignatures(containerId);
+        assertEquals(1, signatures.size());
+        assertEquals(SignatureProfile.LT.name(), signatures.get(0).getSignatureProfile());
+
+        augmentContainer(containerId);
+
+        List<Signature> augmentedSignatures = getSignatures(containerId);
+        assertEquals(1, augmentedSignatures.size());
+        assertEquals(SignatureProfile.LTA.name(), augmentedSignatures.get(0).getSignatureProfile());
+        assertInfoIsLoggedOnce(".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://tsa.demo.sk.ee/tsa, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=OCSP_REQUEST, .* request_url=http://aia.demo.sk.ee/esteid2018, .* result=SUCCESS.*",
+                ".*event_type=FINISH, event_name=TSA_REQUEST, .* request_url=http://tsa.demo.sk.ee/tsa,.* result=SUCCESS.*");
+
     }
 
     @Test

@@ -13,6 +13,7 @@ import ee.openeid.siga.service.signature.container.asic.AsicContainerService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
+import ee.openeid.siga.webapp.json.AugmentContainerSignaturesResponse;
 import ee.openeid.siga.webapp.json.CreateContainerDataFileRequest;
 import ee.openeid.siga.webapp.json.CreateContainerDataFileResponse;
 import ee.openeid.siga.webapp.json.CreateContainerRemoteSigningRequest;
@@ -236,6 +237,17 @@ public class AsicContainerController {
 
         DeleteContainerResponse response = new DeleteContainerResponse();
         response.setResult(result);
+        return response;
+    }
+
+    @SigaEventLog(eventName = SigaEventName.AUGMENT_SIGNATURES)
+    @PutMapping(value = "/containers/{containerId}/augmentation", produces = MediaType.APPLICATION_JSON_VALUE)
+    public AugmentContainerSignaturesResponse augmentContainerSignatures(@PathVariable(value = "containerId") String containerId) {
+        validator.validateContainerId(containerId);
+
+        Result result = containerService.augmentSignatures(containerId);
+        AugmentContainerSignaturesResponse response = new AugmentContainerSignaturesResponse();
+        response.setResult(result.name());
         return response;
     }
 

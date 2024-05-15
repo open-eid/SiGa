@@ -1,6 +1,9 @@
 package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
+import ee.openeid.siga.common.event.SigaEvent;
+import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
@@ -15,23 +18,34 @@ import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.enumerations.MimeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.ServiceType;
+import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.X509Cert;
+import org.digidoc4j.impl.ServiceAccessListener;
+import org.digidoc4j.impl.ServiceAccessScope;
+import org.digidoc4j.impl.asic.asice.AsicESignature;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 
 @Slf4j
@@ -39,8 +53,13 @@ import static org.digidoc4j.Container.DocumentType.ASICE;
 @Profile("datafileContainer")
 @RequiredArgsConstructor
 public class AsicContainerService implements AsicSessionHolder {
+    private static final List<SignatureProfile> augmentableSignatureProfiles = List.of(
+            SignatureProfile.LT,
+            SignatureProfile.LTA
+    );
     private final SessionService sessionService;
     private final Configuration configuration;
+    private final SigaEventLogger sigaEventLogger;
 
     public String createContainer(String containerName, List<DataFile> dataFiles) {
         ContainerBuilder containerBuilder = ContainerBuilder.
@@ -129,10 +148,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
         dataFiles.forEach(dataFile -> addDataFileToContainer(container, dataFile));
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        container.save(outputStream);
-        sessionHolder.setContainer(outputStream.toByteArray());
-        sessionService.update(sessionHolder);
+        updateContainerInSession(sessionHolder, container);
         return Result.OK;
     }
 
@@ -149,17 +165,50 @@ public class AsicContainerService implements AsicSessionHolder {
         }
         container.removeDataFile(dataFile.get());
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        container.save(outputStream);
-        sessionHolder.setContainer(outputStream.toByteArray());
-        sessionService.update(sessionHolder);
+        updateContainerInSession(sessionHolder, container);
 
+        return Result.OK;
+    }
+
+    public Result augmentSignatures(String containerId) {
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
+        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        validateIfSignaturesAugmentable(container);
+
+        try(ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
+            container.extendSignatureProfile(SignatureProfile.LTA);
+        }
+
+        addSignaturesToSession(container, sessionHolder);
+        updateContainerInSession(sessionHolder, container);
         return Result.OK;
     }
 
     public String closeSession(String containerId) {
         sessionService.removeByContainerId(containerId);
         return Result.OK.name();
+    }
+
+    @Override
+    public SessionService getSessionService() {
+        return sessionService;
+    }
+
+    String generateContainerId() {
+        return UUIDGenerator.generateUUID();
+    }
+
+    private void addSignaturesToSession(Container container, AsicContainerSession containerSession) {
+        for (org.digidoc4j.Signature signature: container.getSignatures()) {
+            containerSession.addSignatureId(signature.getUniqueId(), Arrays.hashCode(signature.getAdESSignature()));
+        }
+    }
+
+    private void updateContainerInSession(AsicContainerSession sessionHolder, Container container) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        container.save(outputStream);
+        sessionHolder.setContainer(outputStream.toByteArray());
+        sessionService.update(sessionHolder);
     }
 
     private void addDataFileToContainer(Container container, DataFile dataFile) {
@@ -176,6 +225,28 @@ public class AsicContainerService implements AsicSessionHolder {
     private void validateIfSessionMutable(Container container) {
         if (!container.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signature(s)");
+        }
+    }
+
+    private void validateIfSignaturesAugmentable(Container container) {
+        if (container.getSignatures().isEmpty()) {
+            throw new InvalidSessionDataException("Unable to augment. Container does not contain any signatures");
+        }
+        for (org.digidoc4j.Signature signature: container.getSignatures()) {
+            if (!augmentableSignatureProfiles.contains(signature.getProfile())) {
+                throw new InvalidSessionDataException("Cannot augment signature profile " + signature.getProfile());
+            }
+            validateIfSignatureNotTLevel(signature);
+        }
+    }
+
+    private void validateIfSignatureNotTLevel(org.digidoc4j.Signature signature) {
+        X509Cert ocspCertificate = null;
+        try {
+            ocspCertificate = ((AsicESignature) signature).getOrigin().getOCSPCertificate();
+        } catch (Exception e) {}
+        if (ocspCertificate == null) {
+            throw new InvalidSessionDataException("Cannot augment signature profile T");
         }
     }
 
@@ -214,12 +285,13 @@ public class AsicContainerService implements AsicSessionHolder {
         return sessionHolder;
     }
 
-    @Override
-    public SessionService getSessionService() {
-        return sessionService;
-    }
-
-    String generateContainerId() {
-        return UUIDGenerator.generateUUID();
+    private ServiceAccessListener createServiceAccessListener() {
+        return e -> {
+            if (ServiceType.TSP == e.getServiceType()) {
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.TSA_REQUEST, REQUEST_URL, e.getServiceUrl()));
+            } else {
+                sigaEventLogger.logEvent(SigaEvent.buildEventWithParameter(SigaEventName.OCSP_REQUEST, REQUEST_URL, e.getServiceUrl()));
+            }
+        };
     }
 }
