@@ -93,8 +93,7 @@ public abstract class ContainerSigningServiceTest {
         assertTrue(new String(dataToSign.getDataToSign()).startsWith(getExpectedDataToSignPrefix()));
     }
 
-    protected void assertSignAndValidateSignature() {
-        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+    protected void assertSignAndValidateSignature(SignatureParameters signatureParameters) {
         signatureParameters.setSignatureDigestAlgorithm(DigestAlgorithm.SHA512);
         DataToSign dataToSign = getSigningService().createDataToSign(CONTAINER_ID, signatureParameters).getDataToSign();
         byte[] signatureRaw = pkcs12Esteid2018SignatureToken.sign(DigestAlgorithm.SHA512, dataToSign.getDataToSign());
@@ -104,6 +103,7 @@ public abstract class ContainerSigningServiceTest {
         assertEquals("Harjumaa", signature.getStateOrProvince());
         assertEquals("Estonia", signature.getCountryName());
         assertEquals("Engineer", signature.getSignerRoles().get(0));
+        assertEquals(signatureParameters.getSignatureProfile(), signature.getProfile());
         assertTrue(signature.validateSignature().isValid());
     }
 

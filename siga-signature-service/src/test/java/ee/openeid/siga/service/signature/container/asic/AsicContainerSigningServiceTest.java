@@ -139,7 +139,14 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
 
     @Test
     void signAndValidateSignatureTest() {
-        assertSignAndValidateSignature();
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        assertSignAndValidateSignature(signatureParameters);
+    }
+
+    @Test
+    void signAndValidateLtaSignatureTest() {
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate(), SignatureProfile.LTA);
+        assertSignAndValidateSignature(signatureParameters);
     }
 
     @Test

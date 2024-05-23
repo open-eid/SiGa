@@ -47,6 +47,7 @@ public class RequestUtil {
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES = "hashcode_several_data_files.asice";
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER = "hashcode_several_data_files_in_random_order.asice";
     public static final String VALID_ASICE = "test.asice";
+    public static final String EXPIRED_OCSP_ASICE = "asice_ocsp_cert_expired.asice";
     public static final String DIFFERENT_MANIFEST_FILENAME = "different_manifest_path-filename.asice";
     public static final String DIFFERENT_SHA256_FILENAME = "different_sha256_path-filename.asice";
     public static final String DIFFERENT_SHA512_FILENAME = "different_sha512_path-filename.asice";

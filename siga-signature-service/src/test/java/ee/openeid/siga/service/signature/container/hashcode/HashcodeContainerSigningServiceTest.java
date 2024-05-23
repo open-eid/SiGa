@@ -24,6 +24,7 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
+import org.digidoc4j.SignatureParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,7 +136,8 @@ class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
 
     @Test
     void signAndValidateSignatureTest() {
-        assertSignAndValidateSignature();
+        SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
+        assertSignAndValidateSignature(signatureParameters);
     }
 
     @Test
