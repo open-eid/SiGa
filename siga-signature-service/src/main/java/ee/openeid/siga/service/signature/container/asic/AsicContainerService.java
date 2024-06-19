@@ -28,10 +28,8 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.ServiceType;
 import org.digidoc4j.SignatureProfile;
-import org.digidoc4j.X509Cert;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
-import org.digidoc4j.impl.asic.asice.AsicESignature;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -236,17 +234,6 @@ public class AsicContainerService implements AsicSessionHolder {
             if (!augmentableSignatureProfiles.contains(signature.getProfile())) {
                 throw new InvalidSessionDataException("Cannot augment signature profile " + signature.getProfile());
             }
-            validateIfSignatureNotTLevel(signature);
-        }
-    }
-
-    private void validateIfSignatureNotTLevel(org.digidoc4j.Signature signature) {
-        X509Cert ocspCertificate = null;
-        try {
-            ocspCertificate = ((AsicESignature) signature).getOrigin().getOCSPCertificate();
-        } catch (Exception e) {}
-        if (ocspCertificate == null) {
-            throw new InvalidSessionDataException("Cannot augment signature profile T");
         }
     }
 
