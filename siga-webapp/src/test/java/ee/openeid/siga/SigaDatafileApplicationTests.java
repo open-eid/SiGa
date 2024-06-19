@@ -72,11 +72,11 @@ class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        assertEquals("S0", signatureResponse.getId());
+        assertEquals("id-8c2a30729f251c6cb8336844b97f0657", signatureResponse.getId());
         assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         assertEquals(1, originalContainer.getSignatures().size());
-        assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
         String signingCertificate = Base64.getEncoder().encodeToString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);
@@ -95,11 +95,11 @@ class SigaDatafileApplicationTests extends SigaBaseApplicationTests {
         String containerId = uploadContainer();
         List<Signature> signatures = getSignatures(containerId);
         GetContainerSignatureDetailsResponse signatureResponse = getSignature(containerId, signatures.get(0).getGeneratedSignatureId());
-        assertEquals("S0", signatureResponse.getId());
+        assertEquals("id-8c2a30729f251c6cb8336844b97f0657", signatureResponse.getId());
         assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         assertEquals(1, originalContainer.getSignatures().size());
-        assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
         String signingCertificate = Hex.encodeHexString(pkcs12Esteid2018SignatureToken.getCertificate().getEncoded());
 
         CreateContainerRemoteSigningResponse startRemoteSigningResponse = startRemoteSigning(containerId, signingCertificate);

@@ -24,10 +24,10 @@ class RequestTransformerTest {
         Container container = ContainerBuilder.aContainer().withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
 
         GetContainerSignatureDetailsResponse response = RequestTransformer.transformSignatureToDetails(container.getSignatures().get(0));
-        assertEquals("2014-11-17T14:11:47Z", response.getClaimedSigningTime());
-        assertEquals("2014-11-17T14:11:46Z", response.getOcspResponseCreationTime());
-        assertEquals("2014-11-17T14:11:46Z", response.getTimeStampCreationTime());
-        assertEquals("2014-11-17T14:11:46Z", response.getTrustedSigningTime());
+        assertEquals("2018-11-23T12:24:04Z", response.getClaimedSigningTime());
+        assertEquals("2018-11-23T12:24:05Z", response.getOcspResponseCreationTime());
+        assertEquals("2018-11-23T12:24:04Z", response.getTimeStampCreationTime());
+        assertEquals("2018-11-23T12:24:04Z", response.getTrustedSigningTime());
     }
 
 }

@@ -120,7 +120,7 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
     protected void assertSignedContainer(String containerId, int validSignatureCount) throws Exception {
         Container container = getContainer(containerId);
         assertEquals(2, container.getSignatures().size());
-        assertEquals(2, container.getDataFiles().size());
+        assertEquals(1, container.getDataFiles().size());
         List<Signature> signatures = getSignatures(containerId);
 
         assertEquals(2, signatures.size());

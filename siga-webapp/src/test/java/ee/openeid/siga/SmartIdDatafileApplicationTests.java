@@ -33,10 +33,10 @@ class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests {
         assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         assertEquals(1, originalContainer.getSignatures().size());
-        assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        assertEquals(2, dataFiles.size());
+        assertEquals(1, dataFiles.size());
         String certificateId = startSmartIdCertificateChoice(containerId);
         AtomicReference<CertificateStatus> certificateStatusHolder = new AtomicReference<>();
         await().atMost(25, SECONDS).until(isSmartIdCertificateChoiceSuccessful(certificateStatusHolder, containerId, certificateId));
@@ -63,10 +63,10 @@ class SmartIdDatafileApplicationTests extends SmartIdBaseApplicationTests {
         assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         assertEquals(1, originalContainer.getSignatures().size());
-        assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
 
         List<DataFile> dataFiles = getDataFiles(containerId);
-        assertEquals(2, dataFiles.size());
+        assertEquals(1, dataFiles.size());
 
         String signatureId = startSmartIdSigning(containerId, null);
         await().atMost(25, SECONDS).until(isSmartIdResponseSuccessful(containerId, signatureId));

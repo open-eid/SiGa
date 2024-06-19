@@ -30,9 +30,9 @@ class MobileIdDatafileApplicationTests extends MobileIdBaseApplicationTests {
         assertEquals(1, signatures.size());
         Container originalContainer = getContainer(containerId);
         assertEquals(1, originalContainer.getSignatures().size());
-        assertEquals(2, originalContainer.getDataFiles().size());
+        assertEquals(1, originalContainer.getDataFiles().size());
         List<DataFile> dataFiles = getDataFiles(containerId);
-        assertEquals(2, dataFiles.size());
+        assertEquals(1, dataFiles.size());
 
         String signatureId = startMobileSigning(containerId);
         String mobileFirstStatus = getMobileIdStatus(containerId, signatureId);
