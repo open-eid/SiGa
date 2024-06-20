@@ -19,6 +19,7 @@ import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.enumerations.MimeType;
+import eu.europa.esig.dss.enumerations.SignatureQualification;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.ContainerValidationResult;
 import org.digidoc4j.ServiceType;
 import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.impl.ServiceAccessListener;
@@ -171,10 +173,10 @@ public class AsicContainerService implements AsicSessionHolder {
     public Result augmentSignatures(String containerId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
-        validateIfSignaturesAugmentable(container);
+        List<org.digidoc4j.Signature> augmentableSignatures = validateAndGetAugmentableSignatures(container);
 
-        try(ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
-            container.extendSignatureProfile(SignatureProfile.LTA);
+        try (ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
+            container.extendSignatureProfile(SignatureProfile.LTA, augmentableSignatures);
         }
 
         addSignaturesToSession(container, sessionHolder);
@@ -226,11 +228,37 @@ public class AsicContainerService implements AsicSessionHolder {
         }
     }
 
-    private void validateIfSignaturesAugmentable(Container container) {
+    private List<org.digidoc4j.Signature> validateAndGetAugmentableSignatures(Container container) {
+        validateSignaturesExist(container);
+        ContainerValidationResult validationResult = container.validate();
+        List<org.digidoc4j.Signature> signaturesWithoutESeals = discardESeals(validationResult, container);
+        validateSignatureProfiles(signaturesWithoutESeals);
+        return signaturesWithoutESeals;
+    }
+
+    private List<org.digidoc4j.Signature> discardESeals(ContainerValidationResult validationResult, Container container) {
+        List<org.digidoc4j.Signature> allSignatures = container.getSignatures();
+        List<org.digidoc4j.Signature> signaturesWithoutESeals = new ArrayList<>(allSignatures.size());
+        for (org.digidoc4j.Signature signature: allSignatures) {
+            SignatureQualification signatureQualification = validationResult.getSignatureQualification(signature.getUniqueId());
+            if (!signatureQualification.getReadable().contains("Seal")) {
+                signaturesWithoutESeals.add(signature);
+            }
+        }
+        if (signaturesWithoutESeals.isEmpty()) {
+            throw new InvalidSessionDataException("Unable to augment. Container contains only e-Seals");
+        }
+        return signaturesWithoutESeals;
+    }
+
+    private void validateSignaturesExist(Container container) {
         if (container.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to augment. Container does not contain any signatures");
         }
-        for (org.digidoc4j.Signature signature: container.getSignatures()) {
+    }
+
+    private void validateSignatureProfiles(List<org.digidoc4j.Signature> signatures) {
+        for (org.digidoc4j.Signature signature: signatures) {
             if (!augmentableSignatureProfiles.contains(signature.getProfile())) {
                 throw new InvalidSessionDataException("Cannot augment signature profile " + signature.getProfile());
             }

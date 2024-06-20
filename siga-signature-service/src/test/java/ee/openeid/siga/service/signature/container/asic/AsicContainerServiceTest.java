@@ -359,6 +359,44 @@ class AsicContainerServiceTest {
     }
 
     @Test
+    @Disabled // TODO: Fix - use TEST container or better e-seal detection algorithm
+    void augmentContainerWithOnlyESealsThrows() throws URISyntaxException {
+        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource("live_eSeal_qscd_TS.asice").toURI());
+        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        InvalidSessionDataException caughtException = assertThrows(
+                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
+        );
+
+        assertEquals("Unable to augment. Container contains only e-Seals", caughtException.getMessage());
+    }
+
+    @Test
+    void augmentContainerWithSignatureAndESeal_OnlySignatureIsAugmented() throws URISyntaxException {
+        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource("LT_sig_and_LT_seal.asice").toURI());
+        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.augmentSignatures(CONTAINER_ID);
+
+        assertEquals(Result.OK, result);
+        Mockito.verify(sessionService).update(sessionCaptor.capture());
+        assertEquals(CONTAINER_SESSION_ID, sessionCaptor.getValue().getSessionId());
+        AsicContainerSession sessionHolder = containerService.getSessionHolder(CONTAINER_ID);
+        Container updatedContainer = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        assertEquals(2, updatedContainer.getSignatures().size());
+        assertEquals(SignatureProfile.LTA, updatedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> signatureArchiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 0);
+        assertEquals(1, signatureArchiveTimestamps.size(), "Signature must contain 1 archive timestamp");
+        assertEquals(SignatureProfile.LT, updatedContainer.getSignatures().get(1).getProfile());
+        List<TimestampToken> eSealArchiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 1);
+        assertEquals(0, eSealArchiveTimestamps.size(), "E-Seal must not contain any archive timestamps");
+    }
+
+    @Test
     void successfulCloseSession() {
         String result = containerService.closeSession(CONTAINER_ID);
         assertEquals(Result.OK.name(), result);
