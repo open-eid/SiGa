@@ -245,7 +245,7 @@ public class AsicContainerController {
     public AugmentContainerSignaturesResponse augmentContainerSignatures(@PathVariable(value = "containerId") String containerId) {
         validator.validateContainerId(containerId);
 
-        Result result = containerService.augmentSignatures(containerId);
+        Result result = containerService.augmentContainer(containerId);
         AugmentContainerSignaturesResponse response = new AugmentContainerSignaturesResponse();
         response.setResult(result.name());
         return response;
