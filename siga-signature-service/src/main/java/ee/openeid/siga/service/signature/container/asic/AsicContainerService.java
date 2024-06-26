@@ -19,7 +19,6 @@ import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import ee.openeid.siga.session.SessionService;
 import eu.europa.esig.dss.enumerations.MimeType;
-import eu.europa.esig.dss.enumerations.SignatureQualification;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
-import org.digidoc4j.ContainerValidationResult;
 import org.digidoc4j.ServiceType;
 import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.impl.ServiceAccessListener;
@@ -53,11 +51,8 @@ import static org.digidoc4j.Container.DocumentType.ASICE;
 @Profile("datafileContainer")
 @RequiredArgsConstructor
 public class AsicContainerService implements AsicSessionHolder {
-    private static final List<SignatureProfile> augmentableSignatureProfiles = List.of(
-            SignatureProfile.LT,
-            SignatureProfile.LTA
-    );
     private final SessionService sessionService;
+    private final AugmentationValidationService augmentationValidationService;
     private final Configuration configuration;
     private final SigaEventLogger sigaEventLogger;
 
@@ -105,7 +100,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public List<Signature> getSignatures(String containerId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = createContainerFromSession(sessionHolder);
 
         List<Signature> signatures = new ArrayList<>();
         container.getSignatures()
@@ -121,7 +116,7 @@ public class AsicContainerService implements AsicSessionHolder {
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Integer signatureHashCode = sessionHolder.getSignatureIdHolder().get(signatureId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = createContainerFromSession(sessionHolder);
 
         Optional<org.digidoc4j.Signature> digidoc4jSignature = container.getSignatures().stream()
                 .filter(signature -> signatureHashCode == Arrays.hashCode(signature.getAdESSignature()))
@@ -135,7 +130,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public List<DataFile> getDataFiles(String containerId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = createContainerFromSession(sessionHolder);
 
         List<org.digidoc4j.DataFile> dataFiles = container.getDataFiles();
         return dataFiles.stream().map(this::transformDataFile).collect(Collectors.toList());
@@ -143,7 +138,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public Result addDataFiles(String containerId, List<DataFile> dataFiles) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = createContainerFromSession(sessionHolder);
         validateIfSessionMutable(container);
 
         dataFiles.forEach(dataFile -> addDataFileToContainer(container, dataFile));
@@ -155,7 +150,7 @@ public class AsicContainerService implements AsicSessionHolder {
     public Result removeDataFile(String containerId, String datafileName) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
 
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        Container container = createContainerFromSession(sessionHolder);
         validateIfSessionMutable(container);
         Optional<org.digidoc4j.DataFile> dataFile = container.getDataFiles().stream()
                 .filter(df -> df.getName().equals(datafileName))
@@ -172,8 +167,8 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public Result augmentSignatures(String containerId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
-        Container container = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
-        List<org.digidoc4j.Signature> augmentableSignatures = validateAndGetAugmentableSignatures(container);
+        Container container = createContainerFromSession(sessionHolder);
+        List<org.digidoc4j.Signature> augmentableSignatures = augmentationValidationService.validateAndGetAugmentableSignatures(containerId, container);
 
         try (ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
             container.extendSignatureProfile(SignatureProfile.LTA, augmentableSignatures);
@@ -182,6 +177,10 @@ public class AsicContainerService implements AsicSessionHolder {
         addSignaturesToSession(container, sessionHolder);
         updateContainerInSession(sessionHolder, container);
         return Result.OK;
+    }
+
+    Container createContainerFromSession(AsicContainerSession sessionHolder) {
+        return ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
     }
 
     public String closeSession(String containerId) {
@@ -225,43 +224,6 @@ public class AsicContainerService implements AsicSessionHolder {
     private void validateIfSessionMutable(Container container) {
         if (!container.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signature(s)");
-        }
-    }
-
-    private List<org.digidoc4j.Signature> validateAndGetAugmentableSignatures(Container container) {
-        validateSignaturesExist(container);
-        ContainerValidationResult validationResult = container.validate();
-        List<org.digidoc4j.Signature> signaturesWithoutESeals = discardESeals(validationResult, container);
-        validateSignatureProfiles(signaturesWithoutESeals);
-        return signaturesWithoutESeals;
-    }
-
-    private List<org.digidoc4j.Signature> discardESeals(ContainerValidationResult validationResult, Container container) {
-        List<org.digidoc4j.Signature> allSignatures = container.getSignatures();
-        List<org.digidoc4j.Signature> signaturesWithoutESeals = new ArrayList<>(allSignatures.size());
-        for (org.digidoc4j.Signature signature: allSignatures) {
-            SignatureQualification signatureQualification = validationResult.getSignatureQualification(signature.getUniqueId());
-            if (!signatureQualification.getReadable().contains("Seal")) {
-                signaturesWithoutESeals.add(signature);
-            }
-        }
-        if (signaturesWithoutESeals.isEmpty()) {
-            throw new InvalidSessionDataException("Unable to augment. Container contains only e-Seals");
-        }
-        return signaturesWithoutESeals;
-    }
-
-    private void validateSignaturesExist(Container container) {
-        if (container.getSignatures().isEmpty()) {
-            throw new InvalidSessionDataException("Unable to augment. Container does not contain any signatures");
-        }
-    }
-
-    private void validateSignatureProfiles(List<org.digidoc4j.Signature> signatures) {
-        for (org.digidoc4j.Signature signature: signatures) {
-            if (!augmentableSignatureProfiles.contains(signature.getProfile())) {
-                throw new InvalidSessionDataException("Cannot augment signature profile " + signature.getProfile());
-            }
         }
     }
 

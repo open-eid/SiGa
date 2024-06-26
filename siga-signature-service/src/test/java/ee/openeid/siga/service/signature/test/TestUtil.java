@@ -4,6 +4,12 @@ import ee.openeid.siga.service.signature.hashcode.HashcodesDataFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.SignatureBuilder;
+import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.signers.PKCS12SignatureToken;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,6 +25,7 @@ public class TestUtil {
     public static final String HASHCODES_SHA256_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hashcodes><file-entry full-path=\"first datafile.txt\" hash=\"SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms\" size=\"10\"/><file-entry full-path=\"second datafile.txt\" hash=\"SGotKr7DQfmpUTMp4p6jhumLKigNONEqC0pTySrYsms\" size=\"10\"/></hashcodes>";
     public static final String HASHCODES_SHA512_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hashcodes><file-entry full-path=\"first datafile.txt\" hash=\"8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw\" size=\"10\"/><file-entry full-path=\"second datafile.txt\" hash=\"8dvW2xdYgT9ZEJBTibWXsP9H3LTOToBaQ6McE3BoPHjRnXvVOc/REszydaAMG4Pizt9RdsdKHbd94wO/E4Kfyw\" size=\"10\"/></hashcodes>";
     public static final String MIMETYPE = "application/vnd.etsi.asic-e+zip";
+    public static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
 
     public static HashcodeContainerFilesHolder getContainerFiles(byte[] container) throws IOException {
         try (SeekableInMemoryByteChannel byteChannel = new SeekableInMemoryByteChannel(container);
@@ -60,5 +67,18 @@ public class TestUtil {
 
     private static Path getDocumentPath(String filePath) throws URISyntaxException {
         return Paths.get(TestUtil.class.getClassLoader().getResource(filePath).toURI());
+    }
+
+    public static Container createSignedContainer(SignatureProfile profile) {
+        Container container = ContainerBuilder.aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain"))
+                .build();
+        SignatureBuilder builder = SignatureBuilder
+                .aSignature(container)
+                .withSignatureProfile(profile);
+        org.digidoc4j.Signature signature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
+        container.addSignature(signature);
+        return container;
     }
 }

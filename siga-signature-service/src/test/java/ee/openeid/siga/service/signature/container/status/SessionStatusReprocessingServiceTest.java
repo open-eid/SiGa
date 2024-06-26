@@ -17,6 +17,7 @@ import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.service.signature.container.asic.AugmentationValidationService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
@@ -121,6 +122,8 @@ public class SessionStatusReprocessingServiceTest {
     private SessionStatusReprocessingService sessionStatusReprocessingService;
     @SpyBean
     private HashcodeContainerSigningService hashcodeContainerSigningService;
+    @MockBean
+    private AugmentationValidationService augmentationValidationService;
     @MockBean
     private SecurityContext securityContext;
     @MockBean

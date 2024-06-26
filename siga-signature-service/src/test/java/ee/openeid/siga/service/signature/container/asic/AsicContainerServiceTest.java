@@ -23,15 +23,10 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.SignatureBuilder;
 import org.digidoc4j.SignatureProfile;
-import org.digidoc4j.exceptions.NetworkException;
 import org.digidoc4j.impl.asic.AsicSignature;
-import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -51,6 +46,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,27 +55,22 @@ import java.util.concurrent.atomic.AtomicReference;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_SESSION_ID;
-import static ee.openeid.siga.service.signature.test.RequestUtil.EXPIRED_OCSP_ASICE;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createAsicSessionHolder;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createDataFileListWithOneFile;
+import static ee.openeid.siga.service.signature.test.TestUtil.pkcs12Esteid2018SignatureToken;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class AsicContainerServiceTest {
-
-    private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
-    private static final Map<String, String> notAugmentableContainers = Map.of(
-            "B_EPES", "bdoc-with-b-epes-signature.bdoc", // Contains a single B_EPES signature
-            "LT_TM", "bdoc-with-tm-and-ts-signature.bdoc", // Contains one LT and one LT_TM signature
-            "T", "T_level_signature.asice" // Contains a single T level signature (LT signature with removed OCSP)
-    );
 
     @Spy
     @InjectMocks
@@ -87,6 +78,8 @@ class AsicContainerServiceTest {
 
     @Mock
     private SessionService sessionService;
+    @Mock
+    private AugmentationValidationService validationService;
     @Mock
     private SigaEventLogger eventLogger;
 
@@ -217,46 +210,8 @@ class AsicContainerServiceTest {
     }
 
     @Test
-    void successfulAugmentLtSignature() {
-        Container container = createSignedContainer(SignatureProfile.LT);
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        Result result = containerService.augmentSignatures(CONTAINER_ID);
-
-        assertEquals(Result.OK, result);
-        Mockito.verify(sessionService).update(sessionCaptor.capture());
-        assertEquals(CONTAINER_SESSION_ID, sessionCaptor.getValue().getSessionId());
-        AsicContainerSession sessionHolder = containerService.getSessionHolder(CONTAINER_ID);
-        Container updatedContainer = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
-        assertEquals(1, updatedContainer.getSignatures().size());
-        assertEquals(SignatureProfile.LTA, updatedContainer.getSignatures().get(0).getProfile());
-        List<TimestampToken> archiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 0);
-        assertEquals(1, archiveTimestamps.size(), "The signature must contain 1 archive timestamp");
-    }
-
-    @Test
-    void successfulAugmentLtaSignature() {
-        Container container = createSignedContainer(SignatureProfile.LTA);
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        Result result = containerService.augmentSignatures(CONTAINER_ID);
-
-        assertEquals(Result.OK, result);
-        Mockito.verify(sessionService).update(sessionCaptor.capture());
-        assertEquals(CONTAINER_SESSION_ID, sessionCaptor.getValue().getSessionId());
-        AsicContainerSession sessionHolder = containerService.getSessionHolder(CONTAINER_ID);
-        Container updatedContainer = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
-        assertEquals(1, updatedContainer.getSignatures().size());
-        assertEquals(SignatureProfile.LTA, updatedContainer.getSignatures().get(0).getProfile());
-        List<TimestampToken> archiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 0);
-        assertEquals(2, archiveTimestamps.size(), "The signature must contain 2 archive timestamps");
-    }
-
-    @Test
     void successfulAugmentContainerWithLtAndLtaSignatures() {
-        Container container = createSignedContainer(SignatureProfile.LTA);
+        Container container = TestUtil.createSignedContainer(SignatureProfile.LTA);
         SignatureBuilder builder = SignatureBuilder
                 .aSignature(container)
                 .withSignatureProfile(SignatureProfile.LT);
@@ -264,6 +219,9 @@ class AsicContainerServiceTest {
         container.addSignature(signature);
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        Mockito.when(validationService.validateAndGetAugmentableSignatures(anyString(), any(Container.class)))
+                .thenReturn(container.getSignatures());
+        Mockito.doReturn(container).when(containerService).createContainerFromSession(any());
 
         Result result = containerService.augmentSignatures(CONTAINER_ID);
 
@@ -282,103 +240,16 @@ class AsicContainerServiceTest {
     }
 
     @Test
-    void augmentContainerWithoutSignaturesThrows() {
-        Container container = ContainerBuilder.aContainer()
-                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
-                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain"))
-                .build();
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("Unable to augment. Container does not contain any signatures", caughtException.getMessage());
-    }
-
-    @Test
-    void augmentContainerWithOneLtAndOneBSignatureThrows() {
-        Container container = createSignedContainer(SignatureProfile.LT);
-        SignatureBuilder builder = SignatureBuilder
-                .aSignature(container)
-                .withSignatureProfile(SignatureProfile.B_BES);
-        org.digidoc4j.Signature signature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
-        container.addSignature(signature);
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("Cannot augment signature profile B_BES", caughtException.getMessage());
-    }
-
-    @Test
-    @Disabled("SIGA-840: Currently, SiGa allows to augment signatures with expired OCSP, but this should probably not be allowed")
-    void augmentContainerWithExpiredOcspThrows() throws IOException, URISyntaxException {
-        AsicContainerSession session = RequestUtil.createAsicSessionHolder();
-        session.setContainer(TestUtil.getFile(EXPIRED_OCSP_ASICE));
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        NetworkException caughtException = assertThrows(
-                NetworkException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("TODO", caughtException.getMessage());
-    }
-
-    @Test
-    void augmentContainerWithBLevelSignatureThrows() {
-        Container container = createSignedContainer(SignatureProfile.B_BES);
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("Cannot augment signature profile B_BES", caughtException.getMessage());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"B_EPES", "LT_TM", "T"})
-    void augmentContainerWithNotAugmentableSignatureProfileThrows(String signatureProfile) throws URISyntaxException {
-        String containerFilename = notAugmentableContainers.get(signatureProfile);
-        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource(containerFilename).toURI());
-        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("Cannot augment signature profile " + signatureProfile, caughtException.getMessage());
-    }
-
-    @Test
-    @Disabled // TODO: Fix - use TEST container or better e-seal detection algorithm
-    void augmentContainerWithOnlyESealsThrows() throws URISyntaxException {
-        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource("live_eSeal_qscd_TS.asice").toURI());
-        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
-        AsicContainerSession session = getContainerSession(container);
-        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> containerService.augmentSignatures(CONTAINER_ID)
-        );
-
-        assertEquals("Unable to augment. Container contains only e-Seals", caughtException.getMessage());
-    }
-
-    @Test
     void augmentContainerWithSignatureAndESeal_OnlySignatureIsAugmented() throws URISyntaxException {
         Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource("LT_sig_and_LT_seal.asice").toURI());
-        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
+        Container container = ContainerBuilder.aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .fromExistingFile(containerPath.toString()).build();
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        Mockito.when(validationService.validateAndGetAugmentableSignatures(anyString(), any(Container.class)))
+                .thenReturn(Collections.singletonList(container.getSignatures().get(0)));
+        Mockito.doReturn(container).when(containerService).createContainerFromSession(any());
 
         Result result = containerService.augmentSignatures(CONTAINER_ID);
 
@@ -394,6 +265,31 @@ class AsicContainerServiceTest {
         assertEquals(SignatureProfile.LT, updatedContainer.getSignatures().get(1).getProfile());
         List<TimestampToken> eSealArchiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 1);
         assertEquals(0, eSealArchiveTimestamps.size(), "E-Seal must not contain any archive timestamps");
+    }
+
+    @Test
+    void augmentContainerWithSignatureWithExpiredOcsp_Succeeds() throws URISyntaxException {
+        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource(VALID_ASICE_WITH_EXPIRED_OCSP).toURI());
+        Container container = ContainerBuilder.aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .fromExistingFile(containerPath.toString()).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+        Mockito.when(validationService.validateAndGetAugmentableSignatures(anyString(), any(Container.class)))
+                .thenReturn(Collections.singletonList(container.getSignatures().get(0)));
+        Mockito.doReturn(container).when(containerService).createContainerFromSession(any());
+
+        Result result = containerService.augmentSignatures(CONTAINER_ID);
+
+        assertEquals(Result.OK, result);
+        Mockito.verify(sessionService).update(sessionCaptor.capture());
+        assertEquals(CONTAINER_SESSION_ID, sessionCaptor.getValue().getSessionId());
+        AsicContainerSession sessionHolder = containerService.getSessionHolder(CONTAINER_ID);
+        Container updatedContainer = ContainerUtil.createContainer(sessionHolder.getContainer(), configuration);
+        assertEquals(1, updatedContainer.getSignatures().size());
+        assertEquals(SignatureProfile.LTA, updatedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> signatureArchiveTimestamps = getSignatureArchiveTimestamps(updatedContainer, 0);
+        assertEquals(1, signatureArchiveTimestamps.size(), "Signature must contain 1 archive timestamp");
     }
 
     @Test
@@ -459,19 +355,6 @@ class AsicContainerServiceTest {
                 .container(outputStream.toByteArray())
                 .build();
         return session;
-    }
-
-    private Container createSignedContainer(SignatureProfile profile) {
-        Container container = ContainerBuilder.aContainer()
-                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
-                .withDataFile(new org.digidoc4j.DataFile("D0Zzjr7TcMXFLuCtlt7I9Fn7kBwspOKFIR7d+QO/FZg".getBytes(), "test.xml", "text/plain"))
-                .build();
-        SignatureBuilder builder = SignatureBuilder
-                .aSignature(container)
-                .withSignatureProfile(profile);
-        org.digidoc4j.Signature signature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
-        container.addSignature(signature);
-        return container;
     }
 
     private List<TimestampToken> getSignatureArchiveTimestamps(Container container, int signatureIndex) {
