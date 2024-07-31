@@ -13,7 +13,6 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.enumerations.MimeType;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
@@ -21,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.impl.asic.manifest.AsicManifest;
 import org.digidoc4j.impl.asic.manifest.ManifestEntry;
 import org.digidoc4j.impl.asic.manifest.ManifestParser;
+import org.digidoc4j.utils.MimeTypeUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -236,7 +236,7 @@ public class HashcodeContainer {
     private List<org.digidoc4j.DataFile> convertDataFiles() {
         return dataFiles.stream().map(d -> {
             DSSDocument dssDocument = new DigestDocument();
-            dssDocument.setMimeType(d.getMimeType() != null ? MimeType.fromMimeTypeString(d.getMimeType()) : MimeTypeEnum.BINARY);
+            dssDocument.setMimeType(d.getMimeType() != null ? MimeTypeUtil.fromMimeTypeString(d.getMimeType()) : MimeTypeEnum.BINARY);
             dssDocument.setName(d.getFileName());
             org.digidoc4j.DataFile dataFile = new org.digidoc4j.DataFile();
             dataFile.setDocument(dssDocument);
