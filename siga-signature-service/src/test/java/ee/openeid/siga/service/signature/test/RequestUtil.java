@@ -58,6 +58,7 @@ public class RequestUtil {
     public static final String DIFFERENT_SHA256_ORDER = "different_sha256_filename_order.asice";
     public static final String DIFFERENT_SHA512_ORDER = "different_sha512_filename_order.asice";
     public static final String DIFFERENT_MANIFEST_ORDER = "different_manifest_filename_order.asice";
+    public static final String UNKNOWN_MIMETYPES_DEFINED_IN_MANIFEST = "hashcode_container_unsigned_with_txt_and_docx.asice";
     public static final String DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
     public static final String CONTAINER_ID = "23423423-234234234-324234-4234";
     public static final String CONTAINER_SESSION_ID = "v1_user_name_23423423-234234234-324234-4234";

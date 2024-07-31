@@ -32,6 +32,7 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_MANIF
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER;
+import static ee.openeid.siga.service.signature.test.RequestUtil.UNKNOWN_MIMETYPES_DEFINED_IN_MANIFEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -229,6 +230,25 @@ class HashcodeContainerTest {
         assertEquals("test.txt", hashcodeContainer.getDataFiles().get(0).getFileName());
         assertEquals("test1.txt", hashcodeContainer.getDataFiles().get(1).getFileName());
         assertEquals("test2.txt", hashcodeContainer.getDataFiles().get(2).getFileName());
+    }
+
+    @Test
+    void shouldUseExistingMimetypeFromManifestForUnknownMimetype() throws URISyntaxException, IOException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(UNKNOWN_MIMETYPES_DEFINED_IN_MANIFEST);
+        hashcodeContainer.open(container);
+        HashcodeContainer newContainer;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            hashcodeContainer.save(outputStream);
+            newContainer = new HashcodeContainer();
+            newContainer.open(outputStream.toByteArray());
+        }
+
+        assertEquals(2, newContainer.getDataFiles().size());
+        assertEquals("text_file.txt", newContainer.getDataFiles().get(0).getFileName());
+        assertEquals("text/plain", newContainer.getDataFiles().get(0).getMimeType());
+        assertEquals("word_file.docx", newContainer.getDataFiles().get(1).getFileName());
+        assertEquals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", newContainer.getDataFiles().get(1).getMimeType());
     }
 
     @Test
