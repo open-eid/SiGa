@@ -47,6 +47,7 @@ public class RequestUtil {
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES = "hashcode_several_data_files.asice";
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER = "hashcode_several_data_files_in_random_order.asice";
     public static final String VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES = "bdoc-with-tm-and-ts-signature.bdoc";
+    public static final String VALID_BDOC_WITH_LT_TM_SIGNATURE = "valid-bdoc-tm-newer.bdoc";
     public static final String VALID_ASICE = "test.asice";
     public static final String VALID_LATVIAN_ASICE = "latvian_LT_signature_with_7min_difference_between_TS_and_OCSP.asice";
     public static final String VALID_ASICE_WITH_EXPIRED_OCSP = "asice_ocsp_cert_expired.asice";

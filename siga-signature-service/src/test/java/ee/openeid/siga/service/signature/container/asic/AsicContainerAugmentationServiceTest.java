@@ -39,6 +39,7 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_SIGNATURE;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_LATVIAN_ASICE;
 import static ee.openeid.siga.service.signature.test.TestUtil.createSignedContainer;
 import static ee.openeid.siga.service.signature.test.TestUtil.pkcs12Esteid2018SignatureToken;
@@ -122,6 +123,20 @@ class AsicContainerAugmentationServiceTest {
         );
 
         assertEquals("Unable to augment. Container does not contain any Estonian signatures", caughtException.getMessage());
+    }
+
+    @Test
+    void containerWithLtTmSignature_WrappedIntoAsics() throws URISyntaxException {
+        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource(VALID_BDOC_WITH_LT_TM_SIGNATURE).toURI());
+        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
+        AsicContainerSession session = getContainerSession(container);
+
+        NotImplementedException caughtException = assertThrows(
+                NotImplementedException.class, () -> augmentationService.augmentContainer(session.getContainer())
+        );
+
+        // TODO SIGA-855: Handle ASiC-S containers
+        assertEquals("ASiC-S wrapping is not yet implemented!", caughtException.getMessage());
     }
 
     @Test

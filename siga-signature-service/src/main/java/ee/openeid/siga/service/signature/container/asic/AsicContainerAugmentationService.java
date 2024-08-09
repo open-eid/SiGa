@@ -69,6 +69,12 @@ public class AsicContainerAugmentationService {
         // Only personal signatures can be augmented, not e-seals
         List<Signature> signaturesWithoutESeals = findPersonalSignaturesOrFail(estonianSignatures, eeValidationResult);
 
+        // Containers with LT_TM signatures must be wrapped into ASiC-S
+        if (containLtTmSignatures(signaturesWithoutESeals, eeValidationResult)) {
+            // TODO SIGA-855: Handle ASiC-S containers
+            throw new NotImplementedException("ASiC-S wrapping is not yet implemented!");
+        }
+
         // Only signatures with LT and LTA profile can be augmented
         List<Signature> eeSignaturesWithAugmentableProfile = getSignaturesWithAugmentableProfile(signaturesWithoutESeals, eeValidationResult);
         List<Signature> euSignaturesWithAugmentableProfile = getSignaturesWithAugmentableProfile(signaturesWithoutESeals, euValidationResult);
@@ -97,6 +103,12 @@ public class AsicContainerAugmentationService {
             eeContainer.extendSignatureProfile(SignatureProfile.LTA, eeSignaturesWithAugmentableProfile);
         }
         return eeContainer;
+    }
+
+    private static boolean containLtTmSignatures(List<Signature> signatures, ContainerValidationResult eeValidationResult) {
+        return signatures.stream()
+                .map(signature -> getSignatureReport(signature, eeValidationResult).getSignatureFormat())
+                .anyMatch(SignatureLevel.XAdES_BASELINE_LT_TM::equals);
     }
 
     private static boolean areSignaturesValid(ContainerValidationResult eeValidationResult,
