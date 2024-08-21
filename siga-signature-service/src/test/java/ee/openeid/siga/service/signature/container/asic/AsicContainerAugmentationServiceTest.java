@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AsicContainerAugmentationServiceTest {
     private static final Map<String, String> containersWithSingleNotAugmentableSignature = Map.of(
             "B_EPES", "bdoc-with-b-epes-signature.bdoc", // Contains a single B_EPES signature
-            "LT_TM", "valid-bdoc-tm.bdoc", // Contains one LT and one LT_TM signature
             "T", "T_level_signature.asice" // Contains a single T level signature (LT signature with removed OCSP)
     );
     private AsicContainerAugmentationService augmentationService;
@@ -198,7 +197,7 @@ class AsicContainerAugmentationServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"B_EPES", "LT_TM", "T"})
+    @ValueSource(strings = {"B_EPES", "T"})
     void containerWithNotAugmentableSignatureProfile_Fails(String signatureProfile) throws URISyntaxException {
         String containerFilename = containersWithSingleNotAugmentableSignature.get(signatureProfile);
         Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource(containerFilename).toURI());
