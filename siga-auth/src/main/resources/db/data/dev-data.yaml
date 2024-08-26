@@ -19,7 +19,7 @@ databaseChangeLog:
                   value: support@client1.ee
               - column:
                   name: contact_phone
-                  value: '+37200000001'
+                  value: '+372 50000001'
             tableName: siga_client
         - insert:
             columns:
@@ -37,7 +37,7 @@ databaseChangeLog:
                   value: support@client2.ee
               - column:
                   name: contact_phone
-                  value: '+37200000002'
+                  value: '+372 50000002'
             tableName: siga_client
   - changeSet:
       id: 1551795684113-2
