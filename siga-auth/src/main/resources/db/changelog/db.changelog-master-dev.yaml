@@ -43,3 +43,5 @@ databaseChangeLog:
       file: db/data/dev-data-10.yaml
   - include:
       file: db/data/dev-data-11.yaml
+  - include:
+      file: db/data/dev-data-12.yaml

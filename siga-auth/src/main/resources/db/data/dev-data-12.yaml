@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1724750021
+      author: (generated)
+      changes:
+        - update:
+            tableName: siga_client
+            columns:
+              - column:
+                  name: contact_phone
+                  value: '+372 50000001'
+            where: name='client1'
+        - update:
+            tableName: siga_client
+            columns:
+              - column:
+                  name: contact_phone
+                  value: '+372 50000002'
+            where: name='client2'
