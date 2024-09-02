@@ -14,6 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class AsicContainerSession implements Session {
     @NonNull
+    @Setter
     private String containerName;
     @NonNull
     private String clientName;

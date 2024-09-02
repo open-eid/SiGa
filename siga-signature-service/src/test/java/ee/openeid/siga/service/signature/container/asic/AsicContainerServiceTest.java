@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 
@@ -206,12 +207,12 @@ class AsicContainerServiceTest {
         Container container = TestUtil.createSignedContainer(SignatureProfile.LTA);
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-        Mockito.when(augmentationService.augmentContainer(any(byte[].class))).thenReturn(container);
+        Mockito.when(augmentationService.augmentContainer(any(byte[].class), anyString())).thenReturn(container);
 
         Result result = containerService.augmentContainer(CONTAINER_ID);
 
         assertEquals(Result.OK, result);
-        Mockito.verify(augmentationService).augmentContainer(eq(session.getContainer()));
+        Mockito.verify(augmentationService).augmentContainer(eq(session.getContainer()), anyString());
         Mockito.verify(sessionService).update(sessionCaptor.capture());
         assertEquals(CONTAINER_SESSION_ID, sessionCaptor.getValue().getSessionId());
     }
@@ -221,7 +222,7 @@ class AsicContainerServiceTest {
         Container container = TestUtil.createSignedContainer(SignatureProfile.LTA);
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
-        Mockito.doThrow(new InvalidSessionDataException("Unable to augment")).when(augmentationService).augmentContainer(any(byte[].class));
+        Mockito.doThrow(new InvalidSessionDataException("Unable to augment")).when(augmentationService).augmentContainer(any(byte[].class), anyString());
 
         InvalidSessionDataException exception = assertThrows(
                 InvalidSessionDataException.class, () -> containerService.augmentContainer(CONTAINER_ID)

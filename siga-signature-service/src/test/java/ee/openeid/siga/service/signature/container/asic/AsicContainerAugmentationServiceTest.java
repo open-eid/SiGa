@@ -5,15 +5,19 @@ import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
-import org.apache.commons.lang3.NotImplementedException;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.DataFile;
 import org.digidoc4j.SignatureBuilder;
 import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.Timestamp;
 import org.digidoc4j.impl.asic.AsicSignature;
 import org.digidoc4j.impl.asic.asice.AsicEContainer;
+import org.digidoc4j.impl.asic.asics.AsicSContainer;
+import org.digidoc4j.impl.asic.asics.AsicSContainerTimestamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +39,7 @@ import java.util.Map;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_SESSION_ID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.ESEAL_WITH_EXPIRED_OCSP;
+import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_OCSP;
@@ -43,6 +48,7 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_LATVIAN_ASICE;
 import static ee.openeid.siga.service.signature.test.TestUtil.createSignedContainer;
 import static ee.openeid.siga.service.signature.test.TestUtil.pkcs12Esteid2018SignatureToken;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -75,7 +81,7 @@ class AsicContainerAugmentationServiceTest {
     void containerWithLtSignature_ReturnsAugmentedAsice() {
         AsicContainerSession session = getContainerSession(TestUtil.createSignedContainer(SignatureProfile.LT));
 
-        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer());
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), "originalContainer");
 
         assertEquals(AsicEContainer.class, augmentedContainer.getClass());
         assertEquals(1, augmentedContainer.getSignatures().size());
@@ -88,7 +94,7 @@ class AsicContainerAugmentationServiceTest {
     void containerWithLtaSignature_ReturnsAugmentedAsiceWithAdditionalArchivalTimestamp() {
         AsicContainerSession session = getContainerSession(TestUtil.createSignedContainer(SignatureProfile.LTA));
 
-        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer());
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), "originalContainer");
 
         assertEquals(AsicEContainer.class, augmentedContainer.getClass());
         assertEquals(1, augmentedContainer.getSignatures().size());
@@ -106,7 +112,7 @@ class AsicContainerAugmentationServiceTest {
         AsicContainerSession session = getContainerSession(container);
 
         InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer())
+                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer(), "originalContainer")
         );
 
         assertEquals("Unable to augment. Container does not contain any signatures", caughtException.getMessage());
@@ -118,7 +124,7 @@ class AsicContainerAugmentationServiceTest {
         session.setContainer(TestUtil.getFile(VALID_LATVIAN_ASICE));
 
         InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer())
+                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer(), VALID_LATVIAN_ASICE)
         );
 
         assertEquals("Unable to augment. Container does not contain any Estonian signatures", caughtException.getMessage());
@@ -130,12 +136,18 @@ class AsicContainerAugmentationServiceTest {
         Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
         AsicContainerSession session = getContainerSession(container);
 
-        NotImplementedException caughtException = assertThrows(
-                NotImplementedException.class, () -> augmentationService.augmentContainer(session.getContainer())
-        );
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), VALID_BDOC_WITH_LT_TM_SIGNATURE);
 
-        // TODO SIGA-855: Handle ASiC-S containers
-        assertEquals("ASiC-S wrapping is not yet implemented!", caughtException.getMessage());
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals(VALID_BDOC_WITH_LT_TM_SIGNATURE, dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(session.getContainer(), dataFile.getBytes(), "The original container included in the resulting ASiC-S container must not be modified.");
     }
 
     @Test
@@ -143,7 +155,7 @@ class AsicContainerAugmentationServiceTest {
         AsicContainerSession session = RequestUtil.createAsicSessionHolder();
         session.setContainer(TestUtil.getFile(VALID_ASICE_WITH_EXPIRED_OCSP));
 
-        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer());
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), VALID_ASICE_WITH_EXPIRED_OCSP);
 
         assertEquals(AsicEContainer.class, augmentedContainer.getClass());
         assertEquals(1, augmentedContainer.getSignatures().size());
@@ -158,7 +170,7 @@ class AsicContainerAugmentationServiceTest {
         AsicContainerSession session = getContainerSession(container);
 
         InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer())
+                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer(), "originalContainer")
         );
 
         assertEquals("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile", caughtException.getMessage());
@@ -174,12 +186,18 @@ class AsicContainerAugmentationServiceTest {
         container.addSignature(signature);
         AsicContainerSession session = getContainerSession(container);
 
-        NotImplementedException caughtException = assertThrows(
-                NotImplementedException.class, () -> augmentationService.augmentContainer(session.getContainer())
-        );
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), "originalContainer.asice");
 
-        // TODO SIGA-855: Handle ASiC-S containers
-        assertEquals("ASiC-S wrapping is not yet implemented!", caughtException.getMessage());
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals("originalContainer.asice", dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(session.getContainer(), dataFile.getBytes(), "Datafile in ASiC-S must be exactly the same as the original container.");
     }
 
     @Test
@@ -188,12 +206,38 @@ class AsicContainerAugmentationServiceTest {
         Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
         AsicContainerSession session = getContainerSession(container);
 
-        NotImplementedException caughtException = assertThrows(
-                NotImplementedException.class, () -> augmentationService.augmentContainer(session.getContainer())
-        );
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES);
 
-        // TODO SIGA-855: Handle ASiC-S containers
-        assertEquals("ASiC-S wrapping is not yet implemented!", caughtException.getMessage());
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals(VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES, dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(session.getContainer(), dataFile.getBytes(), "Datafile in ASiC-S must be exactly the same as the original container.");
+    }
+
+    @Test
+    void containerWithInvalidSignature_WrappedIntoAsics() throws URISyntaxException {
+        Path containerPath = Paths.get(AsicContainerServiceTest.class.getClassLoader().getResource(INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP).toURI());
+        Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
+        AsicContainerSession session = getContainerSession(container);
+
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP);
+
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals(INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP, dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(session.getContainer(), dataFile.getBytes(), "The original container included in the resulting ASiC-S container must not be modified.");
     }
 
     @ParameterizedTest
@@ -205,7 +249,7 @@ class AsicContainerAugmentationServiceTest {
         AsicContainerSession session = getContainerSession(container);
 
         InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer())
+                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer(), containerFilename)
         );
 
         assertEquals("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile", caughtException.getMessage());
@@ -218,7 +262,7 @@ class AsicContainerAugmentationServiceTest {
         AsicContainerSession session = getContainerSession(container);
 
         InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer())
+                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(session.getContainer(), ESEAL_WITH_EXPIRED_OCSP)
         );
 
         assertEquals("Unable to augment. Container contains only e-seals, but no Estonian personal signatures", caughtException.getMessage());
@@ -230,7 +274,7 @@ class AsicContainerAugmentationServiceTest {
         Container container = ContainerBuilder.aContainer().fromExistingFile(containerPath.toString()).build();
         AsicContainerSession session = getContainerSession(container);
 
-        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer());
+        Container augmentedContainer = augmentationService.augmentContainer(session.getContainer(), "LT_sig_and_LT_seal.asice");
 
         assertEquals(AsicEContainer.class, augmentedContainer.getClass());
         assertEquals(2, augmentedContainer.getSignatures().size());

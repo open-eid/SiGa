@@ -158,7 +158,8 @@ public class AsicContainerService implements AsicSessionHolder {
 
     public Result augmentContainer(String containerId) {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
-        Container augmentedContainer = asicContainerAugmentationService.augmentContainer(sessionHolder.getContainer());
+        Container augmentedContainer = asicContainerAugmentationService.augmentContainer(sessionHolder.getContainer(), sessionHolder.getContainerName());
+        renameToAsicsIfNecessary(sessionHolder, augmentedContainer);
         addSignaturesToSession(augmentedContainer, sessionHolder);
         updateContainerInSession(sessionHolder, augmentedContainer);
         return Result.OK;
@@ -180,6 +181,22 @@ public class AsicContainerService implements AsicSessionHolder {
 
     String generateContainerId() {
         return UUIDGenerator.generateUUID();
+    }
+
+    private static void renameToAsicsIfNecessary(AsicContainerSession sessionHolder, Container augmentedContainer) {
+        if ("ASICS".equals(augmentedContainer.getType())) {
+            String filenameWithAsicsExtension = renameToAsics(sessionHolder.getContainerName());
+            sessionHolder.setContainerName(filenameWithAsicsExtension);
+        }
+    }
+
+    private static String renameToAsics(String filename) {
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            return filename.substring(0, lastDotIndex) + ".asics";
+        } else {
+            return filename + ".asics";
+        }
     }
 
     private static void addSignaturesToSession(Container container, AsicContainerSession containerSession) {

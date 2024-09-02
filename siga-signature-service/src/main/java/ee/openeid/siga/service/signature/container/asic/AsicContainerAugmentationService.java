@@ -3,9 +3,11 @@ package ee.openeid.siga.service.signature.container.asic;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import eu.europa.esig.dss.enumerations.Indication;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
 import lombok.extern.slf4j.Slf4j;
@@ -16,17 +18,22 @@ import org.digidoc4j.ContainerValidationResult;
 import org.digidoc4j.ServiceType;
 import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.Timestamp;
+import org.digidoc4j.TimestampBuilder;
 import org.digidoc4j.X509Cert;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
+import org.digidoc4j.impl.asic.asics.AsicSContainerBuilder;
 import org.digidoc4j.impl.asic.report.SignatureValidationReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 
@@ -34,6 +41,7 @@ import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 @Service
 @Profile("datafileContainer")
 public class AsicContainerAugmentationService {
+    private static final Set<String> ASICE_FILE_TYPES = Set.of("ASICE", "BDOC");
     private static final List<SignatureLevel> augmentableSignatureProfiles = List.of(
             SignatureLevel.XAdES_BASELINE_LT,
             SignatureLevel.XAdES_BASELINE_LTA
@@ -52,9 +60,10 @@ public class AsicContainerAugmentationService {
         this.sigaEventLogger = sigaEventLogger;
     }
 
-    public Container augmentContainer(byte[] containerBytes) {
+    public Container augmentContainer(byte[] containerBytes, String containerName) {
         Container eeContainer = ContainerUtil.createContainer(containerBytes, eeConfiguration);
         Container euContainer = ContainerUtil.createContainer(containerBytes, euConfiguration);
+        String containerType = eeContainer.getType();
 
         // Container must contain at least 1 signature
         validateNotEmpty(eeContainer);
@@ -71,8 +80,7 @@ public class AsicContainerAugmentationService {
 
         // Containers with LT_TM signatures must be wrapped into ASiC-S
         if (containLtTmSignatures(signaturesWithoutESeals, eeValidationResult)) {
-            // TODO SIGA-855: Handle ASiC-S containers
-            throw new NotImplementedException("ASiC-S wrapping is not yet implemented!");
+            return wrapIntoAsics(containerBytes, containerName, containerType);
         }
 
         // Only signatures with LT and LTA profile can be augmented
@@ -85,8 +93,7 @@ public class AsicContainerAugmentationService {
             if (euSignaturesWithAugmentableProfile.size() == 0 && eeSignaturesWithAugmentableProfile.size() == 0) {
                 throw new InvalidSessionDataException("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile");
             } else if (eeSignaturesWithAugmentableProfile.size() > 0) {
-                // TODO SIGA-855: Handle ASiC-S containers
-                throw new NotImplementedException("ASiC-S wrapping is not yet implemented!");
+                return wrapIntoAsics(containerBytes, containerName, containerType);
             } else {
                 // if eeSignaturesWithAugmentableProfile.size() == 0 && euSignaturesWithAugmentableProfile.size() > 0:
                 throw new NotImplementedException("Not implemented!");
@@ -95,14 +102,35 @@ public class AsicContainerAugmentationService {
 
         // Signatures must be valid
         if (!areSignaturesValid(eeValidationResult, eeSignaturesWithAugmentableProfile, euValidationResult, euSignaturesWithAugmentableProfile)) {
-            // TODO SIGA-855: Handle ASiC-S containers
-            throw new NotImplementedException("ASiC-S wrapping is not yet implemented!");
+            return wrapIntoAsics(containerBytes, containerName, containerType);
         }
 
         try (ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
             eeContainer.extendSignatureProfile(SignatureProfile.LTA, eeSignaturesWithAugmentableProfile);
         }
         return eeContainer;
+    }
+
+    private Container wrapIntoAsics(byte[] container, String containerName, String containerType) {
+        MimeTypeEnum mimeType = getContainerMimeType(containerType);
+        Container asicsContainer = new AsicSContainerBuilder()
+                .withConfiguration(eeConfiguration)
+                .withDataFile(new ByteArrayInputStream(container), containerName, mimeType.getMimeTypeString())
+                .build();
+        try (ServiceAccessScope ignored = new ServiceAccessScope(createServiceAccessListener())) {
+            Timestamp timestamp = TimestampBuilder.aTimestamp(asicsContainer)
+                    .invokeTimestamping();
+            asicsContainer.addTimestamp(timestamp);
+        }
+        return asicsContainer;
+    }
+
+    private static MimeTypeEnum getContainerMimeType(String containerType) {
+        if (ASICE_FILE_TYPES.contains(containerType)) {
+            return MimeTypeEnum.ASICE;
+        } else {
+            throw new InvalidContainerException("Invalid container type for ASiC-S wrapping: " + containerType);
+        }
     }
 
     private static boolean containLtTmSignatures(List<Signature> signatures, ContainerValidationResult eeValidationResult) {

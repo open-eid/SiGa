@@ -51,6 +51,7 @@ public class RequestUtil {
     public static final String VALID_ASICE = "test.asice";
     public static final String VALID_LATVIAN_ASICE = "latvian_LT_signature_with_7min_difference_between_TS_and_OCSP.asice";
     public static final String VALID_ASICE_WITH_EXPIRED_OCSP = "asice_ocsp_cert_expired.asice";
+    public static final String INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP = "esteid2018signerAiaOcspLTA.asice";
     public static final String ESEAL_WITH_EXPIRED_OCSP = "asice_e-seal_ocsp_cert_expired.asice";
     public static final String DIFFERENT_MANIFEST_FILENAME = "different_manifest_path-filename.asice";
     public static final String DIFFERENT_SHA256_FILENAME = "different_sha256_path-filename.asice";
