@@ -4,6 +4,7 @@ import ee.openeid.siga.service.signature.hashcode.HashcodesDataFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
+import org.apache.commons.io.IOUtils;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -80,5 +81,16 @@ public class TestUtil {
         org.digidoc4j.Signature signature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
         container.addSignature(signature);
         return container;
+    }
+
+    public static byte[] getBytesFromContainer(Container container) throws IOException {
+        InputStream inputStream = container.saveAsStream();
+        return IOUtils.toByteArray(inputStream);
+    }
+    public static Container getContainer(byte[] containerBytes) {
+        return ContainerBuilder.aContainer()
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .fromStream(new ByteArrayInputStream(containerBytes))
+                .build();
     }
 }
