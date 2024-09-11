@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.exceptions.NotSupportedException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -149,7 +150,11 @@ public class AsicContainerService implements AsicSessionHolder {
         if (dataFile.isEmpty()) {
             throw new ResourceNotFoundException("Data file named " + datafileName + " not found");
         }
-        container.removeDataFile(dataFile.get());
+        try {
+            container.removeDataFile(dataFile.get());
+        } catch (NotSupportedException e) {
+            throw new InvalidSessionDataException("Removing datafile not supported for container type: " + container.getType());
+        }
 
         updateContainerInSession(sessionHolder, container);
 

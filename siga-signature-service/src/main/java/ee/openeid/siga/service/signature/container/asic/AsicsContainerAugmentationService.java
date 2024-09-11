@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature.container.asic;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.digidoc4j.ServiceType;
 import org.digidoc4j.Timestamp;
 import org.digidoc4j.TimestampBuilder;
 import org.digidoc4j.exceptions.DigiDoc4JException;
+import org.digidoc4j.exceptions.IllegalContainerContentException;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,8 @@ public class AsicsContainerAugmentationService {
             Timestamp timestamp = TimestampBuilder.aTimestamp(container)
                     .invokeTimestamping();
             container.addTimestamp(timestamp);
+        } catch (IllegalContainerContentException e) {
+            throw new InvalidContainerException("Unable to augment. Invalid contents found for ASiC-S container.");
         }
         return container;
     }

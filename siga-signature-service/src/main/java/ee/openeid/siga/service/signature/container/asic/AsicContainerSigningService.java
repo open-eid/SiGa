@@ -7,6 +7,7 @@ import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.session.AsicSessionHolder;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.digidoc4j.Constant;
 import org.digidoc4j.Container;
 import org.digidoc4j.DataFile;
 import org.digidoc4j.DataToSign;
@@ -62,6 +63,13 @@ public class AsicContainerSigningService extends ContainerSigningService impleme
                 .orElse(null);
         verifyContainerExistence(container);
         verifyContainerContainsNoEmptyDataFiles(container);
+        verifyContainerType(container);
+    }
+
+    private static void verifyContainerType(Container container) {
+        if (Constant.ASICS_CONTAINER_TYPE.equals(container.getType())) {
+            throw new InvalidSessionDataException("ASiC-S container signing is not allowed.");
+        }
     }
 
     @Override
