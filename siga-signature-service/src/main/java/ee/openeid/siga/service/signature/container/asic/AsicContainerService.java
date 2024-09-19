@@ -35,8 +35,12 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.digidoc4j.Constant.ASICE_CONTAINER_TYPE;
+import static org.digidoc4j.Constant.ASICS_CONTAINER_TYPE;
+import static org.digidoc4j.Constant.BDOC_CONTAINER_TYPE;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 
 @Slf4j
@@ -44,6 +48,8 @@ import static org.digidoc4j.Container.DocumentType.ASICE;
 @Profile("datafileContainer")
 @RequiredArgsConstructor
 public class AsicContainerService implements AsicSessionHolder {
+    private static final Set<String> ALLOWED_CONTAINER_TYPES = Set.of(ASICE_CONTAINER_TYPE, BDOC_CONTAINER_TYPE, ASICS_CONTAINER_TYPE);
+
     private final SessionService sessionService;
     private final AsicContainerAugmentationService asicContainerAugmentationService;
     private final Configuration configuration;
@@ -75,6 +81,7 @@ public class AsicContainerService implements AsicSessionHolder {
             log.error("Invalid container:", e);
             throw new InvalidContainerException("Invalid container");
         }
+        validateContainerType(container);
         String containerId = generateContainerId();
         Session session = transformContainerToSession(containerName, containerId, container);
         sessionService.update(session);
@@ -268,4 +275,12 @@ public class AsicContainerService implements AsicSessionHolder {
         );
         return sessionHolder;
     }
+
+    private static void validateContainerType(Container container) {
+        String containerType = container.getType();
+        if (!ALLOWED_CONTAINER_TYPES.contains(containerType)) {
+            throw new InvalidContainerException("Invalid container type: " + containerType);
+        }
+    }
+
 }

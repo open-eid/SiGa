@@ -4,6 +4,7 @@ package ee.openeid.siga.service.signature.container.asic;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.DuplicateDataFileException;
+import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.ContainerInfo;
@@ -236,6 +237,16 @@ class AsicContainerServiceTest {
     void successfulCloseSession() {
         String result = containerService.closeSession(CONTAINER_ID);
         assertEquals(Result.OK.name(), result);
+    }
+
+    @Test
+    void uploadContainerWithInvalidContainerTypeThrows() throws IOException, URISyntaxException {
+        String container = new String(Base64.getEncoder().encode(getFile("container.ddoc")));
+
+        InvalidContainerException caughtException = assertThrows(
+            InvalidContainerException.class, () -> containerService.uploadContainer("container.ddoc", container)
+        );
+        assertEquals("Invalid container type: DDOC", caughtException.getMessage());
     }
 
     @Test
