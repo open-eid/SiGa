@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.exceptions.DigiDoc4JException;
 import org.digidoc4j.exceptions.NotSupportedException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -232,6 +233,9 @@ public class AsicContainerService implements AsicSessionHolder {
             container.addDataFile(digidoc4jDataFile);
         } catch (org.digidoc4j.exceptions.DuplicateDataFileException e) {
             throw new DuplicateDataFileException("Duplicate data files not allowed: " + dataFile.getFileName());
+        } catch (DigiDoc4JException e) {
+            log.error("Cannot add datafile to specified container: ", e);
+            throw new InvalidSessionDataException("Cannot add datafile to specified container.");
         }
     }
 
