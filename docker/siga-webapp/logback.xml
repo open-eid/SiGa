@@ -41,9 +41,8 @@
         </filter>
     </appender>
     <logger name="ee.openeid.siga" level="INFO"/>
-    <logger name="org.digidoc4j" level="INFO"/>
-    <logger name="eu.europa" level="INFO"/>
-    <logger name="org.digidoc4j.impl" level="WARN"/>
+    <logger name="org.digidoc4j" level="WARN"/>
+    <logger name="eu.europa" level="WARN"/>
     <logger name="org.digidoc4j.Configuration" level="INFO"/>
     <logger name="ee.sk" level="INFO"/>
 
