@@ -35,7 +35,7 @@ public class SessionService {
     public Session getContainerBySessionId(String sessionId) {
         Session container = Optional.ofNullable(getContainerCache().get(sessionId))
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        log.info("Found container with container ID [{}]", container.getSessionId());
+        log.debug("Found container with container ID [{}]", container.getSessionId());
         container.setSignatureSessions(Optional
                 .ofNullable(getSignatureSessionCache().get(sessionId))
                 .orElseGet(HashMap::new));
