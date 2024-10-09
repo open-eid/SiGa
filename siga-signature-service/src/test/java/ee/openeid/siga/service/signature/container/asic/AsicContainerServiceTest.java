@@ -40,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_SESSI
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICS;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createAsicSessionHolder;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createDataFileListWithOneFile;
 import static org.digidoc4j.Container.DocumentType.ASICE;
@@ -151,6 +153,48 @@ class AsicContainerServiceTest {
     }
 
     @Test
+    void successfulGetDataFilesFromNonCompositeAsicsContainer() {
+        Container container = ContainerBuilder.aContainer(Container.DocumentType.ASICS)
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("test content".getBytes(StandardCharsets.UTF_8),
+                        "test.xml", "text/plain")).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<DataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
+
+        assertEquals(1, dataFiles.size());
+        assertEquals("test.xml", dataFiles.get(0).getFileName());
+        assertEquals("test content", new String(Base64.getDecoder().decode(dataFiles.get(0).getContent())));
+    }
+
+    @Test
+    void successfulGetDataFilesFromCompositeAsicsContainer() throws IOException, URISyntaxException {
+        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<DataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
+
+        assertEquals(1, dataFiles.size());
+        assertEquals("test.txt", dataFiles.get(0).getFileName());
+        assertEquals("see on testfail", new String(Base64.getDecoder().decode(dataFiles.get(0).getContent())));
+    }
+
+    @Test
+    void successfulGetDataFilesFrom2ndLevelOf3LevelNestedCompositeAsicsContainer() throws IOException, URISyntaxException {
+        Container container = TestUtil.getContainer(getFile("1xTST-recursive-asics-datafile.asics"));
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<DataFile> dataFiles = containerService.getDataFiles(CONTAINER_ID);
+
+        assertEquals(1, dataFiles.size());
+        assertEquals("timestamped-3.asics", dataFiles.get(0).getFileName());
+        assertEquals(12930, Base64.getDecoder().decode(dataFiles.get(0).getContent()).length);
+    }
+
+    @Test
     void addDataFileButSignatureExists() throws IOException, URISyntaxException {
         Mockito.when(sessionService.getContainer(any())).thenReturn(RequestUtil.createAsicSessionHolder());
 
@@ -158,6 +202,33 @@ class AsicContainerServiceTest {
             InvalidSessionDataException.class, () -> containerService.addDataFiles(CONTAINER_ID, createDataFileListWithOneFile())
         );
         assertEquals("Unable to add/remove data file. Container contains signature(s)", caughtException.getMessage());
+    }
+
+    @Test
+    void addDataFileToNonCompositeAsicsContainerFails() {
+        Container container = ContainerBuilder.aContainer(Container.DocumentType.ASICS)
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("test content".getBytes(),
+                        "test.xml", "text/plain")).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        InvalidSessionDataException caughtException = assertThrows(
+            InvalidSessionDataException.class, () -> containerService.addDataFiles(CONTAINER_ID, createDataFileListWithOneFile())
+        );
+        assertEquals("Cannot add datafile to specified container.", caughtException.getMessage());
+    }
+
+    @Test
+    void addDataFileToCompositeAsicsContainerFails() throws IOException, URISyntaxException {
+        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        InvalidSessionDataException caughtException = assertThrows(
+            InvalidSessionDataException.class, () -> containerService.addDataFiles(CONTAINER_ID, createDataFileListWithOneFile())
+        );
+        assertEquals("Unable to add/remove data file. Container contains timestamp token(s)", caughtException.getMessage());
     }
 
     @Test
@@ -201,6 +272,45 @@ class AsicContainerServiceTest {
                 }
         );
         assertEquals("Data file named test.xml not found", caughtException.getMessage());
+    }
+
+    @Test
+    void removeDataFileFromAsicsContainer() {
+        Container container = ContainerBuilder.aContainer(Container.DocumentType.ASICS)
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .withDataFile(new org.digidoc4j.DataFile("test content".getBytes(),
+                        "test.xml", "text/plain")).build();
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        Result result = containerService.removeDataFile(CONTAINER_ID, "test.xml");
+        assertEquals(Result.OK, result);
+    }
+
+    @Test
+    void removeDdocFileFromCompositeAsicsContainerFails() throws IOException, URISyntaxException {
+        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        InvalidSessionDataException caughtException = assertThrows(
+            InvalidSessionDataException.class, () -> containerService.removeDataFile(CONTAINER_ID, "container.ddoc")
+        );
+
+        assertEquals("Unable to add/remove data file. Container contains timestamp token(s)", caughtException.getMessage());
+    }
+
+    @Test
+    void removeInnerDataFileFromCompositeAsicsContainerFails() throws IOException, URISyntaxException {
+        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        AsicContainerSession session = getContainerSession(container);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        InvalidSessionDataException caughtException = assertThrows(
+                InvalidSessionDataException.class, () -> containerService.removeDataFile(CONTAINER_ID, "test.txt")
+        );
+
+        assertEquals("Unable to add/remove data file. Container contains timestamp token(s)", caughtException.getMessage());
     }
 
     @Test

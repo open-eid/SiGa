@@ -25,6 +25,7 @@ import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.exceptions.DigiDoc4JException;
 import org.digidoc4j.exceptions.NotSupportedException;
+import org.digidoc4j.impl.asic.asics.AsicSCompositeContainer;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -132,7 +133,7 @@ public class AsicContainerService implements AsicSessionHolder {
         AsicContainerSession sessionHolder = getSessionHolder(containerId);
         Container container = createContainerFromSession(sessionHolder);
 
-        List<org.digidoc4j.DataFile> dataFiles = container.getDataFiles();
+        List<org.digidoc4j.DataFile> dataFiles = getDataFilesFromContainerSpecificDepth(container);
         return dataFiles.stream().map(AsicContainerService::transformDataFile).collect(Collectors.toList());
     }
 
@@ -152,7 +153,7 @@ public class AsicContainerService implements AsicSessionHolder {
 
         Container container = createContainerFromSession(sessionHolder);
         validateIfSessionMutable(container);
-        Optional<org.digidoc4j.DataFile> dataFile = container.getDataFiles().stream()
+        Optional<org.digidoc4j.DataFile> dataFile = getDataFilesFromContainerSpecificDepth(container).stream()
                 .filter(df -> df.getName().equals(datafileName))
                 .findAny();
         if (dataFile.isEmpty()) {
@@ -161,7 +162,11 @@ public class AsicContainerService implements AsicSessionHolder {
         try {
             container.removeDataFile(dataFile.get());
         } catch (NotSupportedException e) {
-            throw new InvalidSessionDataException("Removing datafile not supported for container type: " + container.getType());
+            if (container instanceof AsicSCompositeContainer) {
+                throw new InvalidSessionDataException("Modifying the contents of composite ASiC-S container is not allowed.");
+            } else {
+                throw new InvalidSessionDataException("Removing datafile not supported for container type: " + container.getType());
+            }
         }
 
         updateContainerInSession(sessionHolder, container);
@@ -243,6 +248,9 @@ public class AsicContainerService implements AsicSessionHolder {
         if (!container.getSignatures().isEmpty()) {
             throw new InvalidSessionDataException("Unable to add/remove data file. Container contains signature(s)");
         }
+        if (!container.getTimestamps().isEmpty()) {
+            throw new InvalidSessionDataException("Unable to add/remove data file. Container contains timestamp token(s)");
+        }
     }
 
     private static Signature transformSignature(String generatedSignatureId, org.digidoc4j.Signature dd4jSignature) {
@@ -284,6 +292,14 @@ public class AsicContainerService implements AsicSessionHolder {
         String containerType = container.getType();
         if (!ALLOWED_CONTAINER_TYPES.contains(containerType)) {
             throw new InvalidContainerException("Invalid container type: " + containerType);
+        }
+    }
+
+    private static List<org.digidoc4j.DataFile> getDataFilesFromContainerSpecificDepth(Container container) {
+        if (container instanceof AsicSCompositeContainer) {
+            return ((AsicSCompositeContainer) container).getNestedContainerDataFiles();
+        } else {
+            return container.getDataFiles();
         }
     }
 

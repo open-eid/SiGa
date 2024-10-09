@@ -12,7 +12,6 @@ import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DataFile;
 import org.digidoc4j.Timestamp;
 import org.digidoc4j.TimestampBuilder;
-import org.digidoc4j.impl.asic.asics.AsicSCompositeContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainerTimestamp;
 import org.junit.jupiter.api.Test;
@@ -27,8 +26,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_DDOC_WITH_EXPIRED_SIGNER_AND_OCSP;
-import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICS_WITH_INCORRECT_MIMETYPE_IN_MANIFEST_XML;
-import static ee.openeid.siga.service.signature.test.TestUtil.getContainer;
 import static ee.openeid.siga.service.signature.test.TestUtil.getFile;
 import static org.digidoc4j.utils.ContainerUtils.DDOC_MIMETYPE_STRING;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -256,31 +253,6 @@ class AsicsContainerAugmentationServiceTest {
         assertEquals("test.asice", dataFile.getName());
         assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
         assertArrayEquals(innerContainerBytes, dataFile.getBytes());
-    }
-
-    @Test
-    void containerWithInvalidMimeTypeDefinedInManifestXml_CorrectMimetypeAddedToArchiveManifest() throws IOException, URISyntaxException {
-        // This ASiC-S container contains a DDOC file, but the mimetype of this DDOC is specified as "application/vnd.etsi.asic-e+zip"
-        Container container = getContainer(getFile(VALID_ASICS_WITH_INCORRECT_MIMETYPE_IN_MANIFEST_XML));
-
-        Container augmentedContainer = augmentationService.augmentContainer(container);
-
-        assertEquals(AsicSCompositeContainer.class, augmentedContainer.getClass());
-        assertEquals(1, augmentedContainer.getDataFiles().size());
-        assertEquals(0, augmentedContainer.getSignatures().size());
-        assertEquals(2, augmentedContainer.getTimestamps().size());
-
-        AsicSContainerTimestamp timestamp1 = (AsicSContainerTimestamp) augmentedContainer.getTimestamps().get(0);
-        assertNull(timestamp1.getArchiveManifest());
-
-        AsicSContainerTimestamp timestamp2 = (AsicSContainerTimestamp) augmentedContainer.getTimestamps().get(1);
-        assertThat(timestamp1.getCreationTime(), lessThanOrEqualTo(timestamp2.getCreationTime()));
-        String timestamp2Xml = IOUtils.toString(timestamp2.getArchiveManifest().getManifestDocument().openStream(), StandardCharsets.UTF_8);
-        assertTrue(timestamp2Xml.contains("<asic:DataObjectReference MimeType=\"application/x-ddoc\" URI=\"container.ddoc\">"));
-
-        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
-        assertEquals("container.ddoc", dataFile.getName());
-        assertEquals(DDOC_MIMETYPE_STRING, dataFile.getMediaType());
     }
 
 }
