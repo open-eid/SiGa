@@ -43,6 +43,7 @@ import java.util.List;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.*;
 import static org.digidoc4j.Container.DocumentType.ASICE;
+import static org.digidoc4j.Container.DocumentType.ASICS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -130,6 +131,28 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
             InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("Unable to sign container with empty datafiles", caughtException.getMessage());
+    }
+
+    @Test
+    void CompositeAsicsContainerInSession() throws IOException, URISyntaxException {
+        AsicContainerSession sessionHolder = RequestUtil.createAsicSessionHolder(VALID_COMPOSITE_ASICS, ASICS);
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        InvalidSessionDataException caughtException = assertThrows(
+            InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+        );
+        assertEquals("ASiC-S container signing is not allowed.", caughtException.getMessage());
+    }
+
+    @Test
+    void NonCompositeAsicsContainerInSession() throws IOException, URISyntaxException {
+        AsicContainerSession sessionHolder = RequestUtil.createAsicSessionHolder("asicsContainerWithLtSignatureWithoutTST.scs", ASICS);
+        Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
+
+        InvalidSessionDataException caughtException = assertThrows(
+            InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+        );
+        assertEquals("ASiC-S container signing is not allowed.", caughtException.getMessage());
     }
 
     @Test

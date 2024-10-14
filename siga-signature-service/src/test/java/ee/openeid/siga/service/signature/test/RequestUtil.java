@@ -21,8 +21,10 @@ import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.DigestAlgorithm;
+import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.impl.asic.asics.AsicSCompositeContainer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class RequestUtil {
     public static final String VALID_ASICE_WITH_EXPIRED_OCSP = "asice_ocsp_cert_expired.asice";
     public static final String INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP = "esteid2018signerAiaOcspLTA.asice";
     public static final String INVALID_DDOC_WITH_EXPIRED_SIGNER_AND_OCSP = "container.ddoc";
-    public static final String VALID_ASICS = "asics_containing_ddoc_and_timestamp.asics";
+    public static final String VALID_COMPOSITE_ASICS = "asics_containing_ddoc_and_timestamp.asics";
     public static final String ESEAL_WITH_EXPIRED_OCSP = "asice_e-seal_ocsp_cert_expired.asice";
     public static final String DIFFERENT_MANIFEST_FILENAME = "different_manifest_path-filename.asice";
     public static final String DIFFERENT_SHA256_FILENAME = "different_sha256_path-filename.asice";
@@ -164,10 +166,12 @@ public class RequestUtil {
                 .dataFiles(RequestUtil.createHashcodeDataFileListWithOneFile()).build();
     }
 
-    public static AsicContainerSession createAsicSessionHolder() throws IOException, URISyntaxException {
-        String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(VALID_ASICE).readAllBytes()));
+    public static AsicContainerSession createAsicSessionHolder(String fileName, Container.DocumentType containerType) throws IOException, URISyntaxException {
+        String base64container = new String(Base64.getEncoder().encode(TestUtil.getFileInputStream(fileName).readAllBytes()));
         InputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64container.getBytes()));
-        Container container = ContainerBuilder.aContainer(ASICE).withConfiguration(Configuration.of(Configuration.Mode.TEST)).fromStream(inputStream).build();
+        Container container = ContainerBuilder.aContainer(containerType)
+                .withConfiguration(Configuration.of(Configuration.Mode.TEST))
+                .fromStream(inputStream).build();
         Map<String, CertificateSession> certificateSessions = new HashMap<>();
         RelyingPartyInfo relyingPartyInfo = RelyingPartyInfo.builder()
                 .name("Testimine")
@@ -177,7 +181,14 @@ public class RequestUtil {
                 .relyingPartyInfo(relyingPartyInfo)
                 .sessionCode("123").build());
         Map<String, Integer> signatureIdHolder = new HashMap<>();
-        signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(container.getSignatures().get(0).getAdESSignature()));
+        for (Signature signature : container.getSignatures()) {
+            signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(signature.getAdESSignature()));
+        }
+        if (container instanceof AsicSCompositeContainer) {
+            for (Signature signature : ((AsicSCompositeContainer) container).getNestedContainerSignatures()) {
+                signatureIdHolder.put(UUIDGenerator.generateUUID(), Arrays.hashCode(signature.getAdESSignature()));
+            }
+        }
         return AsicContainerSession.builder()
                 .sessionId(CONTAINER_SESSION_ID)
                 .clientName(CLIENT_NAME)
@@ -185,9 +196,13 @@ public class RequestUtil {
                 .serviceUuid(SERVICE_UUID)
                 .certificateSessions(certificateSessions)
                 .signatureIdHolder(signatureIdHolder)
-                .containerName("test.asice")
+                .containerName(fileName)
                 .container(Base64.getDecoder().decode(base64container.getBytes()))
                 .build();
+    }
+
+    public static AsicContainerSession createAsicSessionHolder() throws IOException, URISyntaxException {
+        return createAsicSessionHolder(VALID_ASICE, ASICE);
     }
 
     public static SignatureParameters createSignatureParameters(X509Certificate certificate) {

@@ -104,7 +104,7 @@ public class AsicContainerService implements AsicSessionHolder {
         Container container = createContainerFromSession(sessionHolder);
 
         List<Signature> signatures = new ArrayList<>();
-        container.getSignatures()
+        getSignaturesFromContainerSpecificDepth(container)
                 .forEach(sessionSignature -> sessionHolder.getSignatureIdHolder()
                         .forEach((generatedSignatureId, hashcode) -> {
                             if (Arrays.hashCode(sessionSignature.getAdESSignature()) == hashcode) {
@@ -300,6 +300,16 @@ public class AsicContainerService implements AsicSessionHolder {
             return ((AsicSCompositeContainer) container).getNestedContainerDataFiles();
         } else {
             return container.getDataFiles();
+        }
+    }
+
+    private static List<org.digidoc4j.Signature> getSignaturesFromContainerSpecificDepth(Container container) {
+        if (container instanceof AsicSCompositeContainer) {
+            List<org.digidoc4j.Signature> signatures = new ArrayList<>(container.getSignatures());
+            signatures.addAll(((AsicSCompositeContainer) container).getNestedContainerSignatures());
+            return signatures;
+        } else {
+            return container.getSignatures();
         }
     }
 

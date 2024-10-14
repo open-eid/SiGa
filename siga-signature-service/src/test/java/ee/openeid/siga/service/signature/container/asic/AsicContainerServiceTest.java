@@ -53,10 +53,11 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_SESSI
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE;
-import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICS;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_COMPOSITE_ASICS;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createAsicSessionHolder;
 import static ee.openeid.siga.service.signature.test.RequestUtil.createDataFileListWithOneFile;
 import static org.digidoc4j.Container.DocumentType.ASICE;
+import static org.digidoc4j.Container.DocumentType.ASICS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -135,6 +136,44 @@ class AsicContainerServiceTest {
     }
 
     @Test
+    void successfulGetSignaturesFromNonCompositeSignedAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder("asicsContainerWithLtSignatureWithoutTST.scs", ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
+
+        assertEquals(1, signatures.size());
+        assertEquals("id-42f7f6960f18344d433c5578313b43e2", signatures.get(0).getId());
+        assertEquals("LT", signatures.get(0).getSignatureProfile());
+        assertFalse(StringUtils.isBlank(signatures.get(0).getGeneratedSignatureId()));
+        assertEquals("SERIALNUMBER=PNOEE-38001085718, CN=\"JÕEORG,JAAK-KRISTJAN,38001085718\", SURNAME=JÕEORG, GIVENNAME=JAAK-KRISTJAN, C=EE", signatures.get(0).getSignerInfo());
+    }
+
+    @Test
+    void successfulGetSignaturesFromCompositeAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder(VALID_COMPOSITE_ASICS, ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
+
+        assertEquals(1, signatures.size());
+        assertEquals("S0", signatures.get(0).getId());
+        assertEquals("LT_TM", signatures.get(0).getSignatureProfile());
+        assertFalse(StringUtils.isBlank(signatures.get(0).getGeneratedSignatureId()));
+        assertEquals("SERIALNUMBER=11404176865, GIVENNAME=MÄRÜ-LÖÖZ, SURNAME=ŽÕRINÜWŠKY, CN=\"ŽÕRINÜWŠKY,MÄRÜ-LÖÖZ,11404176865\", OU=digital signature, O=ESTEID, C=EE", signatures.get(0).getSignerInfo());
+    }
+
+    @Test
+    void successfulGetSignaturesFrom2ndLevelOfDeeplyNestedCompositeAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder("1xTST-recursive-asics-datafile.asics", ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Signature> signatures = containerService.getSignatures(CONTAINER_ID);
+
+        assertEquals(0, signatures.size());
+    }
+
+    @Test
     void successfulGetSignature() throws IOException, URISyntaxException {
         AsicContainerSession session = createAsicSessionHolder();
         AtomicReference<String> signatureId = new AtomicReference<>();
@@ -170,7 +209,7 @@ class AsicContainerServiceTest {
 
     @Test
     void successfulGetDataFilesFromCompositeAsicsContainer() throws IOException, URISyntaxException {
-        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        Container container = TestUtil.getContainer(getFile(VALID_COMPOSITE_ASICS));
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
@@ -182,7 +221,7 @@ class AsicContainerServiceTest {
     }
 
     @Test
-    void successfulGetDataFilesFrom2ndLevelOf3LevelNestedCompositeAsicsContainer() throws IOException, URISyntaxException {
+    void successfulGetDataFilesFrom2ndLevelOfDeeplyNestedCompositeAsicsContainer() throws IOException, URISyntaxException {
         Container container = TestUtil.getContainer(getFile("1xTST-recursive-asics-datafile.asics"));
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
@@ -221,7 +260,7 @@ class AsicContainerServiceTest {
 
     @Test
     void addDataFileToCompositeAsicsContainerFails() throws IOException, URISyntaxException {
-        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        Container container = TestUtil.getContainer(getFile(VALID_COMPOSITE_ASICS));
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
@@ -289,7 +328,7 @@ class AsicContainerServiceTest {
 
     @Test
     void removeDdocFileFromCompositeAsicsContainerFails() throws IOException, URISyntaxException {
-        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        Container container = TestUtil.getContainer(getFile(VALID_COMPOSITE_ASICS));
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
@@ -302,7 +341,7 @@ class AsicContainerServiceTest {
 
     @Test
     void removeInnerDataFileFromCompositeAsicsContainerFails() throws IOException, URISyntaxException {
-        Container container = TestUtil.getContainer(getFile(VALID_ASICS));
+        Container container = TestUtil.getContainer(getFile(VALID_COMPOSITE_ASICS));
         AsicContainerSession session = getContainerSession(container);
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
 
