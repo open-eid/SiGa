@@ -71,6 +71,7 @@
     <xs:element name="getContainerSmartIdSigningStatusResponse" type="tns:getContainerSmartIdSigningStatusResponse"/>
     <xs:element name="getContainerSignaturesResponse" type="tns:getContainerSignaturesResponse"/>
     <xs:element name="getContainerSignatureDetailsResponse" type="tns:getContainerSignatureDetailsResponse"/>
+    <xs:element name="getContainerTimestampsResponse" type="tns:getContainerTimestampsResponse"/>
     <xs:element name="createContainerDataFileRequest" type="tns:createContainerDataFileRequest"/>
     <xs:element name="createContainerDataFileResponse" type="tns:createContainerDataFileResponse"/>
     <xs:element name="augmentContainerSignaturesResponse" type="tns:augmentContainerSignaturesResponse"/>
@@ -381,6 +382,11 @@
             <xs:element minOccurs="0" name="signatureProductionPlace" type="tns:signatureProductionPlace"/>
         </xs:sequence>
     </xs:complexType>
+    <xs:complexType name="getContainerTimestampsResponse">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="timestamps" maxOccurs="unbounded" type="tns:timestamp"/>
+        </xs:sequence>
+    </xs:complexType>
     <xs:complexType name="createContainerDataFileRequest">
         <xs:sequence>
             <xs:element name="dataFiles" type="tns:dataFile" maxOccurs="unbounded"/>
@@ -446,6 +452,12 @@
             <xs:element name="generatedSignatureId" type="xs:string"/>
             <xs:element name="signerInfo" type="xs:string"/>
             <xs:element name="signatureProfile" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="timestamp">
+        <xs:sequence>
+            <xs:element name="id" type="xs:string"/>
+            <xs:element name="creationTime" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="policy">

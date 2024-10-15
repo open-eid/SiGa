@@ -29,6 +29,7 @@ import ee.openeid.siga.webapp.json.GetContainerDataFilesResponse;
 import ee.openeid.siga.webapp.json.GetContainerResponse;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.GetContainerSignaturesResponse;
+import ee.openeid.siga.webapp.json.GetContainerTimestampsResponse;
 import ee.openeid.siga.webapp.json.GetContainerValidationReportResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import ee.openeid.siga.webapp.json.UpdateContainerRemoteSigningRequest;
@@ -39,6 +40,7 @@ import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.Timestamp;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -174,6 +176,17 @@ public class AsicContainerController {
         validator.validateSignatureId(signatureId);
         org.digidoc4j.Signature signature = containerService.getSignature(containerId, signatureId);
         return RequestTransformer.transformSignatureToDetails(signature);
+    }
+
+    @SigaEventLog(eventName = SigaEventName.GET_TIMESTAMPS_LIST)
+    @GetMapping(value = "/containers/{containerId}/timestamps", produces = MediaType.APPLICATION_JSON_VALUE)
+    public GetContainerTimestampsResponse getTimestampList(@PathVariable(value = "containerId") String containerId) {
+        validator.validateContainerId(containerId);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(containerId);
+        GetContainerTimestampsResponse response = new GetContainerTimestampsResponse();
+        response.getTimestamps().addAll(RequestTransformer.transformTimestampsForResponse(timestamps));
+        return response;
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_DATAFILES_LIST)

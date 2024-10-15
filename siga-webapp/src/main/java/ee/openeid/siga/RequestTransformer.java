@@ -10,6 +10,7 @@ import ee.openeid.siga.util.SupportedCertificateEncoding;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
+import ee.openeid.siga.webapp.json.Timestamp;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.exceptions.InvalidSignatureException;
@@ -67,6 +68,18 @@ public class RequestTransformer {
                     signatures.add(signature);
                 });
         return signatures;
+    }
+
+    static List<Timestamp> transformTimestampsForResponse(List<org.digidoc4j.Timestamp> requestTimestamps) {
+        List<Timestamp> timestamps = new ArrayList<>();
+        requestTimestamps.forEach(
+                ts -> {
+                    Timestamp timestamp = new Timestamp();
+                    timestamp.setId(ts.getUniqueId());
+                    timestamp.setCreationTime(ts.getCreationTime().toInstant().toString());
+                    timestamps.add(timestamp);
+                });
+        return timestamps;
     }
 
     static List<ee.openeid.siga.webapp.json.HashcodeDataFile> transformHashcodeDataFilesForResponse(List<HashcodeDataFile> requestHashcodeDataFiles) {

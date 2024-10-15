@@ -21,9 +21,12 @@ import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
 import org.digidoc4j.SignatureProfile;
+import org.digidoc4j.Timestamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -179,8 +182,85 @@ class AsicContainerServiceTest {
         AtomicReference<String> signatureId = new AtomicReference<>();
         session.getSignatureIdHolder().forEach((sigId, integer) -> signatureId.set(sigId));
         Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
         org.digidoc4j.Signature signature = containerService.getSignature(CONTAINER_ID, signatureId.get());
+
         assertEquals("id-8c2a30729f251c6cb8336844b97f0657", signature.getId());
+    }
+
+    @Test
+    void successfulGetTimestampsFromCompositeAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder(VALID_COMPOSITE_ASICS, ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(CONTAINER_ID);
+
+        assertEquals(1, timestamps.size());
+        Timestamp timestamp = timestamps.get(0);
+        assertEquals("T-519156403B8A19A11569455AA86FD01165C0209F55D6DB244333C001313AA5C9", timestamp.getUniqueId());
+        assertEquals("2024-09-09T12:13:34Z", timestamp.getCreationTime().toInstant().toString());
+        assertEquals("C=EE, O=SK ID Solutions AS, OID.2.5.4.97=NTREE-10747013, CN=DEMO SK TIMESTAMPING AUTHORITY 2023E",
+                timestamp.getCertificate().getSubjectName());
+    }
+
+    @Test
+    void successfulGetTimestampsFromNonCompositeAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder("TXTinsideAsics.asics", ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(CONTAINER_ID);
+
+        assertEquals(1, timestamps.size());
+        Timestamp timestamp = timestamps.get(0);
+        assertEquals("T-C527730442EEA7F33D5F4DDAD710FD5314032A5EE5CF4858AF488A9FBD432D9F", timestamp.getUniqueId());
+        assertEquals("2017-08-25T09:56:33Z", timestamp.getCreationTime().toInstant().toString());
+        assertEquals("CN=SK TIMESTAMPING AUTHORITY, OU=TSA, O=AS Sertifitseerimiskeskus, C=EE",
+                timestamp.getCertificate().getSubjectName());
+    }
+
+    @Test
+    void successfulGetTimestampsFromFirst2LevelsOfDeeplyNestedCompositeAsicsContainer() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder("1xTST-recursive-asics-datafile.asics", ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(CONTAINER_ID);
+
+        assertEquals(2, timestamps.size());
+        Timestamp timestamp1 = timestamps.get(0);
+        assertEquals("T-D82B7E293A8E01DDDA4C9C61024A9C4E1FF7E7E7724196F8ED3CA48CD97055B7", timestamp1.getUniqueId());
+        assertEquals("2024-09-05T12:20:24Z", timestamp1.getCreationTime().toInstant().toString());
+        assertEquals("C=EE, O=SK ID Solutions AS, OID.2.5.4.97=NTREE-10747013, CN=DEMO SK TIMESTAMPING AUTHORITY 2023E",
+                timestamp1.getCertificate().getSubjectName());
+        Timestamp timestamp2 = timestamps.get(1);
+        assertEquals("T-02EF9B1E76AF94BF55BF39EE7ED541F0703EDD9BA56EAB0AAE2DA85A99733DF7", timestamp2.getUniqueId());
+        assertEquals("2024-09-05T12:20:23Z", timestamp2.getCreationTime().toInstant().toString());
+        assertEquals("C=EE, O=SK ID Solutions AS, OID.2.5.4.97=NTREE-10747013, CN=DEMO SK TIMESTAMPING AUTHORITY 2023E",
+                timestamp2.getCertificate().getSubjectName());
+    }
+
+    @Test
+    void getTimestampsFromAsicsContainerWithoutTimestampsReturnsEmptyList() throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder("asicsContainerWithLtSignatureWithoutTST.scs", ASICS);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(CONTAINER_ID);
+
+        assertEquals(0, timestamps.size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "container.ddoc, DDOC",
+            "test.asice, ASICE",
+            "bdoc-with-tm-and-ts-signature.bdoc, BDOC"
+    })
+    void getTimestampsFromNotSupportedContainerTypesReturnEmptyList(String filename, Container.DocumentType containerType) throws IOException, URISyntaxException {
+        AsicContainerSession session = RequestUtil.createAsicSessionHolder(filename, containerType);
+        Mockito.when(sessionService.getContainer(any())).thenReturn(session);
+
+        List<Timestamp> timestamps = containerService.getTimestamps(CONTAINER_ID);
+
+        assertEquals(0, timestamps.size());
     }
 
     @Test

@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.Timestamp;
 import org.digidoc4j.exceptions.DigiDoc4JException;
 import org.digidoc4j.exceptions.NotSupportedException;
 import org.digidoc4j.impl.asic.asics.AsicSCompositeContainer;
@@ -112,6 +113,12 @@ public class AsicContainerService implements AsicSessionHolder {
                             }
                         }));
         return signatures;
+    }
+
+    public List<Timestamp> getTimestamps(String containerId) {
+        AsicContainerSession sessionHolder = getSessionHolder(containerId);
+        Container container = createContainerFromSession(sessionHolder);
+        return getTimestampsFromContainerSpecificDepth(container);
     }
 
     public org.digidoc4j.Signature getSignature(String containerId, String signatureId) {
@@ -310,6 +317,16 @@ public class AsicContainerService implements AsicSessionHolder {
             return signatures;
         } else {
             return container.getSignatures();
+        }
+    }
+
+    private static List<Timestamp> getTimestampsFromContainerSpecificDepth(Container container) {
+        if (container instanceof AsicSCompositeContainer) {
+            List<Timestamp> timestamps = new ArrayList<>(container.getTimestamps());
+            timestamps.addAll(((AsicSCompositeContainer) container).getNestedContainerTimestamps());
+            return timestamps;
+        } else {
+            return container.getTimestamps();
         }
     }
 
