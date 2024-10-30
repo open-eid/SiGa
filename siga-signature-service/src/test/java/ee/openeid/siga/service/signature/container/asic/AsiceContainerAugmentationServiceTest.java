@@ -2,7 +2,6 @@ package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
-import ee.openeid.siga.service.signature.test.TestUtil;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.spi.x509.tsp.TimestampToken;
 import org.digidoc4j.Configuration;
@@ -17,6 +16,7 @@ import org.digidoc4j.impl.asic.asice.AsicEContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainerTimestamp;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.ESEAL_WITH_EXPIRED_OCSP;
-import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP;
+import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP;
+import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_SIGNATURE;
@@ -83,6 +85,84 @@ class AsiceContainerAugmentationServiceTest {
         assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
         List<TimestampToken> archiveTimestamps = getSignatureArchiveTimestamps(augmentedContainer, 0);
         assertEquals(1, archiveTimestamps.size(), "The signature must contain 1 archive timestamp");
+    }
+
+    @Test
+    void containerWithMultipleLtSignatures_ReturnsAsiceWithAllSignaturesAugmented() throws IOException {
+        Container container = createSignedContainer(SignatureProfile.LT);
+        SignatureBuilder builder = SignatureBuilder
+                .aSignature(container)
+                .withSignatureProfile(SignatureProfile.LT);
+        org.digidoc4j.Signature anotherSignature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
+        container.addSignature(anotherSignature);
+
+        byte[] containerBytes = getBytesFromContainer(container);
+
+        Container augmentedContainer = augmentationService.augmentContainer(
+                containerBytes, getContainer(containerBytes), "originalContainer");
+
+        assertEquals(AsicEContainer.class, augmentedContainer.getClass());
+        assertEquals(2, augmentedContainer.getSignatures().size());
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> archiveTimestamps1 = getSignatureArchiveTimestamps(augmentedContainer, 0);
+        assertEquals(1, archiveTimestamps1.size(), "The 1st signature must contain 1 archive timestamp");
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(1).getProfile());
+        List<TimestampToken> archiveTimestamps2 = getSignatureArchiveTimestamps(augmentedContainer, 1);
+        assertEquals(1, archiveTimestamps2.size(), "The 2nd signature must contain 1 archive timestamp");
+    }
+
+    @Test
+    void containerWithMultipleLtaSignatures_ReturnsAsiceWithAllSignaturesAugmented() throws IOException {
+        Container container = createSignedContainer(SignatureProfile.LTA);
+        SignatureBuilder builder = SignatureBuilder
+                .aSignature(container)
+                .withSignatureProfile(SignatureProfile.LTA);
+        org.digidoc4j.Signature anotherSignature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
+        container.addSignature(anotherSignature);
+
+        byte[] containerBytes = getBytesFromContainer(container);
+
+        Container augmentedContainer = augmentationService.augmentContainer(
+                containerBytes, getContainer(containerBytes), "originalContainer");
+
+        assertEquals(AsicEContainer.class, augmentedContainer.getClass());
+        assertEquals(2, augmentedContainer.getSignatures().size());
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> archiveTimestamps1 = getSignatureArchiveTimestamps(augmentedContainer, 0);
+        assertEquals(2, archiveTimestamps1.size(), "The 1st signature must contain 2 archive timestamps");
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(1).getProfile());
+        List<TimestampToken> archiveTimestamps2 = getSignatureArchiveTimestamps(augmentedContainer, 1);
+        assertEquals(2, archiveTimestamps2.size(), "The 2nd signature must contain 2 archive timestamps");
+    }
+
+    @Test
+    void containerWithOneLtAndOneLtaSignature_ReturnsAsiceWithAllSignaturesAugmented() throws IOException {
+        Container container = createSignedContainer(SignatureProfile.LT);
+        SignatureBuilder builder = SignatureBuilder
+                .aSignature(container)
+                .withSignatureProfile(SignatureProfile.LTA);
+        org.digidoc4j.Signature anotherSignature = builder.withSignatureToken(pkcs12Esteid2018SignatureToken).invokeSigning();
+        container.addSignature(anotherSignature);
+
+        byte[] containerBytes = getBytesFromContainer(container);
+
+        Container augmentedContainer = augmentationService.augmentContainer(
+                containerBytes, getContainer(containerBytes), "originalContainer");
+
+        assertEquals(AsicEContainer.class, augmentedContainer.getClass());
+        assertEquals(2, augmentedContainer.getSignatures().size());
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> archiveTimestamps1 = getSignatureArchiveTimestamps(augmentedContainer, 0);
+        assertEquals(1, archiveTimestamps1.size(), "The 1st signature must contain 1 archive timestamp");
+
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(1).getProfile());
+        List<TimestampToken> archiveTimestamps2 = getSignatureArchiveTimestamps(augmentedContainer, 1);
+        assertEquals(2, archiveTimestamps2.size(), "The 2nd signature must contain 2 archive timestamps");
     }
 
     @Test
@@ -162,19 +242,6 @@ class AsiceContainerAugmentationServiceTest {
     }
 
     @Test
-    void containerWithBLevelSignature_Fails() throws IOException {
-        Container container = TestUtil.createSignedContainer(SignatureProfile.B_BES);
-        byte[] containerBytes = getBytesFromContainer(container);
-
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () ->
-                        augmentationService.augmentContainer(containerBytes, getContainer(containerBytes), "originalContainer")
-        );
-
-        assertEquals("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile", caughtException.getMessage());
-    }
-
-    @Test
     void containerWithOneLtAndOneBSignature_WrappedIntoAsics() throws IOException {
         Container container = createSignedContainer(SignatureProfile.LT);
         SignatureBuilder builder = SignatureBuilder
@@ -219,11 +286,11 @@ class AsiceContainerAugmentationServiceTest {
     }
 
     @Test
-    void containerWithInvalidSignature_WrappedIntoAsics() throws URISyntaxException, IOException {
-        byte[] containerBytes = getFile(INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP);
+    void containerWithInvalidLtSignature_WrappedIntoAsics() throws URISyntaxException, IOException {
+        byte[] containerBytes = getFile(INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP);
 
         Container augmentedContainer = augmentationService.augmentContainer(
-                containerBytes, getContainer(containerBytes), INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP);
+                containerBytes, getContainer(containerBytes), INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP);
 
         assertEquals(AsicSContainer.class, augmentedContainer.getClass());
         assertEquals(1, augmentedContainer.getDataFiles().size());
@@ -232,9 +299,48 @@ class AsiceContainerAugmentationServiceTest {
         Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
         assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
         DataFile dataFile = augmentedContainer.getDataFiles().get(0);
-        assertEquals(INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP, dataFile.getName());
+        assertEquals(INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP, dataFile.getName());
         assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
         assertArrayEquals(containerBytes, dataFile.getBytes(), "The original container included in the resulting ASiC-S container must not be modified.");
+    }
+
+    @Test
+    void containerWithInvalidLtaSignature_WrappedIntoAsics() throws URISyntaxException, IOException {
+        byte[] containerBytes = getFile(INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP);
+
+        Container augmentedContainer = augmentationService.augmentContainer(
+                containerBytes, getContainer(containerBytes), INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP);
+
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals(INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP, dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(containerBytes, dataFile.getBytes(), "The original container included in the resulting ASiC-S container must not be modified.");
+    }
+
+    @Test
+    @Disabled   // TODO DD4J-1139: This container is currently not handled correctly by SiGa:
+                //  It passes the pre-augmentation validation and when we try to actually augment it,
+                //  then DSS throws an exception.
+                //  If this container is augmentable, SiGa should augment it without exceptions.
+                //  Otherwise, the validation before augmentation should properly detect that it is not augmentable,
+                //  and SiGa should display proper error message instead of trying to augment it.
+    void containerWithExpiredCertificatesWhichWereValidAtSigningTime_ReturnsAugmentedAsice() throws URISyntaxException, IOException {
+        byte[] containerBytes = getFile(VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP);
+
+        Container augmentedContainer = augmentationService.augmentContainer(
+                containerBytes, getContainer(containerBytes), VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP);
+
+        assertEquals(AsicEContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getSignatures().size());
+        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
+        List<TimestampToken> archiveTimestamps = getSignatureArchiveTimestamps(augmentedContainer, 0);
+        assertEquals(1, archiveTimestamps.size(), "The signature must contain 1 archive timestamp");
     }
 
     @ParameterizedTest
@@ -246,6 +352,19 @@ class AsiceContainerAugmentationServiceTest {
         InvalidSessionDataException caughtException = assertThrows(
                 InvalidSessionDataException.class, () ->
                         augmentationService.augmentContainer(containerBytes, getContainer(containerBytes), containerFilename)
+        );
+
+        assertEquals("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile", caughtException.getMessage());
+    }
+
+    @Test
+    void containerWithBLevelSignature_Fails() throws IOException {
+        Container container = createSignedContainer(SignatureProfile.B_BES);
+        byte[] containerBytes = getBytesFromContainer(container);
+
+        InvalidSessionDataException caughtException = assertThrows(
+                InvalidSessionDataException.class, () ->
+                        augmentationService.augmentContainer(containerBytes, getContainer(containerBytes), "originalContainer")
         );
 
         assertEquals("Unable to augment. Container does not contain any Estonian signatures with LT or LTA profile", caughtException.getMessage());

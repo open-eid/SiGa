@@ -53,7 +53,9 @@ public class RequestUtil {
     public static final String VALID_ASICE = "test.asice";
     public static final String VALID_LATVIAN_ASICE = "latvian_LT_signature_with_7min_difference_between_TS_and_OCSP.asice";
     public static final String VALID_ASICE_WITH_EXPIRED_OCSP = "asice_ocsp_cert_expired.asice";
-    public static final String INVALID_ASICE_WITH_EXPIRED_SIGNER_AND_OCSP = "esteid2018signerAiaOcspLTA.asice";
+    public static final String VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP = "asice_single_signature_with_expired_signer_and_ts_and_ocsp_certificates.asice";
+    public static final String INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP = "esteid2018signerAiaOcspLT.asice";
+    public static final String INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP = "esteid2018signerAiaOcspLTA.asice";
     public static final String INVALID_DDOC_WITH_EXPIRED_SIGNER_AND_OCSP = "container.ddoc";
     public static final String VALID_COMPOSITE_ASICS = "asics_containing_ddoc_and_timestamp.asics";
     public static final String ESEAL_WITH_EXPIRED_OCSP = "asice_e-seal_ocsp_cert_expired.asice";

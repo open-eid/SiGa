@@ -330,27 +330,11 @@ class RequestValidatorTest {
         assertEquals("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate", caughtException.getMessage());
     }
 
-    @Test
-    void oldSignatureProfile() {
-        RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "B_BES")
-        );
-        assertEquals("Invalid signature profile", caughtException.getMessage());
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "123", "@!*", "UNKNOWN", "B_BES", "B_EPES", "LT_TM"})
     void invalidSignatureProfile(String signatureProfile) {
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateRemoteSigning(null, signatureProfile)
-        );
-        assertEquals("Invalid signature profile", caughtException.getMessage());
-    }
-
-    @Test
-    void emptySignatureProfile() {
-        RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateRemoteSigning(null, "")
         );
         assertEquals("Invalid signature profile", caughtException.getMessage());
     }
