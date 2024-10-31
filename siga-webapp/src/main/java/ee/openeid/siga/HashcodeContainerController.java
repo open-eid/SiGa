@@ -117,7 +117,8 @@ public class HashcodeContainerController {
         String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
         validator.validateSigningCertificate(signingCertificate);
         X509Certificate certificate = RequestTransformer.transformCertificate(signingCertificate);
-        validator.validateRemoteSigning(certificate, createRemoteSigningRequest.getSignatureProfile());
+        validator.validateSignatureProfileForHashcodeRequest(createRemoteSigningRequest.getSignatureProfile());
+        validator.validateRemoteSigning(certificate);
 
         String signatureProfile = createRemoteSigningRequest.getSignatureProfile();
         SignatureProductionPlace signatureProductionPlace = createRemoteSigningRequest.getSignatureProductionPlace();

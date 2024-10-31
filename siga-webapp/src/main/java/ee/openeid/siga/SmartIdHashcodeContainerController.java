@@ -72,7 +72,7 @@ public class SmartIdHashcodeContainerController {
             @PathVariable(value = "containerId") String containerId,
             @RequestBody CreateHashcodeContainerSmartIdSigningRequest createSmartIdSigningRequest) {
         validator.validateContainerId(containerId);
-        validator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
+        validator.validateSignatureProfileForHashcodeRequest(createSmartIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createSmartIdSigningRequest.getRoles();
         validator.validateRoles(roles);

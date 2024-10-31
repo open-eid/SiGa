@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -113,8 +114,7 @@ public class RequestValidator {
         }
     }
 
-    public void validateRemoteSigning(X509Certificate signingCertificate, String signatureProfile) {
-        validateSignatureProfile(signatureProfile);
+    public void validateRemoteSigning(X509Certificate signingCertificate) {
         if (signingCertificate == null || !CertificateUtil.isCertificateActive(signingCertificate) || !CertificateUtil.isSigningCertificate(signingCertificate)) {
             throw new InvalidCertificateException("Invalid signing certificate");
         }
@@ -124,11 +124,12 @@ public class RequestValidator {
         }
     }
 
-    public void validateSignatureProfile(String signatureProfile) {
-        SignatureProfile generatedSignatureProfile = SignatureProfile.findByProfile(signatureProfile);
-        if (SignatureProfile.LT != generatedSignatureProfile && SignatureProfile.LTA != generatedSignatureProfile) {
-            throw new RequestValidationException("Invalid signature profile");
-        }
+    public void validateSignatureProfileForDatafileRequest(String signatureProfile) {
+        ensureSignatureProfileInList(signatureProfile, Set.of(SignatureProfile.LT, SignatureProfile.LTA));
+    }
+
+    public void validateSignatureProfileForHashcodeRequest(String signatureProfile) {
+        ensureSignatureProfileInList(signatureProfile, Set.of(SignatureProfile.LT));
     }
 
     public void validateSignatureValue(String signatureValue) {
@@ -161,6 +162,13 @@ public class RequestValidator {
 
         if (roles.stream().anyMatch(StringUtils::isBlank)) {
             throw new RequestValidationException("Roles may not include blank values");
+        }
+    }
+
+    private static void ensureSignatureProfileInList(String signatureProfile, Set<SignatureProfile> allowedProfiles) {
+        SignatureProfile generatedSignatureProfile = SignatureProfile.findByProfile(signatureProfile);
+        if (generatedSignatureProfile == null || !allowedProfiles.contains(generatedSignatureProfile)) {
+            throw new RequestValidationException("Invalid signature profile");
         }
     }
 

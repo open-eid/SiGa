@@ -303,7 +303,7 @@ class RequestValidatorTest {
         InputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(documentPath));
 
         InvalidCertificateException caughtException = assertThrows(
-            InvalidCertificateException.class, () -> validator.validateRemoteSigning(CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes())), "LT")
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(CertificateUtil.createX509Certificate(Base64.getDecoder().decode(inputStream.readAllBytes())))
         );
         assertEquals("Invalid signing certificate", caughtException.getMessage());
     }
@@ -314,7 +314,7 @@ class RequestValidatorTest {
         X509Certificate certificate = readCertificate("smart-id.cer");
 
         InvalidCertificateException caughtException = assertThrows(
-            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate, "LT")
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate)
         );
         assertEquals("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate", caughtException.getMessage());
     }
@@ -325,16 +325,25 @@ class RequestValidatorTest {
         X509Certificate certificate = readCertificate("mobile-id.cer");
 
         InvalidCertificateException caughtException = assertThrows(
-            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate, "LT")
+            InvalidCertificateException.class, () -> validator.validateRemoteSigning(certificate)
         );
         assertEquals("Remote signing endpoint prohibits signing with Mobile-Id/Smart-Id certificate", caughtException.getMessage());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", " ", "123", "@!*", "UNKNOWN", "B_BES", "B_EPES", "LT_TM"})
-    void invalidSignatureProfile(String signatureProfile) {
+    @ValueSource(strings = {"", " ", "123", "@!*", "UNKNOWN", "B_BES", "B_EPES", "LT_TM", "T"})
+    void invalidSignatureProfileForDatafileEndpoint(String signatureProfile) {
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateRemoteSigning(null, signatureProfile)
+            RequestValidationException.class, () -> validator.validateSignatureProfileForDatafileRequest(signatureProfile)
+        );
+        assertEquals("Invalid signature profile", caughtException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "123", "@!*", "UNKNOWN", "B_BES", "B_EPES", "LT_TM", "T", "LTA"})
+    void invalidSignatureProfileForHashcodeEndpoint(String signatureProfile) {
+        RequestValidationException caughtException = assertThrows(
+            RequestValidationException.class, () -> validator.validateSignatureProfileForHashcodeRequest(signatureProfile)
         );
         assertEquals("Invalid signature profile", caughtException.getMessage());
     }

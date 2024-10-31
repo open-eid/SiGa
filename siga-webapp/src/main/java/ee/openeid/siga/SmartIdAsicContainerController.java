@@ -18,7 +18,6 @@ import ee.openeid.siga.webapp.json.GetContainerSmartIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,7 +71,7 @@ public class SmartIdAsicContainerController {
     @PostMapping(value = "/containers/{containerId}/smartidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerSmartIdSigningResponse createContainerSmartIdSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerSmartIdSigningRequest createSmartIdSigningRequest) {
         validator.validateContainerId(containerId);
-        validator.validateSignatureProfile(createSmartIdSigningRequest.getSignatureProfile());
+        validator.validateSignatureProfileForDatafileRequest(createSmartIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createSmartIdSigningRequest.getRoles();
         validator.validateRoles(roles);

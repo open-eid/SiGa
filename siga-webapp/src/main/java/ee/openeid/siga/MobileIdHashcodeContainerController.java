@@ -33,7 +33,7 @@ public class MobileIdHashcodeContainerController {
     @PostMapping(value = "/hashcodecontainers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateHashcodeContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateHashcodeContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         validator.validateContainerId(containerId);
-        validator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
+        validator.validateSignatureProfileForHashcodeRequest(createMobileIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createMobileIdSigningRequest.getRoles();
         validator.validateRoles(roles);

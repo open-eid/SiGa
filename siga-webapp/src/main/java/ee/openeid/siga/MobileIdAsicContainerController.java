@@ -12,7 +12,6 @@ import ee.openeid.siga.webapp.json.GetContainerMobileIdSigningStatusResponse;
 import ee.openeid.siga.webapp.json.SignatureProductionPlace;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.SignatureParameters;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +33,7 @@ public class MobileIdAsicContainerController {
     @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
     public CreateContainerMobileIdSigningResponse prepareMobileIdSignatureSigning(@PathVariable(value = "containerId") String containerId, @RequestBody CreateContainerMobileIdSigningRequest createMobileIdSigningRequest) {
         validator.validateContainerId(containerId);
-        validator.validateSignatureProfile(createMobileIdSigningRequest.getSignatureProfile());
+        validator.validateSignatureProfileForDatafileRequest(createMobileIdSigningRequest.getSignatureProfile());
 
         List<String> roles = createMobileIdSigningRequest.getRoles();
         validator.validateRoles(roles);
