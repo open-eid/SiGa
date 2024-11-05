@@ -16,7 +16,6 @@ import org.digidoc4j.impl.asic.asice.AsicEContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainerTimestamp;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,8 +32,8 @@ import java.util.Map;
 import static ee.openeid.siga.service.signature.test.RequestUtil.ESEAL_WITH_EXPIRED_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_LTA_WITH_EXPIRED_SIGNER_AND_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.INVALID_ASICE_LT_WITH_EXPIRED_SIGNER_AND_OCSP;
-import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_OCSP;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_BDOC_WITH_LT_TM_SIGNATURE;
 import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_LATVIAN_ASICE;
@@ -324,23 +323,22 @@ class AsiceContainerAugmentationServiceTest {
     }
 
     @Test
-    @Disabled   // TODO DD4J-1139: This container is currently not handled correctly by SiGa:
-                //  It passes the pre-augmentation validation and when we try to actually augment it,
-                //  then DSS throws an exception.
-                //  If this container is augmentable, SiGa should augment it without exceptions.
-                //  Otherwise, the validation before augmentation should properly detect that it is not augmentable,
-                //  and SiGa should display proper error message instead of trying to augment it.
-    void containerWithExpiredCertificatesWhichWereValidAtSigningTime_ReturnsAugmentedAsice() throws URISyntaxException, IOException {
+    void containerWithExpiredCertificatesWhichWereValidAtSigningTime_WrappedIntoAsics() throws URISyntaxException, IOException {
         byte[] containerBytes = getFile(VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP);
 
         Container augmentedContainer = augmentationService.augmentContainer(
                 containerBytes, getContainer(containerBytes), VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP);
 
-        assertEquals(AsicEContainer.class, augmentedContainer.getClass());
-        assertEquals(1, augmentedContainer.getSignatures().size());
-        assertEquals(SignatureProfile.LTA, augmentedContainer.getSignatures().get(0).getProfile());
-        List<TimestampToken> archiveTimestamps = getSignatureArchiveTimestamps(augmentedContainer, 0);
-        assertEquals(1, archiveTimestamps.size(), "The signature must contain 1 archive timestamp");
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(1, augmentedContainer.getTimestamps().size());
+        Timestamp timestamp = augmentedContainer.getTimestamps().get(0);
+        assertEquals(AsicSContainerTimestamp.class, timestamp.getClass());
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals(VALID_ASICE_WITH_EXPIRED_SIGNER_AND_TS_AND_OCSP, dataFile.getName());
+        assertEquals(MimeTypeEnum.ASICE.getMimeTypeString(), dataFile.getMediaType());
+        assertArrayEquals(containerBytes, dataFile.getBytes(), "The original container included in the resulting ASiC-S container must not be modified.");
     }
 
     @ParameterizedTest
