@@ -267,7 +267,7 @@ services:
       - "./docker/sid-mock:/conf"
 
   mock-redis-service:
-    image: sk-auth-gw-docker.artifactory.nortal.com/base/redis:alpine
+    image: redis:alpine
   # END SID mock
 
 volumes:
