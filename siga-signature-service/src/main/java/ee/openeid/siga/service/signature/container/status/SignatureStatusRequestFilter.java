@@ -16,14 +16,13 @@ import ee.openeid.siga.common.session.ProcessingStatus;
  */
 public class SignatureStatusRequestFilter implements IgniteBiPredicate<String, Map<String, BinaryObject>> {
     private final long maxProcessingRetries;
-    private final LocalDateTime processingTimeout;
-    private final LocalDateTime exceptionTimeout;
+    private final Duration processingTimeout;
+    private final Duration exceptionTimeout;
 
-    public SignatureStatusRequestFilter(long maxProcessingRetries, Duration processingTimeout,
-            Duration exceptionTimeout) {
+    public SignatureStatusRequestFilter(long maxProcessingRetries, Duration processingTimeout, Duration exceptionTimeout) {
         this.maxProcessingRetries = maxProcessingRetries;
-        this.processingTimeout = LocalDateTime.now().minusSeconds(processingTimeout.toSeconds());
-        this.exceptionTimeout = LocalDateTime.now().minusSeconds(exceptionTimeout.toSeconds());
+        this.processingTimeout = processingTimeout;
+        this.exceptionTimeout = exceptionTimeout;
     }
 
     @Override
@@ -43,10 +42,11 @@ public class SignatureStatusRequestFilter implements IgniteBiPredicate<String, M
     static boolean isApplyFilter(SignatureStatusRequestFilter filter, ProcessingStatus processingStatus,
             LocalDateTime statusTimestamp,
             int processingCounter) {
+        LocalDateTime currentTime = LocalDateTime.now();
         boolean isProcessingTimeout = ProcessingStatus.PROCESSING == processingStatus
-                && statusTimestamp.isBefore(filter.processingTimeout);
+                && currentTime.isAfter(statusTimestamp.plus(filter.processingTimeout));
         boolean isExceptionTimeout = ProcessingStatus.EXCEPTION == processingStatus
-                && statusTimestamp.isBefore(filter.exceptionTimeout);
-        return (isProcessingTimeout || isExceptionTimeout) && processingCounter <= filter.maxProcessingRetries;
+                && currentTime.isAfter(statusTimestamp.plus(filter.exceptionTimeout));
+        return !isProcessingTimeout && !isExceptionTimeout && processingCounter <= filter.maxProcessingRetries;
     }
 }

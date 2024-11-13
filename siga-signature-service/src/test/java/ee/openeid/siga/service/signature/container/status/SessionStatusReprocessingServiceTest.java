@@ -99,7 +99,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         "siga.sid.status-polling-delay=0",
         "siga.status-reprocessing.fixed-rate=1000",
         "siga.status-reprocessing.initial-delay=0",
-        "siga.status-reprocessing.exception-timeout=0",
+        "siga.status-reprocessing.exception-timeout=5000",
         "siga.status-reprocessing.max-processing-attempts=3",
 })
 public class SessionStatusReprocessingServiceTest {
