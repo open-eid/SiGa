@@ -254,6 +254,20 @@ services:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
       - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
 
+  sid-mock:
+    image: nortal/sid-mock:latest
+    depends_on:
+      mock-redis-service:
+        condition: service_started
+    environment:
+      - REDIS_URI=redis://mock-redis-service
+      - MOCK_CONFIGURATION_PATH=/conf/application.yml
+    volumes:
+      - "./docker/sid-mock:/conf"
+
+  mock-redis-service:
+    image: redis:alpine
+
 volumes:
   siga-logs-01:
     name: siga-logs-01
