@@ -72,9 +72,9 @@ public class MobileIdSigningDelegate {
                 .build();
 
         session.addSignatureSession(generatedSignatureId, signatureSession);
+        containerSigningService.getSessionService().update(session);
         pollMobileIdSignatureStatus(session.getSessionId(), generatedSignatureId,
                 containerSigningService.getMobileIdConfigurationProperties().getStatusPollingDelay());
-        containerSigningService.getSessionService().update(session);
 
         return SigningChallenge.builder()
                 .challengeId(initMidSignatureResponse.getChallengeId())

@@ -82,9 +82,9 @@ public class SmartIdSigningDelegate {
 
         session.addSignatureSession(generatedSignatureId, signatureSession);
         session.clearCertificate(smartIdInformation.getDocumentNumber());
+        containerSigningService.getSessionService().update(session);
         pollSmartIdSignatureStatus(session.getSessionId(), generatedSignatureId,
                 containerSigningService.getSmartIdConfigurationProperties().getStatusPollingDelay());
-        containerSigningService.getSessionService().update(session);
 
         return SigningChallenge.builder()
                 .challengeId(initSmartIdSignatureResponse.getChallengeId())
@@ -102,9 +102,9 @@ public class SmartIdSigningDelegate {
                 .relyingPartyInfo(relyingPartyInfo)
                 .sessionCode(smartIdSessionId)
                 .build());
+        containerSigningService.getSessionService().update(session);
         pollSmartIdCertificateStatus(session.getSessionId(), generatedCertificateId,
                 containerSigningService.getSmartIdConfigurationProperties().getStatusPollingDelay());
-        containerSigningService.getSessionService().update(session);
         return generatedCertificateId;
     }
 
