@@ -14,11 +14,6 @@
     <version>2.10.2</version>
     <packaging>${webapp.packaging}</packaging>
 
-    <properties>
-        <spring-boot.build-image.builder>paketobuildpacks/builder:tiny</spring-boot.build-image.builder>
-        <spring-boot.build-image.imageName>${project.artifactId}:latest</spring-boot.build-image.imageName>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>ee.openeid.siga</groupId>
@@ -70,7 +65,7 @@
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <version>3.1.11</version>
+            <version>3.1.12</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -99,11 +94,15 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <image>
+                        <name>${project.artifactId}:latest</name>
+                    </image>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -117,7 +116,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifestEntries>

@@ -26,7 +26,7 @@ public abstract class MobileIdBaseApplicationTests extends BaseTest {
         assertEquals(2, dataFiles.size());
         assertEquals("RnKZobNWVy8u92sDL4S2j1BUzMT5qTgt6hm90TfAGRo=", dataFiles.get(0).getFileHashSha256());
         ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
-        assertEquals("JÃ\u0095EORG,JAAK-KRISTJAN,38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getCommonName());
+        assertEquals("JÕEORG,JAAK-KRISTJAN,38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getCommonName());
         assertEquals("PNOEE-38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getSerialNumber());
 
         String signatureId = startHashcodeMobileSigning(containerId);

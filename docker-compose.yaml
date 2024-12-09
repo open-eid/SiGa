@@ -53,6 +53,9 @@ services:
       - server.ssl.key-alias=siga-01.localhost
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=7000
+      # Logs directory
+      - BUILD_FOLDER=/tmp/logs
+      - IGNITE_WORK_DIR=/tmp/ignite
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
@@ -88,7 +91,6 @@ services:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
       - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
-      - siga-logs-01:/usr/local/tomcat/logs
     depends_on:
       - siga-db
 
@@ -100,6 +102,9 @@ services:
       - spring.liquibase.enabled=false
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=6000
+      # Logs directory
+      - BUILD_FOLDER=/tmp/logs
+      - IGNITE_WORK_DIR=/tmp/ignite
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
@@ -135,7 +140,6 @@ services:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
       - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
-      - siga-logs-02:/usr/local/tomcat/logs
     depends_on:
       - siga-db
 
@@ -253,9 +257,3 @@ services:
     volumes:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
       - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
-
-volumes:
-  siga-logs-01:
-    name: siga-logs-01
-  siga-logs-02:
-    name: siga-logs-02

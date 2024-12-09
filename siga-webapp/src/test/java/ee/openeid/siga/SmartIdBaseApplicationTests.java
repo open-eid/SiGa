@@ -27,7 +27,7 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
         List<HashcodeDataFile> dataFiles = getHashcodeDataFiles(containerId);
         assertEquals(2, dataFiles.size());
         ValidationConclusion validationConclusion = getHashcodeValidationConclusion(containerId);
-        assertEquals("JÃ\u0095EORG,JAAK-KRISTJAN,38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getCommonName());
+        assertEquals("JÕEORG,JAAK-KRISTJAN,38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getCommonName());
         assertEquals("PNOEE-38001085718", validationConclusion.getSignatures().get(0).getSubjectDistinguishedName().getSerialNumber());
 
         String certificateId = startHashcodeSmartIdCertificateChoice(containerId);
