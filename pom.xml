@@ -11,7 +11,7 @@
 
     <groupId>ee.openeid.siga</groupId>
     <artifactId>siga-parent</artifactId>
-    <version>2.10.2</version>
+    <version>2.11.0</version>
     <packaging>pom</packaging>
     <name>Signature Gateway</name>
 
