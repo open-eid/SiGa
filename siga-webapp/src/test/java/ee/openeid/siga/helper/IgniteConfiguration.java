@@ -14,6 +14,7 @@ public class IgniteConfiguration {
     @Bean(destroyMethod = "close")
     public Ignite ignite() throws IgniteException {
         try {
+            System.setProperty("IGNITE_OVERRIDE_CONSISTENT_ID", "node00");
             return Ignition.start("ignite-test-configuration.xml");
         } catch (Exception e) {
             try {
