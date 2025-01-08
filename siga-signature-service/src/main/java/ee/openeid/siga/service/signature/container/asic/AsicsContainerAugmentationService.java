@@ -29,7 +29,7 @@ import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 @Service
 @Profile("datafileContainer")
 public class AsicsContainerAugmentationService {
-    private static final List<String> ALLOWED_ASICS_INNER_TYPES = List.of("ASICE", "BDOC", "DDOC");
+    private static final List<String> ALLOWED_ASICS_INNER_TYPES = List.of("ASICE", "ASICS", "BDOC", "DDOC");
     private final Configuration configuration;
     private final SigaEventLogger sigaEventLogger;
 

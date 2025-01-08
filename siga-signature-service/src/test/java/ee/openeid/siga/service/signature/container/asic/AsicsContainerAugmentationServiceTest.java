@@ -79,7 +79,7 @@ class AsicsContainerAugmentationServiceTest {
     }
 
     @Test
-    void containerWithInnerAsics_Fails() throws IOException {
+    void containerWithInnerAsics_AsicsMimetypeAddedToArchiveManifest() throws IOException {
         Container innerContainer = ContainerBuilder.aContainer(DocumentType.ASICS)
                 .withConfiguration(Configuration.of(Configuration.Mode.TEST))
                 .withDataFile(new DataFile("test-content".getBytes(), "test.txt", "text/plain"))
@@ -89,16 +89,34 @@ class AsicsContainerAugmentationServiceTest {
                 .withConfiguration(Configuration.of(Configuration.Mode.TEST))
                 .withDataFile(new DataFile(innerContainerBytes, "innerContainer.asics", MimeTypeEnum.ASICS.getMimeTypeString()))
                 .build();
-        Timestamp timestamp = TimestampBuilder.aTimestamp(container)
+        Timestamp originalTimestamp = TimestampBuilder.aTimestamp(container)
                 .invokeTimestamping();
-        container.addTimestamp(timestamp);
+        container.addTimestamp(originalTimestamp);
 
-        InvalidSessionDataException caughtException = assertThrows(
-                InvalidSessionDataException.class, () -> augmentationService.augmentContainer(container)
-        );
+        Container augmentedContainer = augmentationService.augmentContainer(container);
 
-        assertEquals("Unable to augment. Invalid container type (ASICS) found inside ASiC-S container. Allowed inner types are: ASICE, BDOC, DDOC",
-                caughtException.getMessage());
+        assertEquals(AsicSContainer.class, augmentedContainer.getClass());
+        assertEquals(1, augmentedContainer.getDataFiles().size());
+        assertEquals(0, augmentedContainer.getSignatures().size());
+        assertEquals(2, augmentedContainer.getTimestamps().size());
+
+        AsicSContainerTimestamp timestamp1 = (AsicSContainerTimestamp) augmentedContainer.getTimestamps().get(0);
+        assertEquals(originalTimestamp.getCreationTime(), timestamp1.getCreationTime());
+        assertEquals(originalTimestamp.getCertificate().getX509Certificate(), timestamp1.getCertificate().getX509Certificate());
+        assertNull(timestamp1.getArchiveManifest());
+
+        AsicSContainerTimestamp timestamp2 = (AsicSContainerTimestamp) augmentedContainer.getTimestamps().get(1);
+        assertThat(timestamp1.getCreationTime(), lessThanOrEqualTo(timestamp2.getCreationTime()));
+        boolean dataObjectExistsInManifest = timestamp2.getArchiveManifest().getReferencedDataObjects().stream()
+                .anyMatch(dataReference ->
+                        "application/vnd.etsi.asic-s+zip".equals(dataReference.getMimeType())
+                        && "innerContainer.asics".equals(dataReference.getName()));
+        assertTrue(dataObjectExistsInManifest);
+
+        DataFile dataFile = augmentedContainer.getDataFiles().get(0);
+        assertEquals("innerContainer.asics", dataFile.getName());
+        assertEquals("application/vnd.etsi.asic-s+zip", dataFile.getMediaType());
+        assertArrayEquals(innerContainerBytes, dataFile.getBytes());
     }
 
     @Test
