@@ -470,14 +470,36 @@
     <xs:complexType name="timeStampTokenData">
         <xs:sequence>
             <xs:element name="indication" type="xs:string"/>
+            <xs:element name="subIndication" type="xs:string"/>
+            <xs:element name="timestampLevel" type="xs:string"/>
             <xs:element name="signedBy" type="xs:string"/>
             <xs:element name="signedTime" type="xs:string"/>
+            <xs:element name="warning" minOccurs="0" maxOccurs="unbounded" type="tns:warning"/>
             <xs:element name="errors" minOccurs="0" maxOccurs="unbounded" type="tns:error"/>
+            <xs:element name="certificates" minOccurs="0" maxOccurs="unbounded" type="tns:certificate"/>
+            <xs:element name="timestampScopes" minOccurs="0" maxOccurs="unbounded" type="tns:timestampScope"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="error">
         <xs:sequence>
             <xs:element name="content" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="certificate">
+        <xs:sequence>
+            <xs:element name="commonName" type="xs:string"/>
+            <xs:element name="content" type="xs:string"/>
+            <xs:element name="issuer" type="xs:string"/>
+            <xs:element name="type" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="timestampScope">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="scope" type="xs:string"/>
+            <xs:element name="content" type="xs:string"/>
+            <xs:element name="hashAlgo" type="xs:string"/>
+            <xs:element name="hash" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="validatedDocumentData">
