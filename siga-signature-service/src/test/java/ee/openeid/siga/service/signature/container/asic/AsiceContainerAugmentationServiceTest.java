@@ -377,7 +377,7 @@ class AsiceContainerAugmentationServiceTest {
                         augmentationService.augmentContainer(containerBytes, getContainer(containerBytes), ESEAL_WITH_EXPIRED_OCSP)
         );
 
-        assertEquals("Unable to augment. Container contains only e-seals, but no Estonian personal signatures", caughtException.getMessage());
+        assertEquals("Unable to augment. Container does not contain any trusted Estonian personal signatures", caughtException.getMessage());
     }
 
     @Test

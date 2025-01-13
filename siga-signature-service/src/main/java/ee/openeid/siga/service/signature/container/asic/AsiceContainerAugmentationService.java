@@ -223,7 +223,7 @@ public class AsiceContainerAugmentationService {
             }
         }
         if (personalSignatures.isEmpty()) {
-            throw new InvalidSessionDataException("Unable to augment. Container contains only e-seals, but no Estonian personal signatures");
+            throw new InvalidSessionDataException("Unable to augment. Container does not contain any trusted Estonian personal signatures");
         }
         return personalSignatures;
     }
