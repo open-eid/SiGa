@@ -46,6 +46,8 @@ public class RequestUtil {
     public static final String CLIENT_NAME = "client1";
     public static final String SERVICE_NAME = "Testimine";
     public static final String SIGNED_HASHCODE = "hashcode.asice";
+    public static final String SIGNED_HASHCODE_NONSTANDARD_SIGNATURE_FILE_NAME = "hashcode-nonstandard-signature-name.asice";
+    public static final String SIGNED_HASHCODE_INVALID_SIGNATURE_FILE_NAME = "hashcode-invalid-signature-name.asice";
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES = "hashcode_several_data_files.asice";
     public static final String SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER = "hashcode_several_data_files_in_random_order.asice";
     public static final String VALID_BDOC_WITH_LT_TM_AND_LT_SIGNATURES = "bdoc-with-tm-and-ts-signature.bdoc";

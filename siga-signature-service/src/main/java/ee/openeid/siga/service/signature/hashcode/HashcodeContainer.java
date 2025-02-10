@@ -31,14 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.SIGNATURE_FILE_PREFIX;
 import static ee.openeid.siga.service.signature.hashcode.HashcodeContainerCreator.ZIP_ENTRY_MIMETYPE;
 
 public class HashcodeContainer {
     private static final int MAX_FILE_SIZE = 500000;
     private static final String META_INF_DIRECTORY = "META-INF";
+    private static final Pattern SIGNATURES_FILE_PATTERN = Pattern.compile("META-INF/(.*)signatures(.*).xml");
     private List<HashcodeDataFile> dataFiles = new ArrayList<>();
     private List<HashcodeSignatureWrapper> signatures = new ArrayList<>();
     private Map<String, ManifestEntry> manifest;
@@ -164,7 +165,7 @@ public class HashcodeContainer {
                 InMemoryDocument manifestFile = new InMemoryDocument(inputStream.readAllBytes());
                 ManifestParser manifestParser = new ManifestParser(manifestFile);
                 manifest = manifestParser.getManifestFileItems();
-            } else if (entryName.startsWith(SIGNATURE_FILE_PREFIX)) {
+            } else if (SIGNATURES_FILE_PATTERN.matcher(entryName).matches()) {
                 signatures.add(createSignatureWrapper(inputStream.readAllBytes()));
             } else if (entryName.startsWith(HashcodesDataFile.HASHCODES_PREFIX)) {
                 HashcodesDataFileParser parser = new HashcodesDataFileParser(inputStream.readAllBytes());

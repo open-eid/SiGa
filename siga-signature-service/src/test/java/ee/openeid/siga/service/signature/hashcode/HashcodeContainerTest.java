@@ -30,6 +30,8 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.DIFFERENT_SHA51
 import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_HASHCODE_FILENAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.DUPLICATE_MANIFEST_FILENAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_INVALID_SIGNATURE_FILE_NAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_NONSTANDARD_SIGNATURE_FILE_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES;
 import static ee.openeid.siga.service.signature.test.RequestUtil.SIGNED_HASHCODE_SEVERAL_DATAFILES_RANDOM_ORDER;
 import static ee.openeid.siga.service.signature.test.RequestUtil.UNKNOWN_MIMETYPES_DEFINED_IN_MANIFEST;
@@ -109,6 +111,31 @@ class HashcodeContainerTest {
         assertEquals("test7.txt", hashcodeContainer.getDataFiles().get(8).getFileName());
         assertEquals("test8.txt", hashcodeContainer.getDataFiles().get(9).getFileName());
 
+    }
+
+    @Test
+    void hashcodeContainer_OpenWithNonstandardSignatureFileName_SignaturesAreFound() throws IOException, URISyntaxException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE_NONSTANDARD_SIGNATURE_FILE_NAME);
+        hashcodeContainer.open(container);
+        assertEquals(1, hashcodeContainer.getSignatures().size());
+        assertFalse(StringUtils.isBlank(hashcodeContainer.getSignatures().get(0).getGeneratedSignatureId()));
+        assertEquals(2, hashcodeContainer.getDataFiles().size());
+
+        List<SignatureHashcodeDataFile> signatureDataFiles = hashcodeContainer.getSignatures().get(0).getDataFiles();
+        assertEquals(2, signatureDataFiles.size());
+        assertEquals("test.txt", signatureDataFiles.get(0).getFileName());
+        assertEquals("SHA256", signatureDataFiles.get(0).getHashAlgo());
+        assertEquals("test1.txt", signatureDataFiles.get(1).getFileName());
+        assertEquals("SHA256", signatureDataFiles.get(1).getHashAlgo());
+    }
+
+    @Test
+    void hashcodeContainer_OpenWithInvalidSignatureFileName_SignaturesAreNotFound() throws IOException, URISyntaxException {
+        HashcodeContainer hashcodeContainer = new HashcodeContainer();
+        byte[] container = TestUtil.getFile(SIGNED_HASHCODE_INVALID_SIGNATURE_FILE_NAME);
+        hashcodeContainer.open(container);
+        assertEquals(0, hashcodeContainer.getSignatures().size());
     }
 
     @Test
