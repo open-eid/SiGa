@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.3</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -41,16 +41,16 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.79</bouncycastle.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.18.0</commons-io.version>
         <digidoc4j.version>6.0.0-SNAPSHOT</digidoc4j.version>
-        <guava.version>33.3.1-jre</guava.version>
+        <guava.version>33.4.0-jre</guava.version>
         <ignite.version>2.15.0</ignite.version>
-        <json.version>20240303</json.version>
-        <wiremock.version>3.10.0</wiremock.version>
+        <json.version>20250107</json.version>
+        <wiremock.version>3.12.0</wiremock.version>
 
-        <cxf-wadl2java-plugin.version>4.0.5</cxf-wadl2java-plugin.version>
+        <cxf-wadl2java-plugin.version>4.1.0</cxf-wadl2java-plugin.version>
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
