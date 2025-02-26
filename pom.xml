@@ -44,7 +44,7 @@
         <bouncycastle.version>1.80</bouncycastle.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.18.0</commons-io.version>
-        <digidoc4j.version>6.0.0-SNAPSHOT</digidoc4j.version>
+        <digidoc4j.version>6.0.0</digidoc4j.version>
         <guava.version>33.4.0-jre</guava.version>
         <ignite.version>2.15.0</ignite.version>
         <json.version>20250107</json.version>

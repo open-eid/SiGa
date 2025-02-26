@@ -5,13 +5,10 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.service.signature.util.ContainerUtil;
-import eu.europa.esig.dss.alert.exception.AlertException;
 import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignatureQualification;
-import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.digidoc4j.Configuration;
@@ -23,13 +20,12 @@ import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.Timestamp;
 import org.digidoc4j.TimestampBuilder;
 import org.digidoc4j.X509Cert;
+import org.digidoc4j.exceptions.DigiDoc4JException;
 import org.digidoc4j.impl.ServiceAccessListener;
 import org.digidoc4j.impl.ServiceAccessScope;
-import org.digidoc4j.impl.asic.AsicSignature;
-import org.digidoc4j.impl.asic.DetachedContentCreator;
+import org.digidoc4j.impl.asic.AsicContainer;
 import org.digidoc4j.impl.asic.asics.AsicSContainerBuilder;
 import org.digidoc4j.impl.asic.report.SignatureValidationReport;
-import org.digidoc4j.impl.asic.xades.XadesValidationDssFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
@@ -37,8 +33,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
 
@@ -150,35 +146,8 @@ public class AsiceContainerAugmentationService {
                 return false;
             }
         }
-        try {
-            ensureDssValidationPasses(eeSignatures, container);
-        } catch (AlertException e) {
-            return false;
-        }
-        return true;
-    }
-
-    private void ensureDssValidationPasses(List<Signature> signatures, Container container) {
-        DetachedContentCreator detachedContentCreator;
-        try {
-            detachedContentCreator = new DetachedContentCreator().populate(container.getDataFiles());
-        } catch (Exception e) {
-            log.error("Error in datafiles processing: {}", e.getMessage());
-            throw new InvalidSessionDataException("Failed to process datafiles in the container");
-        }
-        List<DSSDocument> detachedContentList = detachedContentCreator.getDetachedContentList();
-        XadesValidationDssFacade validationFacade = new XadesValidationDssFacade(detachedContentList, eeConfiguration);
-        for (Signature signature : signatures) {
-            validateSignatureWithDss(validationFacade, signature);
-        }
-    }
-
-    private static void validateSignatureWithDss(XadesValidationDssFacade validationFacade, Signature signature) {
-        AsicSignature asicSignature = (AsicSignature) signature;
-        DSSDocument signatureDocument = asicSignature.getSignatureDocument();
-        XAdESSignature dssSignature = asicSignature.getOrigin().getDssSignature();
-        validationFacade.openXadesValidator(signatureDocument)
-                .getValidationData(Collections.singletonList(dssSignature));
+        Map<String, DigiDoc4JException> validationErrors = ((AsicContainer) container).getExtensionValidationErrors(SignatureProfile.LTA, eeSignatures);
+        return validationErrors.isEmpty();
     }
 
     private static SignatureValidationReport getSignatureReport(Signature signature, ContainerValidationResult validationResult) {
