@@ -1,5 +1,6 @@
 package ee.openeid.siga;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.Param;
@@ -35,6 +36,8 @@ import ee.openeid.siga.webapp.json.UploadHashcodeContainerRequest;
 import ee.openeid.siga.webapp.json.UploadHashcodeContainerResponse;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
 import org.springframework.http.MediaType;
@@ -52,6 +55,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.OptionalInt;
 
+import static ee.openeid.siga.common.event.SigaEventLoggingAspect.putContextParameter;
+import static ee.openeid.siga.common.util.CertificateUtil.getCertificatePolicyOIDs;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class HashcodeContainerController {
@@ -117,6 +124,13 @@ public class HashcodeContainerController {
         String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
         validator.validateSigningCertificate(signingCertificate);
         X509Certificate certificate = RequestTransformer.transformCertificate(signingCertificate);
+
+        List<String> policyOIDs = getCertificatePolicyOIDs(certificate);
+        if (CollectionUtils.isNotEmpty(policyOIDs)) {
+            String joinedOIDs = String.join("|", policyOIDs);
+            putContextParameter("certificate_policies", joinedOIDs);
+        }
+
         validator.validateSignatureProfileForHashcodeRequest(createRemoteSigningRequest.getSignatureProfile());
         validator.validateRemoteSigning(certificate);
 

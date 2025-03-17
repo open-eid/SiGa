@@ -5,6 +5,7 @@ import ee.openeid.siga.common.exception.TechnicalException;
 import eu.europa.esig.dss.utils.Utils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.CertificatePolicies;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.PolicyInformation;
@@ -14,8 +15,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @UtilityClass
@@ -47,20 +53,31 @@ public class CertificateUtil {
 
 
     public static boolean hasProhibitedPolicies(X509Certificate certificate, List<String> policies) {
+        return getPolicyOidStringsAsStream(certificate).anyMatch(policies::contains);
+    }
+
+    public static List<String> getCertificatePolicyOIDs(X509Certificate certificate) {
+        return getPolicyOidStringsAsStream(certificate).toList();
+    }
+
+    private static Stream<String> getPolicyOidStringsAsStream(X509Certificate certificate) {
+        return Optional
+                .ofNullable(getCertificatePoliciesIfPresent(certificate))
+                .map(CertificatePolicies::getPolicyInformation)
+                .stream()
+                .flatMap(Stream::of)
+                .flatMap(policy -> Optional.ofNullable(policy)
+                    .map(PolicyInformation::getPolicyIdentifier)
+                    .map(ASN1ObjectIdentifier::getId)
+                    .stream());
+    }
+
+    private static CertificatePolicies getCertificatePoliciesIfPresent(X509Certificate certificate) {
         byte[] extensionValue = certificate.getExtensionValue(Extension.certificatePolicies.getId());
         if (Utils.isArrayEmpty(extensionValue)) {
-            return false;
+            return null;
         }
-        CertificatePolicies certificatePolicies = parseCertificatePolicies(extensionValue);
-        for (PolicyInformation policyInformation : certificatePolicies.getPolicyInformation()) {
-            if (policyInformation == null || policyInformation.getPolicyIdentifier() == null) {
-                continue;
-            }
-            if (policies.contains(policyInformation.getPolicyIdentifier().getId())) {
-                return true;
-            }
-        }
-        return false;
+        return parseCertificatePolicies(extensionValue);
     }
 
     private static CertificatePolicies parseCertificatePolicies(byte[] extensionValue) {

@@ -3,6 +3,7 @@ package ee.openeid.siga.common.event;
 import ee.openeid.siga.common.exception.SigaApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.jxpath.ClassFunctions;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathException;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
@@ -32,6 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SigaEventLoggingAspect {
     private final SigaEventLogger sigaEventLogger;
     private final ConfigurableBeanFactory configurableBeanFactory;
+    private static final ThreadLocal<Map<String, String>> THREADLOCAL_CONTEXT = new ThreadLocal<>();
 
     @Pointcut("@annotation(sigaEventLog)")
     public void callAt(SigaEventLog sigaEventLog) {
@@ -42,6 +47,7 @@ public class SigaEventLoggingAspect {
     public Object logMethodExecution(ProceedingJoinPoint joinPoint, SigaEventLog eventLog) throws Throwable {
         SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
         Instant start = now();
+        THREADLOCAL_CONTEXT.set(new LinkedHashMap<>());
         try {
             Object proceed = joinPoint.proceed();
             Instant finish = now();
@@ -49,6 +55,7 @@ public class SigaEventLoggingAspect {
             SigaEvent endEvent = sigaEventLogger.logEndEvent(eventLog.eventName(), executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
+            logContextParameters(endEvent);
             if (eventLog.logReturnObject().length != 0) {
                 // FIXME: Possible parameter name collision, when method parameters are logged.
                 logObject(eventLog.logReturnObject(), proceed, endEvent);
@@ -59,14 +66,26 @@ public class SigaEventLoggingAspect {
             SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), e.getErrorCode(), e.getMessage(), executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
+            logContextParameters(endEvent);
             throw e;
         } catch (Throwable e) {
             long executionTimeInMilli = Duration.between(start, now()).toMillis();
             SigaEvent endEvent = sigaEventLogger.logExceptionEvent(eventLog.eventName(), "INTERNAL_SERVER_ERROR", "Internal server error", executionTimeInMilli);
             logMethodParameters(joinPoint, eventLog, startEvent, endEvent);
             logStaticParameters(eventLog.logStaticParameters(), startEvent, endEvent);
+            logContextParameters(endEvent);
             throw e;
+        } finally {
+            THREADLOCAL_CONTEXT.remove();
         }
+    }
+
+    public static void putContextParameter(String key, String value) {
+        Map<String, String> contextMap = THREADLOCAL_CONTEXT.get();
+        if (contextMap == null) {
+            throw new IllegalStateException("Cannot add event logging aspect context parameter outside of logging context");
+        }
+        contextMap.put(key, value);
     }
 
     private void logMethodParameters(ProceedingJoinPoint joinPoint, SigaEventLog eventLog, SigaEvent startEvent, SigaEvent endEvent) {
@@ -85,6 +104,14 @@ public class SigaEventLoggingAspect {
                 actOnEventCreation(logMethodExecutionParameters, i, startEvent, endEvent, arg);
             }
         }
+    }
+
+    private static void logContextParameters(SigaEvent event) {
+        Map<String, String> contextMap = THREADLOCAL_CONTEXT.get();
+        if (MapUtils.isEmpty(contextMap)) {
+            return;
+        }
+        contextMap.forEach(event::addEventParameter);
     }
 
     private void actOnEventCreation(Param[] logMethodExecutionParameters, int i, SigaEvent startEvent, SigaEvent endEvent, Object arg) {
