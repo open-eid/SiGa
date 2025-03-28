@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 class CertificateUtilTest {
-    private static final String ROOT_CERTIFICATE = "MIIEEzCCAvugAwIBAgIQc/jtqiMEFERMtVvsSsH7sjANBgkqhkiG9w0BAQUFADB9" +
+    static final String ROOT_CERTIFICATE = "MIIEEzCCAvugAwIBAgIQc/jtqiMEFERMtVvsSsH7sjANBgkqhkiG9w0BAQUFADB9" +
             "MQswCQYDVQQGEwJFRTEiMCAGA1UECgwZQVMgU2VydGlmaXRzZWVyaW1pc2tlc2t1" +
             "czEwMC4GA1UEAwwnVEVTVCBvZiBFRSBDZXJ0aWZpY2F0aW9uIENlbnRyZSBSb290" +
             "IENBMRgwFgYJKoZIhvcNAQkBFglwa2lAc2suZWUwIhgPMjAxMDEwMDcxMjM0NTZa" +
@@ -52,7 +52,7 @@ class CertificateUtilTest {
             "v7y+tebcqB+1/Dj7o2brNr+dKxIL5IseBeQD4lJ5UtvuPE7pZexUSt2EOcDAAMtHsUB30cIVwPw8" +
             "/CwfT9FBP9H3tUUCtOQ=";
 
-    private static final String SIGNING_CERTIFICATE = "MIID6jCCA02gAwIBAgIQR+qcVFxYF1pcSy/QGEnMVjAKBggqhkjOPQQDBDBgMQswCQYDVQQG" +
+    static final String SIGNING_CERTIFICATE = "MIID6jCCA02gAwIBAgIQR+qcVFxYF1pcSy/QGEnMVjAKBggqhkjOPQQDBDBgMQswCQYDVQQG" +
             "EwJFRTEbMBkGA1UECgwSU0sgSUQgU29sdXRpb25zIEFTMRcwFQYDVQRhDA5OVFJFRS0xMDc0NzAx" +
             "MzEbMBkGA1UEAwwSVEVTVCBvZiBFU1RFSUQyMDE4MB4XDTE5MDEyNTE1NDgzMVoXDTI0MDEyNTIx" +
             "NTk1OVowfzELMAkGA1UEBhMCRUUxKjAoBgNVBAMMIUrDlUVPUkcsSkFBSy1LUklTVEpBTiwzODAw" +
@@ -106,5 +106,4 @@ class CertificateUtilTest {
         X509Certificate certificate = CertificateUtil.createX509Certificate(Base64.getDecoder().decode(SIGNING_CERTIFICATE.getBytes()));
         assertTrue(CertificateUtil.isSigningCertificate(certificate));
     }
-
 }

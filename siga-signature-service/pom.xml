@@ -89,6 +89,13 @@
         </dependency>
 
         <dependency>
+            <groupId>ee.openeid.siga</groupId>
+            <artifactId>siga-common</artifactId>
+            <version>2.11.0</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>

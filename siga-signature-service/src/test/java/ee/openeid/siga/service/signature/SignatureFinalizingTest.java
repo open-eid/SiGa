@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature;
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventLoggingAspectTestUtil;
 import ee.openeid.siga.common.exception.SignatureCreationException;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.Result;
@@ -107,7 +108,11 @@ class SignatureFinalizingTest {
     void shouldRequest_TSA_OCSP_WithSignatureProfile_LT_AndPreferAiaOcspFalse() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(false);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+
+        Result result = SigaEventLoggingAspectTestUtil.callInParameterContext(
+                () -> signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight())
+        );
+
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents("http://tsa.demo.sk.ee/tsa", "http://demo.sk.ee/ocsp");
     }
@@ -116,7 +121,11 @@ class SignatureFinalizingTest {
     void shouldRequest_TSA_AIAOCSP_WithSignatureProfile_LT_AndPreferAiaOcspTrue() throws IOException, URISyntaxException {
         configuration.setPreferAiaOcsp(true);
         Pair<String, String> signature = createSignature(VALID_PKCS12_Esteid2018, SignatureProfile.LT);
-        Result result = signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
+
+        Result result = SigaEventLoggingAspectTestUtil.callInParameterContext(
+                () -> signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight())
+        );
+
         assertEquals(Result.OK, result);
         assertTSAOCSPEvents("http://tsa.demo.sk.ee/tsa", "http://aia.demo.sk.ee/esteid2018");
     }

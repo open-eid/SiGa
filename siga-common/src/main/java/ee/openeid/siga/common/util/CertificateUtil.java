@@ -15,12 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -56,11 +53,7 @@ public class CertificateUtil {
         return getPolicyOidStringsAsStream(certificate).anyMatch(policies::contains);
     }
 
-    public static List<String> getCertificatePolicyOIDs(X509Certificate certificate) {
-        return getPolicyOidStringsAsStream(certificate).toList();
-    }
-
-    private static Stream<String> getPolicyOidStringsAsStream(X509Certificate certificate) {
+    static Stream<String> getPolicyOidStringsAsStream(X509Certificate certificate) {
         return Optional
                 .ofNullable(getCertificatePoliciesIfPresent(certificate))
                 .map(CertificatePolicies::getPolicyInformation)

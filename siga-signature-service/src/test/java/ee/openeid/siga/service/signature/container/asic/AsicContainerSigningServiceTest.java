@@ -3,6 +3,7 @@ package ee.openeid.siga.service.signature.container.asic;
 
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
+import ee.openeid.siga.common.event.SigaEventLoggingAspectTestUtil;
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.MobileIdInformation;
@@ -22,7 +23,13 @@ import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteSemaphore;
-import org.digidoc4j.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.Container;
+import org.digidoc4j.ContainerBuilder;
+import org.digidoc4j.DataFile;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.SignatureProfile;
 import org.digidoc4j.signers.PKCS12SignatureToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +48,22 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ee.openeid.siga.service.signature.test.RequestUtil.*;
+import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
+import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_SESSION_ID;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_NAME;
+import static ee.openeid.siga.service.signature.test.RequestUtil.SERVICE_UUID;
+import static ee.openeid.siga.service.signature.test.RequestUtil.VALID_COMPOSITE_ASICS;
+import static ee.openeid.siga.service.signature.test.RequestUtil.createSignatureParameters;
 import static org.digidoc4j.Container.DocumentType.ASICE;
 import static org.digidoc4j.Container.DocumentType.ASICS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
@@ -173,8 +190,8 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     }
 
     @Test
-    void finalizeAndValidateSignatureTest() throws IOException, URISyntaxException {
-        assertFinalizeAndValidateSignature();
+    void finalizeAndValidateSignatureTest() {
+        SigaEventLoggingAspectTestUtil.executeInParameterContext(this::assertFinalizeAndValidateSignature);
     }
 
     @Test
@@ -188,8 +205,10 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void noDataToSignInSessionForSignatureIdTest() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, this::noDataToSignInSessionForSignatureId
+            InvalidSessionDataException.class,
+                () -> SigaEventLoggingAspectTestUtil.executeInParameterContext(this::noDataToSignInSessionForSignatureId)
         );
+
         assertEquals("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId", caughtException.getMessage());
     }
 

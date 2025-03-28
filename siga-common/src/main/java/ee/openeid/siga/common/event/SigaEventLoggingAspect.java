@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +46,7 @@ public class SigaEventLoggingAspect {
     public Object logMethodExecution(ProceedingJoinPoint joinPoint, SigaEventLog eventLog) throws Throwable {
         SigaEvent startEvent = sigaEventLogger.logStartEvent(eventLog.eventName());
         Instant start = now();
-        THREADLOCAL_CONTEXT.set(new LinkedHashMap<>());
+        setUpParameterContext();
         try {
             Object proceed = joinPoint.proceed();
             Instant finish = now();
@@ -76,16 +75,28 @@ public class SigaEventLoggingAspect {
             logContextParameters(endEvent);
             throw e;
         } finally {
-            THREADLOCAL_CONTEXT.remove();
+            clearParameterContext();
         }
     }
 
     public static void putContextParameter(String key, String value) {
-        Map<String, String> contextMap = THREADLOCAL_CONTEXT.get();
+        Map<String, String> contextMap = getContextMap();
         if (contextMap == null) {
             throw new IllegalStateException("Cannot add event logging aspect context parameter outside of logging context");
         }
         contextMap.put(key, value);
+    }
+
+    static void setUpParameterContext() {
+        THREADLOCAL_CONTEXT.set(new LinkedHashMap<>());
+    }
+
+    static void clearParameterContext() {
+        THREADLOCAL_CONTEXT.remove();
+    }
+
+    static Map<String, String> getContextMap() {
+        return THREADLOCAL_CONTEXT.get();
     }
 
     private void logMethodParameters(ProceedingJoinPoint joinPoint, SigaEventLog eventLog, SigaEvent startEvent, SigaEvent endEvent) {

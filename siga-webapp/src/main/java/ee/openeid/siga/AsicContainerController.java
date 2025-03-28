@@ -9,6 +9,7 @@ import ee.openeid.siga.common.event.XPath;
 import ee.openeid.siga.common.model.ContainerInfo;
 import ee.openeid.siga.common.model.DataToSignWrapper;
 import ee.openeid.siga.common.model.Result;
+import ee.openeid.siga.common.util.LoggingContextUtil;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
@@ -129,6 +130,9 @@ public class AsicContainerController {
         String signingCertificate = createRemoteSigningRequest.getSigningCertificate();
         validator.validateSigningCertificate(signingCertificate);
         X509Certificate certificate = RequestTransformer.transformCertificate(signingCertificate);
+
+        LoggingContextUtil.addCertificatePolicyOIDsToEventLoggingContext(certificate);
+
         validator.validateSignatureProfileForDatafileRequest(createRemoteSigningRequest.getSignatureProfile());
         validator.validateRemoteSigning(certificate);
 

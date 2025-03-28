@@ -10,6 +10,7 @@ import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.common.util.LoggingContextUtil;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
@@ -23,7 +24,13 @@ import lombok.Setter;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
-import org.digidoc4j.*;
+import org.digidoc4j.Configuration;
+import org.digidoc4j.DataToSign;
+import org.digidoc4j.ServiceType;
+import org.digidoc4j.Signature;
+import org.digidoc4j.SignatureParameters;
+import org.digidoc4j.ValidationResult;
+import org.digidoc4j.X509Cert;
 import org.digidoc4j.exceptions.CertificateValidationException;
 import org.digidoc4j.exceptions.NetworkException;
 import org.digidoc4j.exceptions.OCSPRequestFailedException;
@@ -33,13 +40,16 @@ import org.digidoc4j.impl.ServiceAccessScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.function.Predicate;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_ERROR;
 import static ee.openeid.siga.common.event.SigaEventName.ErrorCode.SIGNATURE_FINALIZING_REQUEST_ERROR;
-import static ee.openeid.siga.common.event.SigaEventName.EventParam.*;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.ISSUING_CA;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.REQUEST_URL;
+import static ee.openeid.siga.common.event.SigaEventName.EventParam.SIGNATURE_ID;
 import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
 
 @Slf4j
@@ -97,6 +107,12 @@ public abstract class ContainerSigningService {
 
         addSignatureToSession(sessionHolder, signature, signatureId);
         sessionService.update(sessionHolder);
+
+        if (SigningType.REMOTE.equals(signatureSession.getSigningType())) {
+            X509Certificate certificate = signature.getSigningCertificate().getX509Certificate();
+            LoggingContextUtil.addCertificatePolicyOIDsToEventLoggingContext(certificate);
+        }
+
         return Result.OK;
     }
 
