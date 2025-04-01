@@ -39,6 +39,7 @@
                     <property name="name" value="CONTAINER_SESSION"/>
                     <property name="cacheMode" value="PARTITIONED"/>
                     <property name="backups" value="1"/>
+                    <property name="readFromBackup" value="false"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.TouchedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
@@ -54,6 +55,7 @@
                     <property name="name" value="SIGNATURE_SESSION"/>
                     <property name="cacheMode" value="PARTITIONED"/>
                     <property name="backups" value="1"/>
+                    <property name="readFromBackup" value="false"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.ModifiedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
@@ -69,6 +71,7 @@
                     <property name="name" value="CERTIFICATE_SESSION"/>
                     <property name="cacheMode" value="PARTITIONED"/>
                     <property name="backups" value="1"/>
+                    <property name="readFromBackup" value="false"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.ModifiedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
@@ -84,6 +87,7 @@
                     <property name="name" value="AUTH_SERVICES"/>
                     <property name="cacheMode" value="PARTITIONED"/>
                     <property name="backups" value="1"/>
+                    <property name="readFromBackup" value="false"/>
                     <property name="expiryPolicyFactory">
                         <bean class="javax.cache.expiry.CreatedExpiryPolicy" factory-method="factoryOf">
                             <constructor-arg>
