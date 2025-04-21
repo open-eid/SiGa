@@ -1,6 +1,6 @@
 FROM openjdk:17-slim-bullseye
 
-ENV IGNITE_VERSION 2.15.0
+ENV IGNITE_VERSION 2.17.0
 ENV IGNITE_HOME /opt/ignite/apache-ignite-${IGNITE_VERSION}-bin
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

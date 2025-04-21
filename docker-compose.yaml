@@ -225,7 +225,7 @@ services:
   ignite-01:
     # TODO: Use pre-built image when an official Ignite image is released for JDK17.
     #       '--build' argument in README.md can also be removed after that.
-    #image: apacheignite/ignite:2.15.0
+    #image: apacheignite/ignite:2.17.0
     build: docker/siga-ignite
     environment:
       - CONFIG_URI=/etc/ignite/ignite-configuration.xml
@@ -238,12 +238,12 @@ services:
           - ignite-01.localhost
     volumes:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
-      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
+      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.17.0-bin/run.sh
 
   ignite-02:
     # TODO: Use pre-built image when an official Ignite image is released for JDK17.
     #       '--build' argument in README.md can also be removed after that.
-    #image: apacheignite/ignite:2.15.0
+    #image: apacheignite/ignite:2.17.0
     build: docker/siga-ignite
     environment:
       - CONFIG_URI=/etc/ignite/ignite-configuration.xml
@@ -256,4 +256,4 @@ services:
           - ignite-02.localhost
     volumes:
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/ignite/ignite-configuration.xml
-      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.15.0-bin/run.sh
+      - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.17.0-bin/run.sh

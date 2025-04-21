@@ -43,7 +43,7 @@ Tomcat, while the latter one requires a separate servlet container to run.
 
 ![SiGa deployment diagram](docs/img/siga_deployment.png)
 
-In addition to a JAR or WAR file containing compiled SiGa, [Apache Ignite](https://ignite.apache.org/) version 2.15.0 is
+In addition to a JAR or WAR file containing compiled SiGa, [Apache Ignite](https://ignite.apache.org/) version 2.17.0 is
 required for session management.
 
 ### Running Apache Ignite
