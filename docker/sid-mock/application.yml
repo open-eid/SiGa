@@ -1,0 +1,4 @@
+sid-mock:
+  delay: 0s
+  expiration: 5m
+  store-session-init-requests: true

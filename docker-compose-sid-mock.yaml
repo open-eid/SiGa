@@ -1,0 +1,21 @@
+services:
+  siga-01:
+    environment:
+      - SIGA_SID_URL=http://sid-mock:6666/smart-id-rp/v2/
+  siga-02:
+    environment:
+      - SIGA_SID_URL=http://sid-mock:6666/smart-id-rp/v2/
+
+  sid-mock:
+    image: nortal/sid-mock:v1.3.0
+    depends_on:
+      mock-redis-service:
+        condition: service_started
+    environment:
+      - REDIS_URI=redis://mock-redis-service
+      - MOCK_CONFIGURATION_PATH=/conf/application.yml
+    volumes:
+      - "./docker/sid-mock:/conf"
+
+  mock-redis-service:
+    image: redis:7.4.3-alpine3.21

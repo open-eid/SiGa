@@ -423,6 +423,14 @@ You can view the logs for all the running containers at http://localhost:11080 .
 docker-compose up
 ```
 
+### Using SID mock
+By default, dockerized SiGa is using SK Smart-ID DEMO service. 
+To use [SID-mock](https://github.com/Test-Government/SID-mock) instead run:
+```bash
+docker compose -f docker-compose.yaml -f docker-compose-sid-mock.yaml up -d 
+```
+
+
 ## Integration tests
 
 Integration tests for SiGa are available in the following repository: https://github.com/open-eid/SiGa-Tests
