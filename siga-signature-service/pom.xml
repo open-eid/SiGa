@@ -38,7 +38,7 @@
         <dependency>
             <groupId>ee.sk.smartid</groupId>
             <artifactId>smart-id-java-client</artifactId>
-            <version>2.3</version>
+            <version>2.3.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>ee.sk.mid</groupId>
             <artifactId>mid-rest-java-client</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
