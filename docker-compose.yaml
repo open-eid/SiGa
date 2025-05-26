@@ -179,6 +179,7 @@ services:
       - spring.mail.properties.mail.smtp.starttls.enable=true
       - spring.mail.properties.mail.smtp.starttls.required=true
       - logging.config=/etc/siga-admin/logback.xml
+      - BUILD_FOLDER=/tmp/logs
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=4000
       - JAVA_OPTS=
