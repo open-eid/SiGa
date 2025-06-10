@@ -1,6 +1,10 @@
 package ee.openeid.siga.service.signature.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ee.openeid.siga.common.client.HttpPostClient;
 import ee.openeid.siga.common.client.HttpStatusException;
 import ee.openeid.siga.common.exception.ClientException;
@@ -38,7 +42,7 @@ public class SivaClient {
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
-        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
+        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT, true);
         validateLTASignatureProfile(validationResponse);
         return validationResponse;
     }
@@ -47,7 +51,7 @@ public class SivaClient {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(name);
         request.setDocument(container);
-        return validate(request, VALIDATION_ENDPOINT);
+        return validate(request, VALIDATION_ENDPOINT, false);
     }
 
     private void handleHttpStatusCodeException(HttpStatusException e) {
@@ -91,10 +95,15 @@ public class SivaClient {
                 });
     }
 
-    private ValidationConclusion validate(Object request, String validationEndpoint) {
+    private ValidationConclusion validate(Object request, String validationEndpoint, boolean isHashcodeContainer) {
         ValidationResponse validationResponse;
         try {
-            validationResponse = sivaHttpClient.post(validationEndpoint, request, ValidationResponse.class);
+            if (isHashcodeContainer) {
+                validationResponse = sivaHttpClient.post(validationEndpoint, request, ValidationResponse.class);
+            } else {
+                String jsonResponse = sivaHttpClient.post(validationEndpoint, request, String.class);
+                validationResponse = convertJsonToValidationResponseToChangeErrorElementToErrors(jsonResponse);
+            }
         } catch (HttpStatusException e) {
             handleHttpStatusCodeException(e);
             throw e; // cannot reach here
@@ -110,6 +119,29 @@ public class SivaClient {
         log.info("Container validation details received successfully");
 
         return validationConclusion;
+    }
+
+    private ValidationResponse convertJsonToValidationResponseToChangeErrorElementToErrors(String jsonResponse) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonNode rootNode = objectMapper.readTree(jsonResponse);
+
+        JsonNode timeStampTokensNode = rootNode
+                .path("validationReport")
+                .path("validationConclusion")
+                .path("timeStampTokens");
+
+        if (!timeStampTokensNode.isMissingNode()) {
+            for (JsonNode jsonNode : timeStampTokensNode) {
+                if (jsonNode.has("error") && !jsonNode.has("errors")) {
+                    JsonNode errorNode = jsonNode.get("error");
+                    ((ObjectNode) jsonNode).set("errors", errorNode);
+                    ((ObjectNode) jsonNode).remove("error");
+                }
+            }
+        }
+
+        return objectMapper.treeToValue(rootNode, ValidationResponse.class);
     }
 
     private SivaHashcodeValidationRequest createHashcodeRequest(List<HashcodeSignatureWrapper>
