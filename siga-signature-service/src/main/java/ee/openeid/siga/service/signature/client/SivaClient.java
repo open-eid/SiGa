@@ -1,7 +1,6 @@
 package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -39,10 +38,11 @@ public class SivaClient {
     private static final String DOCUMENT_KEY = "document";
     private static final String SIGNATURE_KEY = "signatureFiles.signature";
     private final HttpPostClient sivaHttpClient;
+    private final ObjectMapper objectMapper;
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
-        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT, true);
+        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
         validateLTASignatureProfile(validationResponse);
         return validationResponse;
     }
@@ -51,7 +51,7 @@ public class SivaClient {
         SivaValidationRequest request = new SivaValidationRequest();
         request.setFilename(name);
         request.setDocument(container);
-        return validate(request, VALIDATION_ENDPOINT, false);
+        return validate(request, VALIDATION_ENDPOINT);
     }
 
     private void handleHttpStatusCodeException(HttpStatusException e) {
@@ -95,10 +95,10 @@ public class SivaClient {
                 });
     }
 
-    private ValidationConclusion validate(Object request, String validationEndpoint, boolean isHashcodeContainer) {
+    private ValidationConclusion validate(Object request, String validationEndpoint) {
         ValidationResponse validationResponse;
         try {
-            if (isHashcodeContainer) {
+            if (HASHCODE_VALIDATION_ENDPOINT.equals(validationEndpoint)) {
                 validationResponse = sivaHttpClient.post(validationEndpoint, request, ValidationResponse.class);
             } else {
                 String jsonResponse = sivaHttpClient.post(validationEndpoint, request, String.class);
@@ -122,8 +122,6 @@ public class SivaClient {
     }
 
     private ValidationResponse convertJsonToValidationResponseToChangeErrorElementToErrors(String jsonResponse) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
 
         JsonNode timeStampTokensNode = rootNode
