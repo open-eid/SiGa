@@ -489,7 +489,6 @@
         <xs:sequence>
             <xs:element name="commonName" type="xs:string"/>
             <xs:element name="content" type="xs:string"/>
-            <xs:element name="issuer" type="xs:string"/>
             <xs:element name="type" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
@@ -498,8 +497,6 @@
             <xs:element name="name" type="xs:string"/>
             <xs:element name="scope" type="xs:string"/>
             <xs:element name="content" type="xs:string"/>
-            <xs:element name="hashAlgo" type="xs:string"/>
-            <xs:element name="hash" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="validatedDocumentData">
