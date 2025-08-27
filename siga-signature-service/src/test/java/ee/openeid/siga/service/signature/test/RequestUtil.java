@@ -78,6 +78,7 @@ public class RequestUtil {
     public static final String CONTAINER_SESSION_ID = "v1_user_name_23423423-234234234-324234-4234";
     public static final String SMART_ID_SESSION_ID = "23423423-234234234-324234-1111";
     public static final String CERTIFICATE_ID = "23423423-234234234-324234-1111";
+    public static final String MOCK_PERSON_IDENTIFIER = "30303039914";
 
     public static List<HashcodeDataFile> createHashcodeDataFileListWithOneFile() {
         return createHashcodeDataFileListWithOneFile("test.txt");
@@ -243,7 +244,7 @@ public class RequestUtil {
 
     public static SmartIdInformation createSmartIdInformation() {
         SmartIdInformation smartIdInformation = SmartIdInformation.builder()
-                .personIdentifier("30303039914")
+                .personIdentifier(MOCK_PERSON_IDENTIFIER)
                 .country("EE")
                 .documentNumber(DOCUMENT_NUMBER)
                 .build();
