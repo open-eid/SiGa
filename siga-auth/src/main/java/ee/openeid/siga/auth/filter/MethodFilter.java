@@ -28,6 +28,7 @@ public class MethodFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         if (!ALLOWED_REQUEST_METHOD_POST.equals(method) && ALLOWED_POST_URI.equals(path)) {
+
             response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
