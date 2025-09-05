@@ -1,5 +1,6 @@
 package ee.openeid.siga.common.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -18,10 +19,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.binaryEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +49,40 @@ class HttpClientImplTest {
     @AfterEach
     void tearDown() {
         WireMock.reset();
+    }
+
+    @Test
+    void post_WhenInvalidJson_HttpClientDecodingExceptionIsThrown() {
+        stubFor(post("/path")
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("not-json")));
+
+        Object requestBody = new Object();
+
+        HttpClientDecodingException ex = assertThrows(HttpClientDecodingException.class,
+                () -> httpClient.post("/path", requestBody, Object.class));
+
+        assertEquals("Error processing JSON response", ex.getMessage());
+        Throwable rootCause = getRootCause(ex.getCause());
+        assertInstanceOf(JsonProcessingException.class, rootCause);
+    }
+
+    @Test
+    void get_WhenInvalidJson_HttpClientDecodingExceptionIsThrown() {
+        stubFor(WireMock.get("/path")
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("not-json")));
+
+        HttpClientDecodingException ex = assertThrows(HttpClientDecodingException.class,
+                () -> httpClient.get("/path", Object.class));
+
+        assertEquals("Error processing JSON response", ex.getMessage());
+        Throwable rootCause = getRootCause(ex.getCause());
+        assertInstanceOf(JsonProcessingException.class, rootCause);
     }
 
     @Test
@@ -257,6 +297,13 @@ class HttpClientImplTest {
 
         byte[] response = httpClient.post("/path", body, byte[].class);
         assertArrayEquals(body, response);
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        while (throwable.getCause() != null && throwable.getCause() != throwable) {
+            throwable = throwable.getCause();
+        }
+        return throwable;
     }
 
     @Data

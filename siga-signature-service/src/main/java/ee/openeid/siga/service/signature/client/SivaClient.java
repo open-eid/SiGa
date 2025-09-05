@@ -4,9 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.client.HttpPostClient;
 import ee.openeid.siga.common.client.HttpStatusException;
 import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.client.HttpClientConnectionException;
+import ee.openeid.siga.common.client.HttpClientDecodingException;
+import ee.openeid.siga.common.client.HttpClientTimeoutException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
+import ee.openeid.siga.common.exception.SiVaHttpErrorException;
+import ee.openeid.siga.common.exception.SiVaServiceException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
@@ -67,7 +72,7 @@ public class SivaClient {
         } else {
             log.error("Unexpected exception was thrown by SiVa. Status: {}-{}, Response body: {} ", httpStatus.value(), httpStatus.getReasonPhrase(), tryToParseResponseBody(e.getResponseBody()));
         }
-        throw new TechnicalException("Unable to get valid response from client");
+        throw new SiVaHttpErrorException(e);
     }
 
     private static String tryToParseResponseBody(byte[] responseBody) {
@@ -97,7 +102,11 @@ public class SivaClient {
             validationResponse = sivaHttpClient.post(validationEndpoint, request, ValidationResponse.class);
         } catch (HttpStatusException e) {
             handleHttpStatusCodeException(e);
-            throw e; // cannot reach here
+            throw e; // unreachable but keeps compiler happy
+        } catch (HttpClientConnectionException
+                 | HttpClientTimeoutException
+                 | HttpClientDecodingException e) {
+            throw new SiVaServiceException(e.getMessage(), e);
         } catch (Exception e) {
             throw new TechnicalException("SIVA service error", e);
         }

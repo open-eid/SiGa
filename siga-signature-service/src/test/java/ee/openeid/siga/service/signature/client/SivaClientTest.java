@@ -5,6 +5,7 @@ import ee.openeid.siga.common.client.HttpStatusException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
+import ee.openeid.siga.common.exception.SiVaHttpErrorException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
@@ -15,8 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -71,6 +73,19 @@ class SivaClientTest {
         assertEquals(Integer.valueOf(1), response.getValidSignaturesCount());
     }
 
+    @ParameterizedTest
+    @MethodSource("httpStatusProvider")
+    void validateHashcodeContainer_WhenHttpClientThrowsHttpStatusException_SivaHttpErrorExceptionIsThrown(HttpStatus status) {
+        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)
+        )).thenThrow(new HttpStatusException(status, ArrayUtils.EMPTY_BYTE_ARRAY));
+
+        SiVaHttpErrorException caughtException = assertThrows(
+                SiVaHttpErrorException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
+                        RequestUtil.createHashcodeDataFileListWithOneFile()));
+
+        assertEquals("Unable to get a valid response from SiVa", caughtException.getMessage());
+    }
+
     @Test
     void invalidSivaTruststoreCertificate() {
         when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
@@ -81,20 +96,6 @@ class SivaClientTest {
                         RequestUtil.createHashcodeDataFileListWithOneFile())
         );
         assertEquals("SIVA service error", caughtException.getMessage());
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @EnumSource(value = HttpStatus.class, names = {"NOT_FOUND", "INTERNAL_SERVER_ERROR"})
-    void sivaHttpStatusCodesTest(HttpStatus status) {
-        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
-                .thenThrow(new HttpStatusException(status, ArrayUtils.EMPTY_BYTE_ARRAY));
-
-        TechnicalException caughtException = assertThrows(
-                TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
-                        RequestUtil.createHashcodeDataFileListWithOneFile())
-        );
-        assertEquals("Unable to get valid response from client", caughtException.getMessage());
     }
 
     @Test
@@ -142,5 +143,12 @@ class SivaClientTest {
                         RequestUtil.createHashcodeDataFileListWithOneFile())
         );
         assertEquals("Signature malformed", caughtException.getMessage());
+    }
+
+    static Stream<HttpStatus> httpStatusProvider() {
+        return Stream.concat(
+                Stream.of((HttpStatus) null),
+                Stream.of(HttpStatus.values())
+                        .filter(Predicate.not(HttpStatus.BAD_REQUEST::equals)));
     }
 }

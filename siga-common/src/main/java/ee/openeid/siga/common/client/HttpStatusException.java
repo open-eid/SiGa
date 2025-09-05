@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
-public class HttpStatusException extends RuntimeException {
+public class HttpStatusException extends HttpClientException {
     @Getter
     private final HttpStatus httpStatus;
     private final byte[] responseBody;

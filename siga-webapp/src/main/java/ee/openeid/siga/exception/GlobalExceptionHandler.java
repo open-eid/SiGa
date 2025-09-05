@@ -1,6 +1,8 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.common.exception.ErrorResponseCode;
+import ee.openeid.siga.common.exception.SiVaHttpErrorException;
+import ee.openeid.siga.common.exception.SiVaServiceException;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import ee.sk.smartid.exception.SmartIdException;
@@ -68,6 +70,26 @@ public class GlobalExceptionHandler {
         return errorResponse;
     }
 
+    @ExceptionHandler(SiVaServiceException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleSivaServiceError(SiVaServiceException exception) {
+        log.error("Siva service error - {}", exception.getLocalizedMessage());
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage("Failed to execute request to SiVa service");
+        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(SiVaHttpErrorException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleSivaInvalidResponse(SiVaHttpErrorException exception) {
+        log.error("Siva response error - {}",  exception.getLocalizedMessage());
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
+        return errorResponse;
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse genericException(Exception exception) {
@@ -77,5 +99,4 @@ public class GlobalExceptionHandler {
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }
-
 }

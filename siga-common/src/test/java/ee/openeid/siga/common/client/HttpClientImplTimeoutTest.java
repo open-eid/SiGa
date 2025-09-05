@@ -2,6 +2,7 @@ package ee.openeid.siga.common.client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ConnectTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutException;
@@ -10,7 +11,6 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
@@ -27,6 +27,8 @@ import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class HttpClientImplTimeoutTest {
@@ -45,8 +47,8 @@ public class HttpClientImplTimeoutTest {
 
         HttpClientImpl httpClientImpl = new HttpClientImpl(webClient);
 
-        WebClientRequestException caughtException = assertThrows(
-                WebClientRequestException.class, () -> httpClientImpl.get("/path", String.class)
+        HttpClientConnectionException caughtException = assertThrows(
+                HttpClientConnectionException.class, () -> httpClientImpl.get("/path", String.class)
         );
 
         assertThat(caughtException.getCause(), instanceOf(ConnectTimeoutException.class));
@@ -79,12 +81,98 @@ public class HttpClientImplTimeoutTest {
 
         HttpClientImpl httpClientImpl = new HttpClientImpl(webClient);
 
-        WebClientRequestException caughtException = assertThrows(
-                WebClientRequestException.class, () -> httpClientImpl.get(endpoint, String.class)
+        HttpClientTimeoutException caughtException = assertThrows(
+                HttpClientTimeoutException.class, () -> httpClientImpl.get(endpoint, String.class)
         );
 
         assertThat(caughtException.getCause(), instanceOf(ReadTimeoutException.class));
     }
+
+    @Test
+    void post_whenReadTimeout_thenHttpClientTimeoutExceptionIsThrown() {
+        int port = findFreePort();
+        String host = "localhost";
+
+        WireMockServer wireMockServer = new WireMockServer(wireMockConfig().port(port));
+        wireMockServer.start();
+        WireMock.configureFor(host, wireMockServer.port());
+
+        WireMockRuntimeInfo wireMockRuntimeInfo = new WireMockRuntimeInfo(wireMockServer);
+
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + wireMockRuntimeInfo.getHttpPort())
+                .clientConnector(new ReactorClientHttpConnector(
+                        HttpClient.create()
+                                .responseTimeout(Duration.ofMillis(500))
+                ))
+                .build();
+
+        HttpClientImpl httpClient = new HttpClientImpl(webClient);
+
+        WireMock.stubFor(
+                WireMock.post("/path")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withFixedDelay(5000)
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"validationConclusion\":{\"valid\":true}}")
+                        )
+        );
+
+        String requestBody = "";
+
+        HttpClientTimeoutException ex = assertThrows(
+                HttpClientTimeoutException.class,
+                () -> httpClient.post("/path", requestBody, byte[].class)
+        );
+
+        assertEquals("Read timeout occurred", ex.getMessage());
+        Throwable rootCause = getRootCause(ex.getCause());
+        assertInstanceOf(ReadTimeoutException.class, rootCause);
+    }
+
+    @Test
+    void get_whenReadTimeout_thenHttpClientTimeoutExceptionIsThrown() {
+        int port = findFreePort();
+        String host = "localhost";
+
+        WireMockServer wireMockServer = new WireMockServer(wireMockConfig().port(port));
+        wireMockServer.start();
+        WireMock.configureFor(host, wireMockServer.port());
+
+        WireMockRuntimeInfo wireMockRuntimeInfo = new WireMockRuntimeInfo(wireMockServer);
+
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + wireMockRuntimeInfo.getHttpPort())
+                .clientConnector(new ReactorClientHttpConnector(
+                        HttpClient.create()
+                                .responseTimeout(Duration.ofMillis(500))
+                ))
+                .build();
+
+        HttpClientImpl httpClient = new HttpClientImpl(webClient);
+
+        WireMock.stubFor(
+                WireMock.get("/path")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withFixedDelay(5000)
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"validationConclusion\":{\"valid\":true}}")
+                        )
+        );
+
+        HttpClientTimeoutException ex = assertThrows(
+                HttpClientTimeoutException.class,
+                () -> httpClient.get("/validate", byte[].class)
+        );
+
+        assertInstanceOf(ReadTimeoutException.class, getRootCause(ex));
+        assertEquals("Read timeout occurred", ex.getMessage());
+    }
+
 
     private int findFreePort() {
         try (ServerSocket socket = new ServerSocket(0)) {
@@ -92,6 +180,13 @@ public class HttpClientImplTimeoutTest {
         } catch (IOException e) {
             throw new RuntimeException("Failed to find a free port", e);
         }
+    }
+
+    private static Throwable getRootCause(Throwable throwable) {
+        while (throwable.getCause() != null && throwable.getCause() != throwable) {
+            throwable = throwable.getCause();
+        }
+        return throwable;
     }
 
 }

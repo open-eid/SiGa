@@ -22,6 +22,7 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
         return webClient.get()
                 .uri(uriBuilder(path))
                 .exchangeToMono(clientResponseHandler(responseType))
+                .onErrorMap(HttpClientImpl::mapToCustomException)
                 .block();
     }
 
@@ -31,6 +32,7 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
                 .uri(uriBuilder(path))
                 .bodyValue(requestBody)
                 .exchangeToMono(clientResponseHandler(responseType))
+                .onErrorMap(HttpClientImpl::mapToCustomException)
                 .block();
     }
 
@@ -57,5 +59,42 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
                     HttpStatus httpStatus = HttpStatus.resolve(statusCode);
                     throw new HttpStatusException(httpStatus, bytes);
                 });
+    }
+
+    private static Throwable mapToCustomException(Throwable e) {
+        Throwable cause = getRootCause(e);
+
+        if (cause instanceof java.net.SocketTimeoutException) {
+            return new HttpClientTimeoutException("Socket timeout occurred while waiting for response", cause);
+        }
+        if (cause instanceof io.netty.handler.timeout.ReadTimeoutException) {
+            return new HttpClientTimeoutException("Read timeout occurred", cause);
+        }
+        if (cause instanceof java.net.UnknownHostException) {
+            return new HttpClientConnectionException("Service unreachable", cause);
+        }
+        if (cause instanceof io.netty.resolver.dns.DnsErrorCauseException) {
+            return new HttpClientConnectionException("Service unreachable", cause);
+        }
+        if (cause instanceof java.net.ConnectException) {
+            return new HttpClientConnectionException("Unable to connect to service", cause);
+        }
+        if (cause instanceof org.springframework.core.codec.DecodingException) {
+            return new HttpClientDecodingException("Error decoding response using Spring codecs", cause);
+        }
+        if (cause instanceof com.fasterxml.jackson.core.JsonProcessingException) {
+            return new HttpClientDecodingException("Error processing JSON response", cause);
+        }
+        if (cause instanceof HttpStatusException) {
+            return cause;
+        }
+        return cause;
+    }
+
+    private static Throwable getRootCause(Throwable throwable) {
+        while (throwable.getCause() != null && throwable.getCause() != throwable) {
+            throwable = throwable.getCause();
+        }
+        return throwable;
     }
 }
