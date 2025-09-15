@@ -4,6 +4,10 @@
 
 Signature Gateway is a web service for creating and signing ASIC-E containers and validating both ASIC-E and BDOC containers with XAdES signatures.
 
+> [!NOTE]
+> Looking for the [**Digital Signature Gateway service**](https://www.ria.ee/en/state-information-system/electronic-identity-eid-and-trust-services/services-digital-signatures)?  
+> Documentation is available [**here**](https://open-eid.github.io/allkirjastamisteenus/).
+
 ## Prerequisites:
 For building and running SiGa you need Java 17.
 
