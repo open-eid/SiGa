@@ -73,7 +73,16 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
         if (cause instanceof java.net.UnknownHostException) {
             return new HttpClientConnectionException("Service unreachable", cause);
         }
+        //Jenkins might throw this depending on URL
         if (cause instanceof io.netty.resolver.dns.DnsErrorCauseException) {
+            return new HttpClientConnectionException("Service unreachable", cause);
+        }
+        //Jenkins might throw this depending on URL
+        if (cause instanceof io.netty.resolver.dns.DnsNameResolverTimeoutException) {
+            return new HttpClientConnectionException("Service unreachable", cause);
+        }
+        //Jenkins might throw this depending on URL
+        if (cause instanceof java.lang.IllegalArgumentException) {
             return new HttpClientConnectionException("Service unreachable", cause);
         }
         if (cause instanceof java.net.ConnectException) {

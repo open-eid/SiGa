@@ -166,7 +166,7 @@ public class HttpClientImplTimeoutTest {
 
         HttpClientTimeoutException ex = assertThrows(
                 HttpClientTimeoutException.class,
-                () -> httpClient.get("/validate", byte[].class)
+                () -> httpClient.get("/path", byte[].class)
         );
 
         assertInstanceOf(ReadTimeoutException.class, getRootCause(ex));

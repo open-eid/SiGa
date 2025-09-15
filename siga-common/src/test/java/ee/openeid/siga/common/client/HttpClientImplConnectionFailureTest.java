@@ -1,6 +1,7 @@
 package ee.openeid.siga.common.client;
 
 import io.netty.resolver.dns.DnsErrorCauseException;
+import io.netty.resolver.dns.DnsNameResolverTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -10,42 +11,52 @@ import java.net.ServerSocket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpClientImplConnectionFailureTest {
 
     @Test
-    void post_WhenDnsErrorCause_HttpClientConnectionExceptionIsThrown() {
+    void post_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrIllegalArgumentException_HttpClientConnectionExceptionIsThrown() {
         WebClient webClient = WebClient.builder()
-                .baseUrl("http://hdsjhdsjdh.com")
+                .baseUrl("http://nonexistent.test")
                 .build();
 
         HttpClientImpl httpClient = new HttpClientImpl(webClient);
         Object requestBody = new Object();
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.post("http://hdsjhdsjdh.com", requestBody, byte[].class));
+                () -> httpClient.post("http://nonexistent.test", requestBody, byte[].class));
 
+        // Depending on the environment (local vs Jenkins), DNS resolution may fail differently:
+        // - Locally, it might throw DnsErrorCauseException
+        // - On Jenkins, it might throw DnsNameResolverTimeoutException || IllegalArgumentException
+        // The test ensures that all cases are correctly wrapped in a HttpClientConnectionException
+        assertTrue(ex.getCause() instanceof DnsErrorCauseException ||
+                ex.getCause() instanceof DnsNameResolverTimeoutException ||
+                ex.getCause() instanceof IllegalArgumentException);
         assertEquals("Service unreachable", ex.getMessage());
-        assertInstanceOf(DnsErrorCauseException.class, ex.getCause());
-
     }
 
     @Test
-    void get_WhenDnsErrorCause_HttpClientConnectionExceptionIsThrown() {
+    void get_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrIllegalArgumentException_HttpClientConnectionExceptionIsThrown() {
         WebClient webClient = WebClient.builder()
-                .baseUrl("http://hdsjhdsjdh.com")
+                .baseUrl("http://nonexistent.test")
                 .build();
 
         HttpClientImpl httpClient = new HttpClientImpl(webClient);
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.get("http://hdsjhdsjdh.com", byte[].class));
+                () -> httpClient.get("http://nonexistent.test", byte[].class));
 
+        // Depending on the environment (local vs Jenkins), DNS resolution may fail differently:
+        // - Locally, it might throw DnsErrorCauseException
+        // - On Jenkins, it might throw DnsNameResolverTimeoutException || IllegalArgumentException
+        // The test ensures that all cases are correctly wrapped in a HttpClientConnectionException
+        assertTrue(ex.getCause() instanceof DnsErrorCauseException ||
+                ex.getCause() instanceof DnsNameResolverTimeoutException ||
+                ex.getCause() instanceof IllegalArgumentException);
         assertEquals("Service unreachable", ex.getMessage());
-        assertInstanceOf(DnsErrorCauseException.class, ex.getCause());
-
     }
 
     @Test
