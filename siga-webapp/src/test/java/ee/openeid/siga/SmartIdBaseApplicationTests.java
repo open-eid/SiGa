@@ -46,7 +46,7 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
                         "request_url=http://tsa.demo.sk.ee/tsa,.* result=SUCCESS.*",
                 ".*event_type=FINISH, event_name=OCSP_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
                         "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
-                        "request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
+                        "request_url=http://aia.demo.sk.ee/eidq2024e,.* result=SUCCESS.*");
     }
 
     @Test
@@ -74,7 +74,7 @@ public abstract class SmartIdBaseApplicationTests extends BaseTest {
                         "request_url=http://tsa.demo.sk.ee/tsa,.* result=SUCCESS.*",
                 ".*event_type=FINISH, event_name=OCSP_REQUEST, client_name=client1, client_uuid=5f923dee-4e6f-4987-bce0-36ad9647ba58, " +
                         "service_name=test1.service.ee, service_uuid=a7fd7728-a3ea-4975-bfab-f240a67e894f, " +
-                        "request_url=http://aia.demo.sk.ee/eid2016,.* result=SUCCESS.*");
+                        "request_url=http://aia.demo.sk.ee/eidq2024e,.* result=SUCCESS.*");
     }
 
 }

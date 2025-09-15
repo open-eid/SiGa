@@ -320,14 +320,14 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
 
     protected static JSONObject createStartSmartIdSigningRequest(String documentNumber) {
         JSONObject request = new JSONObject();
-        request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-40404049996-MOCK-Q"));
+        request.put("documentNumber", Objects.requireNonNullElse(documentNumber, "PNOEE-40504040001-DEMO-Q"));
         request.put("signatureProfile", "LT");
         return request;
     }
 
     protected static JSONObject createStartSmartIdCertificateChoiceRequest() {
         JSONObject request = new JSONObject();
-        request.put("personIdentifier", "40404049996");
+        request.put("personIdentifier", "40504040001");
         request.put("country", "EE");
         return request;
     }
