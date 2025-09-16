@@ -3,6 +3,7 @@ package ee.openeid.siga.exception;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.common.exception.SiVaHttpErrorException;
 import ee.openeid.siga.common.exception.SiVaServiceException;
+import ee.openeid.siga.common.exception.SiVaTlsHandshakeException;
 import ee.openeid.siga.common.exception.SigaApiException;
 import ee.openeid.siga.webapp.json.ErrorResponse;
 import ee.sk.smartid.exception.SmartIdException;
@@ -86,6 +87,16 @@ public class GlobalExceptionHandler {
         log.error("Siva response error - {}",  exception.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(SiVaTlsHandshakeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleTlsHandshakeFailure(SiVaTlsHandshakeException exception) {
+        log.error("TLS connection to Siva failed - {}",  exception.getLocalizedMessage(), exception);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorMessage("General service error");
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
         return errorResponse;
     }

@@ -107,6 +107,13 @@ public class SivaClientConfiguration {
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new TechnicalException("Failed to load KeyStore from resource", e);
         }
+        try {
+            if (!keyStore.aliases().hasMoreElements()) {
+                throw new TechnicalException("Keystore is empty - no certificate found");
+            }
+        } catch (KeyStoreException e) {
+            throw new TechnicalException("Failed to read aliases from KeyStore", e);
+        }
 
         return keyStore;
     }

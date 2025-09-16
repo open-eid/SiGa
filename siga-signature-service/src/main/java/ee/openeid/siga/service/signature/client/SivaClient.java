@@ -1,17 +1,19 @@
 package ee.openeid.siga.service.signature.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.openeid.siga.common.client.HttpPostClient;
-import ee.openeid.siga.common.client.HttpStatusException;
-import ee.openeid.siga.common.exception.ClientException;
 import ee.openeid.siga.common.client.HttpClientConnectionException;
 import ee.openeid.siga.common.client.HttpClientDecodingException;
 import ee.openeid.siga.common.client.HttpClientTimeoutException;
+import ee.openeid.siga.common.client.HttpPostClient;
+import ee.openeid.siga.common.client.HttpStatusException;
+import ee.openeid.siga.common.exception.ClientException;
+import ee.openeid.siga.common.client.HttpClientTlsHandshakeException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.SiVaHttpErrorException;
 import ee.openeid.siga.common.exception.SiVaServiceException;
+import ee.openeid.siga.common.exception.SiVaTlsHandshakeException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
@@ -107,6 +109,8 @@ public class SivaClient {
                  | HttpClientTimeoutException
                  | HttpClientDecodingException e) {
             throw new SiVaServiceException(e.getMessage(), e);
+        } catch (HttpClientTlsHandshakeException e) {
+            throw new SiVaTlsHandshakeException("TLS handshake with SiVa service failed", e);
         } catch (Exception e) {
             throw new TechnicalException("SIVA service error", e);
         }

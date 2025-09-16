@@ -85,6 +85,9 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
                 com.fasterxml.jackson.core.JsonProcessingException.class)) != null) {
             return new HttpClientDecodingException("Error processing JSON response", cause);
         }
+        if ((cause = getCauseOfType(e, javax.net.ssl.SSLHandshakeException.class)) != null) {
+            return new HttpClientTlsHandshakeException("TLS handshake failed", cause);
+        }
         if ((cause = getCauseOfType(e, HttpStatusException.class)) != null) {
             return cause;
         }

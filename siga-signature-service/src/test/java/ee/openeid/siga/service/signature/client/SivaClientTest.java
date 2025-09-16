@@ -2,10 +2,12 @@ package ee.openeid.siga.service.signature.client;
 
 import ee.openeid.siga.common.client.HttpPostClient;
 import ee.openeid.siga.common.client.HttpStatusException;
+import ee.openeid.siga.common.client.HttpClientTlsHandshakeException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
 import ee.openeid.siga.common.exception.SiVaHttpErrorException;
+import ee.openeid.siga.common.exception.SiVaTlsHandshakeException;
 import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
@@ -22,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -102,15 +103,17 @@ class SivaClientTest {
     }
 
     @Test
-    void invalidSivaTruststoreCertificate() {
-        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
-                .thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));
+    void validateHashcodeContainer_WhenHttpClientTlsHandshakeException_SiVaTlsHandshakeExceptionIsThrown() {
+        HttpClientTlsHandshakeException expectedException = new HttpClientTlsHandshakeException("Something happened", new Exception());
+        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)
+        )).thenThrow(expectedException);
 
-        TechnicalException caughtException = assertThrows(
-            TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
+        SiVaTlsHandshakeException caughtException = assertThrows(
+                SiVaTlsHandshakeException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
                         RequestUtil.createHashcodeDataFileListWithOneFile())
         );
-        assertEquals("SIVA service error", caughtException.getMessage());
+        assertEquals("TLS handshake with SiVa service failed", caughtException.getMessage());
+        assertEquals(expectedException, caughtException.getCause());
     }
 
     @Test
