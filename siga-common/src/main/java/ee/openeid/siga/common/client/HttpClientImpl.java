@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class HttpClientImpl implements HttpGetClient, HttpPostClient {
@@ -62,48 +63,48 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
     }
 
     private static Throwable mapToCustomException(Throwable e) {
-        Throwable cause = getRootCause(e);
+        Throwable cause;
 
-        if (cause instanceof java.net.SocketTimeoutException) {
-            return new HttpClientTimeoutException("Socket timeout occurred while waiting for response", cause);
-        }
-        if (cause instanceof io.netty.handler.timeout.ReadTimeoutException) {
+        if ((cause = getCauseOfType(e,
+                java.net.SocketTimeoutException.class,
+                io.netty.handler.timeout.ReadTimeoutException.class)) != null) {
             return new HttpClientTimeoutException("Read timeout occurred", cause);
         }
-        if (cause instanceof java.net.UnknownHostException) {
-            return new HttpClientConnectionException("Service unreachable", cause);
-        }
         //Jenkins might throw this depending on URL
-        if (cause instanceof io.netty.resolver.dns.DnsErrorCauseException) {
+        if ((cause = getCauseOfType(e,
+                io.netty.resolver.dns.DnsErrorCauseException.class,
+                java.net.UnknownHostException.class,
+                io.netty.resolver.dns.DnsNameResolverTimeoutException.class)) != null ) {
             return new HttpClientConnectionException("Service unreachable", cause);
         }
-        //Jenkins might throw this depending on URL
-        if (cause instanceof io.netty.resolver.dns.DnsNameResolverTimeoutException) {
-            return new HttpClientConnectionException("Service unreachable", cause);
-        }
-        //Jenkins might throw this depending on URL
-        if (cause instanceof java.lang.IllegalArgumentException) {
-            return new HttpClientConnectionException("Service unreachable", cause);
-        }
-        if (cause instanceof java.net.ConnectException) {
+        if ((cause = getCauseOfType(e, java.net.ConnectException.class)) != null) {
             return new HttpClientConnectionException("Unable to connect to service", cause);
         }
-        if (cause instanceof org.springframework.core.codec.DecodingException) {
-            return new HttpClientDecodingException("Error decoding response using Spring codecs", cause);
-        }
-        if (cause instanceof com.fasterxml.jackson.core.JsonProcessingException) {
+        if ((cause = getCauseOfType(e,
+                org.springframework.core.codec.DecodingException.class,
+                com.fasterxml.jackson.core.JsonProcessingException.class)) != null) {
             return new HttpClientDecodingException("Error processing JSON response", cause);
         }
-        if (cause instanceof HttpStatusException) {
+        if ((cause = getCauseOfType(e, HttpStatusException.class)) != null) {
             return cause;
         }
-        return cause;
+        return e;
     }
 
-    private static Throwable getRootCause(Throwable throwable) {
-        while (throwable.getCause() != null && throwable.getCause() != throwable) {
+    @SafeVarargs
+    private static Throwable getCauseOfType(Throwable throwable, Class<? extends Throwable>... causeTypes) {
+        while (throwable != null) {
+            if (isOfType(throwable, causeTypes)) {
+                return throwable;
+            } else if (throwable.getCause() == throwable) {
+                break;
+            }
             throwable = throwable.getCause();
         }
-        return throwable;
+        return null;
+    }
+
+    private static boolean isOfType(Object object, Class<?>... types) {
+        return Stream.of(types).anyMatch(type -> type.isInstance(object));
     }
 }

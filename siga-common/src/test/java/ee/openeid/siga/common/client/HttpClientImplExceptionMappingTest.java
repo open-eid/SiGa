@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class HttpClientImplDecodingExceptionAndSocketTimeoutTest {
+class HttpClientImplExceptionMappingTest {
 
     @Mock
     private ExchangeFunction exchangeFunction;
@@ -48,7 +48,7 @@ class HttpClientImplDecodingExceptionAndSocketTimeoutTest {
         HttpClientDecodingException ex = assertThrows(HttpClientDecodingException.class,
                 () -> httpClient.post("/path", requestBody, String.class));
 
-        assertEquals("Error decoding response using Spring codecs", ex.getMessage());
+        assertEquals("Error processing JSON response", ex.getMessage());
         assertSame(decodingException, ex.getCause());
     }
 
@@ -62,7 +62,7 @@ class HttpClientImplDecodingExceptionAndSocketTimeoutTest {
         HttpClientTimeoutException ex = assertThrows(HttpClientTimeoutException.class,
                 () -> httpClient.get("/path", String.class));
 
-        assertEquals("Socket timeout occurred while waiting for response", ex.getMessage());
+        assertEquals("Read timeout occurred", ex.getMessage());
         assertSame(timeoutException, ex.getCause());
     }
 
@@ -77,7 +77,7 @@ class HttpClientImplDecodingExceptionAndSocketTimeoutTest {
         HttpClientTimeoutException ex = assertThrows(HttpClientTimeoutException.class, () ->
                 httpClient.post("/path", new Object(), String.class));
 
-        assertEquals("Socket timeout occurred while waiting for response", ex.getMessage());
+        assertEquals("Read timeout occurred", ex.getMessage());
         assertSame(timeoutException, ex.getCause());
     }
 
@@ -91,10 +91,35 @@ class HttpClientImplDecodingExceptionAndSocketTimeoutTest {
         HttpClientDecodingException ex = assertThrows(HttpClientDecodingException.class,
                 () -> httpClient.get("/path", String.class));
 
-        assertEquals("Error decoding response using Spring codecs", ex.getMessage());
+        assertEquals("Error processing JSON response", ex.getMessage());
         assertSame(decodingException, ex.getCause());
     }
 
+    @Test
+    void get_WhenExchangeFunctionThrowsUnmappedException_OriginalExceptionIsThrown() {
+        Exception originalException = new RuntimeException("Unexpected error");
+
+        when(exchangeFunction.exchange(any(ClientRequest.class)))
+                .thenReturn(Mono.error(originalException));
+
+        Throwable thrown = assertThrows(RuntimeException.class,
+                () -> httpClient.get("/path", String.class));
+
+        assertSame(originalException, thrown);
+    }
+
+    @Test
+    void post_WhenExchangeFunctionThrowsUnmappedException_OriginalExceptionIsThrown() {
+        RuntimeException originalException = new RuntimeException("Unexpected error");
+
+        when(exchangeFunction.exchange(any()))
+                .thenReturn(Mono.error(originalException));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                httpClient.post("/path", new Object(), String.class));
+
+        assertSame(originalException, ex);
+    }
 }
 
 

@@ -87,6 +87,21 @@ class SivaClientTest {
     }
 
     @Test
+    void validateHashcodeContainer_WhenHttpClientThrowsGenericException_TechnicalExceptionIsThrown() {
+        Exception genericException = new RuntimeException("Some unexpected error");
+
+        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)
+        )).thenThrow(genericException);
+
+        TechnicalException caughtException = assertThrows(
+            TechnicalException.class, () -> sivaClient.validateHashcodeContainer(RequestUtil.createSignatureWrapper(),
+                        RequestUtil.createHashcodeDataFileListWithOneFile())
+        );
+        assertEquals("SIVA service error", caughtException.getMessage());
+        assertEquals(genericException, caughtException.getCause());
+    }
+
+    @Test
     void invalidSivaTruststoreCertificate() {
         when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
                 .thenThrow(new ResourceAccessException("I/O error on POST request for https://siva-arendus.eesti.ee/V3/validateHashcode"));

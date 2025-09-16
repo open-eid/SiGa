@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HttpClientImplConnectionFailureTest {
 
     @Test
-    void post_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrIllegalArgumentException_HttpClientConnectionExceptionIsThrown() {
+    void post_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrUnknownHost_HttpClientConnectionExceptionIsThrown() {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://nonexistent.test")
                 .build();
@@ -26,20 +27,20 @@ class HttpClientImplConnectionFailureTest {
         Object requestBody = new Object();
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.post("http://nonexistent.test", requestBody, byte[].class));
+                () -> httpClient.post("/path", requestBody, byte[].class));
 
         // Depending on the environment (local vs Jenkins), DNS resolution may fail differently:
-        // - Locally, it might throw DnsErrorCauseException
-        // - On Jenkins, it might throw DnsNameResolverTimeoutException || IllegalArgumentException
+        // - Locally, it might throw UnknownHostException
+        // - On Jenkins, it might throw DnsNameResolverTimeoutException || DnsErrorCause
         // The test ensures that all cases are correctly wrapped in a HttpClientConnectionException
         assertTrue(ex.getCause() instanceof DnsErrorCauseException ||
                 ex.getCause() instanceof DnsNameResolverTimeoutException ||
-                ex.getCause() instanceof IllegalArgumentException);
+                ex.getCause() instanceof UnknownHostException);
         assertEquals("Service unreachable", ex.getMessage());
     }
 
     @Test
-    void get_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrIllegalArgumentException_HttpClientConnectionExceptionIsThrown() {
+    void get_WhenDnsErrorCauseOrDnsNameResolverTimeoutOrUnknownHost_HttpClientConnectionExceptionIsThrown() {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://nonexistent.test")
                 .build();
@@ -47,15 +48,15 @@ class HttpClientImplConnectionFailureTest {
         HttpClientImpl httpClient = new HttpClientImpl(webClient);
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.get("http://nonexistent.test", byte[].class));
+                () -> httpClient.get("/path", byte[].class));
 
         // Depending on the environment (local vs Jenkins), DNS resolution may fail differently:
-        // - Locally, it might throw DnsErrorCauseException
-        // - On Jenkins, it might throw DnsNameResolverTimeoutException || IllegalArgumentException
+        // - Locally, it might throw UnknownHostException
+        // - On Jenkins, it might throw DnsNameResolverTimeoutException || DnsErrorCause
         // The test ensures that all cases are correctly wrapped in a HttpClientConnectionException
         assertTrue(ex.getCause() instanceof DnsErrorCauseException ||
                 ex.getCause() instanceof DnsNameResolverTimeoutException ||
-                ex.getCause() instanceof IllegalArgumentException);
+                ex.getCause() instanceof UnknownHostException);
         assertEquals("Service unreachable", ex.getMessage());
     }
 
@@ -71,7 +72,7 @@ class HttpClientImplConnectionFailureTest {
         HttpClientImpl httpClient = new HttpClientImpl(webClient);
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.get(url, byte[].class));
+                () -> httpClient.get("/path", byte[].class));
 
 
         assertEquals("Unable to connect to service", ex.getMessage());
@@ -91,7 +92,7 @@ class HttpClientImplConnectionFailureTest {
         HttpClientImpl httpClient = new HttpClientImpl(webClient);
 
         HttpClientConnectionException ex = assertThrows(HttpClientConnectionException.class,
-                () -> httpClient.post(url, requestBody, byte[].class));
+                () -> httpClient.post("/path", requestBody, byte[].class));
 
         assertEquals("Unable to connect to service", ex.getMessage());
         assertThat(ex.getCause()).isInstanceOf(ConnectException.class);
