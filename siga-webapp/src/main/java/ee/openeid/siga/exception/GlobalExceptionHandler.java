@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SigaApiException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse genericSigaApiException(SigaApiException exception) {
-        log.error("Siga API exception - {}", exception);
+        log.error("Siga API exception - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(exception.getErrorCode());
         errorResponse.setErrorMessage(exception.getMessage());
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse httpMessageNotReadableException(Exception exception) {
-        log.error("Siga request exception - {}", exception);
+        log.error("Siga request exception - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
         errorResponse.setErrorMessage(exception.getMessage());
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SmartIdException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse smartIdException(Exception exception) {
-        log.error("Siga request exception - {}", exception);
+        log.error("Siga request exception - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorResponseCode.SMARTID_EXCEPTION.name());
         String smartIdExceptionString = exception.getClass().getSimpleName();
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(value = HttpStatus.METHOD_NOT_ALLOWED)
     public ErrorResponse httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
-        log.error("Not supported http method - {}", exception.getLocalizedMessage(), exception);
+        log.error("Not supported http method - {}", exception.getMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ErrorResponse notFoundException(NoResourceFoundException exception) {
-        log.error("Not found exception - {}", exception.getLocalizedMessage());
+        log.error("Not found exception - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.RESOURCE_NOT_FOUND_EXCEPTION.name());
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SiVaServiceException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleSivaServiceError(SiVaServiceException exception) {
-        log.error("Siva service error - {}", exception.getLocalizedMessage());
+        log.error("Siva service error - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage("Failed to execute request to SiVa service");
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SiVaHttpErrorException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleSivaInvalidResponse(SiVaHttpErrorException exception) {
-        log.error("Siva response error - {}",  exception.getLocalizedMessage());
+        log.error("Siva response error - {}",  exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(exception.getMessage());
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SiVaTlsHandshakeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleTlsHandshakeFailure(SiVaTlsHandshakeException exception) {
-        log.error("TLS connection to Siva failed - {}",  exception.getLocalizedMessage(), exception);
+        log.error("TLS connection to Siva failed - {}",  exception.getMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage("General service error");
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse genericException(Exception exception) {
-        log.error("Internal server error - {}", exception.getLocalizedMessage(), exception);
+        log.error("Internal server error - {}", exception.getMessage(), exception);
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage("General service error");
         errorResponse.setErrorCode(ErrorResponseCode.INTERNAL_SERVER_ERROR.name());
