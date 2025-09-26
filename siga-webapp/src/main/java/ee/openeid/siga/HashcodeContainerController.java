@@ -214,7 +214,7 @@ public class HashcodeContainerController {
 
 
     @SigaEventLog(eventName = SigaEventName.HC_GET_CONTAINER)
-    @GetMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/hashcodecontainers/{containerId:^(?!validationreport$).+}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetHashcodeContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         validator.validateContainerId(containerId);
 
@@ -225,7 +225,7 @@ public class HashcodeContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.HC_DELETE_CONTAINER)
-    @DeleteMapping(value = "/hashcodecontainers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/hashcodecontainers/{containerId:^(?!validationreport$).+}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteHashcodeContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         validator.validateContainerId(containerId);
         Result result = containerService.closeSession(containerId);

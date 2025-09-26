@@ -1,6 +1,5 @@
 package ee.openeid.siga.auth;
 
-import ee.openeid.siga.auth.filter.MethodFilter;
 import ee.openeid.siga.auth.filter.RequestDataVolumeFilter;
 import ee.openeid.siga.auth.filter.event.SigaEventLoggingFilter;
 import ee.openeid.siga.auth.filter.hmac.HmacAuthenticationFilter;
@@ -25,7 +24,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
@@ -46,7 +44,6 @@ public class SecurityConfiguration {
             new AntPathRequestMatcher("/actuator/health"), new AntPathRequestMatcher("/actuator/heartbeat"), new AntPathRequestMatcher("/actuator/version"));
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
     private final HmacAuthenticationProvider hmacAuthenticationProvider;
-    private final MethodFilter methodFilter;
     private final SigaEventLoggingFilter eventsLoggingFilter;
     private final RequestDataVolumeFilter requestDataVolumeFilter;
     private final ContainerIdForAccessLogFilter containerIdForAccessLogFilter;
@@ -73,10 +70,9 @@ public class SecurityConfiguration {
                     ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(servletRequest);
                     filterChain.doFilter(cachingRequestWrapper, servletResponse);
                 }, HmacAuthenticationFilter.class)
-                .addFilterAfter(methodFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(requestDataVolumeFilter, SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(eventsLoggingFilter, SecurityContextHolderAwareRequestFilter.class)
-                .addFilterAfter(containerIdForAccessLogFilter, MethodFilter.class);
+                .addFilterAfter(containerIdForAccessLogFilter, SecurityContextHolderAwareRequestFilter.class);
         http.authorizeHttpRequests(auth -> auth
                     .requestMatchers(PUBLIC_URLS).permitAll()
                     .requestMatchers(PROTECTED_URLS).authenticated()

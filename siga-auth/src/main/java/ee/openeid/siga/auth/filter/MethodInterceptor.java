@@ -63,5 +63,3 @@ public class MethodInterceptor implements HandlerInterceptor {
                 : path;
     }
 }
-
-

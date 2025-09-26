@@ -232,7 +232,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.GET_CONTAINER)
-    @GetMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/containers/{containerId:^(?!validationreport$).+}", produces = MediaType.APPLICATION_JSON_VALUE)
     public GetContainerResponse getContainer(@PathVariable(value = "containerId") String containerId) {
         validator.validateContainerId(containerId);
 
@@ -244,7 +244,7 @@ public class AsicContainerController {
     }
 
     @SigaEventLog(eventName = SigaEventName.DELETE_CONTAINER)
-    @DeleteMapping(value = "/containers/{containerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/containers/{containerId:^(?!validationreport$).+}", produces = MediaType.APPLICATION_JSON_VALUE)
     public DeleteContainerResponse closeSession(@PathVariable(value = "containerId") String containerId) {
         validator.validateContainerId(containerId);
         String result = containerService.closeSession(containerId);
