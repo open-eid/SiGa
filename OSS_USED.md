@@ -36,7 +36,6 @@ Lists of 49 third-party dependencies.
      (Bouncy Castle Licence) Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
      (Bouncy Castle Licence) Bouncy Castle Provider (org.bouncycastle:bcprov-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
      (Bouncy Castle Licence) Bouncy Castle ASN.1 Extension and Utility APIs (org.bouncycastle:bcutil-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
-     (BSD-3-Clause) janino (org.codehaus.janino:janino:3.1.12 - http://janino-compiler.github.io/janino/)
      (GNU Lesser General Public License, Version 2.1) DigiDoc4j (org.digidoc4j:digidoc4j:6.0.1 - https://github.com/open-eid/digidoc4j)
      (Eclipse Distribution License - v 1.0) JAXB Runtime (org.glassfish.jaxb:jaxb-runtime:4.0.5 - https://eclipse-ee4j.github.io/jaxb-ri/)
      (Public Domain) JSON in Java (org.json:json:20250517 - https://github.com/douglascrockford/JSON-java)
