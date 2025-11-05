@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
         log.error("Siga request exception - {}", exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorCode(ErrorResponseCode.REQUEST_VALIDATION_EXCEPTION.name());
-        errorResponse.setErrorMessage(exception.getMessage());
+        errorResponse.setErrorMessage("Request body is invalid. Please provide properly formatted data with all required fields.");
         return errorResponse;
     }
 

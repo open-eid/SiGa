@@ -98,7 +98,7 @@ abstract class ExceptionHandlerTestBase extends BaseTest {
         HttpInputMessage mockInputMessage = getHttpInputMessage();
         HttpMessageNotReadableException ex =
                 new HttpMessageNotReadableException(
-                        "Invalid JSON request",
+                        "Request body is invalid. Please provide properly formatted data with all required fields.",
                         mockInputMessage
                 );
 
