@@ -1,4 +1,4 @@
-FROM openjdk:17-slim-bullseye
+FROM eclipse-temurin:17-jdk-noble
 
 ENV IGNITE_VERSION 2.17.0
 ENV IGNITE_HOME /opt/ignite/apache-ignite-${IGNITE_VERSION}-bin
