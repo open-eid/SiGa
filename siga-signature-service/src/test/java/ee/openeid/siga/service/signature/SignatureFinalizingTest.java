@@ -13,6 +13,7 @@ import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.alert.exception.AlertException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
@@ -152,7 +153,7 @@ class SignatureFinalizingTest {
 
     @Test
     void shouldNotRequest_TSA_OCSP_WithExpiredCertificate() {
-        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+        Exception e = assertThrows(AlertException.class, () -> {
             Pair<String, String> signature = createSignature(EXPIRED_PKCS12_Esteid2011, SignatureProfile.LT);
             signingService.finalizeSigning(CONTAINER_ID, signature.getLeft(), signature.getRight());
         });
@@ -160,9 +161,8 @@ class SignatureFinalizingTest {
         LocalDateTime currentDateTime = LocalDateTime.now(ZoneOffset.UTC);
         String formattedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 
-        assertThat(e.getMessage(), is(String.format(
-                "The signing certificate (notBefore : %s, notAfter : %s) is expired at signing time %s! " +
-                        "Change signing certificate or use method setSignWithExpiredCertificate(true).",
+        assertThat(e.getMessage(), containsString(String.format(
+                "The signing-certificate (notBefore : %s, notAfter : %s) is expired at signing time %s!",
                 OffsetDateTime.of(2011, 4, 8, 13, 35, 52, 0, ZoneOffset.UTC),
                 OffsetDateTime.of(2014, 4, 7, 20, 59, 59, 0, ZoneOffset.UTC),
                 formattedDateTime

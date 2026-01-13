@@ -18,6 +18,7 @@ import ee.openeid.siga.service.signature.configuration.SmartIdClientConfiguratio
 import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
 import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.session.SessionService;
+import eu.europa.esig.dss.alert.exception.AlertException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -128,7 +129,7 @@ public abstract class ContainerSigningService {
             signature = dataToSign.finalize(base64Decoded);
             validateFinalizedSignature(signature, startEvent);
             logSignatureFinalizationEndEvent(startEvent, signature);
-        } catch (CertificateValidationException | TechnicalException e) {
+        } catch (CertificateValidationException | TechnicalException | AlertException e) {
             logSignatureFinalizationExceptionEvent(startEvent, e);
             throw new SignatureCreationException(UNABLE_TO_FINALIZE_SIGNATURE + ". " + e.getMessage(), e);
         } catch (OCSPRequestFailedException e) {
