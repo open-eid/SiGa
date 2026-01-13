@@ -6,7 +6,7 @@ Libraries license information was obtained using below command:
 ./mvnw license:aggregate-add-third-party
 ```
 
-Lists of 49 third-party dependencies.
+Lists of 48 third-party dependencies.
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Classic Module (ch.qos.logback:logback-classic:1.5.18 - http://logback.qos.ch/logback-classic)
      (Eclipse Public License - v 1.0) (GNU Lesser General Public License) Logback Core Module (ch.qos.logback:logback-core:1.5.18 - http://logback.qos.ch/logback-core)
      (The Apache Software License, Version 2.0) co.elastic.logging:logback-ecs-encoder (co.elastic.logging:logback-ecs-encoder:1.7.0 - https://github.com/elastic/ecs-logging-java/logback-ecs-encoder)
@@ -33,10 +33,10 @@ Lists of 49 third-party dependencies.
      (The Apache Software License, Version 2.0) ignite-spring (org.apache.ignite:ignite-spring:2.17.0 - http://ignite.apache.org)
      (The Apache Software License, Version 2.0) ignite-spring-cache-ext (org.apache.ignite:ignite-spring-cache-ext:2.0.0 - https://ignite.apache.org)
      (Apache 2.0) Awaitility (org.awaitility:awaitility:4.3.0 - http://awaitility.org)
-     (Bouncy Castle Licence) Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
-     (Bouncy Castle Licence) Bouncy Castle Provider (org.bouncycastle:bcprov-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
-     (Bouncy Castle Licence) Bouncy Castle ASN.1 Extension and Utility APIs (org.bouncycastle:bcutil-jdk18on:1.80 - https://www.bouncycastle.org/download/bouncy-castle-java/)
-     (GNU Lesser General Public License, Version 2.1) DigiDoc4j (org.digidoc4j:digidoc4j:6.0.1 - https://github.com/open-eid/digidoc4j)
+     (Bouncy Castle Licence) Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs (org.bouncycastle:bcpkix-jdk18on:1.83 - https://www.bouncycastle.org/download/bouncy-castle-java/)
+     (Bouncy Castle Licence) Bouncy Castle Provider (org.bouncycastle:bcprov-jdk18on:1.83 - https://www.bouncycastle.org/download/bouncy-castle-java/)
+     (Bouncy Castle Licence) Bouncy Castle ASN.1 Extension and Utility APIs (org.bouncycastle:bcutil-jdk18on:1.83 - https://www.bouncycastle.org/download/bouncy-castle-java/)
+     (GNU Lesser General Public License, Version 2.1) DigiDoc4j (org.digidoc4j:digidoc4j:6.1.0 - https://github.com/open-eid/digidoc4j)
      (Eclipse Distribution License - v 1.0) JAXB Runtime (org.glassfish.jaxb:jaxb-runtime:4.0.5 - https://eclipse-ee4j.github.io/jaxb-ri/)
      (Public Domain) JSON in Java (org.json:json:20250517 - https://github.com/douglascrockford/JSON-java)
      (Apache License, Version 2.0) Liquibase (org.liquibase:liquibase-core:4.31.1 - http://www.liquibase.com)

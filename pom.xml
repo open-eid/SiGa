@@ -41,10 +41,10 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.80</bouncycastle.version>
+        <bouncycastle.version>1.83</bouncycastle.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.19.0</commons-io.version>
-        <digidoc4j.version>6.0.1</digidoc4j.version>
+        <digidoc4j.version>6.1.0</digidoc4j.version>
         <guava.version>33.4.8-jre</guava.version>
         <ignite.version>2.17.0</ignite.version>
         <json.version>20250517</json.version>
