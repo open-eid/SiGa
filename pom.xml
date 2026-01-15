@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.9</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -42,29 +42,31 @@
         <sonar.language>java</sonar.language>
 
         <bouncycastle.version>1.83</bouncycastle.version>
-        <commons-compress.version>1.27.1</commons-compress.version>
-        <commons-io.version>2.19.0</commons-io.version>
+        <commons-compress.version>1.28.0</commons-compress.version>
+        <commons-io.version>2.21.0</commons-io.version>
         <commons-jxpath.version>1.4.0</commons-jxpath.version>
-        <commons-text.version>1.13.1</commons-text.version>
+        <commons-text.version>1.15.0</commons-text.version>
         <digidoc4j.version>6.1.0</digidoc4j.version>
-        <guava.version>33.4.8-jre</guava.version>
+        <guava.version>33.5.0-jre</guava.version>
         <ignite.version>2.17.0</ignite.version>
         <ignite-spring-cache-ext.version>2.0.0</ignite-spring-cache-ext.version>
         <jasypt-hibernate5.version>1.9.2</jasypt-hibernate5.version>
-        <jcabi-manifests.version>2.1.0</jcabi-manifests.version>
-        <json.version>20250517</json.version>
+        <jcabi-manifests.version>2.2.0</jcabi-manifests.version>
+        <json.version>20251224</json.version>
         <logback-ecs-encoder.version>1.7.0</logback-ecs-encoder.version>
         <mid-rest-java-client.version>1.6</mid-rest-java-client.version>
         <smart-id-java-client.version>2.3.1</smart-id-java-client.version>
-        <wiremock.version>3.13.0</wiremock.version>
+        <wiremock.version>3.13.2</wiremock.version>
 
-        <cxf-wadl2java-plugin.version>4.1.2</cxf-wadl2java-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
-        <license-maven-plugin.version>2.5.0</license-maven-plugin.version>
+        <cxf-wadl2java-plugin.version>4.1.4</cxf-wadl2java-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
+        <commons-lang3.version>3.20.0</commons-lang3.version> <!-- CVE-2025-48924 -->
+        <log4j2.version>2.25.3</log4j2.version> <!-- CVE-2025-68161 -->
     </properties>
 
     <dependencies>
