@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.9</version>
+        <version>3.5.10</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -67,6 +67,7 @@
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
         <commons-lang3.version>3.20.0</commons-lang3.version> <!-- CVE-2025-48924 -->
         <log4j2.version>2.25.3</log4j2.version> <!-- CVE-2025-68161 -->
+        <logback.version>1.5.26</logback.version> <!-- CVE-2026-1225 -->
     </properties>
 
     <dependencies>
