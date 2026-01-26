@@ -41,7 +41,9 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -421,12 +423,21 @@ class RequestValidatorTest {
     @Test
     void invalidMessageToDisplay() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
-        mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 41));
+        mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 101));
 
         RequestValidationException caughtException = assertThrows(
             RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
         );
-        assertEquals("Invalid Mobile-Id message to display", caughtException.getMessage());
+        assertEquals("Mobile ID messageToDisplay exceeded maximum allowed length of 100 characters.", caughtException.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 100})
+    void validateMobileIdInformation_whenDisplayTextLengthIsValid_passesValidation(int length) {
+        MobileIdInformation mobileIdInformation = getMobileInformationRequest();
+        mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", length));
+
+        assertDoesNotThrow(() -> validator.validateMobileIdInformation(mobileIdInformation));
     }
 
     @Test

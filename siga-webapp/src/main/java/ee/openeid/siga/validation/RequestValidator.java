@@ -204,8 +204,8 @@ public class RequestValidator {
     }
 
     private void validateMessageToDisplay(String messageToDisplay) {
-        if (messageToDisplay != null && messageToDisplay.length() > 40) {
-            throw new RequestValidationException("Invalid Mobile-Id message to display");
+        if (messageToDisplay != null && messageToDisplay.length() > 100) {
+            throw new RequestValidationException("Mobile ID messageToDisplay exceeded maximum allowed length of 100 characters.");
         }
     }
 
