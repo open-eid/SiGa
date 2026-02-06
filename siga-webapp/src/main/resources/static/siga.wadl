@@ -99,10 +99,6 @@
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getHashcodeContainerValidationReport" name="GET">
-                    <request>
-                        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="Authorization" style="header"
-                               type="xs:string"/>
-                    </request>
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getHashcodeContainerValidationReportResponse"
@@ -161,6 +157,8 @@
             </resource>
             <resource path="hashcodecontainers/{containerId}/remotesigning/{signatureId}">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
                        type="xs:string"/>
                 <method id="updateHashcodeContainerRemoteSigning" name="PUT">
                     <request>
@@ -228,6 +226,8 @@
             <resource path="hashcodecontainers/{containerId}/mobileidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
+                       type="xs:string"/>
                 <method id="getHashcodeContainerMobileIdSigningStatus" name="GET">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
@@ -287,7 +287,9 @@
             </resource>
             <resource path="hashcodecontainers/{containerId}/smartidsigning/certificatechoice/{generatedCertificateId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
-                       type="xs:string"/>
+                       type="xs:string" required="true"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="generatedCertificateId" style="template"
+                       type="xs:string" required="true"/>
                 <method id="getHashcodeContainerSmartIdCertificateChoiceStatus" name="GET">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
@@ -347,6 +349,8 @@
             </resource>
             <resource path="hashcodecontainers/{containerId}/smartidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
                        type="xs:string"/>
                 <method id="getHashcodeContainerSmartIdSigningStatus" name="GET">
                     <response status="200">
@@ -662,10 +666,6 @@
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
                 <method id="getContainerValidationReport" name="GET">
-                    <request>
-                        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="Authorization" style="header"
-                               type="xs:string"/>
-                    </request>
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
                                             element="tns:getContainerValidationReportResponse"
@@ -724,6 +724,8 @@
             </resource>
             <resource path="containers/{containerId}/remotesigning/{signatureId}">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
                        type="xs:string"/>
                 <method id="updateContainerRemoteSigning" name="PUT">
                     <request>
@@ -791,6 +793,8 @@
             <resource path="containers/{containerId}/mobileidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
+                       type="xs:string"/>
                 <method id="getContainerMobileIdSigningStatus" name="GET">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
@@ -851,6 +855,8 @@
             <resource path="containers/{containerId}/smartidsigning/certificatechoice/{generatedCertificateId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
                        type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="generatedCertificateId" style="template"
+                       type="xs:string" required="true"/>
                 <method id="getContainerSmartIdCertificateChoiceStatus" name="GET">
                     <response status="200">
                         <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02"
@@ -910,6 +916,8 @@
             </resource>
             <resource path="containers/{containerId}/smartidsigning/{signatureId}/status">
                 <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="containerId" style="template"
+                       type="xs:string"/>
+                <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="signatureId" style="template"
                        type="xs:string"/>
                 <method id="getContainerSmartIdSigningStatus" name="GET">
                     <response status="200">
