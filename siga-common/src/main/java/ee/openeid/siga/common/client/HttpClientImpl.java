@@ -82,7 +82,7 @@ public class HttpClientImpl implements HttpGetClient, HttpPostClient {
         }
         if ((cause = getCauseOfType(e,
                 org.springframework.core.codec.DecodingException.class,
-                com.fasterxml.jackson.core.JsonProcessingException.class)) != null) {
+                tools.jackson.core.JacksonException.class)) != null) {
             return new HttpClientDecodingException("Error processing JSON response", cause);
         }
         if ((cause = getCauseOfType(e, javax.net.ssl.SSLHandshakeException.class)) != null) {

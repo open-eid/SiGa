@@ -6,7 +6,7 @@ import ee.openeid.siga.service.signature.container.asic.AsicContainerService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerValidationService;
 import ee.openeid.siga.validation.RequestValidator;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;

@@ -1,6 +1,5 @@
 package ee.openeid.siga.auth.filter.hmac;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.auth.properties.SecurityConfigurationProperties;
 import ee.openeid.siga.common.event.SigaEvent;
 import ee.openeid.siga.common.event.SigaEventLogger;
@@ -23,6 +22,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -127,7 +127,7 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
                 errorResponse.setErrorMessage(failed.getMessage());
             }
             exceptionEvent.setErrorMessage(errorResponse.getErrorMessage());
-            ObjectMapper mapper = new ObjectMapper();
+            JsonMapper mapper = JsonMapper.builder().build();
             mapper.writeValue(out, errorResponse);
             out.flush();
         }

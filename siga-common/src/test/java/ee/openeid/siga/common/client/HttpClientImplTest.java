@@ -1,6 +1,5 @@
 package ee.openeid.siga.common.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -16,6 +15,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.core.JacksonException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -66,7 +66,7 @@ class HttpClientImplTest {
 
         assertEquals("Error processing JSON response", ex.getMessage());
         Throwable rootCause = getRootCause(ex.getCause());
-        assertInstanceOf(JsonProcessingException.class, rootCause);
+        assertInstanceOf(JacksonException.class, rootCause);
     }
 
     @Test
@@ -82,7 +82,7 @@ class HttpClientImplTest {
 
         assertEquals("Error processing JSON response", ex.getMessage());
         Throwable rootCause = getRootCause(ex.getCause());
-        assertInstanceOf(JsonProcessingException.class, rootCause);
+        assertInstanceOf(JacksonException.class, rootCause);
     }
 
     @Test
