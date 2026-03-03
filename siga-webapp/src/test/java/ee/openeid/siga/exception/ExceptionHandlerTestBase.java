@@ -145,7 +145,7 @@ abstract class ExceptionHandlerTestBase extends BaseTest {
     void request_WhenNoResourceFoundException_NotFoundAndLogsError() throws Exception {
         HttpMethod httpMethod = HttpMethod.GET;
         String resourcePath = "/test/resource";
-        NoResourceFoundException ex = new NoResourceFoundException(httpMethod, resourcePath);
+        NoResourceFoundException ex = new NoResourceFoundException(httpMethod, resourcePath, resourcePath);
 
         testException(
                 ex,
