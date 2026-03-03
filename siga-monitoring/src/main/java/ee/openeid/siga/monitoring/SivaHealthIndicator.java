@@ -3,11 +3,15 @@ package ee.openeid.siga.monitoring;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ee.openeid.siga.common.client.HttpGetClient;
 import ee.openeid.siga.common.configuration.SivaClientConfigurationProperties;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -42,23 +46,13 @@ public class SivaHealthIndicator implements HealthIndicator {
         return Health.down();
     }
 
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class HealthStatus {
         private String status;
 
-        public HealthStatus() {
-        }
-
-        public HealthStatus(String status) {
-            this.status = status;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
     }
 }

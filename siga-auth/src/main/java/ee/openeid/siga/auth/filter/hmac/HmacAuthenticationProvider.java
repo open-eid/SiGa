@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class HmacAuthenticationProvider extends DaoAuthenticationProvider {
 
     HmacAuthenticationProvider(SigaUserDetailsService userDetailsService) {
-        super.setUserDetailsService(userDetailsService);
+        super(userDetailsService);
     }
 
     @Override

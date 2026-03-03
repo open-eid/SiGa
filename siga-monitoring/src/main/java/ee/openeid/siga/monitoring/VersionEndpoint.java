@@ -1,5 +1,6 @@
 package ee.openeid.siga.monitoring;
 
+import org.springframework.boot.actuate.endpoint.Access;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import static ee.openeid.siga.monitoring.ApplicationInfoConstants.MANIFEST_PARAM
 import static ee.openeid.siga.monitoring.ApplicationInfoConstants.NOT_AVAILABLE;
 
 @Component
-@Endpoint(id = "version", enableByDefault = false)
+@Endpoint(id = "version", defaultAccess = Access.NONE)
 public class VersionEndpoint {
 
     public static final String RESPONSE_PARAM_VERSION = "version";

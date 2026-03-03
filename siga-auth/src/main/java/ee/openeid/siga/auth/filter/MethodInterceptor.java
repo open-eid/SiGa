@@ -2,7 +2,6 @@ package ee.openeid.siga.auth.filter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
@@ -47,7 +46,7 @@ public class MethodInterceptor implements HandlerInterceptor {
 
         if (!urlExists) {
             HttpMethod httpMethod = HttpMethod.valueOf(method);
-            throw new NoResourceFoundException(httpMethod,path);
+            throw new NoResourceFoundException(httpMethod, path, path);
         }
 
         if (NOT_ALLOWED_REQUEST_METHODS.contains(method)) {
