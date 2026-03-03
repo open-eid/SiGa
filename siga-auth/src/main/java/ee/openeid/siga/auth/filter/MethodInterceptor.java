@@ -40,11 +40,10 @@ public class MethodInterceptor implements HandlerInterceptor {
 
         String path = request.getRequestURI();
         String method = request.getMethod().toUpperCase();
-        String pathWithoutTrailingSlash = getPathWithoutTrailingSlash(path);
 
         boolean urlExists = handlerMapping.getHandlerMethods().keySet().stream()
                 .anyMatch(info -> info.getPatternValues().stream()
-                        .anyMatch(pattern -> PathPatternParser.defaultInstance.parse(pattern).matches(PathContainer.parsePath(pathWithoutTrailingSlash))));
+                        .anyMatch(pattern -> PathPatternParser.defaultInstance.parse(pattern).matches(PathContainer.parsePath(path))));
 
         if (!urlExists) {
             HttpMethod httpMethod = HttpMethod.valueOf(method);
@@ -56,11 +55,5 @@ public class MethodInterceptor implements HandlerInterceptor {
         }
 
         return true;
-    }
-
-    private static String getPathWithoutTrailingSlash(String path) {
-        return StringUtils.length(path) > 1 && path.endsWith("/")
-                ? path.substring(0, path.length() - 1)
-                : path;
     }
 }
