@@ -24,8 +24,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -40,18 +40,14 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableConfigurationProperties(SecurityConfigurationProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(new AntPathRequestMatcher("/siga.wadl"), new AntPathRequestMatcher("/siga.xsd"),
-            new AntPathRequestMatcher("/actuator/health"), new AntPathRequestMatcher("/actuator/heartbeat"), new AntPathRequestMatcher("/actuator/version"));
+    private static final PathPatternRequestMatcher.Builder PATH = PathPatternRequestMatcher.withDefaults();
+    private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(PATH.matcher("/siga.wadl"), PATH.matcher("/siga.xsd"),
+                    PATH.matcher("/actuator/health"), PATH.matcher("/actuator/heartbeat"), PATH.matcher("/actuator/version"));
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
     private final HmacAuthenticationProvider hmacAuthenticationProvider;
     private final SigaEventLoggingFilter eventsLoggingFilter;
     private final RequestDataVolumeFilter requestDataVolumeFilter;
     private final ContainerIdForAccessLogFilter containerIdForAccessLogFilter;
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(PUBLIC_URLS);
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

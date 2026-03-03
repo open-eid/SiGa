@@ -5,11 +5,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.PathContainer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import java.util.Set;
 
@@ -42,7 +44,7 @@ public class MethodInterceptor implements HandlerInterceptor {
 
         boolean urlExists = handlerMapping.getHandlerMethods().keySet().stream()
                 .anyMatch(info -> info.getPatternValues().stream()
-                        .anyMatch(pattern -> handlerMapping.getPathMatcher().match(pattern, pathWithoutTrailingSlash)));
+                        .anyMatch(pattern -> PathPatternParser.defaultInstance.parse(pattern).matches(PathContainer.parsePath(pathWithoutTrailingSlash))));
 
         if (!urlExists) {
             HttpMethod httpMethod = HttpMethod.valueOf(method);
