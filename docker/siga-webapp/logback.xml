@@ -15,8 +15,9 @@
         <file>${COMMON_LOG_FILE}</file>
         <encoder class="co.elastic.logging.logback.EcsEncoder"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <!-- TODO (SIGA-1130): Janino evaluator has been removed without replacement; needs an alternative solution -->
             <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version");</expression>
+                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version") || message.contains("request_uri=/actuator/prometheus");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
@@ -33,8 +34,9 @@
             <onMatch>NEUTRAL</onMatch>
         </filter>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <!-- TODO (SIGA-1130): Janino evaluator has been removed without replacement; needs an alternative solution -->
             <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version");</expression>
+                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version") || message.contains("request_uri=/actuator/prometheus");</expression>
             </evaluator>
             <OnMismatch>NEUTRAL</OnMismatch>
             <OnMatch>DENY</OnMatch>
