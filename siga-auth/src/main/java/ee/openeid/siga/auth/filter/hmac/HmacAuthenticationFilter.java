@@ -6,7 +6,7 @@ import ee.openeid.siga.common.event.SigaEventLogger;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.exception.ErrorResponseCode;
 import ee.openeid.siga.webapp.json.ErrorResponse;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.LockedException;
@@ -83,7 +83,8 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
     }
 
     private String getRequestUri(HttpServletRequest request) {
-        String uri = request.getRequestURI().replace(request.getContextPath(), StringUtils.EMPTY);
+        //TODO (SIGA-1283): Modify this method when SiGa clients don't use URL-s with trailing slashes anymore
+        String uri = Strings.CS.removeStart(resolveOriginalUri(request), request.getContextPath());
         if (request.getQueryString() != null) {
             uri += "?" + request.getQueryString();
         }
@@ -145,5 +146,10 @@ public class HmacAuthenticationFilter extends AbstractAuthenticationProcessingFi
         successHandler.setRedirectStrategy((httpServletRequest, httpServletResponse, s) -> {
         });
         return successHandler;
+    }
+
+    private static String resolveOriginalUri(HttpServletRequest request) {
+        Object originalUri = request.getAttribute("hmac.originalUri");
+        return (originalUri instanceof String string && !string.isBlank()) ? string : request.getRequestURI();
     }
 }
