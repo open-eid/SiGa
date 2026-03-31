@@ -4,6 +4,8 @@
 
     <property name="COMMON_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-common.log"/>
     <property name="EVENTS_LOG_FILE" value="${BUILD_FOLDER:-logs}/siga-events.log"/>
+    <property name="REQUEST_LOG_DENY_PATTERNS"
+              value="request_uri=/actuator/health,request_uri=/actuator/heartbeat,request_uri=/actuator/version,request_uri=/actuator/prometheus"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -14,13 +16,8 @@
     <appender name="COMMON_LOG_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${COMMON_LOG_FILE}</file>
         <encoder class="co.elastic.logging.logback.EcsEncoder"/>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- TODO (SIGA-1130): Janino evaluator has been removed without replacement; needs an alternative solution -->
-            <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version") || message.contains("request_uri=/actuator/prometheus");</expression>
-            </evaluator>
-            <OnMismatch>NEUTRAL</OnMismatch>
-            <OnMatch>DENY</OnMatch>
+        <filter class="ee.openeid.siga.common.logging.DeniedMessagePartLoggingEventFilter">
+            <deniedMessageParts>${REQUEST_LOG_DENY_PATTERNS}</deniedMessageParts>
         </filter>
     </appender>
     <appender name="EVENTS_LOG_FILE" class="ch.qos.logback.core.FileAppender">
@@ -33,13 +30,8 @@
             <onMismatch>DENY</onMismatch>
             <onMatch>NEUTRAL</onMatch>
         </filter>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- TODO (SIGA-1130): Janino evaluator has been removed without replacement; needs an alternative solution -->
-            <evaluator>
-                <expression>return message.contains("request_uri=/actuator/health") || message.contains("request_uri=/actuator/heartbeat") || message.contains("request_uri=/actuator/version") || message.contains("request_uri=/actuator/prometheus");</expression>
-            </evaluator>
-            <OnMismatch>NEUTRAL</OnMismatch>
-            <OnMatch>DENY</OnMatch>
+        <filter class="ee.openeid.siga.common.logging.DeniedMessagePartLoggingEventFilter">
+            <deniedMessageParts>${REQUEST_LOG_DENY_PATTERNS}</deniedMessageParts>
         </filter>
     </appender>
     <logger name="ee.openeid.siga" level="INFO"/>
