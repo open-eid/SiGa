@@ -172,8 +172,9 @@ public class SigaEventLogger {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             List<SigaEvent> events = threadScopeEvents.get();
-            if (authentication != null && authentication.isAuthenticated()) {
-                SigaUserDetails sud = (SigaUserDetails) authentication.getPrincipal();
+            if (authentication != null
+                    && authentication.isAuthenticated()
+                    && authentication.getPrincipal() instanceof SigaUserDetails sud) {
                 insertClientAndServiceDataToEvents(sud);
                 events.forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
             } else {
