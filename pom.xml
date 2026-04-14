@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.6</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -41,13 +41,13 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.83</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <commons-compress.version>1.28.0</commons-compress.version>
-        <commons-io.version>2.21.0</commons-io.version>
+        <commons-io.version>2.22.0</commons-io.version>
         <commons-jxpath.version>1.4.0</commons-jxpath.version>
         <commons-text.version>1.15.0</commons-text.version>
-        <digidoc4j.version>6.1.0</digidoc4j.version>
-        <guava.version>33.5.0-jre</guava.version>
+        <digidoc4j.version>6.1.1</digidoc4j.version>
+        <guava.version>33.6.0-jre</guava.version>
         <ignite.version>2.17.0</ignite.version>
         <ignite-spring-cache-ext.version>2.0.0</ignite-spring-cache-ext.version>
         <jasypt-hibernate5.version>1.9.2</jasypt-hibernate5.version>
@@ -65,7 +65,6 @@
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
-        <commons-lang3.version>3.20.0</commons-lang3.version> <!-- CVE-2025-48924 -->
     </properties>
 
     <dependencies>
