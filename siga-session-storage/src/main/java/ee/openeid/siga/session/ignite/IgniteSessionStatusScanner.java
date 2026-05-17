@@ -2,6 +2,7 @@ package ee.openeid.siga.session.ignite;
 
 import ee.openeid.siga.session.spi.SessionStatusScanner;
 import ee.openeid.siga.session.spi.StatusReprocessingFilter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.binary.BinaryObject;
@@ -9,7 +10,7 @@ import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -33,6 +34,7 @@ import java.util.function.Consumer;
  */
 @RequiredArgsConstructor
 public class IgniteSessionStatusScanner implements SessionStatusScanner {
+    @NonNull
     private final Ignite ignite;
 
     @Override
@@ -63,7 +65,7 @@ public class IgniteSessionStatusScanner implements SessionStatusScanner {
         }
     }
 
-    private static Duration durationFromCutoff(LocalDateTime cutoff) {
-        return Duration.between(cutoff, LocalDateTime.now());
+    private static Duration durationFromCutoff(Instant cutoff) {
+        return Duration.between(cutoff, Instant.now());
     }
 }

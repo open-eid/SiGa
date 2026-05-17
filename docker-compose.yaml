@@ -49,13 +49,14 @@ services:
     environment:
       - server.port=7443
       - server.ssl.key-alias=siga-01.localhost
+      - siga.session-storage.type=${SIGA_SESSION_STORAGE_TYPE:-redis}
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=7000
       # Logs directory
       - BUILD_FOLDER=/tmp/logs
       - IGNITE_WORK_DIR=/tmp/ignite
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
-      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 -XX:MaxDirectMemorySize=256M
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
         -Djava.net.preferIPv4Stack=true
@@ -90,21 +91,23 @@ services:
       - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
     depends_on:
-      - siga-db
+      siga-db:
+        condition: service_started
 
   siga-02:
     image: ${SIGA_DOCKER_REGISTRY}${SIGA_PROJECT}siga-webapp:latest
     environment:
-      - server.port=7443
+      - server.port=6443
       - server.ssl.key-alias=siga-02.localhost
       - spring.liquibase.enabled=false
+      - siga.session-storage.type=${SIGA_SESSION_STORAGE_TYPE:-redis}
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=6000
       # Logs directory
       - BUILD_FOLDER=/tmp/logs
       - IGNITE_WORK_DIR=/tmp/ignite
       - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
-      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 -XX:MaxDirectMemorySize=256M
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
         -Djava.net.preferIPv4Stack=true
@@ -139,7 +142,8 @@ services:
       - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
     depends_on:
-      - siga-db
+      siga-db:
+        condition: service_started
 
   siga-db:
     image: postgres:13
@@ -223,7 +227,112 @@ services:
       # TLS keystore
       - ./docker/tls/siga-admin-smtp/siga-admin-smtp.localhost.keystore.p12:/siga-admin-smtp.localhost.keystore.p12
 
+  siga-redis-1:
+    image: valkey/valkey:7.2.6-alpine
+    profiles: [ "redis" ]
+    restart: unless-stopped
+    command: >
+      valkey-server
+      --port 6379
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-hostname siga-redis-1
+      --cluster-announce-port 6379
+      --cluster-announce-bus-port 16379
+      --cluster-preferred-endpoint-type hostname
+      --notify-keyspace-events Ex
+      --appendonly no
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    networks:
+      default:
+        aliases:
+          - siga-redis-1.localhost
+
+  siga-redis-2:
+    image: valkey/valkey:7.2.6-alpine
+    profiles: [ "redis" ]
+    restart: unless-stopped
+    command: >
+      valkey-server
+      --port 6380
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-hostname siga-redis-2
+      --cluster-announce-port 6380
+      --cluster-announce-bus-port 16380
+      --cluster-preferred-endpoint-type hostname
+      --notify-keyspace-events Ex
+      --appendonly no
+    ports:
+      - "6380:6380"
+      - "16380:16380"
+    networks:
+      default:
+        aliases:
+          - siga-redis-2.localhost
+
+  siga-redis-3:
+    image: valkey/valkey:7.2.6-alpine
+    profiles: [ "redis" ]
+    restart: unless-stopped
+    command: >
+      valkey-server
+      --port 6381
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-hostname siga-redis-3
+      --cluster-announce-port 6381
+      --cluster-announce-bus-port 16381
+      --cluster-preferred-endpoint-type hostname
+      --notify-keyspace-events Ex
+      --appendonly no
+    ports:
+      - "6381:6381"
+      - "16381:16381"
+    networks:
+      default:
+        aliases:
+          - siga-redis-3.localhost
+
+  siga-redis-init:
+    image: valkey/valkey:7.2.6-alpine
+    profiles: [ "redis" ]
+    restart: "no"
+    depends_on:
+      - siga-redis-1
+      - siga-redis-2
+      - siga-redis-3
+    networks:
+      - default
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        for entry in siga-redis-1:6379 siga-redis-2:6380 siga-redis-3:6381; do
+          host=$${entry%:*}
+          port=$${entry#*:}
+          until valkey-cli -h $$host -p $$port ping 2>/dev/null | grep -q PONG; do
+            echo "Waiting for $$host:$$port..."
+            sleep 1
+          done
+        done
+        if valkey-cli -h siga-redis-1 -p 6379 cluster info | grep -q "cluster_state:ok"; then
+          echo "Cluster already formed, skipping create"
+          exit 0
+        fi
+        valkey-cli --cluster create \
+          siga-redis-1:6379 siga-redis-2:6380 siga-redis-3:6381 \
+          --cluster-replicas 0 --cluster-yes
+        echo "Cluster created"
+
   ignite-01:
+    profiles: [ "ignite" ]
     # TODO: Use pre-built image when an official Ignite image is released for JDK17.
     #       '--build' argument in README.md can also be removed after that.
     #image: apacheignite/ignite:2.17.0
@@ -242,6 +351,7 @@ services:
       - ./docker/siga-ignite/run.sh:/opt/ignite/apache-ignite-2.17.0-bin/run.sh
 
   ignite-02:
+    profiles: [ "ignite" ]
     # TODO: Use pre-built image when an official Ignite image is released for JDK17.
     #       '--build' argument in README.md can also be removed after that.
     #image: apacheignite/ignite:2.17.0

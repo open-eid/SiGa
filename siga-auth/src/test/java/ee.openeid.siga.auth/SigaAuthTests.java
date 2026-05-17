@@ -2,15 +2,16 @@ package ee.openeid.siga.auth;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
 import ee.openeid.siga.auth.helper.TestConfiguration;
+import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -28,13 +29,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@Tag("docker")
+@Import(RedisTestcontainersConfiguration.class)
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
 @SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT,
         properties = {"spring.main.allow-bean-definition-overriding=true",
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
-@AutoConfigureMockMvc
 class SigaAuthTests {
 
     final static String DEFAULT_HMAC_ALGO = "HmacSHA256";
@@ -261,4 +263,3 @@ class SigaAuthTests {
                 .build().getSignature(HMAC_SHARED_SECRET);
     }
 }
-

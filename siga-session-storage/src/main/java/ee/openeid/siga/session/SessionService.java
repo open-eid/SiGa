@@ -2,14 +2,17 @@ package ee.openeid.siga.session;
 
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
+import ee.openeid.siga.common.exception.TechnicalException;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.session.configuration.SessionStorageProperties;
 import ee.openeid.siga.session.spi.SessionRemovedEvent;
 import ee.openeid.siga.session.spi.SessionStorage;
 import ee.openeid.siga.session.spi.SessionUpdatedEvent;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +20,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SessionService {
+    @NonNull
     private final SessionStorage sessionStorage;
+    @NonNull
     private final ApplicationEventPublisher eventPublisher;
+    @NonNull
     private final SessionStorageProperties properties;
 
     public Session getContainer(String containerId) {
@@ -63,7 +69,11 @@ public class SessionService {
     }
 
     public String getSessionId(String containerId) {
-        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new TechnicalException("No authenticated user in security context");
+        }
+        String user = authentication.getName();
         return properties.applicationCacheVersion() + "_" + user + "_" + containerId;
     }
 

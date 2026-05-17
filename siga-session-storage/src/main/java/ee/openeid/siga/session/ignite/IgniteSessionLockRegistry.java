@@ -1,6 +1,7 @@
 package ee.openeid.siga.session.ignite;
 
 import ee.openeid.siga.session.spi.SessionLockRegistry;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
@@ -55,6 +56,7 @@ import java.util.concurrent.locks.Lock;
  */
 @RequiredArgsConstructor
 public class IgniteSessionLockRegistry implements SessionLockRegistry {
+    @NonNull
     private final Ignite ignite;
 
     @Override

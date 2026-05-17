@@ -1,11 +1,14 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.common.model.CertificateStatus;
+import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.HashcodeDataFile;
 import ee.openeid.siga.webapp.json.Signature;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,6 +17,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("docker")
+@Import(RedisTestcontainersConfiguration.class)
 public abstract class SmartIdBaseApplicationTests extends BaseTest {
 
     @Test

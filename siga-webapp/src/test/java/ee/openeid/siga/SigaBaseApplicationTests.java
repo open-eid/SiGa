@@ -1,6 +1,7 @@
 package ee.openeid.siga;
 
 import ee.openeid.siga.auth.filter.hmac.HmacSignature;
+import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerRemoteSigningResponse;
 import ee.openeid.siga.webapp.json.GetContainerSignatureDetailsResponse;
@@ -8,7 +9,9 @@ import ee.openeid.siga.webapp.json.Signature;
 import org.apache.commons.codec.binary.Hex;
 import org.digidoc4j.DigestAlgorithm;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Base64;
@@ -18,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Tag("docker")
+@Import(RedisTestcontainersConfiguration.class)
 public abstract class SigaBaseApplicationTests extends BaseTest {
 
     @Test

@@ -7,9 +7,9 @@ import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.ProcessingStatus;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
 import ee.openeid.siga.session.SessionService;
+import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import org.digidoc4j.Signature;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ class MobileIdSigningDelegateTest {
 
     @Test
     void getMobileIdSignatureStatus_WhenContainerHasOutstandingMidSignatureSession_ReturnsOutstandingTransactionStatus() {
-        SessionStatusReprocessingProperties reprocessingProperties = new SessionStatusReprocessingProperties();
+        SessionStatusReprocessingProperties reprocessingProperties = SessionStatusReprocessingProperties.withDefaults();
         HashcodeContainerSession session = createHashcodeContainerSession();
         when(containerSigningService.getSession(CONTAINER_ID)).thenReturn(session);
         when(containerSigningService.getReprocessingProperties()).thenReturn(reprocessingProperties);
@@ -72,7 +72,7 @@ class MobileIdSigningDelegateTest {
 
     @Test
     void getMobileIdSignatureStatus_WhenMaxProcessingAttemptsHasBeenExceeded_ThrowsInternalServerError() {
-        SessionStatusReprocessingProperties reprocessingProperties = new SessionStatusReprocessingProperties();
+        SessionStatusReprocessingProperties reprocessingProperties = SessionStatusReprocessingProperties.withDefaults();
         HashcodeContainerSession session = createHashcodeContainerSession();
         SessionStatus sessionStatus = session.getSignatureSession(SIGNATURE_ID).getSessionStatus();
         sessionStatus.setProcessingCounter(10);

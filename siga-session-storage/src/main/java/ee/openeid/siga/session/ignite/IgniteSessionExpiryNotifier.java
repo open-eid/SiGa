@@ -3,6 +3,7 @@ package ee.openeid.siga.session.ignite;
 import ee.openeid.siga.session.spi.ContainerExpiredEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ignite.Ignite;
@@ -10,6 +11,7 @@ import org.apache.ignite.IgniteEvents;
 import org.apache.ignite.binary.BinaryObject;
 import org.apache.ignite.events.CacheEvent;
 import org.apache.ignite.events.EventType;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.UUID;
@@ -22,10 +24,12 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class IgniteSessionExpiryNotifier {
+    @NonNull
     private final Ignite ignite;
+    @NonNull
     private final ApplicationEventPublisher eventPublisher;
-    private IgniteEvents expiryEvents;
-    private UUID expiryListenerId;
+    private @Nullable IgniteEvents expiryEvents;
+    private @Nullable UUID expiryListenerId;
 
     @PostConstruct
     public void registerExpiryListener() {
@@ -34,7 +38,16 @@ public class IgniteSessionExpiryNotifier {
                 (UUID uuid, CacheEvent event) -> {
                     log.info("CACHE_OBJECT_EXPIRED received: cacheName={}, key={}", event.cacheName(), event.key());
                     if (CacheName.CONTAINER_SESSION.name().equals(event.cacheName())) {
-                        eventPublisher.publishEvent(new ContainerExpiredEvent(extractSessionId((BinaryObject) event.oldValue())));
+                        if (event.oldValue() instanceof BinaryObject binaryObject) {
+                            log.debug("Old value is a BinaryObject, extracting sessionId");
+                            String sessionId = extractSessionId(binaryObject);
+                            if (sessionId == null) {
+                                log.warn("Ignoring expired container session without a sessionId: key={}",
+                                        String.valueOf(event.key()));
+                                return true;
+                            }
+                            eventPublisher.publishEvent(new ContainerExpiredEvent(sessionId));
+                        }
                     }
                     return true;
                 }, null, EventType.EVT_CACHE_OBJECT_EXPIRED);
@@ -42,11 +55,13 @@ public class IgniteSessionExpiryNotifier {
 
     @PreDestroy
     public void unregisterExpiryListener() {
-        if (expiryListenerId == null) {
+        IgniteEvents events = expiryEvents;
+        UUID listenerId = expiryListenerId;
+        if (events == null || listenerId == null) {
             return;
         }
         try {
-            expiryEvents.stopRemoteListen(expiryListenerId);
+            events.stopRemoteListen(listenerId);
         } catch (RuntimeException e) {
             log.warn("Failed to stop Ignite session expiry event listener", e);
         } finally {
@@ -55,7 +70,7 @@ public class IgniteSessionExpiryNotifier {
         }
     }
 
-    private static String extractSessionId(BinaryObject sessionObject) {
+    private static @Nullable String extractSessionId(BinaryObject sessionObject) {
         return sessionObject.field("sessionId");
     }
 }

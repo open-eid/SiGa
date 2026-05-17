@@ -13,16 +13,15 @@ import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.test.RequestUtil;
+import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.session.spi.SessionLockRegistry;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.SignatureParameters;
@@ -42,6 +41,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
@@ -52,8 +52,6 @@ import static ee.openeid.siga.service.signature.test.RequestUtil.createSignature
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -66,7 +64,7 @@ class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
     private HashcodeContainerSigningService signingService;
 
     @Spy
-    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);;
+    private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
     @Mock
     private SigaEventLogger sigaEventLogger;
     @Mock
@@ -76,9 +74,9 @@ class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Spy
     private ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
     @Mock
-    private Ignite ignite;
+    private SessionLockRegistry sessionLockRegistry;
     @Mock
-    private IgniteSemaphore igniteSemaphore;
+    private Lock sessionLock;
     @Mock
     private MobileIdClientConfigurationProperties mobileIdConfigurationProperties;
     @Mock
@@ -87,7 +85,7 @@ class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
     private SessionStatusReprocessingProperties reprocessingProperties;
 
     @BeforeEach
-    void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException, InterruptedException {
         configuration = new Configuration(Configuration.Mode.TEST);
         MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate((signingService));
         Mockito.lenient().when(signingService.getMobileIdSigningDelegate()).thenReturn(mobileIdSigningDelegate);
@@ -97,9 +95,9 @@ class HashcodeContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.lenient().when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.lenient().when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createHashcodeSessionHolder());
         taskExecutor.initialize();
-        Mockito.lenient().when(igniteSemaphore.tryAcquire()).thenReturn(true);
-        Mockito.lenient().when(igniteSemaphore.tryAcquire(anyLong(), any())).thenReturn(true);
-        Mockito.lenient().when(ignite.semaphore(anyString(),anyInt(),anyBoolean(), anyBoolean())).thenReturn(igniteSemaphore);
+        Mockito.lenient().when(sessionLock.tryLock()).thenReturn(true);
+        Mockito.lenient().doReturn(true).when(sessionLock).tryLock(anyLong(), any());
+        Mockito.lenient().when(sessionLockRegistry.obtain(anyString())).thenReturn(sessionLock);
     }
 
     @Test

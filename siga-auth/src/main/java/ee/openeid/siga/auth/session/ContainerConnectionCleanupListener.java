@@ -4,6 +4,7 @@ import ee.openeid.siga.auth.repository.ConnectionRepository;
 import ee.openeid.siga.auth.repository.ServiceRepository;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.spi.ContainerExpiredEvent;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ContainerConnectionCleanupListener {
+    @NonNull
     private final ConnectionRepository connectionRepository;
+    @NonNull
     private final ServiceRepository serviceRepository;
 
     @Async

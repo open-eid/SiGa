@@ -16,7 +16,7 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
 import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
 import ee.openeid.siga.service.signature.container.asic.AsiceContainerAugmentationService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
@@ -27,25 +27,27 @@ import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestConfiguration;
 import ee.openeid.siga.session.SessionService;
+import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.sk.smartid.SmartIdCertificate;
 import lombok.SneakyThrows;
 import org.digidoc4j.DigestAlgorithm;
 import org.digidoc4j.SignatureParameters;
 import org.digidoc4j.signers.PKCS12SignatureToken;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -78,7 +80,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@ExtendWith(SpringExtension.class)
+@Tag("docker")
+@Import(RedisTestcontainersConfiguration.class)
 @ActiveProfiles({"test", "datafileContainer"})
 @SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT, properties = {
         "siga.security.jasypt.encryption-algo=PBEWITHSHA-256AND256BITAES-CBC-BC",
@@ -87,13 +90,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         "siga.security.hmac.clock-skew=2",
         "siga.dd4j.configuration-location=digidoc4j.yaml",
         "siga.dd4j.tsl-refresh-job-cron=0 0 3 * * *",
-        "siga.ignite.application-cache-version=v1",
-        "siga.ignite.configuration-location=classpath:ignite-test-configuration.xml",
-        "siga.midrest.url=https://localhost:9090/mid-api",
+        "siga.session-storage.application-cache-version=v1",
+        "siga.session-storage.ignite.configuration-location=classpath:ignite-test-configuration.xml",
         "siga.midrest.truststore-path=classpath:mid_truststore.p12",
         "siga.midrest.truststore-password=changeIt",
         "siga.midrest.status-polling-delay=0",
-        "siga.sid.url=https://localhost:9090/sid-api",
         "siga.sid.truststore-path=classpath:sid_truststore.p12",
         "siga.sid.truststore-password=changeIt",
         "siga.sid.status-polling-delay=0",
@@ -103,14 +104,25 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         "siga.status-reprocessing.max-processing-attempts=3",
 })
 public class SessionStatusReprocessingServiceTest {
+
     private static final WireMockServer mockServer = new WireMockServer(WireMockConfiguration.wireMockConfig()
             .httpDisabled(true)
-            .httpsPort(9090)
+            .dynamicHttpsPort()
             .keystorePath("src/test/resources/mock_keystore.p12")
             .keystorePassword("changeit")
             .keyManagerPassword("changeit")
             .notifier(new ConsoleNotifier(true))
     );
+
+    static {
+        mockServer.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (mockServer.isRunning()) {
+                mockServer.stop();
+            }
+        }, "wiremock-shutdown"));
+    }
+
     private static final String MOCK_SESSION_CODE = "mock-session-code";
     private static final String SID_DOCUMENT_NUMBER = "PNOEE-123456789-QWER";
     private static final PKCS12SignatureToken pkcs12Esteid2018SignatureToken = new PKCS12SignatureToken("src/test/resources/p12/sign_ECC_from_TEST_of_ESTEID2018.p12", "1234".toCharArray());
@@ -133,9 +145,11 @@ public class SessionStatusReprocessingServiceTest {
     @Autowired
     private SessionStatusReprocessingProperties reprocessingProperties;
 
-    @BeforeAll
-    public static void startMocks() {
-        mockServer.start();
+    @DynamicPropertySource
+    static void wiremockProps(DynamicPropertyRegistry registry) {
+        int port = mockServer.httpsPort();
+        registry.add("siga.midrest.url", () -> "https://localhost:" + port + "/mid-api");
+        registry.add("siga.sid.url", () -> "https://localhost:" + port + "/sid-api");
     }
 
     @BeforeEach
@@ -181,11 +195,11 @@ public class SessionStatusReprocessingServiceTest {
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
             // pollMobileIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
             //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
-            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
+            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
                     .pollMobileIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
-            Mockito.verify(mobileIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
+            Mockito.verify(mobileIdApiClient, Mockito.times(reprocessingProperties.maxProcessingAttempts() + 1))
                     .getSignatureStatus(createDefaultRelyingPartyInfo(), MOCK_SESSION_CODE);
         } finally {
             sessionService.removeBySessionId(containerSessionId);
@@ -268,11 +282,11 @@ public class SessionStatusReprocessingServiceTest {
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
             // pollSmartIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
             //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
-            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.getMaxProcessingAttempts()))
+            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
                     .pollSmartIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
-            Mockito.verify(smartIdApiClient, Mockito.times(reprocessingProperties.getMaxProcessingAttempts() + 1))
+            Mockito.verify(smartIdApiClient, Mockito.times(reprocessingProperties.maxProcessingAttempts() + 1))
                     .getSignatureStatus(createDefaultRelyingPartyInfo(), MOCK_SESSION_CODE);
         } finally {
             sessionService.removeBySessionId(containerSessionId);
@@ -488,7 +502,7 @@ public class SessionStatusReprocessingServiceTest {
             assertThat(statusError.getErrorCode(), equalTo("INTERNAL_SERVER_ERROR"));
             assertThat(signatureSession.getSignature(), nullValue());
             // The final reprocessing failure increments the counter to maxProcessingAttempts + 1
-            assertThat(sessionStatus.getProcessingCounter(), equalTo(reprocessingProperties.getMaxProcessingAttempts() + 1));
+            assertThat(sessionStatus.getProcessingCounter(), equalTo(reprocessingProperties.maxProcessingAttempts() + 1));
         });
 
         // Wait for at least 10 more invocations of processFailedStatusRequests

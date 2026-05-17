@@ -50,6 +50,10 @@
             <artifactId>spring-boot-starter-tomcat-runtime</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.ignite</groupId>
@@ -97,6 +101,13 @@
             <version>${json.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ee.openeid.siga</groupId>
+            <artifactId>siga-common</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

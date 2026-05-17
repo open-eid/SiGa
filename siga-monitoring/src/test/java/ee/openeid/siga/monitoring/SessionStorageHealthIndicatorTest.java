@@ -13,30 +13,29 @@ import org.springframework.boot.health.contributor.Status;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-class IgniteHealthIndicatorTest {
+class SessionStorageHealthIndicatorTest {
 
-
-    private IgniteHealthIndicator igniteHealthIndicator;
+    private SessionStorageHealthIndicator indicator;
 
     @Mock
     private SessionService sessionService;
 
     @BeforeEach
     void beforeTests() {
-        igniteHealthIndicator = new IgniteHealthIndicator(sessionService);
+        indicator = new SessionStorageHealthIndicator(sessionService);
     }
 
     @Test
-    void igniteDownStatus() {
-        Mockito.when(sessionService.getCacheSize()).thenThrow(new RuntimeException("Invalid ignite session"));
-        Health health = igniteHealthIndicator.health();
+    void downWhenCacheSizeFails() {
+        Mockito.when(sessionService.getCacheSize()).thenThrow(new RuntimeException("Backend unavailable"));
+        Health health = indicator.health();
         assertEquals(Status.DOWN, health.getStatus());
     }
 
     @Test
-    void igniteUpStatus() {
-        Mockito.when(sessionService.getCacheSize()).thenReturn(2);
-        Health health = igniteHealthIndicator.health();
+    void upWithActiveContainers() {
+        Mockito.when(sessionService.getCacheSize()).thenReturn(2L);
+        Health health = indicator.health();
         assertEquals(Status.UP, health.getStatus());
     }
 }

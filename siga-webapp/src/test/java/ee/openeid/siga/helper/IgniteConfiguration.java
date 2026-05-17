@@ -4,24 +4,21 @@ import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 
 @SpringBootConfiguration
-@Profile("test")
+@ConditionalOnProperty(prefix = "siga.session-storage", name = "type", havingValue = "ignite")
 public class IgniteConfiguration {
 
-    @Bean(destroyMethod = "close")
+    private static final String INSTANCE_NAME = "siga-ignite";
+
+    @Bean
     public Ignite ignite() throws IgniteException {
-        try {
-            System.setProperty("IGNITE_OVERRIDE_CONSISTENT_ID", "node00");
-            return Ignition.start("ignite-test-configuration.xml");
-        } catch (Exception e) {
-            try {
-                return Ignition.start();
-            } catch (Exception ex) {
-                return Ignition.ignite();
-            }
-        }
+        System.setProperty("IGNITE_OVERRIDE_CONSISTENT_ID", "node00");
+        return Ignition.allGrids().stream()
+                .filter(grid -> INSTANCE_NAME.equals(grid.name()))
+                .findFirst()
+                .orElseGet(() -> Ignition.start("ignite-test-configuration.xml"));
     }
 }

@@ -74,6 +74,13 @@
         </dependency>
 
         <dependency>
+            <groupId>ee.openeid.siga</groupId>
+            <artifactId>siga-common</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>

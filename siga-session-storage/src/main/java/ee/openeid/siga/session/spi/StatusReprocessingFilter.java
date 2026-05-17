@@ -1,7 +1,7 @@
 package ee.openeid.siga.session.spi;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Filter criteria for {@link SessionStatusScanner}. A session is a candidate for reprocessing
@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
  */
 public record StatusReprocessingFilter(
         long maxProcessingRetries,
-        LocalDateTime processingCutoff,
-        LocalDateTime exceptionCutoff
+        Instant processingCutoff,
+        Instant exceptionCutoff
 ) {
     public static StatusReprocessingFilter from(long maxProcessingRetries, Duration processingTimeout, Duration exceptionTimeout) {
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         return new StatusReprocessingFilter(
                 maxProcessingRetries,
                 now.minusSeconds(processingTimeout.toSeconds()),

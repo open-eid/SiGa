@@ -1,6 +1,7 @@
 package ee.openeid.siga.monitoring;
 
 import ee.openeid.siga.session.SessionService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.health.contributor.Health;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SessionStorageHealthIndicator implements HealthIndicator {
+    @NonNull
     private final SessionService sessionService;
 
     @Override

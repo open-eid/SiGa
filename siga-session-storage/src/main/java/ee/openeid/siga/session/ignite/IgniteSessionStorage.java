@@ -4,6 +4,7 @@ import ee.openeid.siga.common.session.CertificateSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.session.spi.SessionStorage;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -46,6 +47,7 @@ public class IgniteSessionStorage implements SessionStorage {
      */
     private static final ExpiryPolicy NO_TOUCH_ON_ACCESS = new ModifiedExpiryPolicy(Duration.ETERNAL);
 
+    @NonNull
     private final Ignite ignite;
 
     @Override

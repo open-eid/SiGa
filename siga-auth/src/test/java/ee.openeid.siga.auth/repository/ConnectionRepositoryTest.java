@@ -4,13 +4,14 @@ import ee.openeid.siga.auth.helper.TestConfiguration;
 import ee.openeid.siga.auth.model.SigaClient;
 import ee.openeid.siga.auth.model.SigaConnection;
 import ee.openeid.siga.auth.model.SigaService;
+import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
@@ -19,13 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@ExtendWith(SpringExtension.class)
+@Tag("docker")
+@Import(RedisTestcontainersConfiguration.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT,
         properties = {"spring.main.allow-bean-definition-overriding=true",
                 "siga.security.hmac.expiration=120",
                 "siga.security.hmac.clock-skew=2"})
 class ConnectionRepositoryTest {
+
     @Autowired
     private ConnectionRepository connectionRepository;
     @Autowired

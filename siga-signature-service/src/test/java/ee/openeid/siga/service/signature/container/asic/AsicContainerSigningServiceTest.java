@@ -13,7 +13,6 @@ import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
@@ -21,8 +20,8 @@ import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteSemaphore;
+import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.session.spi.SessionLockRegistry;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Container;
 import org.digidoc4j.ContainerBuilder;
@@ -47,6 +46,7 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import static ee.openeid.siga.service.signature.test.RequestUtil.CLIENT_NAME;
 import static ee.openeid.siga.service.signature.test.RequestUtil.CONTAINER_ID;
@@ -60,8 +60,6 @@ import static org.digidoc4j.Container.DocumentType.ASICS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -81,9 +79,9 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Spy
     private ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
     @Mock
-    private Ignite ignite;
+    private SessionLockRegistry sessionLockRegistry;
     @Mock
-    private IgniteSemaphore igniteSemaphore;
+    private Lock sessionLock;
     @Mock
     private MobileIdClientConfigurationProperties mobileIdConfigurationProperties;
     @Mock
@@ -94,7 +92,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
 
     @BeforeEach
-    void setUp() throws IOException, URISyntaxException {
+    void setUp() throws IOException, URISyntaxException, InterruptedException {
         Mockito.lenient().when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.lenient().when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate((signingService));
@@ -105,9 +103,9 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         taskExecutor.initialize();
         Mockito.lenient().when(mobileIdConfigurationProperties.getStatusPollingDelay()).thenReturn(Duration.ofSeconds(0));
         Mockito.lenient().when(smartIdConfigurationProperties.getStatusPollingDelay()).thenReturn(Duration.ofSeconds(0));
-        Mockito.lenient().when(igniteSemaphore.tryAcquire()).thenReturn(true);
-        Mockito.lenient().when(igniteSemaphore.tryAcquire(anyLong(), any())).thenReturn(true);
-        Mockito.lenient().when(ignite.semaphore(anyString(), anyInt(), anyBoolean(), anyBoolean())).thenReturn(igniteSemaphore);
+        Mockito.lenient().when(sessionLock.tryLock()).thenReturn(true);
+        Mockito.lenient().doReturn(true).when(sessionLock).tryLock(anyLong(), any());
+        Mockito.lenient().when(sessionLockRegistry.obtain(anyString())).thenReturn(sessionLock);
     }
 
     @Test

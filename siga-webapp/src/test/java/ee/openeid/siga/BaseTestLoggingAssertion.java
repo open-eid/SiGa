@@ -13,7 +13,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ch.qos.logback.classic.Level.*;
+import static ch.qos.logback.classic.Level.ERROR;
+import static ch.qos.logback.classic.Level.INFO;
+import static ch.qos.logback.classic.Level.WARN;
 import static java.util.List.of;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;

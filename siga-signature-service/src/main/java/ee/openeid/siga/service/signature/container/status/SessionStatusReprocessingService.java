@@ -3,7 +3,6 @@ package ee.openeid.siga.service.signature.container.status;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.CertificateSession;
-import ee.openeid.siga.common.session.ProcessingStatus;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
@@ -15,6 +14,7 @@ import ee.openeid.siga.session.spi.SessionLocks;
 import ee.openeid.siga.session.spi.SessionStatusScanner;
 import ee.openeid.siga.session.spi.StatusReprocessingFilter;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -32,11 +31,17 @@ import static java.time.Duration.ZERO;
 @Service
 @RequiredArgsConstructor
 public class SessionStatusReprocessingService {
+    @NonNull
     private final ThreadPoolTaskExecutor taskExecutor;
+    @NonNull
     private final SessionStatusScanner sessionStatusScanner;
+    @NonNull
     private final ContainerSigningServiceSelector containerSigningServiceSelector;
+    @NonNull
     private final SessionService sessionService;
+    @NonNull
     private final SessionLockRegistry sessionLockRegistry;
+    @NonNull
     private final SessionStatusReprocessingProperties reprocessingProperties;
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
@@ -134,20 +139,15 @@ public class SessionStatusReprocessingService {
 
     private static Predicate<Map.Entry<String, SignatureSession>> applySignatureStatusFilter(StatusReprocessingFilter filter) {
         return entry -> SigningType.isPollable(entry.getValue().getSigningType())
-                && matchesReprocessingCriteria(filter, entry.getValue().getSessionStatus());
+                && isDueForReprocessing(filter, entry.getValue().getSessionStatus());
     }
 
     private static Predicate<Map.Entry<String, CertificateSession>> applyCertificateStatusFilter(StatusReprocessingFilter filter) {
-        return entry -> matchesReprocessingCriteria(filter, entry.getValue().getSessionStatus());
+        return entry -> isDueForReprocessing(filter, entry.getValue().getSessionStatus());
     }
 
-    private static boolean matchesReprocessingCriteria(StatusReprocessingFilter filter, SessionStatus status) {
-        ProcessingStatus processingStatus = status.getProcessingStatus();
-        LocalDateTime timestamp = status.getProcessingStatusTimestamp();
-        boolean processingTimedOut = ProcessingStatus.PROCESSING == processingStatus
-                && timestamp.isBefore(filter.processingCutoff());
-        boolean exceptionTimedOut = ProcessingStatus.EXCEPTION == processingStatus
-                && timestamp.isBefore(filter.exceptionCutoff());
-        return (processingTimedOut || exceptionTimedOut) && status.getProcessingCounter() <= filter.maxProcessingRetries();
+    private static boolean isDueForReprocessing(StatusReprocessingFilter filter, SessionStatus status) {
+        return status.isDueForReprocessing(filter.processingCutoff(), filter.exceptionCutoff(),
+                filter.maxProcessingRetries());
     }
 }

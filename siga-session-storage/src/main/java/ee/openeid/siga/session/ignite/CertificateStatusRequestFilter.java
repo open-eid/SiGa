@@ -6,7 +6,7 @@ import org.apache.ignite.internal.binary.BinaryEnumObjectImpl;
 import org.apache.ignite.lang.IgniteBiPredicate;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -29,14 +29,14 @@ import java.util.Map;
  */
 public class CertificateStatusRequestFilter implements IgniteBiPredicate<String, Map<String, BinaryObject>> {
     private final long maxProcessingRetries;
-    private final LocalDateTime processingTimeout;
-    private final LocalDateTime exceptionTimeout;
+    private final Instant processingTimeout;
+    private final Instant exceptionTimeout;
 
     public CertificateStatusRequestFilter(long maxProcessingRetries, Duration processingTimeout,
                                           Duration exceptionTimeout) {
         this.maxProcessingRetries = maxProcessingRetries;
-        this.processingTimeout = LocalDateTime.now().minusSeconds(processingTimeout.toSeconds());
-        this.exceptionTimeout = LocalDateTime.now().minusSeconds(exceptionTimeout.toSeconds());
+        this.processingTimeout = Instant.now().minusSeconds(processingTimeout.toSeconds());
+        this.exceptionTimeout = Instant.now().minusSeconds(exceptionTimeout.toSeconds());
     }
 
     @Override
@@ -47,14 +47,14 @@ public class CertificateStatusRequestFilter implements IgniteBiPredicate<String,
                     int statusOrdinal = sessionStatus.<BinaryEnumObjectImpl>field("processingStatus").enumOrdinal();
                     ProcessingStatus processingStatus = ProcessingStatus
                             .values()[statusOrdinal];
-                    LocalDateTime statusTimestamp = sessionStatus.field("processingStatusTimestamp");
+                    Instant statusTimestamp = sessionStatus.field("processingStatusTimestamp");
                     int processingCounter = sessionStatus.field("processingCounter");
                     return isApplyFilter(this, processingStatus, statusTimestamp, processingCounter);
                 });
     }
 
     public static boolean isApplyFilter(CertificateStatusRequestFilter filter, ProcessingStatus processingStatus,
-                                        LocalDateTime statusTimestamp,
+                                        Instant statusTimestamp,
                                         int processingCounter) {
         boolean isProcessingTimeout = ProcessingStatus.PROCESSING == processingStatus
                 && statusTimestamp.isBefore(filter.processingTimeout);
