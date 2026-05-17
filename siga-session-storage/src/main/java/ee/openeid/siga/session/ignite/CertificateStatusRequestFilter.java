@@ -1,17 +1,30 @@
-package ee.openeid.siga.service.signature.container.status;
+package ee.openeid.siga.session.ignite;
+
+import ee.openeid.siga.common.session.ProcessingStatus;
+import org.apache.ignite.binary.BinaryObject;
+import org.apache.ignite.internal.binary.BinaryEnumObjectImpl;
+import org.apache.ignite.lang.IgniteBiPredicate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import org.apache.ignite.binary.BinaryObject;
-import org.apache.ignite.internal.binary.BinaryEnumObjectImpl;
-import org.apache.ignite.lang.IgniteBiPredicate;
-
-import ee.openeid.siga.common.session.ProcessingStatus;
-
 /**
- * NB: This class is loaded into Ignite server nodes via peer class loading.
+ * Server-side filter for the {@code CERTIFICATE_SESSION} cache {@link org.apache.ignite.cache.query.ScanQuery}
+ * issued by {@link IgniteSessionStatusScanner#scanCertificateSessions}. Accepts a container
+ * {@code sessionId} when at least one certificate session in its map has a
+ * {@code processingStatus} of {@code PROCESSING} or {@code EXCEPTION}, a
+ * {@code processingStatusTimestamp} older than the configured cutoff, and a
+ * {@code processingCounter} still within the retry limit — i.e. it is a candidate for the status
+ * reprocessor to re-poll.
+ *
+ * <p>The predicate runs on Ignite server nodes and reads fields via {@code BinaryObject.field(...)}
+ * rather than through the {@code CertificateSession} class. {@code CertificateSession} has no
+ * custom {@link org.apache.ignite.binary.BinarySerializer} (unlike {@code SignatureSession}) — its
+ * fields are simple enough for Ignite's default reflective marshaller to expose on the binary form,
+ * which is sufficient for the field accesses performed here.
+ *
+ * <p>NB: This class is loaded into Ignite server nodes via peer class loading.
  * If possible, avoid making changes in this class and in its dependencies!
  */
 public class CertificateStatusRequestFilter implements IgniteBiPredicate<String, Map<String, BinaryObject>> {
@@ -20,7 +33,7 @@ public class CertificateStatusRequestFilter implements IgniteBiPredicate<String,
     private final LocalDateTime exceptionTimeout;
 
     public CertificateStatusRequestFilter(long maxProcessingRetries, Duration processingTimeout,
-            Duration exceptionTimeout) {
+                                          Duration exceptionTimeout) {
         this.maxProcessingRetries = maxProcessingRetries;
         this.processingTimeout = LocalDateTime.now().minusSeconds(processingTimeout.toSeconds());
         this.exceptionTimeout = LocalDateTime.now().minusSeconds(exceptionTimeout.toSeconds());
@@ -40,9 +53,9 @@ public class CertificateStatusRequestFilter implements IgniteBiPredicate<String,
                 });
     }
 
-    static boolean isApplyFilter(CertificateStatusRequestFilter filter, ProcessingStatus processingStatus,
-            LocalDateTime statusTimestamp,
-            int processingCounter) {
+    public static boolean isApplyFilter(CertificateStatusRequestFilter filter, ProcessingStatus processingStatus,
+                                        LocalDateTime statusTimestamp,
+                                        int processingCounter) {
         boolean isProcessingTimeout = ProcessingStatus.PROCESSING == processingStatus
                 && statusTimestamp.isBefore(filter.processingTimeout);
         boolean isExceptionTimeout = ProcessingStatus.EXCEPTION == processingStatus

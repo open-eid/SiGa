@@ -2,102 +2,84 @@ package ee.openeid.siga.session;
 
 import ee.openeid.siga.common.exception.InvalidSessionDataException;
 import ee.openeid.siga.common.exception.ResourceNotFoundException;
-import ee.openeid.siga.common.session.CertificateSession;
 import ee.openeid.siga.common.session.Session;
-import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.session.configuration.SessionConfigurationProperties;
+import ee.openeid.siga.session.configuration.SessionStorageProperties;
+import ee.openeid.siga.session.spi.SessionRemovedEvent;
+import ee.openeid.siga.session.spi.SessionStorage;
+import ee.openeid.siga.session.spi.SessionUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.cache.CachePeekMode;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.cache.Cache;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 @Slf4j
 @Component
-@EnableConfigurationProperties({SessionConfigurationProperties.class})
 @RequiredArgsConstructor
 public class SessionService {
-    private final Ignite ignite;
-    private final SessionConfigurationProperties sessionConfigurationProperties;
+    private final SessionStorage sessionStorage;
+    private final ApplicationEventPublisher eventPublisher;
+    private final SessionStorageProperties properties;
 
     public Session getContainer(String containerId) {
-        String sessionId = getSessionId(containerId);
-        return getContainerBySessionId(sessionId);
+        return getContainerBySessionId(getSessionId(containerId));
     }
 
     public Session getContainerBySessionId(String sessionId) {
-        Session container = Optional.ofNullable(getContainerCache().get(sessionId))
+        Session container = sessionStorage.get(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         log.debug("Found container with container ID [{}]", container.getSessionId());
-        container.setSignatureSessions(Optional
-                .ofNullable(getSignatureSessionCache().get(sessionId))
-                .orElseGet(HashMap::new));
-        container.setCertificateSessions(Optional
-                .ofNullable(getCertificateSessionCache().get(sessionId))
-                .orElseGet(HashMap::new));
+        return container;
+    }
+
+    /**
+     * Reads the session without refreshing its TTL — for background-driven paths (status
+     * reprocessor, compactors) that must not keep otherwise-idle sessions alive. Use
+     * {@link #getContainerBySessionId} from user-driven paths instead.
+     */
+    public Session peekContainerBySessionId(String sessionId) {
+        Session container = sessionStorage.peek(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
+        log.debug("Peeked container with container ID [{}]", container.getSessionId());
         return container;
     }
 
     public void update(Session session) {
-        getContainerCache().put(session.getSessionId(), session);
-        getSignatureSessionCache().put(session.getSessionId(), session.getSignatureSessions());
-        getCertificateSessionCache().put(session.getSessionId(), session.getCertificateSessions());
+        sessionStorage.update(session);
+        eventPublisher.publishEvent(new SessionUpdatedEvent(session));
     }
 
     public void removeByContainerId(String containerId) {
-        String sessionId = getSessionId(containerId);
-        removeBySessionId(sessionId);
+        removeBySessionId(getSessionId(containerId));
     }
 
     public void removeBySessionId(String sessionId) {
-        getContainerCache().remove(sessionId);
-        getSignatureSessionCache().remove(sessionId);
-        getCertificateSessionCache().remove(sessionId);
+        sessionStorage.remove(sessionId);
+        eventPublisher.publishEvent(new SessionRemovedEvent(sessionId));
     }
 
-    private Cache<String, Session> getContainerCache() {
-        return ignite.getOrCreateCache(CacheName.CONTAINER_SESSION.name());
-    }
-
-    private Cache<String, Map<String, SignatureSession>> getSignatureSessionCache() {
-        return ignite.getOrCreateCache(CacheName.SIGNATURE_SESSION.name());
-    }
-
-    private Cache<String, Map<String, CertificateSession>> getCertificateSessionCache() {
-        return ignite.getOrCreateCache(CacheName.CERTIFICATE_SESSION.name());
-    }
-
-    public int getCacheSize() {
-        return ignite.cache(CacheName.CONTAINER_SESSION.name()).size(CachePeekMode.ALL);
+    public long getCacheSize() {
+        return sessionStorage.size();
     }
 
     public String getSessionId(String containerId) {
         String user = SecurityContextHolder.getContext().getAuthentication().getName();
-        return sessionConfigurationProperties.getApplicationCacheVersion() + "_" + user + "_" + containerId;
+        return properties.applicationCacheVersion() + "_" + user + "_" + containerId;
     }
 
     public static String parseServiceUuid(String sessionId) {
-        String[] sessionIdParts = sessionId.split("_");
-        if (sessionIdParts.length == 3) {
-            return sessionIdParts[1];
-        } else {
-            throw new InvalidSessionDataException("Invalid sessionId: " + sessionId);
-        }
+        return parsePart(sessionId, 1);
     }
 
     public static String parseContainerId(String sessionId) {
-        String[] sessionIdParts = sessionId.split("_");
-        if (sessionIdParts.length == 3) {
-            return sessionIdParts[2];
-        } else {
+        return parsePart(sessionId, 2);
+    }
+
+    private static String parsePart(String sessionId, int index) {
+        String[] parts = sessionId.split("_");
+        if (parts.length != 3) {
             throw new InvalidSessionDataException("Invalid sessionId: " + sessionId);
         }
+        return parts[index];
     }
 }

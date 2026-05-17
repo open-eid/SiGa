@@ -4,9 +4,13 @@ import ee.openeid.siga.common.model.RelyingPartyInfo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @Builder
-public class CertificateSession {
+public class CertificateSession implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private RelyingPartyInfo relyingPartyInfo;
     private String sessionCode;
     private String documentNumber;

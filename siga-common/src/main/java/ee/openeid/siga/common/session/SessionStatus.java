@@ -1,7 +1,12 @@
 package ee.openeid.siga.common.session;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Setter;
+import lombok.Value;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static ee.openeid.siga.common.session.ProcessingStatus.PROCESSING;
@@ -9,7 +14,9 @@ import static ee.openeid.siga.common.session.ProcessingStatus.RESULT;
 
 @Data
 @Builder
-public class SessionStatus {
+public class SessionStatus implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String status;
     private StatusError statusError;
     @Builder.Default
@@ -36,7 +43,9 @@ public class SessionStatus {
 
     @Value
     @Builder
-    public static class StatusError {
+    public static class StatusError implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         String errorCode;
         String errorMessage;
     }

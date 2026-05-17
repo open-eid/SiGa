@@ -1,6 +1,11 @@
 package ee.openeid.siga.common.session;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.cert.X509Certificate;
@@ -13,6 +18,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AsicContainerSession implements Session {
+    private static final long serialVersionUID = 1L;
+
     @NonNull
     @Setter
     private String containerName;
@@ -26,7 +33,7 @@ public class AsicContainerSession implements Session {
     private String sessionId;
     @NonNull
     @Setter
-    private byte [] container;
+    private byte[] container;
     @Builder.Default
     private Map<String, Integer> signatureIdHolder = new HashMap<>();
 
@@ -98,7 +105,7 @@ public class AsicContainerSession implements Session {
     }
 
     @Override
-    public X509Certificate clearCertificate(String documentNumber){
+    public X509Certificate clearCertificate(String documentNumber) {
         return certificateHolder.remove(documentNumber);
     }
 

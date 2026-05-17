@@ -2,7 +2,12 @@ package ee.openeid.siga.common.session;
 
 import ee.openeid.siga.common.model.HashcodeDataFile;
 import ee.openeid.siga.common.model.HashcodeSignatureWrapper;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -15,6 +20,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HashcodeContainerSession implements Session {
+    private static final long serialVersionUID = 1L;
+
     @NonNull
     private String clientName;
     @NonNull
@@ -88,7 +95,7 @@ public class HashcodeContainerSession implements Session {
     }
 
     @Override
-    public X509Certificate clearCertificate(String documentNumber){
+    public X509Certificate clearCertificate(String documentNumber) {
         return certificateHolder.remove(documentNumber);
     }
 }

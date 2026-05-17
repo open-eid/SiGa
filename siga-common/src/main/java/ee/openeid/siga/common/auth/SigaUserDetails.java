@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 @Builder
 public class SigaUserDetails implements UserDetails {
+    private static final long serialVersionUID = 1L;
+
     private int serviceId;
     private String clientName;
     private String clientUuid;

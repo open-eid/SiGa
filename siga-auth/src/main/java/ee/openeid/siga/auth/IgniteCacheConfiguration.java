@@ -1,6 +1,7 @@
 package ee.openeid.siga.auth;
 
 import org.apache.ignite.cache.spring.SpringCacheManager;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableCaching
+@ConditionalOnProperty(prefix = "siga.session-storage", name = "type", havingValue = "ignite")
 public class IgniteCacheConfiguration implements CachingConfigurer {
 
     @Bean

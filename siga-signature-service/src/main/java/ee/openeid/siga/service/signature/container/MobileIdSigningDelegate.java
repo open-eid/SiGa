@@ -16,10 +16,10 @@ import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
 import ee.openeid.siga.service.signature.mobileid.MobileIdSessionStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdStatusResponse;
+import ee.openeid.siga.session.spi.SessionLocks;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
-import org.apache.ignite.IgniteSemaphore;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.Signature;
 import org.digidoc4j.SignatureParameters;
@@ -30,6 +30,7 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import static ee.openeid.siga.common.exception.ErrorResponseCode.INTERNAL_SERVER_ERROR;
 import static ee.openeid.siga.common.model.SigningType.MOBILE_ID;
@@ -105,7 +106,7 @@ public class MobileIdSigningDelegate {
             }
             return status;
         } else {
-            int maxProcessingAttempts = containerSigningService.getReprocessingProperties().getMaxProcessingAttempts();
+            int maxProcessingAttempts = containerSigningService.getReprocessingProperties().maxProcessingAttempts();
             boolean isMaxPollingAttempts = sessionStatus.getProcessingCounter() >= maxProcessingAttempts;
             if (isMaxPollingAttempts) {
                 ErrorResponseCode errorResponseCode = EnumUtils.getEnum(ErrorResponseCode.class, statusError.getErrorCode(), INTERNAL_SERVER_ERROR);
@@ -118,20 +119,22 @@ public class MobileIdSigningDelegate {
 
     public void pollMobileIdSignatureStatus(String sessionId, String signatureId, Duration pollingDelay) {
         Runnable pollingRunnable = () -> {
-            // If semaphore is not acquired it will be re-processed by SessionStatusReprocessingService
-            IgniteSemaphore semaphore = containerSigningService.getIgnite().semaphore(signatureId, 1, true, true);
-            if (semaphore.tryAcquire()) {
-                try (semaphore) {
+            // If lock is not acquired it will be re-processed by SessionStatusReprocessingService
+            Lock lock = containerSigningService.getSessionLockRegistry().obtain(signatureId);
+            boolean acquired = SessionLocks.tryRun(lock, () -> {
+                try {
                     pollSignatureStatus(sessionId, signatureId);
                 } catch (Exception ex) {
                     setPollingException(sessionId, signatureId, ex);
                 } finally {
-                    // Semaphore release conditions 1) Normal execution 2) Exception occurs 3) Ignite node leaves topology
+                    // Lock release conditions: 1) Normal execution 2) Exception inside the runnable
+                    //   3) Holder JVM dies — Ignite: failover-safe semaphore releases; Redis: lock TTL lapses.
                     containerSigningService.getSigaEventLogger().logEvents();
                     log.debug("Status polling unlocked for signature id: {}", signatureId);
                 }
-            } else {
-                log.debug("Status polling semaphore not acquired for signature id: {}", signatureId);
+            });
+            if (!acquired) {
+                log.debug("Status polling lock not acquired for signature id: {}", signatureId);
             }
         };
         DelegatingSecurityContextRunnable delegatingRunnable = new DelegatingSecurityContextRunnable(pollingRunnable);
@@ -150,13 +153,12 @@ public class MobileIdSigningDelegate {
         String sessionCode = signatureSession.getSessionCode();
         MobileIdStatusResponse statusResponse = containerSigningService.getMobileIdApiClient().getSignatureStatus(relyingPartyInfo, sessionCode);
 
-        try (IgniteSemaphore containerSemaphore = containerSigningService.getIgnite().semaphore(sessionId, 1, true, true)) { // TODO: SIGA-424
-            if (containerSemaphore.tryAcquire(5, TimeUnit.SECONDS)) {
-                processMobileIdStatusResponse(sessionId, signatureId, statusResponse);
-            } else {
-                log.error("Unprocessed MobileId signature status response due to SIGA-424. Container session id: {}, Signature session id: {}",
-                        sessionId, signatureId);
-            }
+        Lock containerLock = containerSigningService.getSessionLockRegistry().obtain(sessionId); // TODO: SIGA-424
+        boolean processed = SessionLocks.tryRun(containerLock, 5, TimeUnit.SECONDS,
+                () -> processMobileIdStatusResponse(sessionId, signatureId, statusResponse));
+        if (!processed) {
+            log.error("Unprocessed MobileId signature status response due to SIGA-424. Container session id: {}, Signature session id: {}",
+                    sessionId, signatureId);
         }
     }
 

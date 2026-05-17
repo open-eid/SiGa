@@ -26,4 +26,5 @@
 logs/
 
 ### Ignite work dirs ###
-ignite/
+/ignite/
+/*/ignite/

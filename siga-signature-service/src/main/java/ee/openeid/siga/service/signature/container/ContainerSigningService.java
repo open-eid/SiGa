@@ -13,18 +13,18 @@ import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.common.util.LoggingContextUtil;
 import ee.openeid.siga.common.util.UUIDGenerator;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
 import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.session.SessionService;
+import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
+import ee.openeid.siga.session.spi.SessionLockRegistry;
 import eu.europa.esig.dss.alert.exception.AlertException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ignite.Ignite;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
 import org.digidoc4j.ServiceType;
@@ -74,7 +74,7 @@ public abstract class ContainerSigningService {
     private MobileIdApiClient mobileIdApiClient;
     private SmartIdApiClient smartIdApiClient;
     private ThreadPoolTaskExecutor taskExecutor;
-    private Ignite ignite;
+    private SessionLockRegistry sessionLockRegistry;
 
     public DataToSignWrapper createDataToSign(String containerId, SignatureParameters signatureParameters) {
         Session sessionHolder = getSession(containerId);
@@ -107,6 +107,7 @@ public abstract class ContainerSigningService {
         Signature signature = finalizeSignature(sessionHolder, signatureId, base64Decoded);
 
         addSignatureToSession(sessionHolder, signature, signatureId);
+        sessionHolder.removeSigningSession(signatureId);
         sessionService.update(sessionHolder);
 
         if (SigningType.REMOTE.equals(signatureSession.getSigningType())) {

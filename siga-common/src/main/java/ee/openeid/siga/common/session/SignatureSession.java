@@ -11,9 +11,13 @@ import org.apache.ignite.binary.BinaryWriter;
 import org.apache.ignite.binary.Binarylizable;
 import org.digidoc4j.DataToSign;
 
+import java.io.Serializable;
+
 @Data
 @Builder
-public class SignatureSession implements Binarylizable {
+public class SignatureSession implements Binarylizable, Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String sessionCode;
     private byte[] signature;
     @Builder.Default
@@ -46,6 +50,7 @@ public class SignatureSession implements Binarylizable {
         dataFilesHash = reader.readString("dataFilesHash");
         relyingPartyInfo = reader.readObject("relyingPartyInfo");
     }
+
     public void setPollingStatus(ProcessingStatus status) {
         sessionStatus.setProcessingStatus(status);
     }

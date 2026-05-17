@@ -1,9 +1,10 @@
 package ee.openeid.siga.common.session;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
-public interface Session {
+public interface Session extends Serializable {
     String getClientName();
 
     String getServiceName();
@@ -23,13 +24,19 @@ public interface Session {
     X509Certificate getCertificate(String documentNumber);
 
     SignatureSession getSignatureSession(String signatureId);
+
     Map<String, SignatureSession> getSignatureSessions();
+
     void setSignatureSessions(Map<String, SignatureSession> signatureSessions);
+
     Map<String, CertificateSession> getCertificateSessions();
+
     void setCertificateSessions(Map<String, CertificateSession> certificateSessions);
+
     SessionStatus getSignatureSessionStatus(String signatureId);
 
     void clearSigningSession(String signatureId);
+
     void removeSigningSession(String signatureId);
 
     void removeCertificateSession(String certificateId);
