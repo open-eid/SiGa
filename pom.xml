@@ -59,7 +59,7 @@
         <wiremock.version>3.13.2</wiremock.version>
 
         <cxf-wadl2java-plugin.version>4.2.1</cxf-wadl2java-plugin.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
 
