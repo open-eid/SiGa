@@ -283,28 +283,35 @@ spring.datasource.username=user
 spring.datasource.password=password
 ```
 
-#### SiGa health and heartbeat configuration
+#### SiGa monitoring configuration
 
-SiGa has built-in health endpoint for an overview of system related service statuses. The endpoint can be reached at `{host}/actuator/health`. An example configuration for health endpoint:
-```
-management.endpoint.health.show-details=ALWAYS
-management.health.defaults.enabled=false
-management.health.db.enabled=true
-```
+SiGa exposes monitoring endpoints via [Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html). An example configuration for monitoring-related properties used in the Docker-based demo setup can be found in [docker/siga-webapp/application.properties](docker/siga-webapp/application.properties). If SiGa is configured without the example configuration, [Spring Boot default values](https://docs.spring.io/spring-boot/appendix/application-properties/index.html) will apply.
 
-To add a heartbeat endpoint, the following configuration should be added to `application.properties`:
+**Heartbeat endpoint**
+
+The heartbeat endpoint returns a simple aggregate health status. Since it delegates to the Spring Boot [health endpoint](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health) internally, `health` must also be included for the heartbeat to function. The following configuration should be added to `application.properties`:
 ```
 management.endpoints.web.exposure.include=health,heartbeat
 management.endpoint.heartbeat.enabled=true
 ```
-The heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`.
+By default, the heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`. Subject to configured servlet context path and actuator configuration.
 
-To add version information endpoint, the following configuration should be added to `application.properties`:
+**Version endpoint**
+
+To add the version information endpoint, the following configuration should be added to `application.properties`:
 ```
-management.endpoints.web.exposure.include=health,version
+management.endpoints.web.exposure.include=version
 management.endpoint.version.enabled=true
 ```
-The version information endpoint can be accessed at `{host}/actuator/version`.
+By default, the version information endpoint can be accessed at `{host}/actuator/version`. Subject to configured servlet context path and actuator configuration.
+
+**Prometheus endpoint**
+
+SiGa supports metrics collection via [Prometheus](https://docs.spring.io/spring-boot/reference/actuator/metrics.html#actuator.metrics.export.prometheus). To enable the Prometheus metrics endpoint, the following configuration should be added to `application.properties`:
+```
+management.endpoints.web.exposure.include=prometheus
+```
+By default, the Prometheus metrics endpoint can be accessed at `{host}/actuator/prometheus`. Subject to configured servlet context path and actuator configuration.
 
 ## SiGa database
 
