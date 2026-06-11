@@ -189,6 +189,7 @@ services:
         -Djavax.net.ssl.keyStore=/etc/siga-admin/siga-admin.localhost.keystore.p12
         -Djavax.net.ssl.keyStorePassword=changeit
         -Djavax.net.ssl.keyStoreType=pkcs12
+        -Djava.security.properties=/etc/siga-admin/tls-override-java.security # When esteid.ldap.sk.ee starts supporting other ciphers, like ECDHE, remove this workaround.
     ports:
       - "4443:4443"
       - "4000:4000"
@@ -198,6 +199,7 @@ services:
           - siga-admin.localhost
     volumes:
       - ./docker/siga-admin/logback.xml:/etc/siga-admin/logback.xml
+      - ./docker/siga-admin/tls-override-java.security:/etc/siga-admin/tls-override-java.security # When esteid.ldap.sk.ee starts supporting other ciphers, like ECDHE, remove this workaround.
       - ./docker/tls/siga-admin/siga-admin.localhost.keystore.p12:/etc/siga-admin/siga-admin.localhost.keystore.p12
       - ./docker/tls/esteid-ldap/esteid-ldap.truststore.p12:/etc/siga-admin/tls.esteid-ldap.truststore.p12
       - ./docker/tls/siga-admin-smtp/siga-admin-smtp.truststore.p12:/etc/siga-admin/smtp.truststore.p12

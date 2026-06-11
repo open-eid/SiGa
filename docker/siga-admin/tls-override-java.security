@@ -1,0 +1,7 @@
+# Review this list each time JDK 17 is updated, as the default disabled-algorithms list may change.
+# Remove "TLS_RSA_*" from Java's blacklisted TLS algorithms because esteid.ldap.sk.ee doesn't work without them.
+# When esteid.ldap.sk.ee starts supporting other ciphers, like ECDHE, remove this workaround.
+jdk.tls.disabledAlgorithms=SSLv3, TLSv1, TLSv1.1, DTLSv1.0, RC4, DES, \
+    MD5withRSA, DH keySize < 1024, EC keySize < 224, 3DES_EDE_CBC, anon, NULL, \
+    ECDH, rsa_pkcs1_sha1 usage HandshakeSignature, \
+    ecdsa_sha1 usage HandshakeSignature, dsa_sha1 usage HandshakeSignature
