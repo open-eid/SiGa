@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>3.5.15</version>
     </parent>
 
     <groupId>ee.openeid.siga</groupId>
@@ -58,7 +58,7 @@
         <smart-id-java-client.version>2.3.1</smart-id-java-client.version>
         <wiremock.version>3.13.2</wiremock.version>
 
-        <cxf-wadl2java-plugin.version>4.2.1</cxf-wadl2java-plugin.version>
+        <cxf-wadl2java-plugin.version>4.2.2</cxf-wadl2java-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
