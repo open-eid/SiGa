@@ -66,6 +66,7 @@
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
         <jackson-2-bom.version>2.22.0</jackson-2-bom.version> <!-- CVE-2026-54515 -->
+        <logback.version>1.5.35</logback.version> <!-- CVE-2026-10532 -->
     </properties>
 
     <dependencies>
