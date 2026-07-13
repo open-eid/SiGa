@@ -41,7 +41,7 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.85</bouncycastle.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-jxpath.version>1.4.0</commons-jxpath.version>
