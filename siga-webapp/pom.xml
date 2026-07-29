@@ -13,6 +13,12 @@
     <artifactId>siga-webapp</artifactId>
     <packaging>${webapp.packaging}</packaging>
 
+    <properties>
+        <!-- Property values here can be overridden from command line, but plugin <configuration> values below can't be -->
+        <imageName>${project.artifactId}:latest</imageName>
+        <githubMirror>https://github.com</githubMirror>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ee.openeid.siga</groupId>
@@ -94,7 +100,12 @@
                 </executions>
                 <configuration>
                     <image>
-                        <name>${project.artifactId}:latest</name>
+                        <name>${imageName}</name>
+                        <env>
+                            <!-- Enable overriding GitHub mirror -->
+                            <BP_DEPENDENCY_MIRROR_GITHUB_COM>${githubMirror}</BP_DEPENDENCY_MIRROR_GITHUB_COM>
+                            <BP_RESPONSE_HEADER_TIMEOUT>60</BP_RESPONSE_HEADER_TIMEOUT>
+                        </env>
                     </image>
                 </configuration>
             </plugin>

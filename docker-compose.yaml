@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
 
   dozzle: # Web-based UI for browsing container logs
@@ -47,7 +45,7 @@ services:
       - siga-02
 
   siga-01:
-    image: siga-webapp:latest
+    image: ${SIGA_DOCKER_REGISTRY}${SIGA_PROJECT}siga-webapp:latest
     environment:
       - server.port=7443
       - server.ssl.key-alias=siga-01.localhost
@@ -95,7 +93,7 @@ services:
       - siga-db
 
   siga-02:
-    image: siga-webapp:latest
+    image: ${SIGA_DOCKER_REGISTRY}${SIGA_PROJECT}siga-webapp:latest
     environment:
       - server.port=7443
       - server.ssl.key-alias=siga-02.localhost
