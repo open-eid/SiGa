@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   siga-demo-application:
-    image: siga-demo-application:latest
+    image: ${SIGA_DEMO_DOCKER_REGISTRY}${SIGA_DEMO_PROJECT}siga-demo-application:latest
     environment:
       - server.port=9443
       - server.ssl.key-store=/etc/siga-demo/siga-demo.localhost.keystore.p12
