@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17-jdk-noble
 
-ENV IGNITE_VERSION 2.17.0
+ENV IGNITE_VERSION 2.18.0
 ENV IGNITE_HOME /opt/ignite/apache-ignite-${IGNITE_VERSION}-bin
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
