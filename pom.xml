@@ -41,7 +41,8 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
-        <bouncycastle.version>1.85</bouncycastle.version>
+        <!--BouncyCastle 1.85 causes false positives in PAdES validation with current DSS; update when DSS is updated -->
+        <bouncycastle.version>1.84</bouncycastle.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-jxpath.version>1.4.0</commons-jxpath.version>
