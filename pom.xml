@@ -11,7 +11,7 @@
 
     <groupId>ee.openeid.siga</groupId>
     <artifactId>siga-parent</artifactId>
-    <version>2.13.0</version>
+    <version>2.13.1</version>
     <packaging>pom</packaging>
     <name>Signature Gateway</name>
 
@@ -41,6 +41,7 @@
         </sonar.exclusions>
         <sonar.language>java</sonar.language>
 
+        <!--BouncyCastle 1.85 causes false positives in PAdES validation with current DSS; update when DSS is updated -->
         <bouncycastle.version>1.84</bouncycastle.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-io.version>2.22.0</commons-io.version>
@@ -58,15 +59,21 @@
         <smart-id-java-client.version>2.3.1</smart-id-java-client.version>
         <wiremock.version>3.13.2</wiremock.version>
 
-        <cxf-wadl2java-plugin.version>4.2.1</cxf-wadl2java-plugin.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <cxf-wadl2java-plugin.version>4.2.3</cxf-wadl2java-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
-        <jackson-2-bom.version>2.22.0</jackson-2-bom.version> <!-- CVE-2026-54515 -->
-        <logback.version>1.5.35</logback.version> <!-- CVE-2026-10532 -->
+        <jackson-bom.version>3.2.1</jackson-bom.version> <!-- CVE-2026-59889 -->
+        <jackson-2-bom.version>2.22.1</jackson-2-bom.version> <!-- CVE-2026-59889 -->
+        <logback.version>1.5.38</logback.version> <!-- CVE-2026-10532 -->
+        <postgresql.version>42.7.13</postgresql.version><!-- CVE-2026-54291 -->
+        <netty.version>4.2.17.Final</netty.version><!-- CVE-2026-56745,CVE-2026-56746, CVE-2026-55833, CVE-2026-55831 -->
+        <httpcore5.version>5.4.3</httpcore5.version> <!-- CVE-2026-54399 -->
+        <httpclient5.version>5.6.4</httpclient5.version> <!-- CVE-2026-64607 -->
+        <log4j2.version>2.26.1</log4j2.version> <!-- CVE-2026-49844 -->
     </properties>
 
     <dependencies>
