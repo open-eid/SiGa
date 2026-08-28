@@ -1,62 +1,73 @@
-server.ssl.enabled=true
-server.ssl.key-store-type=PKCS12
-server.ssl.key-store=file:/etc/siga/siga.localhost.keystore.p12
-server.ssl.key-store-password=changeit
-server.shutdown=graceful
-# Disable /error endpoint mapping and logging
-spring.autoconfigure.exclude=org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
-spring.lifecycle.timeout-per-shutdown-phase=330s
-spring.task.execution.shutdown.await-termination-period=300s
-spring.task.execution.shutdown.await-termination=true
-spring.task.execution.pool.core-size=128
-spring.task.execution.pool.max-size=256
-spring.task.execution.pool.queue-capacity=128
-spring.profiles.active=digidoc4jTest,datafileContainer,smartId,mobileId
-spring.sql.init.platform=postgresql
-spring.sql.init.continue-on-error=false
-spring.liquibase.enabled=true
-spring.liquibase.change-log=classpath:db/changelog/db.changelog-master-dev.yaml
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://siga-db:5432/siga_db
-spring.datasource.username=sa
-spring.datasource.password=
-spring.cloud.discovery.client.composite-indicator.enabled=false
-logging.config=file:/etc/siga/logback.xml
-management.endpoints.web.exposure.include=health,heartbeat,version,prometheus
-management.endpoint.health.show-details=ALWAYS
-management.health.defaults.enabled=false
-management.health.db.enabled=true
-management.endpoint.heartbeat.enabled=true
-management.endpoint.heartbeat.cache.time-to-live=10s
-management.endpoint.version.enabled=true
-siga.session-storage.ignite.configuration-location=file:/etc/siga/ignite-configuration.xml
-siga.session-storage.application-cache-version=v1
-spring.data.redis.cluster.nodes=siga-redis-1:6379,siga-redis-2:6380,siga-redis-3:6381
-spring.data.redis.lettuce.cluster.refresh.period=30s
-spring.data.redis.lettuce.cluster.refresh.adaptive=true
-spring.data.redis.lettuce.cluster.refresh.dynamic-refresh-sources=true
-siga.dd4j.configuration-location=digidoc4j-test.yaml
-siga.dd4j.tsl-refresh-job-cron=0 0 3 * * *
-siga.siva.url=https://siva-demo.eesti.ee/V3
-siga.siva.trust-store=file:/etc/siga/siva.truststore.p12
-siga.siva.trust-store-password=changeit
-siga.siva.connection-timeout=PT20S
-siga.siva.write-timeout=PT20S
-siga.siva.read-timeout=PT20S
-siga.siva.max-in-memory-size=10MB
-siga.midrest.allowed-countries=EE, LT
-siga.midrest.url=https://tsp.demo.sk.ee/mid-api
-siga.midrest.status-polling-delay=0
-siga.midrest.truststore-path=file:/etc/siga/mid.truststore.p12
-siga.midrest.truststore-password=changeit
-siga.security.jasypt.encryption-algo=PBEWITHSHA-256AND256BITAES-CBC-BC
-siga.security.jasypt.encryption-key=encryptorKey
-siga.security.hmac.expiration=60
-siga.security.hmac.clock-skew=10
-siga.sid.allowedCountries=EE, LT, LV
-siga.sid.url=https://sid.demo.sk.ee/smart-id-rp/v2/
-siga.sid.interaction-type=DISPLAY_TEXT_AND_PIN
-siga.sid.session-status-response-socket-open-time=1000
-siga.sid.status-polling-delay=0
-siga.sid.truststore-path=file:/etc/siga/sid.truststore.p12
-siga.sid.truststore-password=changeit
+server:
+  ssl:
+    enabled: true
+    key-store-type: PKCS12
+    key-store: file:/etc/siga/siga.localhost.keystore.p12
+    key-store-password: changeit
+
+spring:
+  profiles:
+    active: digidoc4jTest,datafileContainer,smartId,mobileId
+  sql:
+    init:
+      platform: postgresql
+      continue-on-error: false
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master-dev.yaml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://siga-db:5432/siga_db
+    username: sa
+    password: ""
+  data:
+    redis:
+      cluster:
+        nodes: siga-redis-1:6379,siga-redis-2:6380,siga-redis-3:6381
+      lettuce:
+        cluster:
+          refresh:
+            period: 30s
+            adaptive: true
+            dynamic-refresh-sources: true
+
+logging:
+  config: file:/etc/siga/logback.xml
+
+siga:
+  session-storage:
+    ignite:
+      configuration-location: file:/etc/siga/ignite-configuration.xml
+    application-cache-version: v1
+  dd4j:
+    configuration-location: digidoc4j-test.yaml
+    tsl-refresh-job-cron: "0 0 3 * * *"
+  siva:
+    url: https://siva-demo.eesti.ee/V3
+    trust-store: file:/etc/siga/siva.truststore.p12
+    trust-store-password: changeit
+    connection-timeout: PT20S
+    write-timeout: PT20S
+    read-timeout: PT20S
+    max-in-memory-size: 10MB
+  midrest:
+    allowed-countries: EE, LT
+    url: https://tsp.demo.sk.ee/mid-api
+    status-polling-delay: 0
+    truststore-path: file:/etc/siga/mid.truststore.p12
+    truststore-password: changeit
+  security:
+    jasypt:
+      encryption-algo: PBEWITHSHA-256AND256BITAES-CBC-BC
+      encryption-key: encryptorKey
+    hmac:
+      expiration: 60
+      clock-skew: 10
+  sid:
+    allowedCountries: EE, LT, LV
+    url: https://sid.demo.sk.ee/smart-id-rp/v2/
+    interaction-type: DISPLAY_TEXT_AND_PIN
+    session-status-response-socket-open-time: 1000
+    status-polling-delay: 0
+    truststore-path: file:/etc/siga/sid.truststore.p12
+    truststore-password: changeit
