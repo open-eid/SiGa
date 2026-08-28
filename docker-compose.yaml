@@ -62,7 +62,7 @@ services:
       # Logs directory
       - BUILD_FOLDER=/tmp/logs
       - IGNITE_WORK_DIR=/tmp/ignite
-      - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/etc/siga/application.yml
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 -XX:MaxDirectMemorySize=256M
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
@@ -95,7 +95,7 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
-      - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
+      - ./docker/siga-webapp/application.yml:/etc/siga/application.yml
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
     depends_on:
       siga-db:
@@ -113,7 +113,7 @@ services:
       # Logs directory
       - BUILD_FOLDER=/tmp/logs
       - IGNITE_WORK_DIR=/tmp/ignite
-      - SPRING_CONFIG_LOCATION=file:/etc/siga/application.properties
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/etc/siga/application.yml
       - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8 -XX:MaxDirectMemorySize=256M
       # The '--add-opens' below is required for running Apache Ignite with JDK 17
       - JAVA_OPTS=
@@ -146,7 +146,7 @@ services:
       - ./docker/tls/sid/sid.truststore.p12:/etc/siga/sid.truststore.p12
       - ./docker/tls/siva/siva.truststore.p12:/etc/siga/siva.truststore.p12
       - ./docker/siga-ignite/ignite-configuration.xml:/etc/siga/ignite-configuration.xml
-      - ./docker/siga-webapp/application.properties:/etc/siga/application.properties
+      - ./docker/siga-webapp/application.yml:/etc/siga/application.yml
       - ./docker/siga-webapp/logback.xml:/etc/siga/logback.xml
     depends_on:
       siga-db:
