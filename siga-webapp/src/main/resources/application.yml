@@ -1,0 +1,36 @@
+server:
+  shutdown: graceful
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
+  task:
+    execution:
+      shutdown:
+        await-termination: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - heartbeat
+          - version
+          - prometheus
+  endpoint:
+    health:
+      show-details: ALWAYS
+      probes:
+        enabled: true
+    heartbeat:
+      enabled: true
+      cache:
+        time-to-live: 10s
+    version:
+      enabled: true
+  health:
+    defaults:
+      enabled: false
+    db:
+      enabled: true
