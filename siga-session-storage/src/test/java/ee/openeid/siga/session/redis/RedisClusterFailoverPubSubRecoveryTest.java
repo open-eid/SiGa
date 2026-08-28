@@ -172,11 +172,12 @@ class RedisClusterFailoverPubSubRecoveryTest {
             // means the remaining masters mark NODE_1 as failing within about 5s, and one of its
             // replicas is promoted shortly after via the cluster failover handshake.
             // -----------------------------------------------------------------
-            var shutdown = NODE_1.execInContainer(
+            NODE_1.execInContainer(
                     "valkey-cli", "-p", String.valueOf(VALKEY_PORT), "SHUTDOWN", "NOSAVE");
-            assertTrue(shutdown.getExitCode() == 0 || shutdown.getStderr().contains("connection lost"),
-                    "Failed to shut down NODE_1 (master 2): "
-                            + shutdown.getStdout() + shutdown.getStderr());
+            Awaitility.await("NODE_1 (master 2) stops running")
+                    .atMost(30, TimeUnit.SECONDS)
+                    .pollInterval(200, TimeUnit.MILLISECONDS)
+                    .until(() -> !NODE_1.isRunning());
 
             waitUntilReplicaPromoted();
 
