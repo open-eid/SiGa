@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     private static final PathPatternRequestMatcher.Builder PATH = PathPatternRequestMatcher.withDefaults();
     private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(
             PATH.matcher("/siga.wadl"), PATH.matcher("/siga.xsd"),
-            PATH.matcher("/actuator/health"), PATH.matcher("/actuator/heartbeat"),
+            PATH.matcher("/actuator/health"), PATH.matcher("/actuator/health/**"), PATH.matcher("/actuator/heartbeat"),
             PATH.matcher("/actuator/version"), PATH.matcher("/actuator/prometheus")
     );
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
