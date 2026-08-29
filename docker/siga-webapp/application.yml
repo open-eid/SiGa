@@ -40,7 +40,7 @@ siga:
       configuration-location: file:/etc/siga/ignite-configuration.xml
     application-cache-version: v1
   dd4j:
-    configuration-location: digidoc4j-test.yaml
+    configuration-location: classpath:digidoc4j-test.yaml
     tsl-refresh-job-cron: "0 0 3 * * *"
   siva:
     url: https://siva-demo.eesti.ee/V3

@@ -23,9 +23,9 @@ siga:
   session-storage:
     application-cache-version: v1
     ignite:
-      configuration-location: ignite-test-configuration.xml
+      configuration-location: classpath:ignite-test-configuration.xml
   dd4j:
-    configuration-location: digidoc4j-test.yaml
+    configuration-location: classpath:digidoc4j-test.yaml
     tsl-refresh-job-cron: "0 0 3 * * *"
   siva:
     trust-store: classpath:siva.truststore.p12

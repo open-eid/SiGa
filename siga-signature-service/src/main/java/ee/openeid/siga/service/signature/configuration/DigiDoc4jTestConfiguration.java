@@ -1,5 +1,6 @@
 package ee.openeid.siga.service.signature.configuration;
 
+import ee.openeid.siga.service.signature.util.ResourceUtil;
 import lombok.RequiredArgsConstructor;
 import org.digidoc4j.Configuration;
 import org.springframework.boot.SpringBootConfiguration;
@@ -17,7 +18,7 @@ public class DigiDoc4jTestConfiguration {
     @Bean
     public Configuration configuration() {
         Configuration configuration = new Configuration(Configuration.Mode.TEST);
-        configuration.loadConfiguration(dd4jConfigurationProperties.getConfigurationLocation());
+        ResourceUtil.loadResourceTo(dd4jConfigurationProperties.getConfigurationLocation(), configuration::loadConfiguration);
         configuration.setPreferAiaOcsp(true);
         return configuration;
     }

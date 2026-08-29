@@ -88,7 +88,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         "siga.security.jasypt.encryption-key=encryptorKey",
         "siga.security.hmac.expiration=-1",
         "siga.security.hmac.clock-skew=2",
-        "siga.dd4j.configuration-location=digidoc4j.yaml",
+        "siga.dd4j.configuration-location=classpath:digidoc4j.yaml",
         "siga.dd4j.tsl-refresh-job-cron=0 0 3 * * *",
         "siga.session-storage.application-cache-version=v1",
         "siga.session-storage.ignite.configuration-location=classpath:ignite-test-configuration.xml",
