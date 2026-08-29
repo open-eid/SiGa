@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ExtendWith(MockitoExtension.class)
-@TestPropertySource(locations = "application-test.properties")
+@TestPropertySource(locations = "application-test.yml")
 class RequestValidatorTest {
 
     static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";

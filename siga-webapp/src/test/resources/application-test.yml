@@ -1,0 +1,52 @@
+server:
+  ssl:
+    enabled: false
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  datasource:
+    initialization-mode: never
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:siga;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;
+    username: sa
+    password: ""
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master-dev.yaml
+  sql:
+    init:
+      continue-on-error: false
+      platform: h2
+
+siga:
+  session-storage:
+    application-cache-version: v1
+    ignite:
+      configuration-location: ignite-test-configuration.xml
+  dd4j:
+    configuration-location: digidoc4j-test.yaml
+    tsl-refresh-job-cron: "0 0 3 * * *"
+  siva:
+    trust-store: classpath:siva.truststore.p12
+    url: https://siva-demo.eesti.ee/V3
+    trust-store-password: changeit
+  midrest:
+    truststore-path: classpath:mid.truststore.p12
+    allowed-countries: EE, LT
+    url: https://tsp.demo.sk.ee/mid-api
+    truststore-password: changeit
+  security:
+    jasypt:
+      encryption-algo: PBEWITHSHA-256AND256BITAES-CBC-BC
+      encryption-key: encryptorKey
+    hmac:
+      expiration: 60
+      clock-skew: 10
+  sid:
+    truststore-path: classpath:sid.truststore.p12
+    allowedCountries: EE, LT, LV
+    url: https://sid.demo.sk.ee/smart-id-rp/v2/
+    interaction-type: DISPLAY_TEXT_AND_PIN
+    session-status-response-socket-open-time: 1000
+    truststore-password: changeit
