@@ -86,11 +86,17 @@ Two Redis server settings are mandatory for SiGa:
   TTL and so are never evicted, while TTL'd keys (`siga:session:*`, `siga:lock:*`, AUTH_SERVICES
   cache) remain eviction candidates.
 
-Point SiGa at the cluster by setting the seed nodes in `application.properties`:
+Point SiGa at the cluster by setting the seed nodes in `application.yml`:
 
-```
-siga.session-storage.type=redis
-spring.data.redis.cluster.nodes=redis-1.example:6379,redis-2.example:6380,redis-3.example:6381
+```yaml
+siga:
+  session-storage:
+    type: redis
+spring:
+  data:
+    redis:
+      cluster:
+        nodes: redis-1.example:6379,redis-2.example:6380,redis-3.example:6381
 ```
 
 On managed Valkey/Redis (AWS ElastiCache, MemoryDB) the `CONFIG` command is blocked at the engine
@@ -129,14 +135,17 @@ configure and run Ignite.
 
 #### Running SiGa with embedded Tomcat
 
-* Make [`application.properties`](#applicationproperties) available anywhere in the host system.
+* Make [`application.yml`](#applicationyml) available anywhere in the host system.
 * Set $JAVA_OPTS environment variable with the required options. When the Ignite backend is
   active, the `--add-opens` flags below are required (see more on
   [Ignite Getting Started guide](https://ignite.apache.org/docs/latest/quick-start/java#running-ignite-with-java-11-or-later));
   with the default Redis backend they can be omitted.
-  Replace the path of `application.properties` in the following command to point to your own file.
+  Replace the path of `application.yml` in the following command to point to your own file. Note
+  `spring.config.additional-location`, not `spring.config.location` — the latter replaces Spring Boot's default
+  config-file search locations instead of adding to them, which would silently disable SiGa's
+  [shipped default configuration](#applicationyml).
   ```bash
-  export JAVA_OPTS="-Dspring.config.location=file:/path/to/application.properties\
+  export JAVA_OPTS="-Dspring.config.additional-location=file:/path/to/application.yml\
     --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED\
     --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED\
     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED\
@@ -178,11 +187,13 @@ cp SiGa/siga-webapp/target/siga-webapp-2.0.1.war apache-tomcat-8.5.46/webapps
 ./apache-tomcat-8.5.46/bin/catalina.sh run
 ```
 
-* Make [`application.properties`](#applicationproperties) available anywhere in the host system.
+* Make [`application.yml`](#applicationyml) available anywhere in the host system.
 * Depending on your system, it might be required to set the `JAVA_HOME` environment variable in file `/etc/default/tomcat8`. For example:
   * `JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64`
 * Create or modify `setenv.sh` placed inside Tomcat `bin` directory:
-  * `export JAVA_OPTS="$JAVA_OPTS -Dspring.config.location=file:/path/to/application.properties"`
+  * `export JAVA_OPTS="$JAVA_OPTS -Dspring.config.additional-location=file:/path/to/application.yml"` — use
+    `additional-location`, not `location`; the latter replaces Spring Boot's default config-file search locations
+    instead of adding to them, which would silently disable SiGa's [shipped default configuration](#applicationyml).
   * `export JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=list-of-profiles-to-activate"` (see [available profiles](#available-profiles))
 
 When the Ignite backend is active, the following options must additionally be added to the `JAVA_OPTS`
@@ -225,11 +236,18 @@ with the default Redis backend they can be omitted:
 
 ## SiGa configuration
 
-### `application.properties`
+### `application.yml`
 
-Example `application.properties` file with DEMO parameters can be seen [here](docker/siga-webapp/application.properties).
-`application.properties` values must be changed for production mode, as default maven profile does not include it in the build.
-Common Spring Boot properties are described [here](https://docs.spring.io/spring-boot/docs/2.7.7/reference/html/application-properties.html).
+Example `application.yml` file with DEMO parameters can be seen [here](docker/siga-webapp/application.yml).
+`application.yml` values must be changed for production mode, as default maven profile does not include it in the build.
+Common Spring Boot properties are described [here](https://docs.spring.io/spring-boot/appendix/application-properties/index.html)
+(Spring Boot accepts either `.properties` or `.yml`/`.yaml` for this file; SiGa's own examples all use YAML).
+
+SiGa also ships its own default configuration, bundled into every JAR/WAR build at
+[`siga-webapp/src/main/resources/application.yml`](siga-webapp/src/main/resources/application.yml). It covers mainly
+graceful shutdown and the monitoring endpoints described in [SiGa monitoring configuration](#siga-monitoring-configuration)
+below — nothing environment-specific. Supply your own `application.yml` (or follow the Docker example above)
+to add everything else, or to override any of the shipped defaults.
 
 #### SiGa session-storage configuration
 
@@ -262,7 +280,7 @@ Ignite backend parameters (applicable when `siga.session-storage.type=ignite`):
 
 | Parameter | Mandatory | Description | Example |
 | --- | --- | --- | --- |
-| siga.session-storage.ignite.configuration-location | Y | Location of the Ignite XML configuration file. Only consulted when `siga.session-storage.type=ignite`. | `/path/to/ignite-configuration.xml` |
+| siga.session-storage.ignite.configuration-location | Y | Location of the Ignite XML configuration file. Only consulted when `siga.session-storage.type=ignite`. | `file:/path/to/ignite-configuration.xml` or `classpath:path/to/ignite-configuration.xml` |
 
 The Ignite backend has no per-cache Spring properties. Cache-level settings — including TTLs
 for the session caches and the `AUTH_SERVICES` cache — live inside the Ignite XML, on each
@@ -318,7 +336,7 @@ configure `notify-keyspace-events=Ex` through the service parameter group instea
 `__keyevent@*__:expired`, which requires `PSUBSCRIBE` on that channel pattern. Wire the
 credentials through `spring.data.redis.username` and `spring.data.redis.password`, ideally
 as environment-injected placeholders rather than plain-text values committed to
-`application.properties`.
+`application.yml`.
 
 **TLS in transit.** Set `spring.data.redis.ssl.enabled=true`. Lettuce enables SNI and peer
 certificate verification by default — leave both on. Cluster-mode topology refresh, pub/sub for
@@ -332,30 +350,61 @@ but must match on both sides; the same bundle can be reused by any other Spring 
 accepts an `ssl.bundle` reference.
 
 PEM truststore — a single CA cert or a concatenated bundle file:
-```properties
-spring.ssl.bundle.pem.redis.truststore.certificate=file:/etc/siga/redis-ca.pem
-spring.data.redis.ssl.bundle=redis
+```yaml
+spring:
+  ssl:
+    bundle:
+      pem:
+        redis:
+          truststore:
+            certificate: file:/etc/siga/redis-ca.pem
+  data:
+    redis:
+      ssl:
+        bundle: redis
 ```
 
 JKS or PKCS12 truststore:
-```properties
-spring.ssl.bundle.jks.redis.truststore.location=file:/etc/siga/redis-truststore.p12
-spring.ssl.bundle.jks.redis.truststore.password=changeit
-spring.data.redis.ssl.bundle=redis
+```yaml
+spring:
+  ssl:
+    bundle:
+      jks:
+        redis:
+          truststore:
+            location: file:/etc/siga/redis-truststore.p12
+            password: changeit
+  data:
+    redis:
+      ssl:
+        bundle: redis
 ```
 
-Putting it all together, a production properties block looks like:
-```properties
-spring.data.redis.cluster.nodes=redis-1.example:6379,redis-2.example:6379,redis-3.example:6379
-spring.data.redis.cluster.max-redirects=3
-spring.data.redis.lettuce.cluster.refresh.period=30s
-spring.data.redis.lettuce.cluster.refresh.adaptive=true
-spring.data.redis.lettuce.cluster.refresh.dynamic-refresh-sources=true
-spring.data.redis.username=${REDIS_USERNAME}
-spring.data.redis.password=${REDIS_PASSWORD}
-spring.data.redis.ssl.enabled=true
-spring.data.redis.ssl.bundle=redis
-spring.ssl.bundle.pem.redis.truststore.certificate=file:/etc/siga/redis-ca.pem
+Putting it all together, a production configuration block looks like:
+```yaml
+spring:
+  data:
+    redis:
+      cluster:
+        nodes: redis-1.example:6379,redis-2.example:6379,redis-3.example:6379
+        max-redirects: 3
+      lettuce:
+        cluster:
+          refresh:
+            period: 30s
+            adaptive: true
+            dynamic-refresh-sources: true
+      username: "${REDIS_USERNAME}"
+      password: "${REDIS_PASSWORD}"
+      ssl:
+        enabled: true
+        bundle: redis
+  ssl:
+    bundle:
+      pem:
+        redis:
+          truststore:
+            certificate: file:/etc/siga/redis-ca.pem
 ```
 
 #### SiGa auth-services cache configuration
@@ -374,7 +423,7 @@ its TTL is driven by `siga.auth.cache.services-ttl` (below). On the Ignite backe
 
 | Parameter | Mandatory | Description | Example |
 | --- | --- | --- | --- |
-| siga.dd4j.configuration-location | Y | Location of the DD4J configuration file. | `/path/to/digidoc4j.yaml` |
+| siga.dd4j.configuration-location | Y | Location of the DD4J configuration file. | `file:/path/to/digidoc4j.yaml` or `classpath:path/to/digidoc4j.yaml` |
 | siga.dd4j.tsl-refresh-job-cron | Y | Cron expression for the scheduled job that refreshes DD4J TSL cache. | `0 0 3 * * *` |
 
 More about configuring DD4J [here](https://github.com/open-eid/digidoc4j/wiki/Questions-&-Answers#using-a-yaml-file-for-configuration).
@@ -399,7 +448,7 @@ Applicable if `mobileId` profile is active.
 | --- | --- | --- | --- |
 | siga.midrest.url | Y | MID REST service URL. | `https://tsp.demo.sk.ee/mid-api` |
 | siga.midrest.allowed-countries | N | MID REST allowed countries. | `EE, LT` |
-| siga.midrest.truststore-path | Y | MID REST PKCS12 truststore path. | `mid_truststore.p12` |
+| siga.midrest.truststore-path | Y | MID REST PKCS12 truststore path. | `file:/path/to/mid_truststore.p12` or `classpath:path/to/mid_truststore.p12` |
 | siga.midrest.truststore-password | Y | MID REST PKCS12 truststore password. | `changeIt` |
 | siga.midrest.long-polling-timeout | N | MID REST [session status request](https://github.com/SK-EID/MID#334-long-polling) long poll value in milliseconds. Defaults to `30000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `30000` |
 | siga.midrest.connect-timeout | N | MID REST client connection timeout in milliseconds. Defaults to `5000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `5000` |
@@ -419,7 +468,7 @@ Applicable if `smartId` profile is active.
 | siga.sid.status-polling-delay | N | Delay before polling status in milliseconds. Defaults to `6000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `6000` |
 | siga.sid.allowed-countries | N | Smart-ID allowed countries. Defaults to `EE, LT, LV`. | `EE, LV, LT` |
 | siga.sid.interaction-type | N | Smart-ID [interaction](https://github.com/SK-EID/smart-id-documentation#31-uc-x-interaction-choice-realization) to be requested to be performed by the Smart-ID app. Supported options: `DISPLAY_TEXT_AND_PIN`, `VERIFICATION_CODE_CHOICE`. Defaults to `DISPLAY_TEXT_AND_PIN`. | `VERIFICATION_CODE_CHOICE` |
-| siga.sid.truststore-path | Y | Smart-ID PKCS12 truststore path | `sid_truststore.p12` |
+| siga.sid.truststore-path | Y | Smart-ID PKCS12 truststore path | `file:/path/to/sid_truststore.p12` or `classpath:path/to/sid_truststore.p12` |
 | siga.sid.truststore-password | Y | Smart-ID PKCS12 truststore password | `changeIt` |
 
 **NB:** Smart-ID relying party name and UUID are registered per [service](#siga_service).
@@ -450,8 +499,10 @@ MID/SID signature/certificate status requests and signature finalization steps a
 
 Example changelogs and changesets are provided under `siga-auth/src/main/resources/db`. To apply a changelog to the database on the application startup, `spring.liquibase.change-log` property must be set, e.g.:
 
-```
-spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yaml
+```yaml
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
 ```
 
 Use `classpath:db/changelog/db.changelog-master-dev.yaml` only for test/dev purposes. This changeset inserts default testing values into services database.
@@ -459,50 +510,58 @@ Use `classpath:db/changelog/db.changelog-master-dev.yaml` only for test/dev purp
 Out-of-the-box, SiGa supports **H2** and **PostgreSQL** databases. **H2** is good for development and testing, but in production using **PostgreSQL** is recommended.
 An example for configuring SiGa to use PostgreSQL:
 
-```
-spring.sql.init.continue-on-error=false
-spring.sql.init.platform=postgresql
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://127.0.0.1:5432/database
-spring.datasource.username=user
-spring.datasource.password=password
+```yaml
+spring:
+  sql:
+    init:
+      continue-on-error: false
+      platform: postgresql
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/database
+    username: user
+    password: password
 ```
 
 #### SiGa monitoring configuration
 
-SiGa exposes monitoring endpoints via [Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html). An example configuration for monitoring-related properties used in the Docker-based demo setup can be found in [docker/siga-webapp/application.properties](docker/siga-webapp/application.properties). If SiGa is configured without the example configuration, [Spring Boot default values](https://docs.spring.io/spring-boot/appendix/application-properties/index.html) will apply.
+SiGa exposes monitoring endpoints via [Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html). 
+SiGa's [shipped default configuration](#applicationyml) already exposes `health`, `heartbeat`, `version` and `prometheus` and 
+enables health probes. The properties below are only needed to customize or override that default 
+(e.g. disable an endpoint, change a cache TTL). A full example, layered on top of the shipped default, 
+can be found in [docker/siga-webapp/application.yml](docker/siga-webapp/application.yml).
 
-`management.health.redis.enabled` enables Spring Boot's Redis health indicator and is only
-meaningful when the Redis session-storage backend is active (i.e. `siga.session-storage.type=redis`,
-or unset, since Redis is the default; see `RedisSessionConfiguration`). When using the Ignite
-backend (`siga.session-storage.type=ignite`), set `management.health.redis.enabled=false`; otherwise
-the health endpoint can report Redis as down even though Redis is not part of that deployment mode.
+**Liveness and readiness probes**
+
+SiGa explicitly enables `management.endpoint.health.probes.enabled=true`, exposing `/actuator/health/liveness` and
+`/actuator/health/readiness`, matching [Spring Boot's Kubernetes probe support](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.kubernetes-probes).
+Both endpoints, and the parent `/actuator/health/**` path generally, are reachable without HMAC authentication —
+required since a Kubernetes kubelet cannot supply SiGa's signed request headers.
 
 **Heartbeat endpoint**
 
-The heartbeat endpoint returns a simple aggregate health status. Since it delegates to the Spring Boot [health endpoint](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health) internally, `health` must also be included for the heartbeat to function. The following configuration should be added to `application.properties`:
-```
-management.endpoints.web.exposure.include=health,heartbeat
-management.endpoint.heartbeat.enabled=true
+The heartbeat endpoint returns a simple aggregate health status, enabled by default. Since it delegates to the 
+Spring Boot [health endpoint](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health) internally, 
+`health` must also stay included in the exposure list for the heartbeat to keep functioning. 
+To customize, e.g. the cache TTL:
+```yaml
+management:
+  endpoint:
+    heartbeat:
+      cache:
+        time-to-live: 10s
 ```
 By default, the heartbeat endpoint can be accessed at `{host}/actuator/heartbeat`. Subject to configured servlet context path and actuator configuration.
 
 **Version endpoint**
 
-To add the version information endpoint, the following configuration should be added to `application.properties`:
-```
-management.endpoints.web.exposure.include=version
-management.endpoint.version.enabled=true
-```
-By default, the version information endpoint can be accessed at `{host}/actuator/version`. Subject to configured servlet context path and actuator configuration.
+The version information endpoint is enabled by default. It can be accessed at `{host}/actuator/version`. 
+Subject to configured servlet context path and actuator configuration.
 
 **Prometheus endpoint**
 
-SiGa supports metrics collection via [Prometheus](https://docs.spring.io/spring-boot/reference/actuator/metrics.html#actuator.metrics.export.prometheus). To enable the Prometheus metrics endpoint, the following configuration should be added to `application.properties`:
-```
-management.endpoints.web.exposure.include=prometheus
-```
-By default, the Prometheus metrics endpoint can be accessed at `{host}/actuator/prometheus`. Subject to configured servlet context path and actuator configuration.
+SiGa supports metrics collection via [Prometheus](https://docs.spring.io/spring-boot/reference/actuator/metrics.html#actuator.metrics.export.prometheus), enabled by default. 
+The Prometheus metrics endpoint can be accessed at `{host}/actuator/prometheus`. Subject to configured servlet context path and actuator configuration.
 
 ## SiGa database
 
