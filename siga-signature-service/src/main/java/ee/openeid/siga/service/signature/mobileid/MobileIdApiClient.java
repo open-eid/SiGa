@@ -8,6 +8,7 @@ import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.Result;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.util.ResourceUtil;
 import ee.sk.mid.MidClient;
 import ee.sk.mid.MidHashToSign;
 import ee.sk.mid.MidHashType;
@@ -27,7 +28,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ServerErrorException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -170,14 +170,7 @@ public class MobileIdApiClient {
     }
 
     private KeyStore getMidTruststore() {
-        try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = configurationProperties.getTruststorePath().getInputStream();
-            keyStore.load(is, configurationProperties.getTruststorePassword().toCharArray());
-            return keyStore;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return ResourceUtil.loadPkcs12KeyStore(configurationProperties.getTruststorePath(), configurationProperties.getTruststorePassword());
     }
 
     private static MobileIdSessionStatus mapToMidStatus(String state, String result) {

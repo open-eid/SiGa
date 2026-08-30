@@ -12,6 +12,7 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.util.CertificateUtil;
 import ee.openeid.siga.common.util.TokenGenerator;
 import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.util.ResourceUtil;
 import ee.sk.smartid.HashType;
 import ee.sk.smartid.SignableHash;
 import ee.sk.smartid.SmartIdCertificate;
@@ -43,7 +44,6 @@ import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ServerErrorException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -255,14 +255,7 @@ public class SmartIdApiClient {
     }
 
     private KeyStore getSidTruststore() {
-        try {
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = smartIdClientConfigurationProperties.getTruststorePath().getInputStream();
-            keyStore.load(is, smartIdClientConfigurationProperties.getTruststorePassword().toCharArray());
-            return keyStore;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return ResourceUtil.loadPkcs12KeyStore(smartIdClientConfigurationProperties.getTruststorePath(), smartIdClientConfigurationProperties.getTruststorePassword());
     }
 
     private SmartIdStatusResponse mapToSmartIdStatusResponse(SessionStatus sessionStatus) {
