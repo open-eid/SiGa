@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 public class SmartIdClientConfigurationProperties {
     @Getter(AccessLevel.NONE)
     private final Environment environment;
-    private String truststorePath;
+    private Resource truststorePath;
     private String truststorePassword;
     private String url;
     private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT", "LV"));
@@ -52,7 +53,7 @@ public class SmartIdClientConfigurationProperties {
     }
 
     private void validateTruststorePath() {
-        if (StringUtils.isBlank(truststorePath)) {
+        if (truststorePath == null) {
             throw new IllegalStateException("siga.sid.truststorePath property must be set");
         }
     }

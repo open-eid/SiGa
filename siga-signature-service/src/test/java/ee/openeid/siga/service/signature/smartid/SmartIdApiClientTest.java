@@ -24,13 +24,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.ClassPathResource;
 
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.ServerErrorException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -62,22 +60,17 @@ public class SmartIdApiClientTest {
 
     @Mock
     private SmartIdClientConfigurationProperties configurationProperties;
-    @Mock
-    private ResourceLoader resourceLoader;
 
     @InjectMocks
     private SmartIdApiClient smartIdApiClient;
 
     @BeforeEach
-    void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+    void setUp(WireMockRuntimeInfo wireMockServer) {
         Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
-        Mockito.when(configurationProperties.getTruststorePath()).thenReturn("sid_truststore.p12");
+        Mockito.when(configurationProperties.getTruststorePath()).thenReturn(new ClassPathResource("sid_truststore.p12"));
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
         Mockito.when(configurationProperties.getSessionStatusResponseSocketOpenTime()).thenReturn(Duration.ofMillis(30000));
         Mockito.lenient().when(configurationProperties.getInteractionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
-        Resource mockResource = Mockito.mock(Resource.class);
-        Mockito.when(mockResource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("sid_truststore.p12").openStream());
-        Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(mockResource);
     }
 
     @AfterEach

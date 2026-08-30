@@ -39,7 +39,6 @@ import org.digidoc4j.DataToSign;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ClientErrorException;
@@ -86,7 +85,6 @@ public class SmartIdApiClient {
         errorMap = Collections.unmodifiableMap(statuses);
     }
 
-    private final ResourceLoader resourceLoader;
     private final SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE,
@@ -259,7 +257,7 @@ public class SmartIdApiClient {
     private KeyStore getSidTruststore() {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = resourceLoader.getResource(smartIdClientConfigurationProperties.getTruststorePath()).getInputStream();
+            InputStream is = smartIdClientConfigurationProperties.getTruststorePath().getInputStream();
             keyStore.load(is, smartIdClientConfigurationProperties.getTruststorePassword().toCharArray());
             return keyStore;
         } catch (Exception e) {
