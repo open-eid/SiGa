@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class MobileIdClientConfigurationProperties {
 
     @Getter(AccessLevel.NONE)
     private final Environment environment;
-    private String truststorePath;
+    private Resource truststorePath;
     private String truststorePassword;
     private Duration connectTimeout = Duration.ofMillis(5000);
     private Duration longPollingTimeout = Duration.ofMillis(30000);
@@ -50,7 +51,7 @@ public class MobileIdClientConfigurationProperties {
     }
 
     private void validateTruststorePath() {
-        if (StringUtils.isBlank(truststorePath)) {
+        if (truststorePath == null) {
             throw new IllegalStateException("siga.midrest.truststorePath property must be set");
         }
     }

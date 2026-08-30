@@ -10,7 +10,6 @@ import ee.openeid.siga.common.exception.MobileIdApiException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.smartid.SmartIdApiClientTest;
 import ee.sk.mid.MidVerificationCodeCalculator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.digidoc4j.DataToSign;
@@ -24,12 +23,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 
 import jakarta.ws.rs.ServerErrorException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
@@ -63,19 +60,13 @@ class MobileIdApiClientTest {
     private MobileIdClientConfigurationProperties configurationProperties;
     @InjectMocks
     private MobileIdApiClient mobileIdApiClient;
-    @Mock
-    private ResourceLoader resourceLoader;
-    @Mock
-    private Resource resource;
 
     @BeforeEach
-    void setUp(WireMockRuntimeInfo wireMockServer) throws IOException {
+    void setUp(WireMockRuntimeInfo wireMockServer) {
         Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
-        Mockito.when(configurationProperties.getTruststorePath()).thenReturn("mid_truststore.p12");
+        Mockito.when(configurationProperties.getTruststorePath()).thenReturn(new ClassPathResource("mid_truststore.p12"));
         Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
         Mockito.when(configurationProperties.getLongPollingTimeout()).thenReturn(Duration.ofMillis(30000));
-        Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
-        Mockito.when(resourceLoader.getResource(Mockito.anyString())).thenReturn(resource);
     }
 
     @AfterEach
@@ -133,10 +124,9 @@ class MobileIdApiClientTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubCertificateRequestErrorResponse(status.value());
             try {
-                Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 mobileIdApiClient.getCertificate(createRPInfo(), createDefaultMobileIdInformation());
                 fail("Should not reach here");
-            } catch (ClientException | IOException e) {
+            } catch (ClientException e) {
                 assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
@@ -157,10 +147,9 @@ class MobileIdApiClientTest {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubSigningInitiationErrorResponse(status.value());
             try {
-                Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
                 mobileIdApiClient.initMobileSigning(createRPInfo(), mockDataToSign(DEFAULT_MOCK_DATA_TO_SIGN), createDefaultMobileIdInformation());
                 fail("Should not reach here");
-            } catch (ClientException | IOException e) {
+            } catch (ClientException e) {
                 assertEquals("Mobile-ID service error", e.getMessage());
             }
             WireMock.reset();
@@ -303,11 +292,6 @@ class MobileIdApiClientTest {
     void getStatus_midRestReturns5XX() {
         Stream.of(HttpStatus.values()).filter(HttpStatus::is5xxServerError).forEach(status -> {
             stubGetStatusErrorResponse(status.value());
-            try {
-                Mockito.when(resource.getInputStream()).thenReturn(SmartIdApiClientTest.class.getClassLoader().getResource("mid_truststore.p12").openStream());
-            } catch (IOException e) {
-                throw new IllegalArgumentException(e);
-            }
             assertThrows(ServerErrorException.class, () -> mobileIdApiClient.getSignatureStatus(createRPInfo(), DEFAULT_MOCK_SESSION_CODE));
             WireMock.reset();
         });

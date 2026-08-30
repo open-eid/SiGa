@@ -24,7 +24,6 @@ import org.digidoc4j.DataToSign;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ServerErrorException;
@@ -55,7 +54,6 @@ public class MobileIdApiClient {
             MidUserCancellationException.class, MobileIdSessionStatus.USER_CANCEL);
 
     private final MobileIdClientConfigurationProperties configurationProperties;
-    private final ResourceLoader resourceLoader;
 
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
@@ -174,7 +172,7 @@ public class MobileIdApiClient {
     private KeyStore getMidTruststore() {
         try {
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            InputStream is = resourceLoader.getResource(configurationProperties.getTruststorePath()).getInputStream();
+            InputStream is = configurationProperties.getTruststorePath().getInputStream();
             keyStore.load(is, configurationProperties.getTruststorePassword().toCharArray());
             return keyStore;
         } catch (Exception e) {
