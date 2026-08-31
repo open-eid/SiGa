@@ -2,7 +2,6 @@ package ee.openeid.siga.session.ignite;
 
 import ee.openeid.siga.common.session.ProcessingStatus;
 import org.apache.ignite.binary.BinaryObject;
-import org.apache.ignite.internal.binary.BinaryEnumObjectImpl;
 import org.apache.ignite.lang.IgniteBiPredicate;
 
 import java.time.Duration;
@@ -44,7 +43,7 @@ public class CertificateStatusRequestFilter implements IgniteBiPredicate<String,
         return certificateSessions.values().stream()
                 .map(s -> (BinaryObject) s.field("sessionStatus"))
                 .anyMatch(sessionStatus -> {
-                    int statusOrdinal = sessionStatus.<BinaryEnumObjectImpl>field("processingStatus").enumOrdinal();
+                    int statusOrdinal = sessionStatus.<BinaryObject>field("processingStatus").enumOrdinal();
                     ProcessingStatus processingStatus = ProcessingStatus
                             .values()[statusOrdinal];
                     Instant statusTimestamp = sessionStatus.field("processingStatusTimestamp");
