@@ -65,7 +65,7 @@ SiGa ships with two backends, selected via `siga.session-storage.type`:
   standalone or cluster. Tested against Valkey 7.2. See [Running Redis/Valkey](#running-redisvalkey-default)
   below.
 * **Apache Ignite** (`siga.session-storage.type=ignite`) — [Apache Ignite](https://ignite.apache.org/)
-  version 2.17.0, kept for backwards compatibility. See [Running Apache Ignite](#running-apache-ignite-opt-in).
+  version 2.18.0, kept for backwards compatibility. See [Running Apache Ignite](#running-apache-ignite-opt-in).
 
 ### Running the session-storage backend
 
