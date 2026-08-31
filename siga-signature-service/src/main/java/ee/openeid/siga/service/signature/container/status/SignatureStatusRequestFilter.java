@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.apache.ignite.binary.BinaryObject;
-import org.apache.ignite.internal.binary.BinaryEnumObjectImpl;
 import org.apache.ignite.lang.IgniteBiPredicate;
 
 import ee.openeid.siga.common.session.ProcessingStatus;
@@ -31,7 +30,7 @@ public class SignatureStatusRequestFilter implements IgniteBiPredicate<String, M
         return signatureSessions.values().stream()
                 .map(s -> (BinaryObject) s.field("sessionStatus"))
                 .anyMatch(sessionStatus -> {
-                    int statusOrdinal = sessionStatus.<BinaryEnumObjectImpl>field("processingStatus").enumOrdinal();
+                    int statusOrdinal = sessionStatus.<BinaryObject>field("processingStatus").enumOrdinal();
                     ProcessingStatus processingStatus = ProcessingStatus
                             .values()[statusOrdinal];
                     LocalDateTime statusTimestamp = sessionStatus.field("processingStatusTimestamp");
