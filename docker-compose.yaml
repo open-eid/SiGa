@@ -166,7 +166,7 @@ services:
       - ./docker/siga-db/install-extensions.sql:/docker-entrypoint-initdb.d/install-extensions.sql
 
   siga-admin:
-    image: siga-admin-webapp:latest
+    image: ${SIGA_ADMIN_DOCKER_REGISTRY}${SIGA_ADMIN_PROJECT}siga-admin-webapp:latest
     profiles:
       - siga-admin
     environment:
