@@ -74,6 +74,7 @@
         <httpcore5.version>5.4.3</httpcore5.version> <!-- CVE-2026-54399 -->
         <httpclient5.version>5.6.4</httpclient5.version> <!-- CVE-2026-64607 -->
         <log4j2.version>2.26.1</log4j2.version> <!-- CVE-2026-49844 -->
+        <tomcat.version>11.0.25</tomcat.version> <!-- CVE-2026-68525 -->
     </properties>
 
     <dependencies>
