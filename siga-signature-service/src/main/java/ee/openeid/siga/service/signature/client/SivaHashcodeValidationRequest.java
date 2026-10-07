@@ -7,5 +7,8 @@ import java.util.List;
 
 @Data
 public class SivaHashcodeValidationRequest {
+
     private List<SignatureFile> signatureFiles = new ArrayList<>();
+    private String validationLevel;
+
 }

@@ -15,12 +15,15 @@ import ee.openeid.siga.common.test.CommonTestUtil;
 import ee.openeid.siga.service.signature.hashcode.HashcodeContainer;
 import ee.openeid.siga.service.signature.test.RequestUtil;
 import ee.openeid.siga.service.signature.test.TestUtil;
+import ee.openeid.siga.webapp.json.SignatureValidationData;
 import ee.openeid.siga.webapp.json.ValidationConclusion;
+import eu.europa.esig.dss.enumerations.SignatureLevel;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -129,6 +132,26 @@ class SivaClientTest {
                         )
                 )
         ));
+        assertThat(capturedRequest.getValidationLevel(), equalTo("LongTermData"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(SignatureLevel.class)
+    void validateHashcodeContainer_SucceedsWithAnySignatureFormat(SignatureLevel signatureLevel) throws Exception {
+        ValidationResponse validationResponse = RequestUtil.createValidationResponse();
+        ValidationConclusion validationConclusion = validationResponse.getValidationReport().getValidationConclusion();
+        SignatureValidationData signatureValidationData = new SignatureValidationData();
+        signatureValidationData.setSignatureFormat(signatureLevel.name());
+        validationConclusion.getSignatures().add(signatureValidationData);
+        when(httpClient.post(Mockito.eq("/validateHashcode"), Mockito.any(), Mockito.eq(ValidationResponse.class)))
+                .thenReturn(validationResponse);
+
+        ValidationConclusion response = sivaClient.validateHashcodeContainer(
+                RequestUtil.createSignatureWrapper(),
+                RequestUtil.createHashcodeDataFileListWithOneFile()
+        );
+
+        assertThat(response, sameInstance(validationConclusion));
     }
 
     @ParameterizedTest
