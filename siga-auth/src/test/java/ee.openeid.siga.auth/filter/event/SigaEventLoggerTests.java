@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MarkerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import static ee.openeid.siga.common.event.SigaEvent.EventResultType.EXCEPTION;
@@ -20,6 +21,7 @@ import static ee.openeid.siga.common.event.SigaEvent.EventResultType.SUCCESS;
 import static ee.openeid.siga.common.event.SigaEventName.REQUEST;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
@@ -28,7 +30,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @ExtendWith(MockitoExtension.class)
 class SigaEventLoggerTests {
 
-    Logger logger = (Logger) LoggerFactory.getLogger(SigaEventLogger.class);
+    Logger logger = (Logger) LoggerFactory.getLogger(SigaEventLogger.SIGA_EVENT);
 
     @Mock
     Appender<ILoggingEvent> appender;
@@ -82,6 +84,7 @@ class SigaEventLoggerTests {
         assertEquals(startEvent.toString(), startLoggingEvent.getMessage());
         assertEquals(endEvent.toString(), endLoggingEvent.getMessage());
 
+        assertThat(startLoggingEvent.getMarkerList(), contains(MarkerFactory.getMarker(SigaEventLogger.SIGA_EVENT)));
         assertThat(startLoggingEvent.getMessage(), containsString("parameter_1=\"value1 with \\\"characters\\\" that should be escaped\", parameter_2=value2"));
         assertThat(endLoggingEvent.getMessage(), containsString("return_value_2=value2, return_value_1=\"value1 with \\\"characters\\\" that should be escaped\""));
     }

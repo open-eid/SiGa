@@ -2,6 +2,8 @@ package ee.openeid.siga.common.event;
 
 import ee.openeid.siga.common.auth.SigaUserDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import static org.slf4j.MarkerFactory.getMarker;
 @Component
 public class SigaEventLogger {
     public static final String SIGA_EVENT = "SIGA_EVENT";
+    private static final Logger EVENT_LOG = LoggerFactory.getLogger(SIGA_EVENT);
 
     private final ThreadLocal<List<SigaEvent>> threadScopeEvents = ThreadLocal.withInitial(ArrayList::new);
 
@@ -176,13 +179,13 @@ public class SigaEventLogger {
                     && authentication.isAuthenticated()
                     && authentication.getPrincipal() instanceof SigaUserDetails sud) {
                 insertClientAndServiceDataToEvents(sud);
-                events.forEach(e -> log.info(getMarker(SIGA_EVENT), e.toString()));
+                events.forEach(e -> EVENT_LOG.info(getMarker(SIGA_EVENT), e.toString()));
             } else {
                 if (!events.isEmpty()) {
                     final String serviceUuid = events.get(0).getServiceUuid();
                     events.forEach(e -> {
                         e.setServiceUuid(serviceUuid);
-                        log.info(getMarker(SIGA_EVENT), e.toString());
+                        EVENT_LOG.info(getMarker(SIGA_EVENT), e.toString());
                     });
                 }
             }
