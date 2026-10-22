@@ -153,7 +153,7 @@ services:
         condition: service_started
 
   siga-db:
-    image: postgres:13
+    image: postgres:17
     restart: always
     environment:
       - POSTGRES_DB=siga_db
@@ -169,6 +169,9 @@ services:
     image: ${SIGA_ADMIN_DOCKER_REGISTRY}${SIGA_ADMIN_PROJECT}siga-admin-webapp:latest
     profiles:
       - siga-admin
+    env_file:
+      - path: docker/siga-admin/oidc-local.env
+        required: false
     environment:
       - siga.admin.esteid-ldap.tls-truststore-path=file:/etc/siga-admin/tls.esteid-ldap.truststore.p12
       - siga.admin.esteid-ldap.tls-truststore-password=changeit
