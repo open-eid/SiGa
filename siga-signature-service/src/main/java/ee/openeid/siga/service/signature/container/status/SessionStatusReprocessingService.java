@@ -7,6 +7,8 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.session.spi.SessionLockRegistry;
@@ -18,11 +20,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.time.Duration.ZERO;
@@ -43,6 +47,8 @@ public class SessionStatusReprocessingService {
     private final SessionLockRegistry sessionLockRegistry;
     @NonNull
     private final SessionStatusReprocessingProperties reprocessingProperties;
+    private final ObjectProvider<MobileIdSigningDelegate<?>> mobileIdSigningDelegates;
+    private final ObjectProvider<SmartIdSigningDelegate<?>> smartIdSigningDelegates;
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
     public void processFailedStatusRequests() {
@@ -79,9 +85,13 @@ public class SessionStatusReprocessingService {
                 log.info("Reprocessing failed signature status request: {}, Session status: {},",
                         signatureSessionId, entry.getValue().getSessionStatus());
                 if (signingType == SigningType.SMART_ID) {
-                    signingService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                    smartIdDelegateFor(signingService).ifPresentOrElse(
+                            delegate -> delegate.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO),
+                            () -> log.warn("Smart-ID not enabled, skipping reprocessing of signature session: {}", signatureSessionId));
                 } else if (signingType == SigningType.MOBILE_ID) {
-                    signingService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                    mobileIdDelegateFor(signingService).ifPresentOrElse(
+                            delegate -> delegate.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO),
+                            () -> log.warn("Mobile-ID not enabled, skipping reprocessing of signature session: {}", signatureSessionId));
                 }
             });
         });
@@ -112,13 +122,18 @@ public class SessionStatusReprocessingService {
                 log.warn("No compatible service found for reprocessing session: {}", sessionId);
                 return;
             }
+            Optional<SmartIdSigningDelegate<?>> smartIdDelegate = smartIdDelegateFor(signingService);
+            if (smartIdDelegate.isEmpty()) {
+                log.warn("Smart-ID not enabled, skipping certificate status reprocessing for session: {}", sessionId);
+                return;
+            }
 
             Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
             certificateSessions.entrySet().stream().filter(applyCertificateStatusFilter(filter)).forEach(entry -> {
                 String certificateSessionId = entry.getKey();
                 log.info("Reprocessing failed certificate status request: {}, Session status: {},",
                         certificateSessionId, entry.getValue().getSessionStatus());
-                signingService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
+                smartIdDelegate.get().pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
             });
         });
     }
@@ -150,4 +165,17 @@ public class SessionStatusReprocessingService {
         return status.isDueForReprocessing(filter.processingCutoff(), filter.exceptionCutoff(),
                 filter.maxProcessingRetries());
     }
+
+    private Optional<MobileIdSigningDelegate<?>> mobileIdDelegateFor(ContainerSigningService signingService) {
+        return mobileIdSigningDelegates.stream()
+                .filter(delegate -> delegate.getContainerSigningService() == signingService)
+                .findFirst();
+    }
+
+    private Optional<SmartIdSigningDelegate<?>> smartIdDelegateFor(ContainerSigningService signingService) {
+        return smartIdSigningDelegates.stream()
+                .filter(delegate -> delegate.getContainerSigningService() == signingService)
+                .findFirst();
+    }
+
 }

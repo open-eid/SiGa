@@ -15,11 +15,16 @@ import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.common.util.UUIDGenerator;
+import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.smartid.InitSmartIdSignatureResponse;
+import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
 import ee.openeid.siga.service.signature.smartid.SmartIdStatusResponse;
 import ee.openeid.siga.session.spi.SessionLocks;
 import ee.sk.smartid.SmartIdCertificate;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
@@ -44,10 +49,21 @@ import static ee.openeid.siga.service.signature.container.ContainerSigningServic
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+/**
+ * Smart-ID signing flow for one container type.
+ *
+ * @param <S> the container signing service this delegate signs with
+ *            ({@link HashcodeContainerSigningService} or {@link AsicContainerSigningService})
+ */
+
 @Slf4j
 @RequiredArgsConstructor
-public class SmartIdSigningDelegate {
-    private final ContainerSigningService containerSigningService;
+public class SmartIdSigningDelegate<S extends ContainerSigningService> {
+
+    @Getter
+    private final S containerSigningService;
+    private final SmartIdApiClient smartIdApiClient;
+    private final SmartIdClientConfigurationProperties configurationProperties;
 
     public static RelyingPartyInfo getRelyingPartyInfo() {
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -63,14 +79,14 @@ public class SmartIdSigningDelegate {
         X509Certificate certificate = session.getCertificate(smartIdInformation.getDocumentNumber());
         RelyingPartyInfo relyingPartyInfo = getRelyingPartyInfo();
         if (certificate == null) {
-            SmartIdCertificate certificateResponse = containerSigningService.getSmartIdApiClient().getCertificate(relyingPartyInfo, smartIdInformation);
+            SmartIdCertificate certificateResponse = smartIdApiClient.getCertificate(relyingPartyInfo, smartIdInformation);
             certificate = certificateResponse.getCertificate();
         }
 
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = containerSigningService.buildDataToSign(session, signatureParameters);
 
-        InitSmartIdSignatureResponse initSmartIdSignatureResponse = containerSigningService.getSmartIdApiClient().initSmartIdSigning(relyingPartyInfo, smartIdInformation, dataToSign);
+        InitSmartIdSignatureResponse initSmartIdSignatureResponse = smartIdApiClient.initSmartIdSigning(relyingPartyInfo, smartIdInformation, dataToSign);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         SignatureSession signatureSession = SignatureSession.builder()
@@ -85,7 +101,7 @@ public class SmartIdSigningDelegate {
         session.clearCertificate(smartIdInformation.getDocumentNumber());
         containerSigningService.getSessionService().update(session);
         pollSmartIdSignatureStatus(session.getSessionId(), generatedSignatureId,
-                containerSigningService.getSmartIdConfigurationProperties().getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
 
         return SigningChallenge.builder()
                 .challengeId(initSmartIdSignatureResponse.getChallengeId())
@@ -97,7 +113,7 @@ public class SmartIdSigningDelegate {
         Session session = containerSigningService.getSession(containerId);
         containerSigningService.verifySigningObjectExistence(session);
         RelyingPartyInfo relyingPartyInfo = getRelyingPartyInfo();
-        String smartIdSessionId = containerSigningService.getSmartIdApiClient().initiateCertificateChoice(relyingPartyInfo, smartIdInformation);
+        String smartIdSessionId = smartIdApiClient.initiateCertificateChoice(relyingPartyInfo, smartIdInformation);
         String generatedCertificateId = UUIDGenerator.generateUUID();
         session.addCertificateSession(generatedCertificateId, CertificateSession.builder()
                 .relyingPartyInfo(relyingPartyInfo)
@@ -105,7 +121,7 @@ public class SmartIdSigningDelegate {
                 .build());
         containerSigningService.getSessionService().update(session);
         pollSmartIdCertificateStatus(session.getSessionId(), generatedCertificateId,
-                containerSigningService.getSmartIdConfigurationProperties().getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
         return generatedCertificateId;
     }
 
@@ -168,8 +184,7 @@ public class SmartIdSigningDelegate {
         Session session = containerSigningService.getSessionService().getContainerBySessionId(sessionId);
         CertificateSession certificateSession = session.getCertificateSession(certificateId);
         RelyingPartyInfo relyingPartyInfo = certificateSession.getRelyingPartyInfo();
-        SmartIdStatusResponse statusResponse = containerSigningService.getSmartIdApiClient()
-                .getCertificateStatus(relyingPartyInfo, certificateSession.getSessionCode());
+        SmartIdStatusResponse statusResponse = smartIdApiClient.getCertificateStatus(relyingPartyInfo, certificateSession.getSessionCode());
 
         Lock containerLock = containerSigningService.getSessionLockRegistry().obtain(sessionId); // TODO: SIGA-424
         boolean processed = SessionLocks.tryRun(containerLock, 5, TimeUnit.SECONDS,
@@ -273,7 +288,7 @@ public class SmartIdSigningDelegate {
         }
         RelyingPartyInfo relyingPartyInfo = signatureSession.getRelyingPartyInfo();
         String sessionCode = signatureSession.getSessionCode();
-        SmartIdStatusResponse statusResponse = containerSigningService.getSmartIdApiClient().getSignatureStatus(relyingPartyInfo, sessionCode);
+        SmartIdStatusResponse statusResponse = smartIdApiClient.getSignatureStatus(relyingPartyInfo, sessionCode);
 
         Lock containerLock = containerSigningService.getSessionLockRegistry().obtain(sessionId); // TODO: SIGA-424
         boolean processed = SessionLocks.tryRun(containerLock, 5, TimeUnit.SECONDS,

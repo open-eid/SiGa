@@ -25,6 +25,7 @@ import org.digidoc4j.DataToSign;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ServerErrorException;
@@ -39,6 +40,7 @@ import static java.lang.String.format;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(MobileIdClientConfigurationProperties.class)
+@Profile("mobileId")
 public class MobileIdApiClient {
 
     private static final Map<Class<?>, MobileIdSessionStatus> errorMap = Map.of(
@@ -153,9 +155,9 @@ public class MobileIdApiClient {
     }
 
     private MidClient createMidRestClient(RelyingPartyInfo relyingPartyInfo) {
-        return MidClient.newBuilder().withHostUrl(configurationProperties.getUrl())
+        return MidClient.newBuilder().withHostUrl(configurationProperties.url())
                 .withTrustStore(getMidTruststore())
-                .withLongPollingTimeoutSeconds((int) configurationProperties.getLongPollingTimeout().toSeconds())
+                .withLongPollingTimeoutSeconds((int) configurationProperties.longPollingTimeout().toSeconds())
                 .withNetworkConnectionConfig(clientConfig())
                 .withRelyingPartyName(relyingPartyInfo.getName())
                 .withRelyingPartyUUID(relyingPartyInfo.getUuid())
@@ -164,13 +166,13 @@ public class MobileIdApiClient {
 
     private ClientConfig clientConfig() {
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) configurationProperties.getConnectTimeout().toMillis());
-        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) configurationProperties.getLongPollingTimeout().plusMillis(5000).toMillis());
+        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) configurationProperties.connectTimeout().toMillis());
+        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) configurationProperties.longPollingTimeout().plusMillis(5000).toMillis());
         return clientConfig;
     }
 
     private KeyStore getMidTruststore() {
-        return ResourceUtil.loadPkcs12KeyStore(configurationProperties.getTruststorePath(), configurationProperties.getTruststorePassword());
+        return ResourceUtil.loadPkcs12KeyStore(configurationProperties.truststorePath(), configurationProperties.truststorePassword());
     }
 
     private static MobileIdSessionStatus mapToMidStatus(String state, String result) {

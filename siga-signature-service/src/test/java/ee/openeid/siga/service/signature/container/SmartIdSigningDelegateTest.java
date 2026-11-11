@@ -7,6 +7,8 @@ import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.ProcessingStatus;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
@@ -34,8 +36,12 @@ class SmartIdSigningDelegateTest {
     private SessionService sessionService;
     @Mock
     private Signature signature;
+    @Mock
+    private SmartIdApiClient mobileIdApiClient;
+    @Mock
+    private SmartIdClientConfigurationProperties configurationProperties;
     @InjectMocks
-    private SmartIdSigningDelegate smartIdSigningDelegate;
+    private SmartIdSigningDelegate<ContainerSigningService> smartIdSigningDelegate;
 
     @Test
     void getSmartIdSignatureStatus_WhenContainerHasOutstandingSidSignatureSession_ReturnsOutstandingTransactionStatus() {

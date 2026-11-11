@@ -12,8 +12,6 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.common.session.AsicContainerSession;
 import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
 import ee.openeid.siga.service.signature.container.ContainerSigningServiceTest;
 import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
@@ -43,7 +41,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -83,10 +80,6 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Mock
     private Lock sessionLock;
     @Mock
-    private MobileIdClientConfigurationProperties mobileIdConfigurationProperties;
-    @Mock
-    private SmartIdClientConfigurationProperties smartIdConfigurationProperties;
-    @Mock
     private SessionStatusReprocessingProperties reprocessingProperties;
     @Spy
     private Configuration configuration = Configuration.of(Configuration.Mode.TEST);
@@ -95,14 +88,8 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     void setUp() throws IOException, URISyntaxException, InterruptedException {
         Mockito.lenient().when(sigaEventLogger.logStartEvent(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
         Mockito.lenient().when(sigaEventLogger.logEndEventFor(any())).thenReturn(SigaEvent.builder().timestamp(0L).build());
-        MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate((signingService));
-        Mockito.lenient().when(signingService.getMobileIdSigningDelegate()).thenReturn(mobileIdSigningDelegate);
-        SmartIdSigningDelegate smartIdSigningDelegate = new SmartIdSigningDelegate((signingService));
-        Mockito.lenient().when(signingService.getSmartIdSigningDelegate()).thenReturn(smartIdSigningDelegate);
         Mockito.lenient().when(sessionService.getContainer(CONTAINER_ID)).thenReturn(RequestUtil.createAsicSessionHolder());
         taskExecutor.initialize();
-        Mockito.lenient().when(mobileIdConfigurationProperties.getStatusPollingDelay()).thenReturn(Duration.ofSeconds(0));
-        Mockito.lenient().when(smartIdConfigurationProperties.getStatusPollingDelay()).thenReturn(Duration.ofSeconds(0));
         Mockito.lenient().when(sessionLock.tryLock()).thenReturn(true);
         Mockito.lenient().doReturn(true).when(sessionLock).tryLock(anyLong(), any());
         Mockito.lenient().when(sessionLockRegistry.obtain(anyString())).thenReturn(sessionLock);
@@ -116,7 +103,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void invalidContainerIdTest() {
         TechnicalException caughtException = assertThrows(
-            TechnicalException.class, this::invalidContainerId
+                TechnicalException.class, this::invalidContainerId
         );
         assertEquals("Unable to parse session object", caughtException.getMessage());
     }
@@ -143,7 +130,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+                InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("Unable to sign container with empty datafiles", caughtException.getMessage());
     }
@@ -154,7 +141,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+                InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("ASiC-S container signing is not allowed.", caughtException.getMessage());
     }
@@ -165,7 +152,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+                InvalidSessionDataException.class, () -> signingService.createDataToSign(CONTAINER_ID, createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("ASiC-S container signing is not allowed.", caughtException.getMessage());
     }
@@ -195,7 +182,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void noDataToSignInSessionTest() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, this::noDataToSignInSession
+                InvalidSessionDataException.class, this::noDataToSignInSession
         );
         assertEquals("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId", caughtException.getMessage());
     }
@@ -203,7 +190,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void noDataToSignInSessionForSignatureIdTest() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class,
+                InvalidSessionDataException.class,
                 () -> SigaEventLoggingAspectTestUtil.executeInParameterContext(this::noDataToSignInSessionForSignatureId)
         );
 
@@ -223,7 +210,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void noSessionFoundMobileSigning() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.getMobileIdSignatureStatus(CONTAINER_ID, "someUnknownSignatureId")
+                InvalidSessionDataException.class, () -> mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, "someUnknownSignatureId")
         );
         assertEquals("Unable to finalize signature. No data to sign with signature Id: someUnknownSignatureId", caughtException.getMessage());
     }
@@ -235,19 +222,19 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.startMobileIdSigning(CONTAINER_ID, Mockito.mock(MobileIdInformation.class),
-                    createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+                InvalidSessionDataException.class, () -> mobileIdSigningDelegate.startMobileIdSigning(CONTAINER_ID, Mockito.mock(MobileIdInformation.class),
+                        createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("Unable to sign container with empty datafiles", caughtException.getMessage());
     }
 
     @Test
-    void successfulCertificateChoice(){
+    void successfulCertificateChoice() {
         assertSuccessfulCertificateChoice();
     }
 
     @Test
-    void successfulCertificateChoiceProcessing(){
+    void successfulCertificateChoiceProcessing() {
         assertSuccessfulCertificateChoiceProcessing();
     }
 
@@ -273,7 +260,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.initSmartIdCertificateChoice(CONTAINER_ID, Mockito.mock(SmartIdInformation.class))
+                InvalidSessionDataException.class, () -> smartIdSigningDelegate.initSmartIdCertificateChoice(CONTAINER_ID, Mockito.mock(SmartIdInformation.class))
         );
         assertEquals("Unable to sign container with empty datafiles", caughtException.getMessage());
     }
@@ -285,8 +272,8 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
         Mockito.when(sessionService.getContainer(CONTAINER_ID)).thenReturn(sessionHolder);
 
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, () -> signingService.startSmartIdSigning(CONTAINER_ID, Mockito.mock(SmartIdInformation.class),
-                    createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
+                InvalidSessionDataException.class, () -> smartIdSigningDelegate.startSmartIdSigning(CONTAINER_ID, Mockito.mock(SmartIdInformation.class),
+                        createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate()))
         );
         assertEquals("Unable to sign container with empty datafiles", caughtException.getMessage());
     }
@@ -309,7 +296,7 @@ class AsicContainerSigningServiceTest extends ContainerSigningServiceTest {
     @Test
     void finalizeSignatureWithContainerDataFilesChangedThrows() {
         InvalidSessionDataException caughtException = assertThrows(
-            InvalidSessionDataException.class, this::finalizeSignatureWithContainerDataFilesChanged
+                InvalidSessionDataException.class, this::finalizeSignatureWithContainerDataFilesChanged
         );
         assertEquals("Unable to finalize signature. " +
                 "Container data files have been changed after signing was initiated. Repeat signing process", caughtException.getMessage());

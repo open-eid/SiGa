@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.SignatureProfile;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -35,10 +36,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class RequestValidator {
 
-    @NonNull
-    private final MobileIdClientConfigurationProperties mobileIdClientConfigurationProperties;
-    @NonNull
-    private final SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
+    private final ObjectProvider<MobileIdClientConfigurationProperties> mobileIdClientConfigurationProperties;
+    private final ObjectProvider<SmartIdClientConfigurationProperties> smartIdClientConfigurationProperties;
     @NonNull
     private final SecurityConfigurationProperties securityConfigurationProperties;
 
@@ -151,7 +150,7 @@ public class RequestValidator {
     }
 
     public void validateSmartIdInformationForCertChoice(SmartIdInformation smartIdInformation) {
-        validateCountry(smartIdInformation.getCountry(), smartIdClientConfigurationProperties.getAllowedCountries());
+        validateCountry(smartIdInformation.getCountry(), smartIdClientConfigurationProperties.getObject().allowedCountries());
         validatePersonIdentifier(smartIdInformation.getPersonIdentifier());
     }
 
@@ -183,7 +182,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid phone No.");
         }
         PhoneNumberUtil.CountryCallingCode countryNumber = PhoneNumberUtil.CountryCallingCode.getCountryByPrefix(phoneNo.substring(0, 4));
-        if (countryNumber == null || !mobileIdClientConfigurationProperties.getAllowedCountries().contains(countryNumber.name())) {
+        if (countryNumber == null || !mobileIdClientConfigurationProperties.getObject().allowedCountries().contains(countryNumber.name())) {
             throw new RequestValidationException("Invalid international calling code");
         }
     }
@@ -220,7 +219,7 @@ public class RequestValidator {
             throw new RequestValidationException("Invalid Smart-Id documentNumber");
         }
         String country = documentNumber.substring(3, 5);
-        if (!smartIdClientConfigurationProperties.getAllowedCountries().contains(country)) {
+        if (!smartIdClientConfigurationProperties.getObject().allowedCountries().contains(country)) {
             throw new RequestValidationException("Invalid Smart-Id country inside documentNumber");
         }
     }

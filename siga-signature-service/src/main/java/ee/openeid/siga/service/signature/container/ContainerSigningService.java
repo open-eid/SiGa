@@ -12,10 +12,6 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.common.util.LoggingContextUtil;
 import ee.openeid.siga.common.util.UUIDGenerator;
-import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
-import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
-import ee.openeid.siga.service.signature.smartid.SmartIdApiClient;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.session.spi.SessionLockRegistry;
@@ -23,7 +19,6 @@ import eu.europa.esig.dss.alert.exception.AlertException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.DataToSign;
@@ -59,20 +54,10 @@ import static ee.openeid.siga.common.event.SigaEventName.FINALIZE_SIGNATURE;
 public abstract class ContainerSigningService {
     protected Configuration configuration;
     static final String UNABLE_TO_FINALIZE_SIGNATURE = "Unable to finalize signature";
-    @Getter
-    @Delegate
-    private final MobileIdSigningDelegate mobileIdSigningDelegate = new MobileIdSigningDelegate(this);
-    @Getter
-    @Delegate
-    private final SmartIdSigningDelegate smartIdSigningDelegate = new SmartIdSigningDelegate(this);
-    private SmartIdClientConfigurationProperties smartIdConfigurationProperties;
-    private MobileIdClientConfigurationProperties mobileIdConfigurationProperties;
     private SessionStatusReprocessingProperties reprocessingProperties;
     @Getter
     private SessionService sessionService;
     private SigaEventLogger sigaEventLogger;
-    private MobileIdApiClient mobileIdApiClient;
-    private SmartIdApiClient smartIdApiClient;
     private ThreadPoolTaskExecutor taskExecutor;
     private SessionLockRegistry sessionLockRegistry;
 

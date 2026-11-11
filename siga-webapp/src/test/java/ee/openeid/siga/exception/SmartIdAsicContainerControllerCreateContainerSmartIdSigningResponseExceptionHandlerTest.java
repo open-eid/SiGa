@@ -1,6 +1,7 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.SmartIdAsicContainerController;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.doAnswer;
 class SmartIdAsicContainerControllerCreateContainerSmartIdSigningResponseExceptionHandlerTest extends ExceptionHandlerTestBase {
 
     @MockitoBean
-    private AsicContainerSigningService signingService;
+    private SmartIdSigningDelegate<AsicContainerSigningService> signingService;
 
     @MockitoBean
     private RequestValidator validator;

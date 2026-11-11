@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -41,7 +42,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,11 +66,19 @@ class RequestValidatorTest {
     @Mock
     private SecurityConfigurationProperties securityConfigurationProperties;
 
+    @Mock
+    private ObjectProvider<MobileIdClientConfigurationProperties> mobileIdProvider;
+
+    @Mock
+    private ObjectProvider<SmartIdClientConfigurationProperties> smartIdProvider;
+
     @BeforeEach
     void setup() {
-        Mockito.lenient().when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        Mockito.lenient().when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        validator = new RequestValidator(mobileIdClientConfigurationProperties, smartIdClientConfigurationProperties, securityConfigurationProperties);
+        Mockito.lenient().when(mobileIdProvider.getObject()).thenReturn(mobileIdClientConfigurationProperties);
+        Mockito.lenient().when(smartIdProvider.getObject()).thenReturn(smartIdClientConfigurationProperties);
+        Mockito.lenient().when(mobileIdClientConfigurationProperties.allowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        Mockito.lenient().when(smartIdClientConfigurationProperties.allowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
+        validator = new RequestValidator(mobileIdProvider, smartIdProvider, securityConfigurationProperties);
     }
 
     private static MobileIdInformation getMobileInformationRequest() {

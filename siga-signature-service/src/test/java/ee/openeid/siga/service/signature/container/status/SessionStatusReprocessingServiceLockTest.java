@@ -5,6 +5,8 @@ import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.session.spi.SessionLockRegistry;
@@ -15,11 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Stream;
 
 import static java.time.Duration.ZERO;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +59,14 @@ class SessionStatusReprocessingServiceLockTest {
     private ContainerSigningService signingService;
     @Mock
     private Lock sessionLock;
+    @Mock
+    private ObjectProvider<MobileIdSigningDelegate<?>> mobileIdSigningDelegates;
+    @Mock
+    private ObjectProvider<SmartIdSigningDelegate<?>> smartIdSigningDelegates;
+    @Mock
+    private MobileIdSigningDelegate<ContainerSigningService> mobileIdDelegate;
+    @Mock
+    private SmartIdSigningDelegate<ContainerSigningService> smartIdDelegate;
 
     private SessionStatusReprocessingProperties reprocessingProperties;
     private StatusReprocessingFilter filter;
@@ -72,11 +84,14 @@ class SessionStatusReprocessingServiceLockTest {
 
         service = new SessionStatusReprocessingService(
                 taskExecutor, sessionStatusScanner, signingServiceSelector,
-                sessionService, sessionLockRegistry, reprocessingProperties);
+                sessionService, sessionLockRegistry, reprocessingProperties,
+                mobileIdSigningDelegates, smartIdSigningDelegates);
     }
 
     @Test
     void shouldObtainLockBySessionId_AndCallSigningService_WhenLockAcquired() {
+        when(mobileIdSigningDelegates.stream()).thenReturn(Stream.of(mobileIdDelegate));
+        when(mobileIdDelegate.getContainerSigningService()).thenReturn(signingService);
         when(sessionLockRegistry.obtain(SESSION_ID)).thenReturn(sessionLock);
         when(sessionLock.tryLock()).thenReturn(true);
         HashcodeContainerSession session = sessionWithStaleSignature();
@@ -92,7 +107,7 @@ class SessionStatusReprocessingServiceLockTest {
         // peek (not get) — must NOT slide TTL during reprocessing.
         verify(sessionService).peekContainerBySessionId(SESSION_ID);
         // Stale MID signature gets re-polled with ZERO delay.
-        verify(signingService).pollMobileIdSignatureStatus(eq(SESSION_ID), eq(SIGNATURE_ID), eq(ZERO));
+        verify(mobileIdDelegate).pollMobileIdSignatureStatus(eq(SESSION_ID), eq(SIGNATURE_ID), eq(ZERO));
         verify(sessionLock).unlock();
     }
 
@@ -142,6 +157,8 @@ class SessionStatusReprocessingServiceLockTest {
 
     @Test
     void shouldObtainLockBySessionId_WhenProcessingFailedCertificateRequest() {
+        when(smartIdSigningDelegates.stream()).thenReturn(Stream.of(smartIdDelegate));
+        when(smartIdDelegate.getContainerSigningService()).thenReturn(signingService);
         when(sessionLockRegistry.obtain(SESSION_ID)).thenReturn(sessionLock);
         when(sessionLock.tryLock()).thenReturn(true);
         HashcodeContainerSession session = sessionWithStaleCertificate();
@@ -151,7 +168,7 @@ class SessionStatusReprocessingServiceLockTest {
         service.processFailedCertificateStatusRequest(filter, SESSION_ID);
 
         verify(sessionLockRegistry).obtain(SESSION_ID);
-        verify(signingService).pollSmartIdCertificateStatus(eq(SESSION_ID), eq("cert-1"), eq(ZERO));
+        verify(smartIdDelegate).pollSmartIdCertificateStatus(eq(SESSION_ID), eq("cert-1"), eq(ZERO));
         verify(sessionLock).unlock();
     }
 

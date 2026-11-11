@@ -1,64 +1,43 @@
 package ee.openeid.siga.service.signature.configuration;
 
-import jakarta.annotation.PostConstruct;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.core.io.Resource;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-@Getter
-@Setter
 @ConfigurationProperties(prefix = "siga.midrest")
-public class MobileIdClientConfigurationProperties {
+@Validated
+public record MobileIdClientConfigurationProperties(
 
-    @Getter(AccessLevel.NONE)
-    private final Environment environment;
-    private Resource truststorePath;
-    private String truststorePassword;
-    private Duration connectTimeout = Duration.ofMillis(5000);
-    private Duration longPollingTimeout = Duration.ofMillis(30000);
-    private Duration statusPollingDelay = Duration.ofMillis(6000);
-    private String url;
-    private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT"));
+        @NotNull(message = "siga.midrest.truststorePath property must be set")
+        Resource truststorePath,
 
-    @Autowired
-    public MobileIdClientConfigurationProperties(Environment environment) {
-        this.environment = environment;
-    }
+        @NotBlank(message = "siga.midrest.truststorePassword property must be set")
+        String truststorePassword,
 
-    @PostConstruct
-    public void validateConfiguration() {
-        if (List.of(environment.getActiveProfiles()).contains("mobileId")) {
-            validateUrl();
-            validateTruststorePath();
-            validateTruststorePassword();
-        }
-    }
+        @NotBlank(message = "siga.midrest.url property must be set")
+        String url,
 
-    private void validateUrl() {
-        if (StringUtils.isBlank(url)) {
-            throw new IllegalStateException("siga.midrest.url property must be set");
-        }
-    }
+        @DefaultValue({"EE", "LT"})
+        @NotNull
+        List<String> allowedCountries,
 
-    private void validateTruststorePath() {
-        if (truststorePath == null) {
-            throw new IllegalStateException("siga.midrest.truststorePath property must be set");
-        }
-    }
+        @DefaultValue("5000ms")
+        @DurationMin(millis = 1)
+        @NotNull
+        Duration connectTimeout,
 
-    private void validateTruststorePassword() {
-        if (StringUtils.isBlank(truststorePassword)) {
-            throw new IllegalStateException("siga.midrest.truststorePassword property must be set");
-        }
-    }
-}
+        @DefaultValue("30000ms")
+        @DurationMin(millis = 1)
+        Duration longPollingTimeout,
+
+        @DefaultValue("6000ms")
+        @DurationMin(millis = 0)
+        Duration statusPollingDelay
+) { }

@@ -13,10 +13,15 @@ import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.common.util.UUIDGenerator;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
+import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
 import ee.openeid.siga.service.signature.mobileid.MobileIdSessionStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdStatusResponse;
 import ee.openeid.siga.session.spi.SessionLocks;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
@@ -40,10 +45,21 @@ import static ee.openeid.siga.service.signature.container.ContainerSigningServic
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+/**
+ * Mobile-ID signing flow for one container type.
+ *
+ * @param <S> the container signing service this delegate signs with
+ *            ({@link HashcodeContainerSigningService} or {@link AsicContainerSigningService})
+ */
+
 @Slf4j
 @RequiredArgsConstructor
-public class MobileIdSigningDelegate {
-    private final ContainerSigningService containerSigningService;
+public class MobileIdSigningDelegate<S extends ContainerSigningService> {
+
+    @Getter
+    private final S containerSigningService;
+    private final MobileIdApiClient mobileIdApiClient;
+    private final MobileIdClientConfigurationProperties configurationProperties;
 
     public static RelyingPartyInfo getRelyingPartyInfo() {
         SigaUserDetails sigaUserDetails = (SigaUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -57,11 +73,11 @@ public class MobileIdSigningDelegate {
         Session session = containerSigningService.getSession(containerId);
         containerSigningService.verifySigningObjectExistence(session);
         RelyingPartyInfo relyingPartyInfo = getRelyingPartyInfo();
-        X509Certificate certificate = containerSigningService.getMobileIdApiClient().getCertificate(relyingPartyInfo, mobileIdInformation);
+        X509Certificate certificate = mobileIdApiClient.getCertificate(relyingPartyInfo, mobileIdInformation);
         signatureParameters.setSigningCertificate(certificate);
         DataToSign dataToSign = containerSigningService.buildDataToSign(session, signatureParameters);
 
-        InitMidSignatureResponse initMidSignatureResponse = containerSigningService.getMobileIdApiClient().initMobileSigning(relyingPartyInfo, dataToSign, mobileIdInformation);
+        InitMidSignatureResponse initMidSignatureResponse = mobileIdApiClient.initMobileSigning(relyingPartyInfo, dataToSign, mobileIdInformation);
 
         String generatedSignatureId = UUIDGenerator.generateUUID();
         SignatureSession signatureSession = SignatureSession.builder()
@@ -75,7 +91,7 @@ public class MobileIdSigningDelegate {
         session.addSignatureSession(generatedSignatureId, signatureSession);
         containerSigningService.getSessionService().update(session);
         pollMobileIdSignatureStatus(session.getSessionId(), generatedSignatureId,
-                containerSigningService.getMobileIdConfigurationProperties().getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
 
         return SigningChallenge.builder()
                 .challengeId(initMidSignatureResponse.getChallengeId())
@@ -151,7 +167,7 @@ public class MobileIdSigningDelegate {
         }
         RelyingPartyInfo relyingPartyInfo = signatureSession.getRelyingPartyInfo();
         String sessionCode = signatureSession.getSessionCode();
-        MobileIdStatusResponse statusResponse = containerSigningService.getMobileIdApiClient().getSignatureStatus(relyingPartyInfo, sessionCode);
+        MobileIdStatusResponse statusResponse = mobileIdApiClient.getSignatureStatus(relyingPartyInfo, sessionCode);
 
         Lock containerLock = containerSigningService.getSessionLockRegistry().obtain(sessionId); // TODO: SIGA-424
         boolean processed = SessionLocks.tryRun(containerLock, 5, TimeUnit.SECONDS,

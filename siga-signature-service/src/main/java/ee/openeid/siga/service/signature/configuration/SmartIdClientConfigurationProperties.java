@@ -1,72 +1,47 @@
 package ee.openeid.siga.service.signature.configuration;
 
 import ee.openeid.siga.service.signature.smartid.SmartIdInteractionType;
-import jakarta.annotation.PostConstruct;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.core.io.Resource;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-@Getter
-@Setter
 @ConfigurationProperties(prefix = "siga.sid")
-public class SmartIdClientConfigurationProperties {
-    @Getter(AccessLevel.NONE)
-    private final Environment environment;
-    private Resource truststorePath;
-    private String truststorePassword;
-    private String url;
-    private List<String> allowedCountries = new ArrayList<>(Arrays.asList("EE", "LT", "LV"));
-    private SmartIdInteractionType interactionType = SmartIdInteractionType.DISPLAY_TEXT_AND_PIN;
-    private Duration connectTimeout = Duration.ofMillis(5000);
-    private Duration sessionStatusResponseSocketOpenTime = Duration.ofMillis(30000);
-    private Duration statusPollingDelay = Duration.ofMillis(6000);
+@Validated
+public record SmartIdClientConfigurationProperties(
 
-    @Autowired
-    public SmartIdClientConfigurationProperties(Environment environment) {
-        this.environment = environment;
-    }
+        @NotNull(message = "siga.sid.truststorePath property must be set")
+        Resource truststorePath,
 
-    @PostConstruct
-    public void validateConfiguration() {
-        if (List.of(environment.getActiveProfiles()).contains("smartId")) {
-            validateUrl();
-            validateTruststorePath();
-            validateTruststorePassword();
-            validateInteractionType();
-        }
-    }
+        @NotBlank(message = "siga.sid.truststorePassword property must be set")
+        String truststorePassword,
 
-    private void validateUrl() {
-        if (StringUtils.isBlank(url)) {
-            throw new IllegalStateException("siga.sid.url property must be set");
-        }
-    }
+        @NotBlank(message = "siga.sid.url property must be set")
+        String url,
 
-    private void validateTruststorePath() {
-        if (truststorePath == null) {
-            throw new IllegalStateException("siga.sid.truststorePath property must be set");
-        }
-    }
+        @DefaultValue({"EE", "LT", "LV"})
+        List<String> allowedCountries,
 
-    private void validateTruststorePassword() {
-        if (StringUtils.isBlank(truststorePassword)) {
-            throw new IllegalStateException("siga.sid.truststorePassword property must be set");
-        }
-    }
+        @NotNull(message = "siga.sid.interactionType property must be set")
+        @DefaultValue("DISPLAY_TEXT_AND_PIN")
+        SmartIdInteractionType interactionType,
 
-    private void validateInteractionType() {
-        if (interactionType == null) {
-            throw new IllegalStateException("siga.sid.interactionType property must be set");
-        }
-    }
+        @DefaultValue("5000ms")
+        @DurationMin(millis = 1)
+        Duration connectTimeout,
+
+        @DefaultValue("30000ms")
+        @DurationMin(millis = 1)
+        Duration sessionStatusResponseSocketOpenTime,
+
+        @DefaultValue("6000ms")
+        @DurationMin(millis = 0)
+        Duration statusPollingDelay
+) {
 }

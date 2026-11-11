@@ -1,6 +1,7 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.MobileIdAsicContainerController;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.doAnswer;
 class MobileIdAsicContainerControllerGetContainerMobileIdSigningStatusResponseExceptionHandlerTest extends ExceptionHandlerTestBase {
 
     @MockitoBean
-    private AsicContainerSigningService signingService;
+    private MobileIdSigningDelegate<AsicContainerSigningService> signingService;
 
     @MockitoBean
     private RequestValidator validator;
