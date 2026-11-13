@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.openeid.siga.common.client.HttpClientConnectionException;
 import ee.openeid.siga.common.client.HttpClientDecodingException;
 import ee.openeid.siga.common.client.HttpClientTimeoutException;
+import ee.openeid.siga.common.client.HttpClientTlsHandshakeException;
 import ee.openeid.siga.common.client.HttpPostClient;
 import ee.openeid.siga.common.client.HttpStatusException;
-import ee.openeid.siga.common.exception.ClientException;
-import ee.openeid.siga.common.client.HttpClientTlsHandshakeException;
 import ee.openeid.siga.common.exception.InvalidContainerException;
 import ee.openeid.siga.common.exception.InvalidHashAlgorithmException;
 import ee.openeid.siga.common.exception.InvalidSignatureException;
@@ -22,7 +21,6 @@ import ee.openeid.siga.webapp.json.ValidationConclusion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DigestAlgorithm;
-import org.digidoc4j.SignatureProfile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +36,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SivaClient {
     private static final String HASHCODE_VALIDATION_ENDPOINT = "/validateHashcode";
+    private static final String HASHCODE_VALIDATION_LEVEL = "LongTermData";
     private static final String VALIDATION_ENDPOINT = "/validate";
     private static final String DOCUMENT_KEY = "document";
     private static final String SIGNATURE_KEY = "signatureFiles.signature";
@@ -45,9 +44,7 @@ public class SivaClient {
 
     public ValidationConclusion validateHashcodeContainer(List<HashcodeSignatureWrapper> signatureWrappers, List<HashcodeDataFile> dataFiles) {
         SivaHashcodeValidationRequest request = createHashcodeRequest(signatureWrappers, dataFiles);
-        ValidationConclusion validationResponse = validate(request, HASHCODE_VALIDATION_ENDPOINT);
-        validateLTASignatureProfile(validationResponse);
-        return validationResponse;
+        return validate(request, HASHCODE_VALIDATION_ENDPOINT);
     }
 
     public ValidationConclusion validateContainer(String name, String container) {
@@ -86,16 +83,6 @@ public class SivaClient {
         } catch (Exception e) {
             return Base64.getEncoder().encodeToString(responseBody);
         }
-    }
-
-
-    private void validateLTASignatureProfile(ValidationConclusion validationConclusion) {
-        validationConclusion.getSignatures().forEach(
-                signature -> {
-                    if (("XAdES_BASELINE_" + SignatureProfile.LTA.name()).equals(signature.getSignatureFormat())) {
-                        throw new ClientException("Unable to validate container! Container contains signature with unsupported signature profile: LTA");
-                    }
-                });
     }
 
     private ValidationConclusion validate(Object request, String validationEndpoint) {
@@ -150,6 +137,7 @@ public class SivaClient {
             signatureFile.setDatafiles(sivaDataFiles);
             request.getSignatureFiles().add(signatureFile);
         });
+        request.setValidationLevel(HASHCODE_VALIDATION_LEVEL);
         return request;
     }
 
