@@ -66,6 +66,7 @@
 
         <!-- Override vulnerable dependencies that are pulled in via Spring boot -->
         <!-- TODO: Amend this list when Spring Boot version is updated! -->
+        <json.version>20260719</json.version>
     </properties>
 
     <dependencies>
