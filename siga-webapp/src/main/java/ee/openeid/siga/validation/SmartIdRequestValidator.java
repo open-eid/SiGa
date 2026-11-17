@@ -3,6 +3,7 @@ package ee.openeid.siga.validation;
 import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.service.signature.configuration.SmartIdClientConfigurationProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Component
 @Profile("smartId")
 public class SmartIdRequestValidator {
@@ -19,6 +21,7 @@ public class SmartIdRequestValidator {
 
     SmartIdRequestValidator(SmartIdClientConfigurationProperties properties) {
         this.allowedCountries = properties.allowedCountries();
+        log.info("Smart-ID signing enabled (profile 'smartId'): {}", properties);
     }
 
     public void validateForCertChoice(SmartIdInformation smartIdInformation) {

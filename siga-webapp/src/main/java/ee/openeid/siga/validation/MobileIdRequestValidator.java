@@ -4,6 +4,7 @@ import ee.openeid.siga.common.exception.RequestValidationException;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.util.PhoneNumberUtil;
 import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Component
 @Profile("mobileId")
 public class MobileIdRequestValidator {
@@ -20,6 +22,7 @@ public class MobileIdRequestValidator {
 
     MobileIdRequestValidator(MobileIdClientConfigurationProperties properties) {
         this.allowedCountries = properties.allowedCountries();
+        log.info("Mobile-ID signing enabled (profile 'mobileId'): {}", properties);
     }
 
     public void validate(MobileIdInformation mobileIdInformation) {
