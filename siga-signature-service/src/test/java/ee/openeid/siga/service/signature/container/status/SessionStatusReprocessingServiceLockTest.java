@@ -5,6 +5,8 @@ import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.session.spi.SessionLockRegistry;
@@ -19,11 +21,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import static java.time.Duration.ZERO;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,6 +59,10 @@ class SessionStatusReprocessingServiceLockTest {
     private ContainerSigningService signingService;
     @Mock
     private Lock sessionLock;
+    @Mock
+    private MobileIdSigningDelegate<ContainerSigningService> mobileIdDelegate;
+    @Mock
+    private SmartIdSigningDelegate<ContainerSigningService> smartIdDelegate;
 
     private SessionStatusReprocessingProperties reprocessingProperties;
     private StatusReprocessingFilter filter;
@@ -70,9 +78,13 @@ class SessionStatusReprocessingServiceLockTest {
                 reprocessingProperties.processingTimeout(),
                 reprocessingProperties.exceptionTimeout());
 
+        // lenient: delegates are looked up only once a due entry is found, which not every test reaches.
+        lenient().when(mobileIdDelegate.getContainerSigningService()).thenReturn(signingService);
+        lenient().when(smartIdDelegate.getContainerSigningService()).thenReturn(signingService);
         service = new SessionStatusReprocessingService(
                 taskExecutor, sessionStatusScanner, signingServiceSelector,
-                sessionService, sessionLockRegistry, reprocessingProperties);
+                sessionService, sessionLockRegistry, reprocessingProperties,
+                List.of(mobileIdDelegate), List.of(smartIdDelegate));
     }
 
     @Test
@@ -92,7 +104,7 @@ class SessionStatusReprocessingServiceLockTest {
         // peek (not get) — must NOT slide TTL during reprocessing.
         verify(sessionService).peekContainerBySessionId(SESSION_ID);
         // Stale MID signature gets re-polled with ZERO delay.
-        verify(signingService).pollMobileIdSignatureStatus(eq(SESSION_ID), eq(SIGNATURE_ID), eq(ZERO));
+        verify(mobileIdDelegate).pollMobileIdSignatureStatus(eq(SESSION_ID), eq(SIGNATURE_ID), eq(ZERO));
         verify(sessionLock).unlock();
     }
 
@@ -151,7 +163,7 @@ class SessionStatusReprocessingServiceLockTest {
         service.processFailedCertificateStatusRequest(filter, SESSION_ID);
 
         verify(sessionLockRegistry).obtain(SESSION_ID);
-        verify(signingService).pollSmartIdCertificateStatus(eq(SESSION_ID), eq("cert-1"), eq(ZERO));
+        verify(smartIdDelegate).pollSmartIdCertificateStatus(eq(SESSION_ID), eq("cert-1"), eq(ZERO));
         verify(sessionLock).unlock();
     }
 

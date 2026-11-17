@@ -5,6 +5,7 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceRequest;
@@ -32,7 +33,7 @@ import java.util.List;
 @Profile("smartId & datafileContainer")
 @RequiredArgsConstructor
 public class SmartIdAsicContainerController {
-    private final AsicContainerSigningService signingService;
+    private final SmartIdSigningDelegate<AsicContainerSigningService> smartIdSigningDelegate;
     private final RequestValidator validator;
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_INIT)
@@ -45,7 +46,7 @@ public class SmartIdAsicContainerController {
         validator.validateContainerId(containerId);
         validator.validateSmartIdInformationForCertChoice(smartIdInformation);
 
-        String certificateId = signingService.initSmartIdCertificateChoice(containerId, smartIdInformation);
+        String certificateId = smartIdSigningDelegate.initSmartIdCertificateChoice(containerId, smartIdInformation);
         CreateContainerSmartIdCertificateChoiceResponse response = new CreateContainerSmartIdCertificateChoiceResponse();
         response.setGeneratedCertificateId(certificateId);
         return response;
@@ -60,7 +61,7 @@ public class SmartIdAsicContainerController {
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
 
-        CertificateStatus status = signingService.getSmartIdCertificateStatus(containerId, certificateId);
+        CertificateStatus status = smartIdSigningDelegate.getSmartIdCertificateStatus(containerId, certificateId);
         GetContainerSmartIdCertificateChoiceStatusResponse response = new GetContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
@@ -82,7 +83,7 @@ public class SmartIdAsicContainerController {
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
         validator.validateSmartIdInformationForSigning(smartIdInformation);
 
-        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
+        SigningChallenge signingChallenge = smartIdSigningDelegate.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
         CreateContainerSmartIdSigningResponse response = new CreateContainerSmartIdSigningResponse();
         response.setChallengeId(signingChallenge.getChallengeId());
@@ -96,7 +97,7 @@ public class SmartIdAsicContainerController {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
 
-        String status = signingService.getSmartIdSignatureStatus(containerId, signatureId);
+        String status = smartIdSigningDelegate.getSmartIdSignatureStatus(containerId, signatureId);
 
         GetContainerSmartIdSigningStatusResponse response = new GetContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);

@@ -5,6 +5,7 @@ import ee.openeid.siga.common.model.RelyingPartyInfo;
 import ee.openeid.siga.common.model.SigningType;
 import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.SignatureSession;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
 import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
 import ee.openeid.siga.service.signature.mobileid.MobileIdSessionStatus;
 import ee.openeid.siga.service.signature.mobileid.MobileIdStatusResponse;
@@ -63,9 +64,11 @@ class MobileIdSigningDelegateLockRenewalTest {
     private Lock pollingLock;
     @Mock
     private Lock containerLock;
+    @Mock
+    private MobileIdClientConfigurationProperties configurationProperties;
 
     private ThreadPoolTaskExecutor taskExecutor;
-    private MobileIdSigningDelegate delegate;
+    private MobileIdSigningDelegate<ContainerSigningService> delegate;
 
     @BeforeEach
     void setUp() {
@@ -76,7 +79,6 @@ class MobileIdSigningDelegateLockRenewalTest {
         when(containerSigningService.getTaskExecutor()).thenReturn(taskExecutor);
         when(containerSigningService.getSessionLockRegistry()).thenReturn(sessionLockRegistry);
         when(containerSigningService.getSessionService()).thenReturn(sessionService);
-        when(containerSigningService.getMobileIdApiClient()).thenReturn(mobileIdApiClient);
         when(containerSigningService.getSigaEventLogger()).thenReturn(sigaEventLogger);
 
         when(sessionLockRegistry.obtain(SIGNATURE_ID)).thenReturn(pollingLock);
@@ -88,7 +90,7 @@ class MobileIdSigningDelegateLockRenewalTest {
         response.setStatus(MobileIdSessionStatus.OUTSTANDING_TRANSACTION);
         when(mobileIdApiClient.getSignatureStatus(any(), any())).thenReturn(response);
 
-        delegate = new MobileIdSigningDelegate(containerSigningService);
+        delegate = new MobileIdSigningDelegate<>(containerSigningService, mobileIdApiClient, configurationProperties);
     }
 
     @AfterEach

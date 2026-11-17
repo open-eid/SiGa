@@ -7,6 +7,8 @@ import ee.openeid.siga.common.session.Session;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.service.signature.container.ContainerSigningService;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import ee.openeid.siga.session.spi.SessionLockRegistry;
@@ -22,9 +24,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import java.util.stream.Collectors;
+
+import static ee.openeid.siga.common.exception.ErrorResponseCode.INTERNAL_SERVER_ERROR;
+import static ee.openeid.siga.common.session.ProcessingStatus.EXCEPTION;
 import static java.time.Duration.ZERO;
 
 @Slf4j
@@ -43,6 +51,12 @@ public class SessionStatusReprocessingService {
     private final SessionLockRegistry sessionLockRegistry;
     @NonNull
     private final SessionStatusReprocessingProperties reprocessingProperties;
+    // Empty while the mobileId/smartId profile is inactive: Spring injects an empty list for a
+    // collection parameter of the only constructor.
+    @NonNull
+    private final List<MobileIdSigningDelegate<?>> mobileIdDelegates;
+    @NonNull
+    private final List<SmartIdSigningDelegate<?>> smartIdDelegates;
 
     @Scheduled(fixedRateString = "${siga.status-reprocessing.fixed-rate:5000}", initialDelayString = "${siga.status-reprocessing.initial-delay:5000}")
     public void processFailedStatusRequests() {
@@ -72,16 +86,34 @@ public class SessionStatusReprocessingService {
                 return;
             }
 
+            SmartIdSigningDelegate<?> smartIdDelegate =
+                    delegateFor(smartIdDelegates, SmartIdSigningDelegate::getContainerSigningService, signingService);
+            MobileIdSigningDelegate<?> mobileIdDelegate =
+                    delegateFor(mobileIdDelegates, MobileIdSigningDelegate::getContainerSigningService, signingService);
+
             Map<String, SignatureSession> signatureSessions = session.getSignatureSessions();
-            signatureSessions.entrySet().stream().filter(applySignatureStatusFilter(filter)).forEach(entry -> {
+            Map<Boolean, List<Map.Entry<String, SignatureSession>>> dueBySigningEnabled = signatureSessions.entrySet().stream()
+                    .filter(applySignatureStatusFilter(filter))
+                    .collect(Collectors.partitioningBy(entry ->
+                            (entry.getValue().getSigningType() == SigningType.SMART_ID ? smartIdDelegate : mobileIdDelegate) != null));
+            // Signing type not enabled on this node: fail the status attempt like a polling exception does,
+            // so the entry leaves the queue once maxProcessingAttempts is reached. Persisted before any
+            // async poll is started, so this session copy cannot overwrite a poll result.
+            List<Map.Entry<String, SignatureSession>> notEnabled = dueBySigningEnabled.get(false);
+            if (!notEnabled.isEmpty()) {
+                notEnabled.forEach(entry -> markSigningNotEnabled(sessionId, entry.getKey(),
+                        entry.getValue().getSigningType(), entry.getValue().getSessionStatus()));
+                sessionService.update(session);
+            }
+            dueBySigningEnabled.get(true).forEach(entry -> {
                 String signatureSessionId = entry.getKey();
                 SigningType signingType = entry.getValue().getSigningType();
                 log.info("Reprocessing failed signature status request: {}, Session status: {},",
                         signatureSessionId, entry.getValue().getSessionStatus());
                 if (signingType == SigningType.SMART_ID) {
-                    signingService.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                    smartIdDelegate.pollSmartIdSignatureStatus(sessionId, signatureSessionId, ZERO);
                 } else if (signingType == SigningType.MOBILE_ID) {
-                    signingService.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
+                    mobileIdDelegate.pollMobileIdSignatureStatus(sessionId, signatureSessionId, ZERO);
                 }
             });
         });
@@ -112,13 +144,26 @@ public class SessionStatusReprocessingService {
                 log.warn("No compatible service found for reprocessing session: {}", sessionId);
                 return;
             }
+            SmartIdSigningDelegate<?> delegate =
+                    delegateFor(smartIdDelegates, SmartIdSigningDelegate::getContainerSigningService, signingService);
 
             Map<String, CertificateSession> certificateSessions = session.getCertificateSessions();
+            if (delegate == null) {
+                List<Map.Entry<String, CertificateSession>> dueEntries = certificateSessions.entrySet().stream()
+                        .filter(applyCertificateStatusFilter(filter))
+                        .toList();
+                if (!dueEntries.isEmpty()) {
+                    dueEntries.forEach(entry -> markSigningNotEnabled(sessionId, entry.getKey(),
+                            SigningType.SMART_ID, entry.getValue().getSessionStatus()));
+                    sessionService.update(session);
+                }
+                return;
+            }
             certificateSessions.entrySet().stream().filter(applyCertificateStatusFilter(filter)).forEach(entry -> {
                 String certificateSessionId = entry.getKey();
                 log.info("Reprocessing failed certificate status request: {}, Session status: {},",
                         certificateSessionId, entry.getValue().getSessionStatus());
-                signingService.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
+                delegate.pollSmartIdCertificateStatus(sessionId, certificateSessionId, ZERO);
             });
         });
     }
@@ -150,4 +195,21 @@ public class SessionStatusReprocessingService {
         return status.isDueForReprocessing(filter.processingCutoff(), filter.exceptionCutoff(),
                 filter.maxProcessingRetries());
     }
+
+    private static void markSigningNotEnabled(String sessionId, String statusSessionId, SigningType signingType,
+                                              SessionStatus sessionStatus) {
+        log.error("{} status polling exception, signing not enabled. Session id: {}, Status session id: {}",
+                signingType, sessionId, statusSessionId);
+        sessionStatus.setProcessingStatus(EXCEPTION);
+        sessionStatus.setStatusError(INTERNAL_SERVER_ERROR.name(), signingType + " signing not enabled");
+    }
+
+    private static <D> D delegateFor(List<D> delegates, Function<D, ContainerSigningService> signingServiceOf,
+                                     ContainerSigningService signingService) {
+        return delegates.stream()
+                .filter(delegate -> signingServiceOf.apply(delegate) == signingService)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

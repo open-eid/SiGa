@@ -17,6 +17,8 @@ import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SessionStatus.StatusError;
 import ee.openeid.siga.common.session.SignatureSession;
 import ee.openeid.siga.common.testsupport.RedisTestcontainersConfiguration;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsiceContainerAugmentationService;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.service.signature.mobileid.InitMidSignatureResponse;
@@ -82,7 +84,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @Tag("docker")
 @Import(RedisTestcontainersConfiguration.class)
-@ActiveProfiles({"test", "datafileContainer"})
+@ActiveProfiles({"test", "datafileContainer", "mobileId", "smartId"})
 @SpringBootTest(classes = {TestConfiguration.class}, webEnvironment = RANDOM_PORT, properties = {
         "siga.security.jasypt.encryption-algo=PBEWITHSHA-256AND256BITAES-CBC-BC",
         "siga.security.jasypt.encryption-key=encryptorKey",
@@ -133,7 +135,9 @@ public class SessionStatusReprocessingServiceTest {
     @MockitoSpyBean
     private SessionStatusReprocessingService sessionStatusReprocessingService;
     @MockitoSpyBean
-    private HashcodeContainerSigningService hashcodeContainerSigningService;
+    private MobileIdSigningDelegate<HashcodeContainerSigningService> hashcodeMobileIdSigningDelegate;
+    @MockitoSpyBean
+    private SmartIdSigningDelegate<HashcodeContainerSigningService> hashcodeSmartIdSigningDelegate;
     @MockitoBean
     private AsiceContainerAugmentationService asicContainerAugmentationService;
     @MockitoBean
@@ -195,7 +199,7 @@ public class SessionStatusReprocessingServiceTest {
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
             // pollMobileIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
             //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
-            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
+            Mockito.verify(hashcodeMobileIdSigningDelegate, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
                     .pollMobileIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
@@ -282,7 +286,7 @@ public class SessionStatusReprocessingServiceTest {
             assertMaxReprocessingAttempts(containerSessionId, signingChallenge);
             // pollSmartIdSignatureStatus might be called more times than maxProcessingAttempts if the first polling
             //  attempt, that is triggered by startSigning, happens before the signing session has been written into cache
-            Mockito.verify(hashcodeContainerSigningService, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
+            Mockito.verify(hashcodeSmartIdSigningDelegate, Mockito.atLeast(reprocessingProperties.maxProcessingAttempts()))
                     .pollSmartIdSignatureStatus(containerSessionId, signingChallenge.getGeneratedSignatureId(), Duration.ZERO);
             // Ensure that signing session is polled exactly maxProcessingAttempts + 1 times
             //  (initial polling attempt + maxProcessingAttempts reprocessing attempts)
@@ -359,7 +363,7 @@ public class SessionStatusReprocessingServiceTest {
         String containerId = containerSessionId.substring(13, 49);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         MobileIdInformation mobileIdInformation = RequestUtil.createMobileInformation();
-        SigningChallenge signingChallenge = hashcodeContainerSigningService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+        SigningChallenge signingChallenge = hashcodeMobileIdSigningDelegate.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
         assertThat(signingChallenge, notNullValue());
         assertThat(signingChallenge.getChallengeId(), equalTo("1234"));
 
@@ -381,7 +385,7 @@ public class SessionStatusReprocessingServiceTest {
         String containerId = containerSessionId.substring(13, 49);
         SignatureParameters signatureParameters = createSignatureParameters(pkcs12Esteid2018SignatureToken.getCertificate());
         SmartIdInformation smartIdInformation = RequestUtil.createSmartIdInformation();
-        SigningChallenge signingChallenge = hashcodeContainerSigningService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
+        SigningChallenge signingChallenge = hashcodeSmartIdSigningDelegate.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
         assertThat(signingChallenge, notNullValue());
         assertThat(signingChallenge.getChallengeId(), equalTo("1234"));
 

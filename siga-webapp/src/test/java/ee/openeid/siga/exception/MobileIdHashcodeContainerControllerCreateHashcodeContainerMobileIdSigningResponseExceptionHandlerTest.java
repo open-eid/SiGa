@@ -1,6 +1,7 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.MobileIdHashcodeContainerController;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.doAnswer;
 class MobileIdHashcodeContainerControllerCreateHashcodeContainerMobileIdSigningResponseExceptionHandlerTest extends ExceptionHandlerTestBase {
 
     @MockitoBean
-    private HashcodeContainerSigningService signingService;
+    private MobileIdSigningDelegate<HashcodeContainerSigningService> signingService;
 
     @MockitoBean
     private RequestValidator validator;

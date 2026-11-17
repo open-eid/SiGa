@@ -4,6 +4,7 @@ import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningRequest;
@@ -26,7 +27,7 @@ import java.util.List;
 @Profile("mobileId & datafileContainer")
 @RequiredArgsConstructor
 public class MobileIdAsicContainerController {
-    private final AsicContainerSigningService signingService;
+    private final MobileIdSigningDelegate<AsicContainerSigningService> mobileIdSigningDelegate;
     private final RequestValidator validator;
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
@@ -44,7 +45,7 @@ public class MobileIdAsicContainerController {
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         validator.validateMobileIdInformation(mobileIdInformation);
 
-        SigningChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+        SigningChallenge challenge = mobileIdSigningDelegate.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 
         CreateContainerMobileIdSigningResponse response = new CreateContainerMobileIdSigningResponse();
         response.setChallengeId(challenge.getChallengeId());
@@ -57,7 +58,7 @@ public class MobileIdAsicContainerController {
     public GetContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.getMobileIdSignatureStatus(containerId, signatureId);
+        String status = mobileIdSigningDelegate.getMobileIdSignatureStatus(containerId, signatureId);
 
         GetContainerMobileIdSigningStatusResponse response = new GetContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);

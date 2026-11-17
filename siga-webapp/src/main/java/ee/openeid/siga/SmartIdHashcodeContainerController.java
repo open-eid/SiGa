@@ -6,6 +6,7 @@ import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.model.CertificateStatus;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.common.model.SmartIdInformation;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerSmartIdCertificateChoiceRequest;
@@ -31,7 +32,7 @@ import java.util.List;
 @Profile("smartId")
 @RequiredArgsConstructor
 public class SmartIdHashcodeContainerController {
-    private final HashcodeContainerSigningService signingService;
+    private final SmartIdSigningDelegate<HashcodeContainerSigningService> smartIdSigningDelegate;
     private final RequestValidator validator;
 
     @SigaEventLog(eventName = SigaEventName.HC_SMART_ID_CERTIFICATE_CHOICE_INIT)
@@ -44,7 +45,7 @@ public class SmartIdHashcodeContainerController {
         validator.validateContainerId(containerId);
         validator.validateSmartIdInformationForCertChoice(smartIdInformation);
 
-        String certificateId = signingService.initSmartIdCertificateChoice(containerId, smartIdInformation);
+        String certificateId = smartIdSigningDelegate.initSmartIdCertificateChoice(containerId, smartIdInformation);
         CreateHashcodeContainerSmartIdCertificateChoiceResponse response = new CreateHashcodeContainerSmartIdCertificateChoiceResponse();
         response.setGeneratedCertificateId(certificateId);
         return response;
@@ -59,7 +60,7 @@ public class SmartIdHashcodeContainerController {
         validator.validateContainerId(containerId);
         validator.validateCertificateId(certificateId);
 
-        CertificateStatus status = signingService.getSmartIdCertificateStatus(containerId, certificateId);
+        CertificateStatus status = smartIdSigningDelegate.getSmartIdCertificateStatus(containerId, certificateId);
         GetHashcodeContainerSmartIdCertificateChoiceStatusResponse response = new GetHashcodeContainerSmartIdCertificateChoiceStatusResponse();
         response.setSidStatus(status.getStatus());
         response.setDocumentNumber(status.getDocumentNumber());
@@ -83,7 +84,7 @@ public class SmartIdHashcodeContainerController {
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
         validator.validateSmartIdInformationForSigning(smartIdInformation);
 
-        SigningChallenge signingChallenge = signingService.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
+        SigningChallenge signingChallenge = smartIdSigningDelegate.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 
         CreateHashcodeContainerSmartIdSigningResponse response = new CreateHashcodeContainerSmartIdSigningResponse();
         response.setChallengeId(signingChallenge.getChallengeId());
@@ -98,7 +99,7 @@ public class SmartIdHashcodeContainerController {
             @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.getSmartIdSignatureStatus(containerId, signatureId);
+        String status = smartIdSigningDelegate.getSmartIdSignatureStatus(containerId, signatureId);
 
         GetHashcodeContainerSmartIdSigningStatusResponse response = new GetHashcodeContainerSmartIdSigningStatusResponse();
         response.setSidStatus(status);

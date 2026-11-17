@@ -1,6 +1,7 @@
 package ee.openeid.siga.exception;
 
 import ee.openeid.siga.SmartIdHashcodeContainerController;
+import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.doAnswer;
 class SmartIdHashcodeContainerControllerGetHashcodeContainerSmartIdSigningStatusResponseExceptionHandlerTest extends ExceptionHandlerTestBase {
 
     @MockitoBean
-    private HashcodeContainerSigningService signingService;
+    private SmartIdSigningDelegate<HashcodeContainerSigningService> signingService;
 
     @MockitoBean
     private RequestValidator validator;

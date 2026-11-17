@@ -7,7 +7,9 @@ import ee.openeid.siga.common.session.HashcodeContainerSession;
 import ee.openeid.siga.common.session.ProcessingStatus;
 import ee.openeid.siga.common.session.SessionStatus;
 import ee.openeid.siga.common.session.SignatureSession;
-import ee.openeid.siga.service.signature.smartid.SmartIdSessionStatus;
+import ee.openeid.siga.service.signature.configuration.MobileIdClientConfigurationProperties;
+import ee.openeid.siga.service.signature.mobileid.MobileIdApiClient;
+import ee.openeid.siga.service.signature.mobileid.MobileIdSessionStatus;
 import ee.openeid.siga.session.SessionService;
 import ee.openeid.siga.session.configuration.SessionStatusReprocessingProperties;
 import org.digidoc4j.Signature;
@@ -21,6 +23,8 @@ import static ee.openeid.siga.service.signature.mobileid.MobileIdSessionStatus.O
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,8 +38,12 @@ class MobileIdSigningDelegateTest {
     private SessionService sessionService;
     @Mock
     private Signature signature;
+    @Mock
+    private MobileIdApiClient mobileIdApiClient;
+    @Mock
+    private MobileIdClientConfigurationProperties configurationProperties;
     @InjectMocks
-    private MobileIdSigningDelegate mobileIdSigningDelegate;
+    private MobileIdSigningDelegate<ContainerSigningService> mobileIdSigningDelegate;
 
     @Test
     void getMobileIdSignatureStatus_WhenContainerHasOutstandingMidSignatureSession_ReturnsOutstandingTransactionStatus() {
@@ -55,7 +63,7 @@ class MobileIdSigningDelegateTest {
         SignatureSession signatureSession = session.getSignatureSession(SIGNATURE_ID);
         byte[] signature = signatureSession.getSignature();
         SessionStatus sessionStatus = signatureSession.getSessionStatus();
-        sessionStatus.setStatus(SmartIdSessionStatus.OK.getSigaSigningMessage());
+        sessionStatus.setStatus(MobileIdSessionStatus.SIGNATURE.name());
         sessionStatus.setProcessingStatus(ProcessingStatus.RESULT);
         when(containerSigningService.getSession(CONTAINER_ID)).thenReturn(session);
         when(containerSigningService.getSessionService()).thenReturn(sessionService);
@@ -63,7 +71,7 @@ class MobileIdSigningDelegateTest {
 
         String signatureStatus = mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, SIGNATURE_ID);
 
-        assertEquals(SmartIdSessionStatus.OK.getSigaSigningMessage(), signatureStatus);
+        assertEquals(MobileIdSessionStatus.SIGNATURE.name(), signatureStatus);
         assertNull(session.getSignatureSession(SIGNATURE_ID));
         verify(containerSigningService).finalizeSignature(session, SIGNATURE_ID, signature);
         verify(containerSigningService).addSignatureToSession(session, this.signature, SIGNATURE_ID);
@@ -99,6 +107,56 @@ class MobileIdSigningDelegateTest {
         );
 
         assertEquals("Unable to finalize signature for signing type: SMART_ID", caughtException.getMessage());
+    }
+
+    @Test
+    void getMobileIdSignatureStatus_WhenContainerSessionIsMissing_ThrowsInvalidSessionData() {
+        InvalidSessionDataException caughtException = assertThrows(
+                InvalidSessionDataException.class, () -> mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, SIGNATURE_ID)
+        );
+
+        assertEquals("Unable to finalize signature. No data to sign with signature Id: " + SIGNATURE_ID, caughtException.getMessage());
+    }
+
+    @Test
+    void getMobileIdSignatureStatus_WhenSignatureIdIsUnknown_ThrowsInvalidSessionData() {
+        when(containerSigningService.getSession(CONTAINER_ID)).thenReturn(createHashcodeContainerSession());
+
+        assertThrows(InvalidSessionDataException.class,
+                () -> mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, "unknown"));
+    }
+
+    @Test
+    void getMobileIdSignatureStatus_WhenUserCancelled_ReturnsStatusWithoutFinalizingAndRemovesSigningSession() {
+        HashcodeContainerSession session = createHashcodeContainerSession();
+        SessionStatus sessionStatus = session.getSignatureSession(SIGNATURE_ID).getSessionStatus();
+        sessionStatus.setStatus(MobileIdSessionStatus.USER_CANCEL.name());
+        sessionStatus.setProcessingStatus(ProcessingStatus.RESULT);
+        when(containerSigningService.getSession(CONTAINER_ID)).thenReturn(session);
+        when(containerSigningService.getSessionService()).thenReturn(sessionService);
+
+        String signatureStatus = mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, SIGNATURE_ID);
+
+        assertEquals(MobileIdSessionStatus.USER_CANCEL.name(), signatureStatus);
+        assertNull(session.getSignatureSession(SIGNATURE_ID));
+        verify(containerSigningService, never()).finalizeSignature(any(), any(), any());
+        verify(sessionService).update(session);
+    }
+
+    @Test
+    void getMobileIdSignatureStatus_WhenFinalizationFails_StillRemovesSigningSession() {
+        HashcodeContainerSession session = createHashcodeContainerSession();
+        SessionStatus sessionStatus = session.getSignatureSession(SIGNATURE_ID).getSessionStatus();
+        sessionStatus.setStatus(MobileIdSessionStatus.SIGNATURE.name());
+        sessionStatus.setProcessingStatus(ProcessingStatus.RESULT);
+        when(containerSigningService.getSession(CONTAINER_ID)).thenReturn(session);
+        when(containerSigningService.getSessionService()).thenReturn(sessionService);
+        when(containerSigningService.finalizeSignature(any(), any(), any())).thenThrow(new IllegalStateException("finalize failed"));
+
+        assertThrows(IllegalStateException.class, () -> mobileIdSigningDelegate.getMobileIdSignatureStatus(CONTAINER_ID, SIGNATURE_ID));
+
+        assertNull(session.getSignatureSession(SIGNATURE_ID));
+        verify(sessionService).update(session);
     }
 
     private static HashcodeContainerSession createHashcodeContainerSession() {

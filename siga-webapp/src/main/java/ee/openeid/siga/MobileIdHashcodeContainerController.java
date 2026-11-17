@@ -4,6 +4,7 @@ import ee.openeid.siga.common.event.SigaEventLog;
 import ee.openeid.siga.common.event.SigaEventName;
 import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningChallenge;
+import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.CreateHashcodeContainerMobileIdSigningRequest;
@@ -26,7 +27,7 @@ import java.util.List;
 @Profile("mobileId")
 @RequiredArgsConstructor
 public class MobileIdHashcodeContainerController {
-    private final HashcodeContainerSigningService signingService;
+    private final MobileIdSigningDelegate<HashcodeContainerSigningService> mobileIdSigningDelegate;
     private final RequestValidator validator;
 
     @SigaEventLog(eventName = SigaEventName.HC_MOBILE_ID_SIGNING_INIT)
@@ -45,7 +46,7 @@ public class MobileIdHashcodeContainerController {
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         validator.validateMobileIdInformation(mobileIdInformation);
 
-        SigningChallenge challenge = signingService.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
+        SigningChallenge challenge = mobileIdSigningDelegate.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 
         CreateHashcodeContainerMobileIdSigningResponse response = new CreateHashcodeContainerMobileIdSigningResponse();
         response.setChallengeId(challenge.getChallengeId());
@@ -58,7 +59,7 @@ public class MobileIdHashcodeContainerController {
     public GetHashcodeContainerMobileIdSigningStatusResponse getMobileSigningStatus(@PathVariable(value = "containerId") String containerId, @PathVariable(value = "signatureId") String signatureId) {
         validator.validateContainerId(containerId);
         validator.validateSignatureId(signatureId);
-        String status = signingService.getMobileIdSignatureStatus(containerId, signatureId);
+        String status = mobileIdSigningDelegate.getMobileIdSignatureStatus(containerId, signatureId);
 
         GetHashcodeContainerMobileIdSigningStatusResponse response = new GetHashcodeContainerMobileIdSigningStatusResponse();
         response.setMidStatus(status);
