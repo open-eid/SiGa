@@ -33,13 +33,13 @@ import ee.sk.smartid.rest.dao.SemanticsIdentifier;
 import ee.sk.smartid.rest.dao.SessionStatus;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.spi.DSSUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.digidoc4j.DataToSign;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ClientErrorException;
@@ -56,8 +56,8 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @EnableConfigurationProperties(SmartIdClientConfigurationProperties.class)
+@Profile("smartId")
 public class SmartIdApiClient {
 
     private static final String SMART_ID_CERTIFICATE_LEVEL = "QUALIFIED";
@@ -86,6 +86,12 @@ public class SmartIdApiClient {
     }
 
     private final SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
+
+    public SmartIdApiClient(SmartIdClientConfigurationProperties smartIdClientConfigurationProperties) {
+        this.smartIdClientConfigurationProperties = smartIdClientConfigurationProperties;
+        // Fail startup on an unreadable truststore. Requests still re-read it, so a replaced file applies without restart.
+        getSidTruststore();
+    }
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE,
             logParameters = {@Param(index = 0, fields = {@XPath(name = "relying_party_name", xpath = "name")})},
@@ -224,14 +230,14 @@ public class SmartIdApiClient {
         if (messageToDisplay == null) {
             messageToDisplay = StringUtils.EMPTY; // Smart-ID client library does not allow null string
         }
-        switch (smartIdClientConfigurationProperties.getInteractionType()) {
+        switch (smartIdClientConfigurationProperties.interactionType()) {
             case DISPLAY_TEXT_AND_PIN:
                 return List.of(Interaction.displayTextAndPIN(messageToDisplay));
             case VERIFICATION_CODE_CHOICE:
                 return List.of(Interaction.verificationCodeChoice(messageToDisplay));
             default:
                 throw new IllegalStateException("Unsupported Smart-ID interaction type: " +
-                        smartIdClientConfigurationProperties.getInteractionType()
+                        smartIdClientConfigurationProperties.interactionType()
                 );
         }
     }
@@ -239,8 +245,8 @@ public class SmartIdApiClient {
     private SmartIdClient createSmartIdClient(RelyingPartyInfo relyingPartyInfo) {
         SmartIdClient client = new SmartIdClient();
         client.setTrustStore(getSidTruststore());
-        client.setHostUrl(smartIdClientConfigurationProperties.getUrl());
-        client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdClientConfigurationProperties.getSessionStatusResponseSocketOpenTime().toMillis());
+        client.setHostUrl(smartIdClientConfigurationProperties.url());
+        client.setSessionStatusResponseSocketOpenTime(TimeUnit.MILLISECONDS, smartIdClientConfigurationProperties.sessionStatusResponseSocketOpenTime().toMillis());
         client.setNetworkConnectionConfig(clientConfig());
         client.setRelyingPartyName(relyingPartyInfo.getName());
         client.setRelyingPartyUUID(relyingPartyInfo.getUuid());
@@ -249,13 +255,13 @@ public class SmartIdApiClient {
 
     private ClientConfig clientConfig() {
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) smartIdClientConfigurationProperties.getConnectTimeout().toMillis());
-        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) smartIdClientConfigurationProperties.getSessionStatusResponseSocketOpenTime().plusMillis(5000).toMillis());
+        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) smartIdClientConfigurationProperties.connectTimeout().toMillis());
+        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) smartIdClientConfigurationProperties.sessionStatusResponseSocketOpenTime().plusMillis(5000).toMillis());
         return clientConfig;
     }
 
     private KeyStore getSidTruststore() {
-        return ResourceUtil.loadPkcs12KeyStore(smartIdClientConfigurationProperties.getTruststorePath(), smartIdClientConfigurationProperties.getTruststorePassword());
+        return ResourceUtil.loadPkcs12KeyStore(smartIdClientConfigurationProperties.truststorePath(), smartIdClientConfigurationProperties.truststorePassword());
     }
 
     private SmartIdStatusResponse mapToSmartIdStatusResponse(SessionStatus sessionStatus) {

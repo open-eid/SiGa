@@ -19,12 +19,12 @@ import ee.sk.mid.rest.dao.request.MidCertificateRequest;
 import ee.sk.mid.rest.dao.request.MidSignatureRequest;
 import ee.sk.mid.rest.dao.response.MidCertificateChoiceResponse;
 import ee.sk.mid.rest.dao.response.MidSignatureResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.digidoc4j.DataToSign;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import jakarta.ws.rs.ServerErrorException;
@@ -37,8 +37,8 @@ import static java.lang.String.format;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @EnableConfigurationProperties(MobileIdClientConfigurationProperties.class)
+@Profile("mobileId")
 public class MobileIdApiClient {
 
     private static final Map<Class<?>, MobileIdSessionStatus> errorMap = Map.of(
@@ -54,6 +54,12 @@ public class MobileIdApiClient {
             MidUserCancellationException.class, MobileIdSessionStatus.USER_CANCEL);
 
     private final MobileIdClientConfigurationProperties configurationProperties;
+
+    public MobileIdApiClient(MobileIdClientConfigurationProperties configurationProperties) {
+        this.configurationProperties = configurationProperties;
+        // Fail startup on an unreadable truststore. Requests still re-read it, so a replaced file applies without restart.
+        getMidTruststore();
+    }
 
     @SigaEventLog(eventName = SigaEventName.MID_GET_MOBILE_CERTIFICATE,
             logStaticParameters = {@LogParam(name = SigaEventName.EventParam.REQUEST_URL, value = "${siga.midrest.url}")})
@@ -153,9 +159,9 @@ public class MobileIdApiClient {
     }
 
     private MidClient createMidRestClient(RelyingPartyInfo relyingPartyInfo) {
-        return MidClient.newBuilder().withHostUrl(configurationProperties.getUrl())
+        return MidClient.newBuilder().withHostUrl(configurationProperties.url())
                 .withTrustStore(getMidTruststore())
-                .withLongPollingTimeoutSeconds((int) configurationProperties.getLongPollingTimeout().toSeconds())
+                .withLongPollingTimeoutSeconds((int) configurationProperties.longPollingTimeout().toSeconds())
                 .withNetworkConnectionConfig(clientConfig())
                 .withRelyingPartyName(relyingPartyInfo.getName())
                 .withRelyingPartyUUID(relyingPartyInfo.getUuid())
@@ -164,13 +170,13 @@ public class MobileIdApiClient {
 
     private ClientConfig clientConfig() {
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) configurationProperties.getConnectTimeout().toMillis());
-        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) configurationProperties.getLongPollingTimeout().plusMillis(5000).toMillis());
+        clientConfig.property(ClientProperties.CONNECT_TIMEOUT, (int) configurationProperties.connectTimeout().toMillis());
+        clientConfig.property(ClientProperties.READ_TIMEOUT, (int) configurationProperties.longPollingTimeout().plusMillis(5000).toMillis());
         return clientConfig;
     }
 
     private KeyStore getMidTruststore() {
-        return ResourceUtil.loadPkcs12KeyStore(configurationProperties.getTruststorePath(), configurationProperties.getTruststorePassword());
+        return ResourceUtil.loadPkcs12KeyStore(configurationProperties.truststorePath(), configurationProperties.truststorePassword());
     }
 
     private static MobileIdSessionStatus mapToMidStatus(String state, String result) {

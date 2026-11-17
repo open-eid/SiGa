@@ -447,11 +447,11 @@ Applicable if `mobileId` profile is active.
 | Parameter | Mandatory | Description | Example |
 | --- | --- | --- | --- |
 | siga.midrest.url | Y | MID REST service URL. | `https://tsp.demo.sk.ee/mid-api` |
-| siga.midrest.allowed-countries | N | MID REST allowed countries. | `EE, LT` |
+| siga.midrest.allowed-countries | N | MID REST allowed countries. Defaults to `EE, LT`. | `EE, LT` |
 | siga.midrest.truststore-path | Y | MID REST PKCS12 truststore path. | `file:/path/to/mid_truststore.p12` or `classpath:path/to/mid_truststore.p12` |
 | siga.midrest.truststore-password | Y | MID REST PKCS12 truststore password. | `changeIt` |
-| siga.midrest.long-polling-timeout | N | MID REST [session status request](https://github.com/SK-EID/MID#334-long-polling) long poll value in milliseconds. Defaults to `30000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `30000` |
-| siga.midrest.connect-timeout | N | MID REST client connection timeout in milliseconds. Defaults to `5000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `5000` |
+| siga.midrest.long-polling-timeout | N | MID REST [session status request](https://github.com/SK-EID/MID#334-long-polling) long poll value in milliseconds. Defaults to `30000`. Must be at least `1000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `30000` |
+| siga.midrest.connect-timeout | N | MID REST client connection timeout in milliseconds. Defaults to `5000`. Must be greater than 0. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `5000` |
 | siga.midrest.status-polling-delay | N | Delay before polling status in milliseconds. Defaults to `6000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `6000` |
 
 **NB:** MID REST relying party name and UUID are registered per [service](#siga_service).
@@ -463,8 +463,8 @@ Applicable if `smartId` profile is active.
 | Parameter | Mandatory | Description | Example |
 | --- | --- | --- | --- |
 | siga.sid.url | Y | Smart-ID service URL. | `https://sid.demo.sk.ee/smart-id-rp/v2/` |
-| siga.sid.session-status-response-socket-open-time | N | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `30000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `30000` |
-| siga.sid.connect-timeout | N | Smart-ID client connection timeout in milliseconds. Defaults to `5000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `5000` |
+| siga.sid.session-status-response-socket-open-time | N | Smart-ID [session status request](https://github.com/SK-EID/smart-id-documentation/blob/master/README.md#46-session-status) long poll value in milliseconds. Defaults to `30000`. Must be at least `1000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `30000` |
+| siga.sid.connect-timeout | N | Smart-ID client connection timeout in milliseconds. Defaults to `5000`. Must be greater than 0. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `5000` |
 | siga.sid.status-polling-delay | N | Delay before polling status in milliseconds. Defaults to `6000`. [Supports ISO 8601 Duration format.](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration) | `6000` |
 | siga.sid.allowed-countries | N | Smart-ID allowed countries. Defaults to `EE, LT, LV`. | `EE, LV, LT` |
 | siga.sid.interaction-type | N | Smart-ID [interaction](https://github.com/SK-EID/smart-id-documentation#31-uc-x-interaction-choice-realization) to be requested to be performed by the Smart-ID app. Supported options: `DISPLAY_TEXT_AND_PIN`, `VERIFICATION_CODE_CHOICE`. Defaults to `DISPLAY_TEXT_AND_PIN`. | `VERIFICATION_CODE_CHOICE` |

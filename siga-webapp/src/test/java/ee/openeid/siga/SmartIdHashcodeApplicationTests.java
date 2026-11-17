@@ -39,4 +39,9 @@ class SmartIdHashcodeApplicationTests extends SmartIdBaseApplicationTests {
         );
     }
 
+    @Test
+    void mobileIdHashcodeEndpoints_WhenMobileIdProfileInactive_NotMapped() throws Exception {
+        assertHashcodeMobileIdEndpointsAreNotMapped();
+    }
+
 }

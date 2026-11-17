@@ -58,15 +58,16 @@ class MobileIdApiClientTest {
 
     @Mock
     private MobileIdClientConfigurationProperties configurationProperties;
-    @InjectMocks
     private MobileIdApiClient mobileIdApiClient;
 
     @BeforeEach
     void setUp(WireMockRuntimeInfo wireMockServer) {
-        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
-        Mockito.when(configurationProperties.getTruststorePath()).thenReturn(new ClassPathResource("mid_truststore.p12"));
-        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
-        Mockito.when(configurationProperties.getLongPollingTimeout()).thenReturn(Duration.ofMillis(30000));
+        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).url();
+        Mockito.when(configurationProperties.truststorePath()).thenReturn(new ClassPathResource("mid_truststore.p12"));
+        Mockito.when(configurationProperties.truststorePassword()).thenReturn("changeIt");
+        Mockito.when(configurationProperties.longPollingTimeout()).thenReturn(Duration.ofMillis(30000));
+        // Built after stubbing: the constructor loads the truststore.
+        mobileIdApiClient = new MobileIdApiClient(configurationProperties);
     }
 
     @AfterEach

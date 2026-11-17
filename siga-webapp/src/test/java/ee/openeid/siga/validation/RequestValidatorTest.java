@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,8 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,8 +53,9 @@ class RequestValidatorTest {
 
     static final String CONTENT = "dGVzdCBmaWxlIGNvbnRlbnQ=";
 
-    @InjectMocks
     private RequestValidator validator;
+    private MobileIdRequestValidator mobileIdValidator;
+    private SmartIdRequestValidator smartIdValidator;
 
     @Mock
     private SmartIdClientConfigurationProperties smartIdClientConfigurationProperties;
@@ -68,9 +68,11 @@ class RequestValidatorTest {
 
     @BeforeEach
     void setup() {
-        Mockito.lenient().when(mobileIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        Mockito.lenient().when(smartIdClientConfigurationProperties.getAllowedCountries()).thenReturn(Arrays.asList("EE", "LT"));
-        validator = new RequestValidator(mobileIdClientConfigurationProperties, smartIdClientConfigurationProperties, securityConfigurationProperties);
+        Mockito.when(mobileIdClientConfigurationProperties.allowedCountries()).thenReturn(List.of("EE", "LT"));
+        Mockito.when(smartIdClientConfigurationProperties.allowedCountries()).thenReturn(List.of("EE", "LT"));
+        validator = new RequestValidator(securityConfigurationProperties);
+        mobileIdValidator = new MobileIdRequestValidator(mobileIdClientConfigurationProperties);
+        smartIdValidator = new SmartIdRequestValidator(smartIdClientConfigurationProperties);
     }
 
     private static MobileIdInformation getMobileInformationRequest() {
@@ -373,7 +375,7 @@ class RequestValidatorTest {
 
     @Test
     void successfulMobileInformation() {
-        validator.validateMobileIdInformation(getMobileInformationRequest());
+        mobileIdValidator.validate(getMobileInformationRequest());
     }
 
     @Test
@@ -382,7 +384,7 @@ class RequestValidatorTest {
         mobileIdInformation.setLanguage(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
@@ -393,7 +395,7 @@ class RequestValidatorTest {
         mobileIdInformation.setLanguage("");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
@@ -404,7 +406,7 @@ class RequestValidatorTest {
         mobileIdInformation.setLanguage("ESTO");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
@@ -415,7 +417,7 @@ class RequestValidatorTest {
         mobileIdInformation.setLanguage("ESP");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid Mobile-Id language", caughtException.getMessage());
     }
@@ -426,7 +428,7 @@ class RequestValidatorTest {
         mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", 101));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Mobile ID messageToDisplay exceeded maximum allowed length of 100 characters.", caughtException.getMessage());
     }
@@ -437,14 +439,14 @@ class RequestValidatorTest {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(StringUtils.repeat("a", length));
 
-        assertDoesNotThrow(() -> validator.validateMobileIdInformation(mobileIdInformation));
+        assertDoesNotThrow(() -> mobileIdValidator.validate(mobileIdInformation));
     }
 
     @Test
     void nullMessageToDisplay() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setMessageToDisplay(null);
-        validator.validateMobileIdInformation(mobileIdInformation);
+        mobileIdValidator.validate(mobileIdInformation);
     }
 
     @Test
@@ -453,7 +455,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPhoneNo(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid phone No.", caughtException.getMessage());
     }
@@ -464,7 +466,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPhoneNo("");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid phone No.", caughtException.getMessage());
     }
@@ -475,7 +477,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPhoneNo(StringUtils.repeat("a", 21));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid phone No.", caughtException.getMessage());
     }
@@ -486,7 +488,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPhoneNo("+3795394823");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid international calling code", caughtException.getMessage());
     }
@@ -497,7 +499,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPhoneNo("+3715394823");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid international calling code", caughtException.getMessage());
     }
@@ -508,7 +510,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPersonIdentifier(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -519,7 +521,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPersonIdentifier("");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -530,7 +532,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("1", 13));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -541,7 +543,7 @@ class RequestValidatorTest {
         mobileIdInformation.setPersonIdentifier(StringUtils.repeat("a", 11));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateMobileIdInformation(mobileIdInformation)
+            RequestValidationException.class, () -> mobileIdValidator.validate(mobileIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -550,7 +552,7 @@ class RequestValidatorTest {
     void latvianPersonIdentifier() {
         MobileIdInformation mobileIdInformation = getMobileInformationRequest();
         mobileIdInformation.setPersonIdentifier("111111-11111");
-        validator.validateMobileIdInformation(mobileIdInformation);
+        mobileIdValidator.validate(mobileIdInformation);
     }
 
     @Test
@@ -624,7 +626,7 @@ class RequestValidatorTest {
     @Test
     void validateSmartIdInformationForCertChoice_isValid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+        smartIdValidator.validateForCertChoice(smartIdInformation);
     }
 
     @Test
@@ -633,7 +635,7 @@ class RequestValidatorTest {
         smartIdInformation.setCountry(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
@@ -644,7 +646,7 @@ class RequestValidatorTest {
         smartIdInformation.setCountry("E");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
@@ -655,7 +657,7 @@ class RequestValidatorTest {
         smartIdInformation.setCountry("LV");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("LV is not allowed for Smart-Id country", caughtException.getMessage());
     }
@@ -666,7 +668,7 @@ class RequestValidatorTest {
         smartIdInformation.setCountry("EEE");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id country", caughtException.getMessage());
     }
@@ -677,7 +679,7 @@ class RequestValidatorTest {
         smartIdInformation.setPersonIdentifier(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -688,7 +690,7 @@ class RequestValidatorTest {
         smartIdInformation.setPersonIdentifier(StringUtils.repeat("a", 31));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -699,7 +701,7 @@ class RequestValidatorTest {
         smartIdInformation.setPersonIdentifier("");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForCertChoice(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForCertChoice(smartIdInformation)
         );
         assertEquals("Invalid person identifier", caughtException.getMessage());
     }
@@ -707,7 +709,7 @@ class RequestValidatorTest {
     @Test
     void validateSmartIdInformationForSigning_isValid() {
         SmartIdInformation smartIdInformation = getDefaultSmartIdInformation();
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+        smartIdValidator.validateForSigning(smartIdInformation);
     }
 
     @Test
@@ -716,7 +718,7 @@ class RequestValidatorTest {
         smartIdInformation.setMessageToDisplay(StringUtils.repeat("a", 61));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id message to display", caughtException.getMessage());
     }
@@ -727,7 +729,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber(null);
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
@@ -738,7 +740,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber(StringUtils.repeat("a", 41));
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
@@ -749,7 +751,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber("");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
@@ -760,7 +762,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber("PNOEE-123");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
@@ -771,7 +773,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber("PNKEE-12345678-ZOKS-Q");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id documentNumber", caughtException.getMessage());
     }
@@ -782,7 +784,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber("PNOLV-12345678-ZOKS-Q");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id country inside documentNumber", caughtException.getMessage());
     }
@@ -793,7 +795,7 @@ class RequestValidatorTest {
         smartIdInformation.setDocumentNumber("PNOWW-12345678-ZOKS-Q");
 
         RequestValidationException caughtException = assertThrows(
-            RequestValidationException.class, () -> validator.validateSmartIdInformationForSigning(smartIdInformation)
+            RequestValidationException.class, () -> smartIdValidator.validateForSigning(smartIdInformation)
         );
         assertEquals("Invalid Smart-Id country inside documentNumber", caughtException.getMessage());
     }

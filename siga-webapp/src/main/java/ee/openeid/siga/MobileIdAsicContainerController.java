@@ -6,6 +6,7 @@ import ee.openeid.siga.common.model.MobileIdInformation;
 import ee.openeid.siga.common.model.SigningChallenge;
 import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
+import ee.openeid.siga.validation.MobileIdRequestValidator;
 import ee.openeid.siga.validation.RequestValidator;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningRequest;
 import ee.openeid.siga.webapp.json.CreateContainerMobileIdSigningResponse;
@@ -29,6 +30,7 @@ import java.util.List;
 public class MobileIdAsicContainerController {
     private final MobileIdSigningDelegate<AsicContainerSigningService> mobileIdSigningDelegate;
     private final RequestValidator validator;
+    private final MobileIdRequestValidator mobileIdRequestValidator;
 
     @SigaEventLog(eventName = SigaEventName.MOBILE_ID_SIGNING_INIT)
     @PostMapping(value = "/containers/{containerId}/mobileidsigning", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,7 +45,7 @@ public class MobileIdAsicContainerController {
 
         MobileIdInformation mobileIdInformation = getMobileIdInformation(createMobileIdSigningRequest);
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
-        validator.validateMobileIdInformation(mobileIdInformation);
+        mobileIdRequestValidator.validate(mobileIdInformation);
 
         SigningChallenge challenge = mobileIdSigningDelegate.startMobileIdSigning(containerId, mobileIdInformation, signatureParameters);
 

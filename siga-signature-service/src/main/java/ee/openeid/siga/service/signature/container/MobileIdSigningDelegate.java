@@ -87,7 +87,7 @@ public class MobileIdSigningDelegate<S extends ContainerSigningService> {
         session.addSignatureSession(generatedSignatureId, signatureSession);
         containerSigningService.getSessionService().update(session);
         pollMobileIdSignatureStatus(session.getSessionId(), generatedSignatureId,
-                configurationProperties.getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
 
         return SigningChallenge.builder()
                 .challengeId(initMidSignatureResponse.getChallengeId())

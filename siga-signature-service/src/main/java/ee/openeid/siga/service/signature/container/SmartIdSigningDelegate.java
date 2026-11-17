@@ -97,7 +97,7 @@ public class SmartIdSigningDelegate<S extends ContainerSigningService> {
         session.clearCertificate(smartIdInformation.getDocumentNumber());
         containerSigningService.getSessionService().update(session);
         pollSmartIdSignatureStatus(session.getSessionId(), generatedSignatureId,
-                configurationProperties.getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
 
         return SigningChallenge.builder()
                 .challengeId(initSmartIdSignatureResponse.getChallengeId())
@@ -117,7 +117,7 @@ public class SmartIdSigningDelegate<S extends ContainerSigningService> {
                 .build());
         containerSigningService.getSessionService().update(session);
         pollSmartIdCertificateStatus(session.getSessionId(), generatedCertificateId,
-                configurationProperties.getStatusPollingDelay());
+                configurationProperties.statusPollingDelay());
         return generatedCertificateId;
     }
 

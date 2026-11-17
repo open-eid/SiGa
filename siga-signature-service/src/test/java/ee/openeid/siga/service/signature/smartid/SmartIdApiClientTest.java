@@ -20,7 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,16 +60,16 @@ public class SmartIdApiClientTest {
     @Mock
     private SmartIdClientConfigurationProperties configurationProperties;
 
-    @InjectMocks
     private SmartIdApiClient smartIdApiClient;
 
     @BeforeEach
     void setUp(WireMockRuntimeInfo wireMockServer) {
-        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).getUrl();
-        Mockito.when(configurationProperties.getTruststorePath()).thenReturn(new ClassPathResource("sid_truststore.p12"));
-        Mockito.when(configurationProperties.getTruststorePassword()).thenReturn("changeIt");
-        Mockito.when(configurationProperties.getSessionStatusResponseSocketOpenTime()).thenReturn(Duration.ofMillis(30000));
-        Mockito.lenient().when(configurationProperties.getInteractionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
+        Mockito.doReturn("http://localhost:" + wireMockServer.getHttpPort()).when(configurationProperties).url();
+        Mockito.when(configurationProperties.truststorePath()).thenReturn(new ClassPathResource("sid_truststore.p12"));
+        Mockito.when(configurationProperties.truststorePassword()).thenReturn("changeIt");
+        Mockito.when(configurationProperties.sessionStatusResponseSocketOpenTime()).thenReturn(Duration.ofMillis(30000));
+        Mockito.lenient().when(configurationProperties.interactionType()).thenReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE);
+        smartIdApiClient = new SmartIdApiClient(configurationProperties);
     }
 
     @AfterEach
@@ -245,7 +244,7 @@ public class SmartIdApiClientTest {
 
     @Test
     void initSmartIdSigning_displayTextAndPin_ok() {
-        Mockito.doReturn(SmartIdInteractionType.DISPLAY_TEXT_AND_PIN).when(configurationProperties).getInteractionType();
+        Mockito.doReturn(SmartIdInteractionType.DISPLAY_TEXT_AND_PIN).when(configurationProperties).interactionType();
         stubSigningInitiationResponse(
                 WireMock.equalToJson("{\n" +
                                 "    \"allowedInteractionsOrder\": [\n" +
@@ -274,7 +273,7 @@ public class SmartIdApiClientTest {
 
     @Test
     void initSmartIdSigning_verificationCodeChoice_ok() {
-        Mockito.doReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE).when(configurationProperties).getInteractionType();
+        Mockito.doReturn(SmartIdInteractionType.VERIFICATION_CODE_CHOICE).when(configurationProperties).interactionType();
         stubSigningInitiationResponse(
                 WireMock.equalToJson("{\n" +
                                 "    \"allowedInteractionsOrder\": [\n" +

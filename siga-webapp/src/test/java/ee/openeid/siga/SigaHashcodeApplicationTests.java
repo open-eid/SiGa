@@ -62,4 +62,14 @@ class SigaHashcodeApplicationTests extends SigaBaseApplicationTests {
         );
     }
 
+    @Test
+    void mobileIdHashcodeEndpoints_WhenMobileIdProfileInactive_NotMapped() throws Exception {
+        assertHashcodeMobileIdEndpointsAreNotMapped();
+    }
+
+    @Test
+    void smartIdHashcodeEndpoints_WhenSmartIdProfileInactive_NotMapped() throws Exception {
+        assertHashcodeSmartIdEndpointsAreNotMapped();
+    }
+
 }

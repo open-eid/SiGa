@@ -66,6 +66,7 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -330,6 +331,33 @@ public abstract class BaseTest extends BaseTestLoggingAssertion {
         request.put("personIdentifier", "40504040001");
         request.put("country", "EE");
         return request;
+    }
+
+    /**
+     * Uses an existing container, so a 404 can only mean the endpoint is not mapped: for an unknown
+     * container id a mapped endpoint also answers 404 (RESOURCE_NOT_FOUND_EXCEPTION).
+     */
+    protected void assertHashcodeMobileIdEndpointsAreNotMapped() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        postRequest("/hashcodecontainers/" + containerId + "/mobileidsigning",
+                createStartMobileSigningRequest(), status().isNotFound());
+        getRequest("/hashcodecontainers/" + containerId + "/mobileidsigning/" + UUID.randomUUID() + "/status",
+                status().isNotFound());
+    }
+
+    /**
+     * See {@link #assertHashcodeMobileIdEndpointsAreNotMapped()} for why an existing container is used.
+     */
+    protected void assertHashcodeSmartIdEndpointsAreNotMapped() throws Exception {
+        String containerId = uploadHashcodeContainer();
+        postRequest("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice",
+                createStartSmartIdCertificateChoiceRequest(), status().isNotFound());
+        getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/certificatechoice/" + UUID.randomUUID() + "/status",
+                status().isNotFound());
+        postRequest("/hashcodecontainers/" + containerId + "/smartidsigning",
+                createStartSmartIdSigningRequest(null), status().isNotFound());
+        getRequest("/hashcodecontainers/" + containerId + "/smartidsigning/" + UUID.randomUUID() + "/status",
+                status().isNotFound());
     }
 
     protected String startHashcodeSmartIdCertificateChoice(String containerId) throws Exception {

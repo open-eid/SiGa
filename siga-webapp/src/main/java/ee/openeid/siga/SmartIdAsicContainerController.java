@@ -8,6 +8,7 @@ import ee.openeid.siga.common.model.SmartIdInformation;
 import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.asic.AsicContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
+import ee.openeid.siga.validation.SmartIdRequestValidator;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceRequest;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdCertificateChoiceResponse;
 import ee.openeid.siga.webapp.json.CreateContainerSmartIdSigningRequest;
@@ -35,6 +36,7 @@ import java.util.List;
 public class SmartIdAsicContainerController {
     private final SmartIdSigningDelegate<AsicContainerSigningService> smartIdSigningDelegate;
     private final RequestValidator validator;
+    private final SmartIdRequestValidator smartIdRequestValidator;
 
     @SigaEventLog(eventName = SigaEventName.SMART_ID_CERTIFICATE_CHOICE_INIT)
     @PostMapping(value = "/containers/{containerId}/smartidsigning/certificatechoice", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +46,7 @@ public class SmartIdAsicContainerController {
 
         SmartIdInformation smartIdInformation = getSmartIdInformation(certificateChoiceRequest);
         validator.validateContainerId(containerId);
-        validator.validateSmartIdInformationForCertChoice(smartIdInformation);
+        smartIdRequestValidator.validateForCertChoice(smartIdInformation);
 
         String certificateId = smartIdSigningDelegate.initSmartIdCertificateChoice(containerId, smartIdInformation);
         CreateContainerSmartIdCertificateChoiceResponse response = new CreateContainerSmartIdCertificateChoiceResponse();
@@ -81,7 +83,7 @@ public class SmartIdAsicContainerController {
 
         SignatureParameters signatureParameters = RequestTransformer.transformSignatureParameters(signatureProfile, signatureProductionPlace, roles);
         SmartIdInformation smartIdInformation = getSmartIdInformation(createSmartIdSigningRequest);
-        validator.validateSmartIdInformationForSigning(smartIdInformation);
+        smartIdRequestValidator.validateForSigning(smartIdInformation);
 
         SigningChallenge signingChallenge = smartIdSigningDelegate.startSmartIdSigning(containerId, smartIdInformation, signatureParameters);
 

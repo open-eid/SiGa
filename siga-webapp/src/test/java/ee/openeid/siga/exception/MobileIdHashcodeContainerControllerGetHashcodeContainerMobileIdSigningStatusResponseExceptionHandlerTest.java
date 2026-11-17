@@ -3,6 +3,7 @@ package ee.openeid.siga.exception;
 import ee.openeid.siga.MobileIdHashcodeContainerController;
 import ee.openeid.siga.service.signature.container.MobileIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
+import ee.openeid.siga.validation.MobileIdRequestValidator;
 import ee.openeid.siga.validation.RequestValidator;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,9 @@ class MobileIdHashcodeContainerControllerGetHashcodeContainerMobileIdSigningStat
 
     @MockitoBean
     private MobileIdSigningDelegate<HashcodeContainerSigningService> signingService;
+
+    @MockitoBean
+    private MobileIdRequestValidator mobileIdRequestValidator;
 
     @MockitoBean
     private RequestValidator validator;

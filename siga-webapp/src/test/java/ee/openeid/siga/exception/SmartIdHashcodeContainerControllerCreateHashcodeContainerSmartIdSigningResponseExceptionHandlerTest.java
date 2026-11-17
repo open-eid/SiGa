@@ -4,6 +4,7 @@ import ee.openeid.siga.SmartIdHashcodeContainerController;
 import ee.openeid.siga.service.signature.container.SmartIdSigningDelegate;
 import ee.openeid.siga.service.signature.container.hashcode.HashcodeContainerSigningService;
 import ee.openeid.siga.validation.RequestValidator;
+import ee.openeid.siga.validation.SmartIdRequestValidator;
 import org.json.JSONObject;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,9 @@ class SmartIdHashcodeContainerControllerCreateHashcodeContainerSmartIdSigningRes
 
     @MockitoBean
     private SmartIdSigningDelegate<HashcodeContainerSigningService> signingService;
+
+    @MockitoBean
+    private SmartIdRequestValidator smartIdRequestValidator;
 
     @MockitoBean
     private RequestValidator validator;
