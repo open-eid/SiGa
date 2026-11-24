@@ -2,6 +2,7 @@ package ee.openeid.siga.common.util;
 
 import ee.openeid.siga.common.exception.InvalidCertificateException;
 import ee.openeid.siga.common.exception.TechnicalException;
+import ee.openeid.siga.common.model.KeyUsageType;
 import eu.europa.esig.dss.utils.Utils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class CertificateUtil {
         if (certificate.getKeyUsage() == null || certificate.getKeyUsage().length < 2) {
             return false;
         }
-        return certificate.getKeyUsage()[1];
+        return certificate.getKeyUsage()[KeyUsageType.NON_REPUDIATION];
     }
 
 
